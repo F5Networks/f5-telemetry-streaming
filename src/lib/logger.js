@@ -8,7 +8,9 @@
 
 'use strict';
 
-const maskDefaultSecrets = require('./utils/misc').maskDefaultSecrets;
+const deepCopy = require('./utils/misc').deepCopy;
+const maskJSONObjectDefaultSecrets = require('./utils/misc').maskJSONObjectDefaultSecrets;
+const maskJSONStringDefaultSecrets = require('./utils/misc').maskJSONStringDefaultSecrets;
 const stringify = require('./utils/misc').stringify;
 
 /** @module logger */
@@ -70,7 +72,20 @@ let CURRENT_LOG_LEVEL = NOTSET;
  * @returns {string} processed message
  */
 const processMessage = function (prefix, message) {
-    return `[${prefix}] ${maskDefaultSecrets(stringify(message))}`;
+    if (typeof message === 'object' && message !== null) {
+        try {
+            message = maskJSONObjectDefaultSecrets(deepCopy(message),
+                { breakCircularRef: 'circularRefFound' });
+        } catch (_) {
+            // do nothing
+        }
+    }
+    try {
+        message = maskJSONStringDefaultSecrets(stringify(message));
+    } catch (_) {
+        // do nothing
+    }
+    return `[${prefix}] ${message}`;
 };
 
 /**
@@ -85,7 +100,7 @@ class Logger {
     constructor(prefix) {
         // the f5-logger only exists on BIG-IP, so for unit tests provide a mock
         this.logger = f5logger;
-        this.prefix = prefix || '';
+        this.prefix = prefix;
     }
 
     /**

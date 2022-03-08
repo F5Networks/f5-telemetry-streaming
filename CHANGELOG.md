@@ -1,6 +1,21 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.27.0
+### Added
+- AUTOTOOL-2925: Save recent declarations to a file
+### Fixed
+- AUTOTOOL-2938: [GitHub #184](https://github.com/F5Networks/f5-telemetry-streaming/issues/184): Added additional sanitation to StatsD metric and tag naming
+- AUTOTOOL-3023: RegEx catastrophic backtracking on attempt to mask secrets in JSON data
+- AUTOTOOL-2969: [GitHub #174](https://github.com/F5Networks/f5-telemetry-streaming/issues/174): Added info about installed ASM attack signatures
+### Changed
+- AUTOTOOL-2959: Update npm packages (@opentelemetry/api from 1.0.3 to 1.0.4, @opentelemetry/sdk-metrics-base from 0.26.0 to 0.27.0, jmespath from 0.15.0 to 0.16.0). Replaced deprecated @opentelemetry/exporter-collector-proto with @opentelemetry/exporter-metrics-otlp-proto 0.27.0
+- AUTOTOOL-2976: Replaced grpc-js package by F5-specific grpc-js-0.2-modified
+- AUTOTOOL-2979: Update DataDog consumer to use the v2 logs API
+- AUTOTOOL-2907: Close Tracer by timeout when inactive
+- AUTOTOOL-3038: Add support for ElasticSearch 8
+### Removed
+
 ## 1.26.0
 ### Added
 - AUTOTOOL-2801: [GitHub #171](https://github.com/F5Networks/f5-telemetry-streaming/issues/171): Added fqdn property to pool members that use FQDNs

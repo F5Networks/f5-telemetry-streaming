@@ -538,7 +538,8 @@ function runValidationFunction(func, schemaCtx, dataCtx) {
  * @returns {Function}
  */
 function wrapAsyncValidationFunction(func, schemaCtx, dataCtx) {
-    return () => func()
+    return () => Promise.resolve()
+        .then(() => func())
         .catch((err) => Promise.reject(getValidationError(err, schemaCtx, dataCtx)));
 }
 

@@ -3760,6 +3760,18 @@ module.exports = {
                     source: 'f5-telemetry',
                     sourcetype: 'f5:telemetry',
                     time: 1546304461000
+                },
+                {
+                    fields: {
+                        filename: 'ASM-AttackSignatures_20190716_122131.im',
+                        'metric_name:createDateTime': 1563279691000,
+                        name: 'ff8080817a3a4908017a3a490958000e',
+                        telemetryStreamingStatisticSet: 'system.asmAttackSignatures'
+                    },
+                    host: 'telemetry.bigip.com',
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    time: 1546304461000
                 }
             ]
         },

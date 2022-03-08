@@ -33,6 +33,9 @@ const BASE_STORAGE_DATA = {};
  * ConfigWorker class
  *
  * @event change - config was validated and can be propagated
+ * @event received - new declaration received
+ * @event validationFailed - declaration validation failed
+ * @event validationSucceed - declaration validation succeed
  *
  * @property {configUtil.Configuration} currentConfig - copy of current configuration
  * @property {logger.Logger} logger - logger instance
@@ -127,12 +130,21 @@ class ConfigWorker extends SafeEventEmitter {
      */
     load() {
         return this.getDeclaration()
-            .then((declaration) => this.processDeclaration(declaration))
+            .then((declaration) => this.processDeclaration(declaration, {
+                metadata: {
+                    message: 'Loading saved configuration'
+                }
+            }))
             .catch((error) => {
                 this.logger.exception('Unable to load and validate existing declaration', error);
                 this.logger.warning('Going to try to load default empty declaration. Old declaration is still accessible via API');
                 // to be able to retrieve current declaration via API do not save empty declaration
-                return this.processDeclaration(BASE_DECLARATION, { save: false });
+                return this.processDeclaration(util.deepCopy(BASE_DECLARATION), {
+                    save: false,
+                    metadata: {
+                        message: 'Loading default config! Unable to load saved config, see error message in logs'
+                    }
+                });
             })
             .then((declaration) => {
                 this.logger.info('Application config loaded');
@@ -151,6 +163,7 @@ class ConfigWorker extends SafeEventEmitter {
      * @param {object} namespaceDeclaration - namespace-only data to process
      * @param {string} namespace - namespace to which config belongs to
      * @param {object} [options] - options, see 'processDeclaration' for more defaults
+     * @param {any} [options.metadata] - additional metadata (for logging/debugging only)
      *
      * @returns {Promise<object>} resolved with copy of validated namespace declaration resolved on success
      */
@@ -158,7 +171,10 @@ class ConfigWorker extends SafeEventEmitter {
         // each call to 'validate' mutates data
         namespaceDeclaration = namespaceDeclaration || {};
         options = options || {};
-        return validate.call(this, namespaceDeclaration, { schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME })
+        // make copy of declaration to avoid modifications caused by validation
+        return validate.call(this, util.deepCopy(namespaceDeclaration), {
+            schemaType: CONFIG_CLASSES.NAMESPACE_CLASS_NAME
+        })
             .then(() => this.getDeclaration())
             .then((declaration) => {
                 if (typeof declaration[namespace] === 'object' && declaration[namespace].class !== CONFIG_CLASSES.NAMESPACE_CLASS_NAME) {
@@ -182,14 +198,17 @@ class ConfigWorker extends SafeEventEmitter {
      * @param {object} declaration - declaration to validate against config schema
      * @param {object} [options] - options when processing declaration config
      * @param {boolean} [options.expanded = false] - return expanded declaration instead of just validated
+     * @param {any} [options.metadata] - additional metadata (for logging/debugging only)
      * @param {string} [options.namespaceToUpdate] - only update this namespace config
      * @param {boolean} [options.save = true] - save validated declaration to storage
      *
      * @returns {Promise<object>} resolved with copy of validated declaration resolved on success
      */
     processDeclaration(declaration, options) {
+        const originDeclaration = util.deepCopy(declaration);
         const setConfigOpts = {};
         const storageData = util.deepCopy(BASE_STORAGE_DATA);
+        const transactionID = util.generateUuid();
         let expandedConfig = {};
         let validatedConfig = {};
 
@@ -202,7 +221,12 @@ class ConfigWorker extends SafeEventEmitter {
         // validate declaration, then run it back through validator with scratch
         // property set for additional processing required prior to internal consumption
         // each call to 'validate' mutates data
-        return validate.call(this, declaration)
+        return this.safeEmitAsync('received', {
+            declaration: util.deepCopy(originDeclaration),
+            metadata: util.deepCopy(options.metadata),
+            transactionID
+        })
+            .then(() => validate.call(this, declaration))
             .then((config) => {
                 // ensure that 'validatedConfig' is a copy
                 validatedConfig = util.deepCopy(config);
@@ -210,9 +234,23 @@ class ConfigWorker extends SafeEventEmitter {
                 this.logger.debug('Expanding configuration');
                 return expandDeclaration.call(this, declaration);
             })
+            .catch((error) => this.safeEmitAsync('validationFailed', {
+                declaration: util.deepCopy(originDeclaration),
+                errorMsg: `${error}`,
+                metadata: util.deepCopy(options.metadata),
+                transactionID
+            })
+                .then(() => Promise.reject(error)))
             .then((config) => {
                 this.logger.debug('Configuration successfully validated');
                 expandedConfig = config;
+                return this.safeEmitAsync('validationSucceed', {
+                    declaration: util.deepCopy(expandedConfig),
+                    metadata: util.deepCopy(options.metadata),
+                    transactionID
+                });
+            })
+            .then(() => {
                 if (options.namespaceToUpdate) {
                     setConfigOpts.namespaceToUpdate = options.namespaceToUpdate;
                     // normalize the specified namespace config only
@@ -307,15 +345,6 @@ function notifyConfigChange(newConfig, options) {
                     }
                 });
             }
-            /**
-             * Config changed event.
-             *
-             * The config copy is passed by reference to each Listener. Any listener that modifies
-             * the config must make its own local copy.
-             *
-             * @event ConfigWorker#change
-             * @type {configUtil.Configuration}
-             */
             return this.emitAsync('change', decryptedConfig);
         })
         .catch((err) => {
@@ -383,3 +412,41 @@ configWorker.on('error', (err) => {
 });
 
 module.exports = configWorker;
+
+/**
+ * Config changed event.
+ *
+ * The config copy is passed by reference to each Listener. Any listener that modifies
+ * the config must make its own local copy.
+ *
+ * @event ConfigWorker#change
+ * @type {configUtil.Configuration}
+ */
+/**
+ * New declaration received.
+ *
+ * @event ConfigWorker#received
+ * @type {object}
+ * @property {object} declaration - newly received declaration
+ * @property {any} metadata - additional metadata (for logging/debug only)
+ * @property {string} transactionID - transaction ID
+ */
+/**
+ * Declaration validation failed.
+ *
+ * @event ConfigWorker#validationFailed
+ * @type {object}
+ * @property {object} declaration - declaration
+ * @property {Error} error - error
+ * @property {any} metadata - additional metadata (for logging/debug only)
+ * @property {string} transactionID - transaction ID
+ */
+/**
+ * Declaration validation succeed.
+ *
+ * @event ConfigWorker#validationSucceed
+ * @type {object}
+ * @property {object} declaration - newly received declaration
+ * @property {any} metadata - additional metadata (for logging/debug only)
+ * @property {string} transactionID - transaction ID
+ */

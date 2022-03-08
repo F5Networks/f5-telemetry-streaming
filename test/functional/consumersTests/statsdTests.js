@@ -15,7 +15,7 @@ const fs = require('fs');
 const deepDiff = require('deep-diff');
 const util = require('../shared/util');
 const constants = require('../shared/constants');
-const { DEFAULT_HOSTNAME } = require('../../../src/lib/constants');
+const DEFAULT_HOSTNAME = require('../../../src/lib/constants').DEFAULT_HOSTNAME;
 const dutUtils = require('../dutTests').utils;
 
 // module requirements

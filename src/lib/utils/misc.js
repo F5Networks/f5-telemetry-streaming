@@ -38,6 +38,9 @@ const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
  * Note: when error passed to callback then all other args will be attached
  * to it and can be access via 'error.callbackArgs' property
  *
+ * @sync
+ * @public
+ *
  * @property {Object} module - origin module
  * @property {String} funcName - function name
  *
@@ -63,8 +66,292 @@ function proxyForNodeCallbackFuncs(module, funcName) {
 }
 
 /**
+ * Promisify FS module
+ *
+ * @sync
+ * @public
+ * @param {Object} fsModule - FS module
+ *
+ * @returns {Object} node FS module
+ */
+function promisifyNodeFsModule(fsModule) {
+    const newFsModule = Object.create(fsModule);
+    Object.keys(fsModule).forEach((key) => {
+        if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+            newFsModule[key] = proxyForNodeCallbackFuncs(fsModule, key);
+        }
+    });
+    return newFsModule;
+}
+
+/**
+ * 'traverseJSON' block - START
+ */
+/**
+ * 'key' callback for traverseJSONKey
+ *
+ * @sync
+ * @private
+ *
+ * @param {TraverseJSONCallback | undefined} cb - callback
+ * @param {Array} parentInfo - parent info
+ * @param {any} key - key to inspect
+ * @param {Array} waiting - list of items to inspect
+ *
+ * @returns {boolean} true when item added to waiting list
+ */
+function traverseJSONCb(parentCtx, key, waiting, cb) {
+    const parentItem = parentCtx[0];
+    if (cb && cb(parentItem, key) === false) {
+        return false;
+    }
+    const currentItem = parentItem[key];
+
+    if (typeof currentItem === 'object' && currentItem !== null) {
+        // to keep the order of item in waiting list need to push next elem in array first
+        if (Array.isArray(parentItem) && (key + 1) < parentItem.length) {
+            waiting.push([parentItem, parentCtx[1], key + 1]);
+        }
+        waiting.push([currentItem, key]);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Traverse object and its nested data (non-recursive)
+ *
+ * Note:
+ * - mutates 'data' when 'cb' and/or 'breakCircularRef' specified)
+ * - doesn't mutates 'options'
+ *
+ * @sync
+ * @public
+ *
+ * @example
+ * traverseJSON(data, cb, options);
+ * traverseJSON(data, options, cb);
+ * traverseJSON(data, options);
+ * traverseJSON(data, cb);
+ *
+ * @param {any} data - data to traverse
+ * @param {TraverseJSONCallback} [cb] - callback
+ * @param {object} [options] - options
+ * @param {any} [options.breakCircularRef = false] - break circular references by replacing with arg's value
+ * @param {number} [options.maxDepth = 0] - max depth
+ *
+ * @returns {void} once process finished or stopped
+ */
+function traverseJSON(data, cb, options) {
+    // support objects/arrays for now, but should not be a problem to extend
+    // to support other types
+    if (arguments.length < 2
+        || typeof data !== 'object'
+        || data === null
+        || (Array.isArray(data) && data.length === 0)
+    ) {
+        return;
+    }
+
+    cb = arguments[1];
+    options = arguments[2];
+    if (typeof cb !== 'function') {
+        options = cb;
+        cb = arguments[2];
+    }
+
+    const breakCircularRef = objectGet(options, 'breakCircularRef', false);
+    const maxDepth = objectGet(options, 'maxDepth', 0);
+
+    if (!(cb || breakCircularRef !== false)) {
+        return;
+    }
+
+    // - array of arrays - [currentLvl, obj1, obj2...]
+    // - like a stack
+    // - have to store currentLvl because it's value may 'jump', e.g. from 0 to 3
+    const buckets = [];
+
+    // - fast search 0(1) - recursion detection
+    // - according to docs it keeps keys in order of insertion
+    // - stores object's key in parent item
+    const bucketsMap = new Map();
+
+    // [[item, key-or-index-in-parent-object, next-index-in-array]]
+    const waiting = [[data, null]];
+
+    // current item from 'waiting' list - [item, key-or-index-in-parent-object, next-index-in-array]
+    let currentCtx;
+    let currentLvl;
+    let stopNotRequested = true;
+
+    /**
+     * Add current item to stack if allowed
+     *
+     * @returns {boolean} true when item added
+     */
+    const addToStack = () => {
+        if (maxDepth && bucketsMap.size >= maxDepth) {
+            return false;
+        }
+        // create new bucket or push current item to recent one
+        let len = buckets.length;
+        if (!len || buckets[len - 1][0] !== currentLvl) {
+            buckets.push([currentLvl]);
+            len += 1;
+        }
+        buckets[len - 1].push(currentCtx[0]);
+        bucketsMap.set(currentCtx[0], currentCtx[1]);
+        return true;
+    };
+
+    // trying to have less unnecessary calculations/data
+    let innerCb;
+    if (cb) {
+        if (cb.length < 3) {
+            innerCb = (parent, itemKey) => cb(parent, itemKey);
+        } else if (cb.length < 4) {
+            innerCb = (parent, itemKey) => cb(parent, itemKey, bucketsMap.size);
+        } else {
+            /**
+             * Stop function execution
+             *
+             * @returns {void}
+             */
+            const stopCb = () => {
+                stopNotRequested = false;
+            };
+            if (cb.length < 5) {
+                innerCb = (parent, itemKey) => cb(parent, itemKey, bucketsMap.size, stopCb);
+            } else {
+                /**
+                 * Compute current path
+                 *
+                 * @returns {Array<string | integer>} path
+                 */
+                const getCurrentPath = () => {
+                    const it = bucketsMap.values();
+                    const p = [];
+                    // skip first element - it is root object, it doesn't have a parent
+                    it.next();
+                    let result = it.next();
+                    while (!result.done) {
+                        p.push(result.value);
+                        result = it.next();
+                    }
+                    return p;
+                };
+                innerCb = (parent, itemKey) => cb(parent, itemKey, bucketsMap.size, stopCb, getCurrentPath());
+            }
+        }
+    }
+    /**
+     * @param {string | integer} key - item's key
+     * @returns {boolean} true when item added to waiting list
+     */
+    const keyCb = (key) => traverseJSONCb(currentCtx, key, waiting, innerCb);
+
+    /**
+     * Example #1:
+     *
+     * const root = { level1: { level2: { level3: 'value } } };
+     *
+     * when algo reaches 'level3' then stack will look like following (simplified):
+     * [
+     *   [0, root-object, level1, level2]
+     * ]
+     *
+     * Waiting list will look like following:
+     * [] -> empty, no more items to inspect
+     *
+     * Note: '0' for each item in stack means that 'level3' is child for 'level2',
+     *  'level2' is child for 'level1' and so on.
+     *
+     * Example #2:
+     *
+     * const root = {
+     *      level1_a: { level2_a: {level3_a: 'value' }},
+     *      level1_b: { level2_b: {level3_b: {}, level3_c: 'value' }}
+     * };
+     *
+     * when algo reaches 'level3_c' then stack will look like following (simplified):
+     * [
+     *   [0, root-object],
+     *   [1, level1_b, level2_b]
+     * ]
+     *
+     * Waiting list will look like following:
+     * [
+     *     level1_a,
+     *     level3_b
+     * ]
+     */
+
+    while (waiting.length && stopNotRequested) {
+        // [item, parent-key-or-index]
+        // if it has 3rd element, then 'item' in stack already
+        currentCtx = waiting.pop();
+        currentLvl = waiting.length;
+
+        // remove buckets from other levels if needed
+        for (let i = buckets.length - 1; i >= 0; i -= 1) {
+            if (buckets[i][0] > currentLvl) {
+                const toRemove = buckets.pop();
+                for (let j = 1; j < toRemove.length; j += 1) {
+                    bucketsMap.delete(toRemove[j]);
+                }
+            }
+        }
+
+        // if it has 3rd element, then 'item' in stack already,
+        // no need to check for circular ref
+        if (currentCtx.length === 2) {
+            const existingCtx = bucketsMap.get(currentCtx[0]);
+            if (typeof existingCtx !== 'undefined') {
+                // circular ref found
+                if (breakCircularRef !== false) {
+                    // replace circular-ref in parent object with new value to break a loop
+                    const bucket = buckets[buckets.length - 1];
+                    bucket[bucket.length - 1][currentCtx[1]] = breakCircularRef;
+                }
+                // skip item, it was inspected already
+                // eslint-disable-next-line no-continue
+                continue;
+            }
+        }
+
+        if (Array.isArray(currentCtx[0])) {
+            // if it has 3rd element, then 'item' in stack already
+            let allowed = true;
+            if (currentCtx.length === 2) {
+                allowed = addToStack();
+            }
+            if (allowed) {
+                const itemLen = currentCtx[0].length;
+                // start from 0 or continue with next index in queue
+                for (let i = (currentCtx.length > 2 ? currentCtx[2] : 0);
+                    stopNotRequested && i < itemLen && !keyCb(i);
+                    i += 1);
+            }
+        } else if (addToStack()) {
+            const objKeys = Object.keys(currentCtx[0]);
+            const objLen = objKeys.length;
+            for (let i = 0; stopNotRequested && i < objLen; i += 1) {
+                keyCb(objKeys[i]);
+            }
+        }
+    }
+}
+/**
+ * 'traverseJSON' block - END
+ */
+
+/**
  * Create function to mask secrets in well formed JSON data (e.g. from JSON.stringify).
  * Also partially supports escaped JSON.
+ *
+ * @sync
+ * @public
  *
  * @param {Array<string>} properties - properties to mask
  * @param {string} mask - mask to use
@@ -72,7 +359,7 @@ function proxyForNodeCallbackFuncs(module, funcName) {
  * @returns {function(string): string} function to use to mask secrets. Function has read-only
  *  property 'matchesFound' that returns number of matches found during last call
  */
-function createJsonSecretsMaskFunc(properties, mask) {
+function createJSONStringSecretsMaskFunc(properties, mask) {
     mask = arguments.length > 1 ? mask : constants.SECRETS.MASK;
     // matches counter, should be reset every time
     let matches = 0;
@@ -83,7 +370,7 @@ function createJsonSecretsMaskFunc(properties, mask) {
             [
                 '(',
                 // match leading ',' or '{' with spaces and new lines (or escaped  new lines)
-                '(?:(?:,|\\{)(?:\\s+|(?:(?:\\\\+r)?\\\\+n|\\\\+r)+)*)',
+                '(?:(?:,|\\{)(?:\\s|\\\\+[rn]{1})*)',
                 // match quoted property (escaped quotes too). Group #2 is leading quote.
                 // It will be used to match closing quote for property name and quotes for value if value is a string
                 `(?:(\\\\{0,}")${propName}\\2\\s*:\\s*)`,
@@ -110,7 +397,7 @@ function createJsonSecretsMaskFunc(properties, mask) {
             ].join(''),
             [
                 // match following ',' or '}' (with preceding spaces and new lines or escaped new lines)
-                '(,|(?:(?:\\s+|(?:(?:\\\\+r)?\\\\+n|\\\\+r)+)*\\}))'
+                '(,|(?:(?:\\s|\\\\+[rn]{1})*\\}))'
             ].join('')
         ].join(''), 'g'),
         with: (match, p1, p2, p3) => {
@@ -118,7 +405,7 @@ function createJsonSecretsMaskFunc(properties, mask) {
             return `${p1}${p2}${mask}${p2}${p3}`;
         }
     }));
-    function maskDefaultSecrets(data) {
+    function maskJSONStringDefaultSecrets(data) {
         matches = 0;
         let maskedData = data;
         try {
@@ -130,16 +417,124 @@ function createJsonSecretsMaskFunc(properties, mask) {
         }
         return maskedData;
     }
-    Object.defineProperty(maskDefaultSecrets, 'matchesFound', {
+    Object.defineProperty(maskJSONStringDefaultSecrets, 'matchesFound', {
         get() {
             return matches;
         }
     });
-    return maskDefaultSecrets;
+    return maskJSONStringDefaultSecrets;
 }
 
+/**
+ * 'createJSONObjectSecretsMaskFunc' block - START
+ */
+/**
+ * Check if object has nested objects (not primitives)
+ * @sync
+ * @private
+ *
+ * @param {any} obj - data to inspect
+ *
+ * @returns {boolean} true if object has nested objects
+ */
+function hasNestedObjects(obj) {
+    if (typeof obj === 'object' && obj !== null) {
+        if (Array.isArray(obj)) {
+            return obj.some((v) => typeof v === 'object' && v !== null);
+        }
+        return Object.keys(obj)
+            .some((k) => typeof obj[k] === 'object' && obj[k] !== null);
+    }
+    return false;
+}
+
+/**
+ * Create function to mask secrets in data
+ *
+ * @sync
+ * @public
+ *
+ * @example
+ * createSecretsMaskFunc(['prop'])
+ *
+ * @example
+ * createSecretsMaskFunc(['prop'], 'mask')
+ *
+ * @example
+ * createSecretsMaskFunc(['prop'], 2)
+ *
+ * @example
+ * createSecretsMaskFunc(['prop'], 'mask', 2)
+ *
+ * @param {Array<string>} properties - properties to mask
+ * @param {object} [options] - options
+ * @param {any} [options.breakCircularRef = false] - break circular references by replacing with arg's value
+ * @param {any} [options.mask] - mask to use
+ * @param {number} [options.maxDepth = 0] - max depth
+ *
+ * @returns {function(any, object): any} function to use to mask secrets:
+ * - first argument is data to inspect
+ * - second argument is 'options' (similar to above) to override pre-defined options
+ * - function has read-only property 'matchesFound' that returns
+ *   number of matches found during last call
+ */
+function createJSONObjectSecretsMaskFunc(properties, options) {
+    let matches;
+    // shallow-copy to avoid modifications
+    properties = properties.slice(0);
+    properties.sort();
+
+    const defaultMask = objectGet(options, 'mask', constants.SECRETS.MASK);
+    const defaultOpts = {
+        breakCircularRef: objectGet(options, 'breakCircularRef', false),
+        maxDepth: objectGet(options, 'maxDepth', 0)
+    };
+
+    /**
+     * Note: mutates 'data'
+     *
+     * @param {any} data - data to inspect
+     * @param {object} innerOptions - options similar to parent function
+     *
+     * @returns {any} processed data
+     */
+    function maskSecrets(data, innerOptions) {
+        matches = 0;
+        let traverseOpts = defaultOpts;
+        let mask = defaultMask;
+
+        if (arguments.length > 1) {
+            traverseOpts = {
+                breakCircularRef: objectGet(innerOptions, 'breakCircularRef', defaultOpts.breakCircularRef),
+                maxDepth: objectGet(innerOptions, 'maxDepth', defaultOpts.maxDepth)
+            };
+            mask = objectGet(innerOptions, 'mask', defaultMask);
+        }
+        traverseJSON(data, traverseOpts, (parent, key) => {
+            if (!Array.isArray(parent) && properties.indexOf(key) !== -1 && !hasNestedObjects(parent[key])) {
+                parent[key] = mask;
+                matches += 1;
+            }
+        });
+        return data;
+    }
+    Object.defineProperty(maskSecrets, 'matchesFound', {
+        get() {
+            return matches;
+        }
+    });
+    return maskSecrets;
+}
+/**
+ * 'createJSONObjectSecretsMaskFunc' block - END
+ */
+
 module.exports = {
-    createJsonSecretsMaskFunc,
+    createJSONObjectSecretsMaskFunc,
+    createJSONStringSecretsMaskFunc,
+    proxyForNodeCallbackFuncs,
+    promisifyNodeFsModule,
+    traverseJSON,
 
     /**
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
@@ -153,7 +548,7 @@ module.exports = {
     assignDefaults,
 
     /**
-     * Check if object has any data or not
+     * Check if object has any data or not (for JSON data only)
      *
      * @param {any} obj - object to test
      *
@@ -250,7 +645,7 @@ module.exports = {
      *
      * @returns {Object}    Object with the parsed JSON data
      */
-    parseJsonWithDuplicatekeys(data) {
+    parseJsonWithDuplicateKeys(data) {
         const arrayHandler = (keys, key, values, value) => {
             const existingKey = keys.indexOf(key.value);
             if (existingKey !== -1) {
@@ -518,13 +913,22 @@ module.exports = {
     },
 
     /**
-     * Mask Secrets (as needed)
+     * Mask Secrets in JSON string (as needed)
      *
      * @param {string} msg - message to mask
      *
      * @returns {string} masked message
      */
-    maskDefaultSecrets: createJsonSecretsMaskFunc(constants.SECRETS.PROPS),
+    maskJSONStringDefaultSecrets: createJSONStringSecretsMaskFunc(constants.SECRETS.PROPS, constants.SECRETS.MASK),
+
+    /**
+     * Mask Secrets in JSON data (as needed)
+     *
+     * @param {any} msg - data to mask
+     *
+     * @returns {any} masked data
+     */
+    maskJSONObjectDefaultSecrets: createJSONObjectSecretsMaskFunc(constants.SECRETS.PROPS, constants.SECRETS.MASK),
 
     /**
      * Generates a unique property name that the object doesn't have
@@ -551,6 +955,20 @@ module.exports = {
     },
 
     /**
+     * Registers callback to execute when application exiting
+     *
+     * @param {function} cb - callback to register
+     *
+     * @returns {void} once registered
+     */
+    onApplicationExit(cb) {
+        process.on('SIGINT', cb);
+        process.on('SIGTERM', cb);
+        process.on('SIGHUP', cb);
+        process.on('exit', cb);
+    },
+
+    /**
      * Promisified 'child_process'' module
      *
      * @see fs
@@ -568,13 +986,21 @@ module.exports = {
      *
      * @see fs
      */
-    fs: (function promisifyNodeFsModule(fsModule) {
-        const newFsModule = Object.create(fsModule);
-        Object.keys(fsModule).forEach((key) => {
-            if (typeof fsModule[`${key}Sync`] !== 'undefined') {
-                newFsModule[key] = proxyForNodeCallbackFuncs(fsModule, key);
-            }
-        });
-        return newFsModule;
-    }(fs))
+    fs: promisifyNodeFsModule(fs)
 };
+
+/**
+ * 'traverseJSON' callback
+ *
+ * Note:
+ * - if 'path' is empty Array then parent is 'root' object
+ *
+ * @callback TraverseJSONCallback
+ * @param {any} parent - parent object
+ * @param {any} key - key to inspect in parent object
+ * @param {integer} depth - current stack depth
+ * @param {function} stop - function to call when process should be stopped
+ * @param {Array} path - path to parent element
+ *
+ * @returns {boolean} false when item should be ignored
+ */

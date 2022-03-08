@@ -21,23 +21,23 @@ module.exports = {
                         version: '14.0.0.1',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
-                        description: 'Telemetry BIG-IP',
-                        marketingName: 'BIG-IP Virtual Edition',
+                        description: 'Telemetry_BIG-IP',
+                        marketingName: 'BIG-IP_Virtual_Edition',
                         platformId: 'Z100',
                         chassisId: '9c3abad5-513a-1c43-5bc2be62e957',
-                        baseMac: '00:0d:3a:30:34:51',
-                        callBackUrl: 'https://10.0.1.100',
+                        baseMac: '000d3a303451',
+                        callBackUrl: 'https--10.0.1.100',
                         configReady: 'yes',
                         licenseReady: 'yes',
                         provisionReady: 'yes',
-                        configSyncSucceeded: true,
+                        configSyncSucceeded: 'true',
                         syncMode: 'standalone',
                         syncColor: 'green',
                         syncStatus: 'Standalone',
                         failoverStatus: 'ACTIVE',
                         failoverColor: 'green',
-                        asmState: 'Policies Consistent',
-                        apmState: 'Policies Consistent',
+                        asmState: 'Policies_Consistent',
+                        apmState: 'Policies_Consistent',
                         afmState: 'quiescent'
                     }
                 },
@@ -50,23 +50,23 @@ module.exports = {
                         version: '14.0.0.1',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
-                        description: 'Telemetry BIG-IP',
-                        marketingName: 'BIG-IP Virtual Edition',
+                        description: 'Telemetry_BIG-IP',
+                        marketingName: 'BIG-IP_Virtual_Edition',
                         platformId: 'Z100',
                         chassisId: '9c3abad5-513a-1c43-5bc2be62e957',
-                        baseMac: '00:0d:3a:30:34:51',
-                        callBackUrl: 'https://10.0.1.100',
+                        baseMac: '000d3a303451',
+                        callBackUrl: 'https--10.0.1.100',
                         configReady: 'yes',
                         licenseReady: 'yes',
                         provisionReady: 'yes',
-                        configSyncSucceeded: true,
+                        configSyncSucceeded: 'true',
                         syncMode: 'standalone',
                         syncColor: 'green',
                         syncStatus: 'Standalone',
                         failoverStatus: 'ACTIVE',
                         failoverColor: 'green',
-                        asmState: 'Policies Consistent',
-                        apmState: 'Policies Consistent',
+                        asmState: 'Policies_Consistent',
+                        apmState: 'Policies_Consistent',
                         afmState: 'quiescent'
                     }
                 },
@@ -79,23 +79,23 @@ module.exports = {
                         version: '14.0.0.1',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
-                        description: 'Telemetry BIG-IP',
-                        marketingName: 'BIG-IP Virtual Edition',
+                        description: 'Telemetry_BIG-IP',
+                        marketingName: 'BIG-IP_Virtual_Edition',
                         platformId: 'Z100',
                         chassisId: '9c3abad5-513a-1c43-5bc2be62e957',
-                        baseMac: '00:0d:3a:30:34:51',
-                        callBackUrl: 'https://10.0.1.100',
+                        baseMac: '000d3a303451',
+                        callBackUrl: 'https--10.0.1.100',
                         configReady: 'yes',
                         licenseReady: 'yes',
                         provisionReady: 'yes',
-                        configSyncSucceeded: true,
+                        configSyncSucceeded: 'true',
                         syncMode: 'standalone',
                         syncColor: 'green',
                         syncStatus: 'Standalone',
                         failoverStatus: 'ACTIVE',
                         failoverColor: 'green',
-                        asmState: 'Policies Consistent',
-                        apmState: 'Policies Consistent',
+                        asmState: 'Policies_Consistent',
+                        apmState: 'Policies_Consistent',
                         afmState: 'quiescent'
                     }
                 },
@@ -108,23 +108,23 @@ module.exports = {
                         version: '14.0.0.1',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
-                        description: 'Telemetry BIG-IP',
-                        marketingName: 'BIG-IP Virtual Edition',
+                        description: 'Telemetry_BIG-IP',
+                        marketingName: 'BIG-IP_Virtual_Edition',
                         platformId: 'Z100',
                         chassisId: '9c3abad5-513a-1c43-5bc2be62e957',
-                        baseMac: '00:0d:3a:30:34:51',
-                        callBackUrl: 'https://10.0.1.100',
+                        baseMac: '000d3a303451',
+                        callBackUrl: 'https--10.0.1.100',
                         configReady: 'yes',
                         licenseReady: 'yes',
                         provisionReady: 'yes',
-                        configSyncSucceeded: true,
+                        configSyncSucceeded: 'true',
                         syncMode: 'standalone',
                         syncColor: 'green',
                         syncStatus: 'Standalone',
                         failoverStatus: 'ACTIVE',
                         failoverColor: 'green',
-                        asmState: 'Policies Consistent',
-                        apmState: 'Policies Consistent',
+                        asmState: 'Policies_Consistent',
+                        apmState: 'Policies_Consistent',
                         afmState: 'quiescent'
                     }
                 },
@@ -137,23 +137,23 @@ module.exports = {
                         version: '14.0.0.1',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
-                        description: 'Telemetry BIG-IP',
-                        marketingName: 'BIG-IP Virtual Edition',
+                        description: 'Telemetry_BIG-IP',
+                        marketingName: 'BIG-IP_Virtual_Edition',
                         platformId: 'Z100',
                         chassisId: '9c3abad5-513a-1c43-5bc2be62e957',
-                        baseMac: '00:0d:3a:30:34:51',
-                        callBackUrl: 'https://10.0.1.100',
+                        baseMac: '000d3a303451',
+                        callBackUrl: 'https--10.0.1.100',
                         configReady: 'yes',
                         licenseReady: 'yes',
                         provisionReady: 'yes',
-                        configSyncSucceeded: true,
+                        configSyncSucceeded: 'true',
                         syncMode: 'standalone',
                         syncColor: 'green',
                         syncStatus: 'Standalone',
                         failoverStatus: 'ACTIVE',
                         failoverColor: 'green',
-                        asmState: 'Policies Consistent',
-                        apmState: 'Policies Consistent',
+                        asmState: 'Policies_Consistent',
+                        apmState: 'Policies_Consistent',
                         afmState: 'quiescent'
                     }
                 },
@@ -181,210 +181,210 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-.1024-blocks',
                     metricValue: 436342,
                     metricTags: {
-                        name: '/'
+                        name: '-'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-.Capacity_Float',
                     metricValue: 0.55,
                     metricTags: {
-                        name: '/'
+                        name: '-'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-dev-shm.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/dev/shm'
+                        name: '-dev-shm'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-dev-shm.Capacity_Float',
                     metricValue: 0.09,
                     metricTags: {
-                        name: '/dev/shm'
+                        name: '-dev-shm'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-config.1024-blocks',
                     metricValue: 3269592,
                     metricTags: {
-                        name: '/config'
+                        name: '-config'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-config.Capacity_Float',
                     metricValue: 0.11,
                     metricTags: {
-                        name: '/config'
+                        name: '-config'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-usr.1024-blocks',
                     metricValue: 4136432,
                     metricTags: {
-                        name: '/usr'
+                        name: '-usr'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-usr.Capacity_Float',
                     metricValue: 0.83,
                     metricTags: {
-                        name: '/usr'
+                        name: '-usr'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var.1024-blocks',
                     metricValue: 3096336,
                     metricTags: {
-                        name: '/var'
+                        name: '-var'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var.Capacity_Float',
                     metricValue: 0.37,
                     metricTags: {
-                        name: '/var'
+                        name: '-var'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-shared.1024-blocks',
                     metricValue: 20642428,
                     metricTags: {
-                        name: '/shared'
+                        name: '-shared'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-shared.Capacity_Float',
                     metricValue: 0.03,
                     metricTags: {
-                        name: '/shared'
+                        name: '-shared'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-log.1024-blocks',
                     metricValue: 3023760,
                     metricTags: {
-                        name: '/var/log'
+                        name: '-var-log'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-log.Capacity_Float',
                     metricValue: 0.08,
                     metricTags: {
-                        name: '/var/log'
+                        name: '-var-log'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-appdata.1024-blocks',
                     metricValue: 51607740,
                     metricTags: {
-                        name: '/appdata'
+                        name: '-appdata'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-appdata.Capacity_Float',
                     metricValue: 0.03,
                     metricTags: {
-                        name: '/appdata'
+                        name: '-appdata'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-shared-rrd-1-2.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/shared/rrd.1.2'
+                        name: '-shared-rrd.1.2'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-shared-rrd-1-2.Capacity_Float',
                     metricValue: 0.01,
                     metricTags: {
-                        name: '/shared/rrd.1.2'
+                        name: '-shared-rrd.1.2'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-run.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/var/run'
+                        name: '-var-run'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-run.Capacity_Float',
                     metricValue: 0.01,
                     metricTags: {
-                        name: '/var/run'
+                        name: '-var-run'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-tmstat.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/var/tmstat'
+                        name: '-var-tmstat'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-tmstat.Capacity_Float',
                     metricValue: 0.01,
                     metricTags: {
-                        name: '/var/tmstat'
+                        name: '-var-tmstat'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-prompt.1024-blocks',
                     metricValue: 4096,
                     metricTags: {
-                        name: '/var/prompt'
+                        name: '-var-prompt'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-prompt.Capacity_Float',
                     metricValue: 0.01,
                     metricTags: {
-                        name: '/var/prompt'
+                        name: '-var-prompt'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-apm-mount-apmclients-7170-2018-627-21-3-0-iso.1024-blocks',
                     metricValue: 298004,
                     metricTags: {
-                        name: '/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso'
+                        name: '-var-apm-mount-apmclients-7170.2018.627.21-3.0.iso'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-apm-mount-apmclients-7170-2018-627-21-3-0-iso.Capacity_Float',
                     metricValue: 1,
                     metricTags: {
-                        name: '/var/apm/mount/apmclients-7170.2018.627.21-3.0.iso'
+                        name: '-var-apm-mount-apmclients-7170.2018.627.21-3.0.iso'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-loipc.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/var/loipc'
+                        name: '-var-loipc'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-var-loipc.Capacity_Float',
                     metricValue: 0,
                     metricTags: {
-                        name: '/var/loipc'
+                        name: '-var-loipc'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-mnt-sshplugin_tempfs.1024-blocks',
                     metricValue: 7181064,
                     metricTags: {
-                        name: '/mnt/sshplugin_tempfs'
+                        name: '-mnt-sshplugin_tempfs'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.diskStorage.-mnt-sshplugin_tempfs.Capacity_Float',
                     metricValue: 0,
                     metricTags: {
-                        name: '/mnt/sshplugin_tempfs'
+                        name: '-mnt-sshplugin_tempfs'
                     }
                 },
                 {
@@ -402,7 +402,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.sda.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.sda.util',
                     metricValue: 0.09,
                     metricTags: {
                         name: 'sda'
@@ -423,7 +423,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.sdb.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.sdb.util',
                     metricValue: 0.04,
                     metricTags: {
                         name: 'sdb'
@@ -444,7 +444,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-0.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-0.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-0'
@@ -465,7 +465,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-1.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-1.util',
                     metricValue: 0.01,
                     metricTags: {
                         name: 'dm-1'
@@ -486,7 +486,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-2.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-2.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-2'
@@ -507,7 +507,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-3.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-3.util',
                     metricValue: 0.01,
                     metricTags: {
                         name: 'dm-3'
@@ -528,7 +528,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-4.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-4.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-4'
@@ -549,7 +549,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-5.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-5.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-5'
@@ -570,7 +570,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-6.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-6.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-6'
@@ -591,7 +591,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-7.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-7.util',
                     metricValue: 0,
                     metricTags: {
                         name: 'dm-7'
@@ -612,7 +612,7 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-8.%util',
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.diskLatency.dm-8.util',
                     metricValue: 0.01,
                     metricTags: {
                         name: 'dm-8'
@@ -670,18 +670,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -689,18 +689,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -708,18 +708,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -727,18 +727,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-evictedConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -746,18 +746,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -765,18 +765,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -784,18 +784,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -803,18 +803,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -822,18 +822,18 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Common-app-app-app_vs.clientside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '10.5.6.7:80',
+                        destination: '10.5.6.780',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The virtual server is available',
+                        'status.statusReason': 'The_virtual_server_is_available',
                         mask: '255.255.255.255',
-                        name: '/Common/foofoo.app/foofoo_vs',
-                        appService: '/Common/foofoo.app/foofoo',
+                        name: '-Common-foofoo.app-foofoo_vs',
+                        appService: '-Common-foofoo.app-foofoo',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Common',
-                        pool: '/Common/foofoo.app/foofoo_pool',
+                        pool: '-Common-foofoo.app-foofoo_pool',
                         application: 'foofoo.app'
                     }
                 },
@@ -841,17 +841,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -859,17 +859,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -877,17 +877,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -895,17 +895,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-evictedConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -913,17 +913,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -931,17 +931,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -949,17 +949,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -967,17 +967,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -985,17 +985,17 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:443',
+                        destination: '192.0.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
                         mask: '255.255.255.0',
-                        name: '/Example_Tenant/A1/serviceMain',
+                        name: '-Example_Tenant-A1-serviceMain',
                         ipProtocol: 'tcp',
-                        isAvailable: false,
-                        isEnabled: true,
+                        isAvailable: 'false',
+                        isEnabled: 'true',
                         tenant: 'Example_Tenant',
-                        pool: '/Example_Tenant/A1/barbar_pool',
+                        pool: '-Example_Tenant-A1-barbar_pool',
                         application: 'A1'
                     }
                 },
@@ -1003,13 +1003,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1018,13 +1018,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1033,13 +1033,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1048,13 +1048,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-evictedConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1063,13 +1063,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1078,13 +1078,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1093,13 +1093,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1108,13 +1108,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1123,13 +1123,13 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11:80',
+                        destination: '192.0.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
-                        isAvailable: true,
-                        isEnabled: true,
-                        'status.statusReason': 'The children pool member(s) either don\'t have service checking enabled, or service check results are not available yet',
-                        name: '/Example_Tenant/A1/serviceMain-Redirect',
+                        isAvailable: 'true',
+                        isEnabled: 'true',
+                        'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
+                        name: '-Example_Tenant-A1-serviceMain-Redirect',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1140,8 +1140,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1152,8 +1152,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1164,8 +1164,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1176,8 +1176,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1188,8 +1188,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1200,8 +1200,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1212,8 +1212,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1224,8 +1224,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/app.app/app_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-app.app-app_pool',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -1238,9 +1238,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1251,9 +1251,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1264,9 +1264,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1277,9 +1277,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1290,9 +1290,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1303,9 +1303,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1316,9 +1316,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/app.app/app_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Common-app.app-app_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1327,8 +1327,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1338,8 +1338,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1349,8 +1349,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1360,8 +1360,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1371,8 +1371,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1382,8 +1382,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1393,8 +1393,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1404,8 +1404,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Common/telemetry-local',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Common-telemetry-local',
                         tenant: 'Common'
                     }
                 },
@@ -1417,9 +1417,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1430,9 +1430,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1443,9 +1443,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1456,9 +1456,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1469,9 +1469,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1482,9 +1482,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1495,9 +1495,9 @@ module.exports = {
                         monitorStatus: 'down',
                         availabilityState: 'available',
                         enabledState: 'enabled',
-                        poolName: '/Common/telemetry-local',
-                        port: 0,
-                        'status.statusReason': 'Pool member has been marked down by a monitor'
+                        poolName: '-Common-telemetry-local',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_has_been_marked_down_by_a_monitor'
                     }
                 },
                 {
@@ -1506,8 +1506,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1518,8 +1518,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1530,8 +1530,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1542,8 +1542,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1554,8 +1554,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1566,8 +1566,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1578,8 +1578,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1590,8 +1590,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/hsl_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-hsl_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1604,9 +1604,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1617,9 +1617,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1630,9 +1630,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1643,9 +1643,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1656,9 +1656,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1669,9 +1669,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1682,9 +1682,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/hsl_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-hsl_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1693,8 +1693,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1705,8 +1705,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1717,8 +1717,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1729,8 +1729,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1741,8 +1741,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1753,8 +1753,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1765,8 +1765,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1777,8 +1777,8 @@ module.exports = {
                     metricTags: {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'The pool is available',
-                        name: '/Example_Tenant/A1/web_pool',
+                        'status.statusReason': 'The_pool_is_available',
+                        name: '-Example_Tenant-A1-web_pool',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -1791,9 +1791,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1804,9 +1804,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1817,9 +1817,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1830,9 +1830,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1843,9 +1843,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1856,9 +1856,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1869,9 +1869,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1882,9 +1882,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1895,9 +1895,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1908,9 +1908,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1921,9 +1921,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1934,9 +1934,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1947,9 +1947,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1960,9 +1960,9 @@ module.exports = {
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 0,
-                        'status.statusReason': 'Pool member is available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '0',
+                        'status.statusReason': 'Pool_member_is_available'
                     }
                 },
                 {
@@ -1973,9 +1973,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -1987,9 +1987,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2001,9 +2001,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2015,9 +2015,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2029,9 +2029,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2043,9 +2043,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2057,9 +2057,9 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
@@ -2071,121 +2071,121 @@ module.exports = {
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'unchecked',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'Pool member does not have service checking enabled'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'Pool_member_does_not_have_service_checking_enabled'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-bitsIn',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-bitsOut',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-curConns',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-maxConns',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-pktsIn',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-pktsOut',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.serverside-totConns',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-bestwebsite-com-80.totRequests',
                     metricTags: {
-                        addr: '::',
+                        addr: '',
                         availabilityState: 'available',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
                         monitorStatus: 'fqdn-up',
-                        poolName: '/Example_Tenant/A1/web_pool',
-                        port: 80,
-                        'status.statusReason': 'The DNS server(s) are available'
+                        poolName: '-Example_Tenant-A1-web_pool',
+                        port: '80',
+                        'status.statusReason': 'The_DNS_servers_are_available'
                     },
                     metricValue: 0
                 },
@@ -2193,7 +2193,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.ltmPolicies.-Common-app-app-app_policy.invoked',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_policy',
+                        name: '-Common-app.app-app_policy',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2202,7 +2202,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.ltmPolicies.-Common-app-app-app_policy.succeeded',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_policy',
+                        name: '-Common-app.app-app_policy',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2221,7 +2221,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.ltmPolicies.-Common-telemetry.invoked',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/telemetry',
+                        name: '-Common-telemetry',
                         tenant: 'Common'
                     }
                 },
@@ -2229,7 +2229,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.ltmPolicies.-Common-telemetry.succeeded',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/telemetry',
+                        name: '-Common-telemetry',
                         tenant: 'Common'
                     }
                 },
@@ -2247,7 +2247,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.cookiePersistInserts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2256,7 +2256,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.getReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2265,7 +2265,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.maxKeepaliveReq',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2274,7 +2274,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.numberReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2283,7 +2283,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.postReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2292,7 +2292,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.2xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2301,7 +2301,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.3xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2310,7 +2310,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.4xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2319,7 +2319,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.5xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2328,7 +2328,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.respLessThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2337,7 +2337,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.respGreaterThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2346,7 +2346,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v10Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2355,7 +2355,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v10Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2364,7 +2364,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v11Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2373,7 +2373,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v11Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2382,7 +2382,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v9Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2391,7 +2391,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-app-app-app_http.v9Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/app.app/app_http',
+                        name: '-Common-app.app-app_http',
                         tenant: 'Common',
                         application: 'app.app'
                     }
@@ -2400,7 +2400,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.cookiePersistInserts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2408,7 +2408,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.getReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2416,7 +2416,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.maxKeepaliveReq',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2424,7 +2424,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.numberReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2432,7 +2432,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.postReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2440,7 +2440,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.2xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2448,7 +2448,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.3xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2456,7 +2456,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.4xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2464,7 +2464,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.5xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2472,7 +2472,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.respLessThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2480,7 +2480,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.respGreaterThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2488,7 +2488,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v10Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2496,7 +2496,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v10Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2504,7 +2504,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v11Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2512,7 +2512,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v11Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2520,7 +2520,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v9Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2528,7 +2528,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Common-http.v9Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http',
+                        name: '-Common-http',
                         tenant: 'Common'
                     }
                 },
@@ -2536,7 +2536,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.cookiePersistInserts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2545,7 +2545,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.getReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2554,7 +2554,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.maxKeepaliveReq',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2563,7 +2563,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.numberReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2572,7 +2572,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.postReqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2581,7 +2581,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.2xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2590,7 +2590,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.3xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2599,7 +2599,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.4xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2608,7 +2608,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.5xxResp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2617,7 +2617,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.respLessThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2626,7 +2626,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.respGreaterThan2m',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2635,7 +2635,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v10Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2644,7 +2644,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v10Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2653,7 +2653,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v11Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2662,7 +2662,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v11Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2671,7 +2671,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v9Reqs',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2680,7 +2680,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.httpProfiles.-Example_Tenant-A1-custom_http_profile.v9Resp',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/custom_http_profile',
+                        name: '-Example_Tenant-A1-custom_http_profile',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -2689,7 +2689,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.activeHandshakeRejected',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2697,7 +2697,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-adhKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2705,7 +2705,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-aesBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2713,7 +2713,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-aesGcmBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2721,7 +2721,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-camelliaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2729,7 +2729,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-chacha20Poly1305Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2737,7 +2737,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-desBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2745,7 +2745,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-dhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2753,7 +2753,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-dheDssKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2761,7 +2761,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-ecdhEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2769,7 +2769,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-ecdhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2777,7 +2777,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-ecdheEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2785,7 +2785,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-ecdheRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2793,7 +2793,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-edhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2801,7 +2801,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-ideaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2809,7 +2809,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-md5Digest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2817,7 +2817,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-nullBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2825,7 +2825,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-nullDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2833,7 +2833,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-rc2Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2841,7 +2841,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-rc4Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2849,7 +2849,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-rsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2857,7 +2857,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.cipherUses-shaDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2865,7 +2865,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.currentCompatibleConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2873,7 +2873,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.currentConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2881,7 +2881,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.currentNativeConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2889,7 +2889,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.currentActiveHandshakes',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2897,7 +2897,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.decryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2905,7 +2905,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.decryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2913,7 +2913,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.encryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2921,7 +2921,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.encryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2929,7 +2929,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.fatalAlerts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2937,7 +2937,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.handshakeFailures',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2945,7 +2945,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.peercertInvalid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2953,7 +2953,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.peercertNone',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2961,7 +2961,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.peercertValid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2969,7 +2969,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-dtlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2977,7 +2977,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-sslv2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2985,7 +2985,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-sslv3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -2993,7 +2993,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-tlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3001,7 +3001,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-tlsv1_1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3009,7 +3009,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-tlsv1_2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3017,7 +3017,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.protocolUses-tlsv1_3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3025,7 +3025,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.recordsIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3033,7 +3033,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.recordsOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3041,7 +3041,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.sniRejects',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3049,7 +3049,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.totCompatConns',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3057,7 +3057,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Common-clientssl.totNativeConns',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/clientssl',
+                        name: '-Common-clientssl',
                         tenant: 'Common'
                     }
                 },
@@ -3065,7 +3065,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.activeHandshakeRejected',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3074,7 +3074,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-adhKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3083,7 +3083,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-aesBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3092,7 +3092,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-aesGcmBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3101,7 +3101,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-camelliaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3110,7 +3110,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-chacha20Poly1305Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3119,7 +3119,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-desBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3128,7 +3128,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-dhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3137,7 +3137,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-dheDssKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3146,7 +3146,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-ecdhEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3155,7 +3155,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-ecdhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3164,7 +3164,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-ecdheEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3173,7 +3173,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-ecdheRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3182,7 +3182,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-edhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3191,7 +3191,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-ideaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3200,7 +3200,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-md5Digest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3209,7 +3209,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-nullBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3218,7 +3218,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-nullDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3227,7 +3227,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-rc2Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3236,7 +3236,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-rc4Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3245,7 +3245,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-rsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3254,7 +3254,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.cipherUses-shaDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3263,7 +3263,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.currentCompatibleConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3272,7 +3272,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.currentConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3281,7 +3281,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.currentNativeConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3290,7 +3290,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.currentActiveHandshakes',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3299,7 +3299,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.decryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3308,7 +3308,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.decryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3317,7 +3317,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.encryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3326,7 +3326,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.encryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3335,7 +3335,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.fatalAlerts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3344,7 +3344,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.handshakeFailures',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3353,7 +3353,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.peercertInvalid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3362,7 +3362,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.peercertNone',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3371,7 +3371,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.peercertValid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3380,7 +3380,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-dtlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3389,7 +3389,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-sslv2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3398,7 +3398,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-sslv3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3407,7 +3407,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-tlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3416,7 +3416,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-tlsv1_1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3425,7 +3425,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-tlsv1_2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3434,7 +3434,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.protocolUses-tlsv1_3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3443,7 +3443,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.recordsIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3452,7 +3452,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.recordsOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3461,7 +3461,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.sniRejects',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3470,7 +3470,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.totCompatConns',
                     metricValue: 100,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3479,7 +3479,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.clientSslProfiles.-Example_Tenant-A1-webtls.totNativeConns',
                     metricValue: 100,
                     metricTags: {
-                        name: '/Example_Tenant/A1/webtls',
+                        name: '-Example_Tenant-A1-webtls',
                         tenant: 'Example_Tenant',
                         application: 'A1'
                     }
@@ -3488,7 +3488,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.activeHandshakeRejected',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3496,7 +3496,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-adhKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3504,7 +3504,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-aesBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3512,7 +3512,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-aesGcmBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3520,7 +3520,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-camelliaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3528,7 +3528,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-chacha20Poly1305Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3536,7 +3536,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-desBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3544,7 +3544,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-dhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3552,7 +3552,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-dheDssKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3560,7 +3560,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-ecdhEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3568,7 +3568,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-ecdhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3576,7 +3576,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-ecdheEcdsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3584,7 +3584,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-ecdheRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3592,7 +3592,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-edhRsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3600,7 +3600,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-ideaBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3608,7 +3608,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-md5Digest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3616,7 +3616,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-nullBulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3624,7 +3624,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-nullDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3632,7 +3632,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-rc2Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3640,7 +3640,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-rc4Bulk',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3648,7 +3648,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-rsaKeyxchg',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3656,7 +3656,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.cipherUses-shaDigest',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3664,7 +3664,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.currentCompatibleConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3672,7 +3672,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.currentConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3680,7 +3680,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.currentNativeConnections',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3688,7 +3688,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.currentActiveHandshakes',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3696,7 +3696,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.decryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3704,7 +3704,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.decryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3712,7 +3712,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.encryptedBytesIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3720,7 +3720,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.encryptedBytesOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3728,7 +3728,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.fatalAlerts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3736,7 +3736,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.handshakeFailures',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3744,7 +3744,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.peercertInvalid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3752,7 +3752,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.peercertNone',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3760,7 +3760,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.peercertValid',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3768,7 +3768,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-dtlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3776,7 +3776,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-sslv2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3784,7 +3784,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-sslv3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3792,7 +3792,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-tlsv1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3800,7 +3800,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-tlsv1_1',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3808,7 +3808,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-tlsv1_2',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3816,7 +3816,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.protocolUses-tlsv1_3',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3824,7 +3824,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.recordsIn',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3832,7 +3832,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.recordsOut',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3840,7 +3840,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.totCompatConns',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3848,7 +3848,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.serverSslProfiles.-Common-serverssl.totNativeConns',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/serverssl',
+                        name: '-Common-serverssl',
                         tenant: 'Common'
                     }
                 },
@@ -3856,8 +3856,8 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.sslCerts.ca-bundle-crt.expirationDate',
                     metricValue: 0,
                     metricTags: {
-                        issuer: 'CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US',
-                        subject: 'CN=Starfield Services Root Certificate Authority,OU=http://certificates.starfieldtech.com/repository/,O=Starfield Technologies, Inc.,L=Scottsdale,ST=Arizona,C=US',
+                        issuer: 'CN=Starfield_Services_Root_Certificate_AuthorityOU=http--certificates.starfieldtech.com-repository-O=Starfield_Technologies_Inc.L=ScottsdaleST=ArizonaC=US',
+                        subject: 'CN=Starfield_Services_Root_Certificate_AuthorityOU=http--certificates.starfieldtech.com-repository-O=Starfield_Technologies_Inc.L=ScottsdaleST=ArizonaC=US',
                         name: 'ca-bundle.crt'
                     }
                 },
@@ -3865,9 +3865,9 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.sslCerts.default-crt.expirationDate',
                     metricValue: 0,
                     metricTags: {
-                        email: 'root@localhost.localdomain',
-                        issuer: 'emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US',
-                        subject: 'emailAddress=root@localhost.localdomain,CN=localhost.localdomain,OU=IT,O=MyCompany,L=Seattle,ST=WA,C=US',
+                        email: 'rootlocalhost.localdomain',
+                        issuer: 'emailAddress=rootlocalhost.localdomainCN=localhost.localdomainOU=ITO=MyCompanyL=SeattleST=WAC=US',
+                        subject: 'emailAddress=rootlocalhost.localdomainCN=localhost.localdomainOU=ITO=MyCompanyL=SeattleST=WAC=US',
                         name: 'default.crt'
                     }
                 },
@@ -3875,8 +3875,8 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.sslCerts.f5-ca-bundle-crt.expirationDate',
                     metricValue: 0,
                     metricTags: {
-                        issuer: 'CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US',
-                        subject: 'CN=Entrust Root Certification Authority - G2,OU=(c) 2009 Entrust, Inc. - for authorized use only,OU=See www.entrust.net/legal-terms,O=Entrust, Inc.,C=US',
+                        issuer: 'CN=Entrust_Root_Certification_Authority_-_G2OU=c_2009_Entrust_Inc._-_for_authorized_use_onlyOU=See_www.entrust.net-legal-termsO=Entrust_Inc.C=US',
+                        subject: 'CN=Entrust_Root_Certification_Authority_-_G2OU=c_2009_Entrust_Inc._-_for_authorized_use_onlyOU=See_www.entrust.net-legal-termsO=Entrust_Inc.C=US',
                         name: 'f5-ca-bundle.crt'
                     }
                 },
@@ -3884,9 +3884,9 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.sslCerts.f5-irule-crt.expirationDate',
                     metricValue: 0,
                     metricTags: {
-                        email: 'support@f5.com',
-                        issuer: 'emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US',
-                        subject: 'emailAddress=support@f5.com,CN=support.f5.com,OU=Product Development,O=F5 Networks,L=Seattle,ST=Washington,C=US',
+                        email: 'supportf5.com',
+                        issuer: 'emailAddress=supportf5.comCN=support.f5.comOU=Product_DevelopmentO=F5_NetworksL=SeattleST=WashingtonC=US',
+                        subject: 'emailAddress=supportf5.comCN=support.f5.comOU=Product_DevelopmentO=F5_NetworksL=SeattleST=WashingtonC=US',
                         name: 'f5-irule.crt'
                     }
                 },
@@ -3894,7 +3894,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcInBroadcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3902,7 +3902,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcInMulticastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3910,7 +3910,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcInOctets',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3918,7 +3918,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcInUcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3926,7 +3926,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcOutBroadcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3934,7 +3934,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcOutMulticastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3942,7 +3942,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcOutOctets',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3950,7 +3950,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.hcOutUcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3958,7 +3958,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.inDiscards',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3966,7 +3966,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.inErrors',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3974,7 +3974,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.inUnknownProtos',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3982,7 +3982,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.outDiscards',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3990,7 +3990,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-http-tunnel.outErrors',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/http-tunnel',
+                        name: '-Common-http-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -3998,7 +3998,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcInBroadcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4006,7 +4006,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcInMulticastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4014,7 +4014,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcInOctets',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4022,7 +4022,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcInUcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4030,7 +4030,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcOutBroadcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4038,7 +4038,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcOutMulticastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4046,7 +4046,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcOutOctets',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4054,7 +4054,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.hcOutUcastPkts',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4062,7 +4062,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.inDiscards',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4070,7 +4070,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.inErrors',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4078,7 +4078,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.inUnknownProtos',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4086,7 +4086,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.outDiscards',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4094,7 +4094,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.networkTunnels.-Common-socks-tunnel.outErrors',
                     metricValue: 0,
                     metricTags: {
-                        name: '/Common/socks-tunnel',
+                        name: '-Common-socks-tunnel',
                         tenant: 'Common'
                     }
                 },
@@ -4103,7 +4103,7 @@ module.exports = {
                     metricValue: 1221553,
                     metricTags: {
                         type: 'sync-failover',
-                        name: '/Common/example_device_group',
+                        name: '-Common-example_device_group',
                         tenant: 'Common'
                     }
                 },
@@ -4218,14 +4218,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4236,14 +4236,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4254,14 +4254,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4272,14 +4272,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4290,14 +4290,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4308,14 +4308,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4326,14 +4326,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4344,14 +4344,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4362,14 +4362,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4380,14 +4380,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4398,14 +4398,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4416,14 +4416,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4434,14 +4434,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4452,14 +4452,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4470,14 +4470,14 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'A',
-                        name: '/Common/www.aone.tstest.com',
+                        name: '-Common-www.aone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4488,15 +4488,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4507,15 +4507,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4526,15 +4526,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4545,15 +4545,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4564,15 +4564,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4583,15 +4583,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4602,15 +4602,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4621,15 +4621,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4640,15 +4640,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4659,15 +4659,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4678,15 +4678,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4697,15 +4697,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4716,15 +4716,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4735,15 +4735,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4754,15 +4754,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'AAAA',
-                        lastResortPool: '/Common/ts_aaaa_pool',
-                        name: '/Common/www.aaaaone.tstest.com',
+                        lastResortPool: '-Common-ts_aaaa_pool',
+                        name: '-Common-www.aaaaone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'formerr',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -4780,7 +4780,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4798,7 +4798,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4816,7 +4816,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4834,7 +4834,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4852,7 +4852,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4870,7 +4870,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4888,7 +4888,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4906,7 +4906,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4924,7 +4924,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4942,7 +4942,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4960,7 +4960,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4978,7 +4978,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -4996,7 +4996,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5014,7 +5014,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5032,7 +5032,7 @@ module.exports = {
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5045,13 +5045,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5064,13 +5064,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5083,13 +5083,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5102,13 +5102,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5121,13 +5121,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5140,13 +5140,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5159,13 +5159,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5178,13 +5178,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5197,13 +5197,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5216,13 +5216,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5235,13 +5235,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5254,13 +5254,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5273,13 +5273,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5292,13 +5292,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5311,13 +5311,13 @@ module.exports = {
                         'status.enabledState': 'enabled',
                         'status.statusReason': 'Checking',
                         wipType: 'CNAME',
-                        lastResortPool: '/Common/ts_cname_pool',
+                        lastResortPool: '-Common-ts_cname_pool',
                         name: 'www.cnametwo.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'disabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5328,15 +5328,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5347,15 +5347,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5366,15 +5366,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5385,15 +5385,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5404,15 +5404,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5423,15 +5423,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5442,15 +5442,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5461,15 +5461,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5480,15 +5480,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5499,15 +5499,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5518,15 +5518,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5537,15 +5537,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5556,15 +5556,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5575,15 +5575,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5594,15 +5594,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'MX',
-                        lastResortPool: '/Common/ts_mx_pool',
-                        name: '/Common/www.mxone.tstest.com',
+                        lastResortPool: '-Common-ts_mx_pool',
+                        name: '-Common-www.mxone.tstest.com',
                         poolLbMode: 'topology',
                         persistence: 'enabled',
                         failureRcode: 'noerror',
                         minimalResponse: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'disabled',
                         tenant: 'Common'
                     }
@@ -5613,15 +5613,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5632,15 +5632,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5651,15 +5651,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5670,15 +5670,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5689,15 +5689,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5708,15 +5708,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5727,15 +5727,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5746,15 +5746,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5765,15 +5765,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5784,15 +5784,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5803,15 +5803,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5822,15 +5822,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5841,15 +5841,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5860,15 +5860,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5879,15 +5879,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'NAPTR',
-                        lastResortPool: '/Common/ts_naptr_pool',
-                        name: '/Common/www.naptrone.tstest.com',
+                        lastResortPool: '-Common-ts_naptr_pool',
+                        name: '-Common-www.naptrone.tstest.com',
                         poolLbMode: 'global-availability',
                         persistence: 'disabled',
                         failureRcode: 'notimpl',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5898,15 +5898,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5917,15 +5917,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5936,15 +5936,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5955,15 +5955,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5974,15 +5974,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -5993,15 +5993,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6012,15 +6012,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6031,15 +6031,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6050,15 +6050,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6069,15 +6069,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6088,15 +6088,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6107,15 +6107,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6126,15 +6126,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6145,15 +6145,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6164,15 +6164,15 @@ module.exports = {
                     metricTags: {
                         'status.availabilityState': 'offline',
                         'status.enabledState': 'enabled',
-                        'status.statusReason': 'No enabled pools available',
+                        'status.statusReason': 'No_enabled_pools_available',
                         wipType: 'SRV',
-                        lastResortPool: '/Common/ts_cname_pool',
-                        name: '/Common/www.srvone.tstest.com',
+                        lastResortPool: '-Common-ts_cname_pool',
+                        name: '-Common-www.srvone.tstest.com',
                         poolLbMode: 'round-robin',
                         persistence: 'disabled',
                         failureRcode: 'servfail',
                         minimalResponse: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         failureRcodeResponse: 'enabled',
                         tenant: 'Common'
                     }
@@ -6184,20 +6184,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6208,20 +6208,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6232,20 +6232,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6256,20 +6256,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6280,20 +6280,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6304,20 +6304,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6328,20 +6328,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6352,20 +6352,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6376,20 +6376,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6400,20 +6400,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6421,15 +6421,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6440,15 +6440,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6459,15 +6459,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6478,15 +6478,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.limitMaxBps',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6497,15 +6497,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.limitMaxConnections',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6516,15 +6516,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.limitMaxPps',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6535,15 +6535,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.memberOrder',
                     metricValue: 2,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6554,15 +6554,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aPools.-Common-ts_a_pool.members.vs1--Common-server1.ratio',
                     metricValue: 1,
                     metricTags: {
-                        poolName: '/Common/ts_a_pool',
+                        poolName: '-Common-ts_a_pool',
                         poolType: 'A',
-                        serverName: '/Common/server1',
+                        serverName: '-Common-server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/gateway_icmp from 172.16.100.17 : no route',
+                        'status.statusReason': '_Monitor_-Common-gateway_icmp_from_172.16.100.17__no_route',
                         vsName: 'vs1',
-                        name: 'server1:vs1',
-                        enabled: true,
+                        name: 'server1vs1',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -6576,20 +6576,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6600,20 +6600,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6624,20 +6624,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6648,20 +6648,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6672,20 +6672,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6696,20 +6696,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6720,20 +6720,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6744,20 +6744,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6768,20 +6768,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6792,20 +6792,20 @@ module.exports = {
                         poolType: 'A',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: '8.8.8.8',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
-                        name: '/Common/ts_a_pool',
+                        name: '-Common-ts_a_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'disabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'ratio',
                         dynamicRatio: 'disabled',
                         manualResume: 'disabled',
-                        monitor: '/Common/gateway_icmp',
+                        monitor: '-Common-gateway_icmp',
                         tenant: 'Common'
                     }
                 },
@@ -6816,20 +6816,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6840,20 +6840,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6864,20 +6864,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6888,20 +6888,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6912,20 +6912,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6936,20 +6936,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6960,20 +6960,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -6984,20 +6984,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7008,20 +7008,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7032,20 +7032,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7053,15 +7053,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7072,15 +7072,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7091,15 +7091,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7110,15 +7110,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.limitMaxBps',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7129,15 +7129,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.limitMaxConnections',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7148,15 +7148,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.limitMaxPps',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7167,15 +7167,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.memberOrder',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7186,15 +7186,15 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.aaaaPools.-Common-ts_aaaa_pool.members.vs3--Common-gslb_server1.ratio',
                     metricValue: 1,
                     metricTags: {
-                        poolName: '/Common/ts_aaaa_pool',
+                        poolName: '-Common-ts_aaaa_pool',
                         poolType: 'AAAA',
-                        serverName: '/Common/gslb_server1',
+                        serverName: '-Common-gslb_server1',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': ' Monitor /Common/tcp from 172.16.100.17 : state: connect failed',
+                        'status.statusReason': '_Monitor_-Common-tcp_from_172.16.100.17__state_connect_failed',
                         vsName: 'vs3',
-                        name: 'gslb_server1:vs3',
-                        enabled: true,
+                        name: 'gslb_server1vs3',
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',
                         limitMaxPpsStatus: 'disabled',
@@ -7208,20 +7208,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7232,20 +7232,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7256,20 +7256,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7280,20 +7280,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7304,20 +7304,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7328,20 +7328,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7352,20 +7352,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7376,20 +7376,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7400,20 +7400,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7424,20 +7424,20 @@ module.exports = {
                         poolType: 'AAAA',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackIp: 'any',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'enabled',
-                        name: '/Common/ts_aaaa_pool',
+                        name: '-Common-ts_aaaa_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
                         limitMaxPpsStatus: 'disabled',
-                        enabled: true,
+                        enabled: 'true',
                         limitMaxBpsStatus: 'disabled',
                         loadBalancingMode: 'round-robin',
                         dynamicRatio: 'enabled',
                         manualResume: 'disabled',
-                        monitor: 'min 1 of { /Common/http /Common/tcp }',
+                        monitor: 'min_1_of__-Common-http_-Common-tcp_',
                         tenant: 'Common'
                     }
                 },
@@ -7453,7 +7453,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7472,7 +7472,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7491,7 +7491,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7510,7 +7510,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7529,7 +7529,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7548,7 +7548,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7567,7 +7567,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7578,7 +7578,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.cnamePools.-Common-ts_cname_pool.members.www-cnameone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_cname_pool',
+                        poolName: '-Common-ts_cname_pool',
                         poolType: 'CNAME',
                         serverName: 'www.cnameone.tstest.com',
                         availabilityState: 'unknown',
@@ -7590,7 +7590,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.cnamePools.-Common-ts_cname_pool.members.www-cnameone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_cname_pool',
+                        poolName: '-Common-ts_cname_pool',
                         poolType: 'CNAME',
                         serverName: 'www.cnameone.tstest.com',
                         availabilityState: 'unknown',
@@ -7602,7 +7602,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.cnamePools.-Common-ts_cname_pool.members.www-cnameone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_cname_pool',
+                        poolName: '-Common-ts_cname_pool',
                         poolType: 'CNAME',
                         serverName: 'www.cnameone.tstest.com',
                         availabilityState: 'unknown',
@@ -7622,7 +7622,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7641,7 +7641,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7660,7 +7660,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7679,7 +7679,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7698,7 +7698,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7717,7 +7717,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7736,7 +7736,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7755,7 +7755,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7774,7 +7774,7 @@ module.exports = {
                         name: 'ts_cname_pool',
                         alternateMode: 'round-robin',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -7788,12 +7788,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7807,12 +7807,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7826,12 +7826,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7845,12 +7845,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7864,12 +7864,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7883,12 +7883,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7902,12 +7902,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -7918,72 +7918,72 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aaaaone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aaaaone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aaaaone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.mxPools.-Common-ts_mx_pool.members.www-aone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_mx_pool',
+                        poolName: '-Common-ts_mx_pool',
                         poolType: 'MX',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
@@ -7993,12 +7993,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8012,12 +8012,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8031,12 +8031,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8050,12 +8050,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8069,12 +8069,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8088,12 +8088,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8107,12 +8107,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8126,12 +8126,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8145,12 +8145,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8164,12 +8164,12 @@ module.exports = {
                         poolType: 'MX',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'return-to-dns',
-                        name: '/Common/ts_mx_pool',
+                        name: '-Common-ts_mx_pool',
                         alternateMode: 'topology',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'round-robin',
                         manualResume: 'enabled',
                         dynamicRatio: 'enabled',
@@ -8183,12 +8183,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8202,12 +8202,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8221,12 +8221,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8240,12 +8240,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8259,12 +8259,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8278,12 +8278,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8297,12 +8297,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8313,72 +8313,72 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-aone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-aone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-aone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-srvone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.srvone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-srvone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.srvone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.naptrPools.-Common-ts_naptr_pool.members.www-srvone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_naptr_pool',
+                        poolName: '-Common-ts_naptr_pool',
                         poolType: 'NAPTR',
                         serverName: 'www.srvone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
@@ -8388,12 +8388,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8407,12 +8407,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8426,12 +8426,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8445,12 +8445,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8464,12 +8464,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8483,12 +8483,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8502,12 +8502,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8521,12 +8521,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8540,12 +8540,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8559,12 +8559,12 @@ module.exports = {
                         poolType: 'NAPTR',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'ratio',
-                        name: '/Common/ts_naptr_pool',
+                        name: '-Common-ts_naptr_pool',
                         alternateMode: 'virtual-server-score',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'static-persistence',
                         manualResume: 'enabled',
                         dynamicRatio: 'disabled',
@@ -8578,12 +8578,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8597,12 +8597,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8616,12 +8616,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8635,12 +8635,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8654,12 +8654,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8673,12 +8673,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8692,12 +8692,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8708,72 +8708,72 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aaaaone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aaaaone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aaaaone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aaaaone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aone-tstest-com.alternate',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aone-tstest-com.fallback',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
                     metricName: 'f5telemetry.telemetry-bigip-com.srvPools.-Common-ts_srv_pool.members.www-aone-tstest-com.preferred',
                     metricValue: 0,
                     metricTags: {
-                        poolName: '/Common/ts_srv_pool',
+                        poolName: '-Common-ts_srv_pool',
                         poolType: 'SRV',
                         serverName: 'www.aone.tstest.com',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No Wide IPs available: No enabled pools available'
+                        'status.statusReason': 'No_Wide_IPs_available_No_enabled_pools_available'
                     }
                 },
                 {
@@ -8783,12 +8783,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8802,12 +8802,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8821,12 +8821,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8840,12 +8840,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8859,12 +8859,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8878,12 +8878,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8897,12 +8897,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8916,12 +8916,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8935,12 +8935,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -8954,12 +8954,12 @@ module.exports = {
                         poolType: 'SRV',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
-                        'status.statusReason': 'No enabled pool members available',
+                        'status.statusReason': 'No_enabled_pool_members_available',
                         fallbackMode: 'quality-of-service',
-                        name: '/Common/ts_srv_pool',
+                        name: '-Common-ts_srv_pool',
                         alternateMode: 'packet-rate',
                         verifyMemberAvailability: 'enabled',
-                        enabled: true,
+                        enabled: 'true',
                         loadBalancingMode: 'virtual-server-capacity',
                         manualResume: 'disabled',
                         dynamicRatio: 'disabled',
@@ -9348,6 +9348,14 @@ module.exports = {
                         name: 'sslTps'
                     },
                     metricValue: 0
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.asmAttackSignatures.ff8080817a3a4908017a3a490958000e.createDateTime',
+                    metricTags: {
+                        filename: 'ASM-AttackSignatures_20190716_122131.im',
+                        name: 'ff8080817a3a4908017a3a490958000e'
+                    },
+                    metricValue: 1563279691000
                 }
             ]
         }

@@ -8,11 +8,15 @@
 
 'use strict';
 
+const EventEmitter2 = require('eventemitter2');
+const memfs = require('memfs');
+const pathUtil = require('path');
 const sinon = require('sinon');
 
 const assignDefaults = require('./util').assignDefaults;
 const constants = require('../../../src/lib/constants');
 const deepCopy = require('./util').deepCopy;
+const promisifyNodeFsModule = require('../../../src/lib/utils/misc').promisifyNodeFsModule;
 const tsLogsForwarder = require('../../winstonLogger').tsLogger;
 
 let SINON_FAKE_CLOCK = null;
@@ -197,7 +201,13 @@ const _module = module.exports = {
     configWorker(configWorker) {
         const ctx = _module.eventEmitter(configWorker);
         ctx.configs = [];
+        ctx.receivedSpy = sinon.spy();
+        ctx.validationFailedSpy = sinon.spy();
+        ctx.validationSucceedSpy = sinon.spy();
         configWorker.on('change', (config) => ctx.configs.push(config));
+        configWorker.on('received', ctx.receivedSpy);
+        configWorker.on('validationFailed', ctx.validationFailedSpy);
+        configWorker.on('validationSucceed', ctx.validationSucceedSpy);
         return ctx;
     },
 
@@ -365,7 +375,7 @@ const _module = module.exports = {
             ctx[f5level].callsFake((message) => {
                 ctx.messages.all.push(message);
                 ctx.messages[msgLvl].push(message);
-                ctx[f5level].wrappedMethod(message);
+                ctx[f5level].wrappedMethod.call(logger.logger, message);
 
                 if (tsLogsForwarder.logger) {
                     tsLogsForwarder.logger[tsLogsForwarder.levels[f5level]](message);
@@ -473,14 +483,106 @@ const _module = module.exports = {
      * @returns {TracerStubCtx} stub context
      */
     tracer(tracer) {
+        const cwd = process.cwd();
+        const pathMap = {};
+        const volume = new memfs.Volume();
+        const virtualFS = memfs.createFsFromVolume(volume);
+        const promisifiedFS = promisifyNodeFsModule(virtualFS);
+        const emitter = new EventEmitter2();
+        this.eventEmitter(emitter);
+
+        sinon.stub(virtualFS, 'mkdir').callsFake(function (dirPath) {
+            volume.mkdirSync(dirPath, { recursive: true });
+            return virtualFS.mkdir.wrappedMethod.apply(virtualFS, arguments);
+        });
+
+        volume.reset();
+
+        let pendingWrites = 0;
+        emitter.on('dec', () => emitter.emit('change', -1));
+        emitter.on('inc', () => emitter.emit('change', 1));
+        emitter.on('change', (delta) => {
+            pendingWrites += delta;
+            emitter.emit('changed', pendingWrites);
+        });
+
         const ctx = {
-            data: {},
+            create: sinon.stub(tracer, 'create'),
+            fs: virtualFS,
+            promisifiedFS,
+            waitForData() {
+                if (!pendingWrites) {
+                    return Promise.resolve();
+                }
+                return emitter.waitFor('changed', {
+                    filter: (counter) => counter === 0
+                });
+            },
             write: sinon.stub(tracer.Tracer.prototype, 'write')
         };
-        ctx.write.callsFake(function write(data) {
-            ctx.data[this.path] = ctx.data[this.path] || [];
-            ctx.data[this.path].push(data);
-            return Promise.resolve();
+        Object.defineProperties(ctx, {
+            data: {
+                get() {
+                    const virtualPaths = volume.toJSON();
+                    Object.keys(virtualPaths).forEach((absolute) => {
+                        // parse data at first
+                        let data = virtualPaths[absolute];
+                        try {
+                            virtualPaths[absolute] = JSON.parse(data);
+                        } catch (_) {
+                            // do nothing
+                        }
+                        if (pathMap[absolute]) {
+                            data = virtualPaths[absolute];
+                            delete virtualPaths[absolute];
+                            pathMap[absolute].forEach((relative) => {
+                                virtualPaths[relative] = data;
+                            });
+                        }
+                    });
+                    return virtualPaths;
+                }
+            },
+            pendingWrites: {
+                get() { return pendingWrites; }
+            }
+        });
+
+        ctx.create.callsFake((path, options) => {
+            if (!pathUtil.isAbsolute(path)) {
+                const normPath = pathUtil.resolve(
+                    pathUtil.join(cwd, pathUtil.normalize(path))
+                );
+                pathMap[normPath] = pathMap[normPath] || [];
+                pathMap[normPath].push(path);
+            }
+            // - make copy to avoid modifications for origin options
+            // - copy it back to origin options to reflect changes
+            // reason:
+            // - caller POV: want to see all changes and don't want to see virtualFS ref
+            // - Tracer POV: want to keep 'optionsCopy' unmodified
+            const optionsCopy = Object.assign({}, options || {});
+            optionsCopy.fs = promisifiedFS;
+            const inst = ctx.create.wrappedMethod.call(tracer, path, optionsCopy);
+            Object.assign(options || {}, optionsCopy);
+            if (options) {
+                delete options.fs;
+            }
+            return inst;
+        });
+        ctx.write.callsFake(function (data) {
+            emitter.emit('inc');
+            return ctx.write.wrappedMethod.call(this, data)
+                .then(
+                    (ret) => {
+                        emitter.emit('dec');
+                        return Promise.resolve(ret);
+                    },
+                    (err) => {
+                        emitter.emit('dec');
+                        return Promise.reject(err);
+                    }
+                );
         });
         return ctx;
     },
@@ -532,6 +634,9 @@ const _module = module.exports = {
  * @typedef ConfigWorkerStubCtx
  * @type {EventEmitter2Ctx}
  * @property {Array<object>} configs - list of emitted configs
+ * @property {sinon.spy} receivedSpy - spy for 'received' event
+ * @property {sinon.spy} validationFailedSpy - spy for 'validationFailed' event
+ * @property {sinon.spy} validationSucceedSpy - spy for 'validationSucceed' event
  */
 /**
  * @typedef CoreStubCtx
@@ -616,6 +721,9 @@ const _module = module.exports = {
  * @typedef TracerStubCtx
  * @type {object}
  * @property {Object<string, Array<any>>} data - data written to tracers
+ * @property {object} fromConfig - sinon stub for tracer.fromConfig method
+ * @property {number} pendingWrites - number of pending attempts to write data
+ * @property {function} waitForData - wait until all data flushed
  * @property {object} write - sinon stub for Tracer.prototype.write
  */
 /**

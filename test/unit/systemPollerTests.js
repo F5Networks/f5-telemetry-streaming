@@ -28,6 +28,7 @@ const teemReporter = require('../../src/lib/teemReporter');
 const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
 const tracer = require('../../src/lib/utils/tracer');
+const tracerMgr = require('../../src/lib/tracerManager');
 const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -306,7 +307,7 @@ describe('System Poller', () => {
             let pollerTimersBefore;
 
             const registeredTracerPaths = () => {
-                const paths = tracer.registered().map((t) => t.path);
+                const paths = tracerMgr.registered().map((t) => t.path);
                 paths.sort();
                 return paths;
             };
@@ -320,7 +321,7 @@ describe('System Poller', () => {
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.args[0].traceName, 'f5telemetry_default::My_System::SystemPoller_1');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].config.traceName, 'f5telemetry_default::My_System::SystemPoller_1');
-                        assert.lengthOf(tracer.registered(), 1);
+                        assert.lengthOf(tracerMgr.registered(), 1);
                         testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1']);
                         pollerTimersBefore = Object.assign({}, pollerTimers);
                     });
@@ -329,7 +330,7 @@ describe('System Poller', () => {
             it('should stop existing poller(s) when removed from config', () => configWorker.emitAsync('change', { components: [], mappings: {} })
                 .then(() => {
                     assert.deepStrictEqual(pollerTimers, {});
-                    assert.isEmpty(tracer.registered());
+                    assert.isEmpty(tracerMgr.registered());
                     assert.isFalse(pollerTimersBefore['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                 }));
 
@@ -353,7 +354,7 @@ describe('System Poller', () => {
                         path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1',
                         type: 'output'
                     },
-                    tracer: tracer.registered()[0],
+                    tracer: tracerMgr.registered()[0],
                     credentials: {
                         username: undefined,
                         passphrase: undefined
@@ -381,7 +382,7 @@ describe('System Poller', () => {
                 };
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
-                        assert.lengthOf(tracer.registered(), 1);
+                        assert.lengthOf(tracerMgr.registered(), 1);
                         testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1']);
                         assert.deepStrictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].config, expectedPollerConfig);
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
@@ -400,7 +401,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.isEmpty(tracer.registered());
+                        assert.isEmpty(tracerMgr.registered());
                         assert.isFalse(pollerTimersBefore['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });
@@ -415,7 +416,7 @@ describe('System Poller', () => {
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].config.traceName, 'f5telemetry_default::My_System::SystemPoller_1');
-                        assert.lengthOf(tracer.registered(), 1);
+                        assert.lengthOf(tracerMgr.registered(), 1);
                         testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1']);
                     });
             });
@@ -426,7 +427,7 @@ describe('System Poller', () => {
                 return configWorker.processDeclaration(testUtil.deepCopy(newDeclaration))
                     .then(() => {
                         assert.deepStrictEqual(pollerTimers, {});
-                        assert.isEmpty(tracer.registered());
+                        assert.isEmpty(tracerMgr.registered());
                         assert.isFalse(pollerTimersBefore['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
                     });
             });
@@ -441,7 +442,7 @@ describe('System Poller', () => {
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].config.traceName, 'f5telemetry_default::My_System::SystemPoller_1');
-                        assert.lengthOf(tracer.registered(), 1);
+                        assert.lengthOf(tracerMgr.registered(), 1);
                         testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1']);
                     });
             });
@@ -460,7 +461,7 @@ describe('System Poller', () => {
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System_New::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System_New::SystemPoller_1'].timer.intervalInS, 500, 'should set configured interval');
                         assert.strictEqual(pollerTimers['f5telemetry_default::My_System_New::SystemPoller_1'].config.traceName, 'f5telemetry_default::My_System_New::SystemPoller_1');
-                        assert.lengthOf(tracer.registered(), 1);
+                        assert.lengthOf(tracerMgr.registered(), 1);
                         testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1']);
                     });
             });
@@ -520,7 +521,7 @@ describe('System Poller', () => {
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller',
                                         type: 'output'
                                     },
-                                    tracer: tracer.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller/.test(t.path)),
+                                    tracer: tracerMgr.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::My_Poller/.test(t.path)),
                                     credentials: {
                                         username: undefined,
                                         passphrase: undefined
@@ -567,7 +568,7 @@ describe('System Poller', () => {
                                         type: 'output'
                                     },
                                     systemName: 'My_System_New',
-                                    tracer: tracer.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::SystemPoller_1/.test(t.path)),
+                                    tracer: tracerMgr.registered().find((t) => /Telemetry_System_Poller.f5telemetry_default::My_System_New::SystemPoller_1/.test(t.path)),
                                     traceName: 'f5telemetry_default::My_System_New::SystemPoller_1',
                                     credentials: {
                                         username: undefined,
@@ -670,7 +671,7 @@ describe('System Poller', () => {
                                         path: '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_System::SystemPoller_1',
                                         type: 'output'
                                     },
-                                    tracer: tracer.registered()[0],
+                                    tracer: tracerMgr.registered()[0],
                                     credentials: {
                                         username: undefined,
                                         passphrase: undefined

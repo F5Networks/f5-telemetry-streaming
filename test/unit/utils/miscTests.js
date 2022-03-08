@@ -197,7 +197,7 @@ describe('Misc Util', () => {
         });
     });
 
-    describe('.parseJsonWithDuplicatekeys()', () => {
+    describe('.parseJsonWithDuplicateKeys()', () => {
         it('should parse JSON string without duplicate keys', () => {
             const input = JSON.stringify({
                 singleValue: 'value',
@@ -217,7 +217,7 @@ describe('Misc Util', () => {
                 ]
             });
             const expectedOutput = util.copy(JSON.parse(input));
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), expectedOutput);
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), expectedOutput);
         });
 
         it('should parse JSON string with duplicate keys (values = strings)', () => {
@@ -228,7 +228,7 @@ describe('Misc Util', () => {
                 },
                 "dupKey": "value2"
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 dupKey: [
                     'value',
                     'value2'
@@ -248,7 +248,7 @@ describe('Misc Util', () => {
                     "why": "should support objects too"
                 }
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 dupKey: [
                     { key1: 'value1' },
                     { why: 'should support objects too' }
@@ -261,7 +261,7 @@ describe('Misc Util', () => {
                 "dupKey": [1, 2, 3],
                 "dupKey": ["one", "two", "three"]
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 dupKey: [1, 2, 3, 'one', 'two', 'three']
             });
         });
@@ -271,7 +271,7 @@ describe('Misc Util', () => {
                 "dupKey": "just a string value",
                 "dupKey": [1, 2, 3]
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 dupKey: ['just a string value', 1, 2, 3]
             });
         });
@@ -284,7 +284,7 @@ describe('Misc Util', () => {
                     "key2": "value2"
                 }
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 dupKey: [1, 2, 3, {
                     key1: 'value1',
                     key2: 'value2'
@@ -359,7 +359,7 @@ describe('Misc Util', () => {
                     }
                 }
             }`;
-            assert.deepStrictEqual(util.parseJsonWithDuplicatekeys(input), {
+            assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 kind: 'tm:sys:performance:throughput:throughputstats',
                 selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4.2',
                 entries: {
@@ -833,7 +833,7 @@ describe('Misc Util', () => {
         });
     });
 
-    describe('.maskDefaultSecrets', () => {
+    describe('.maskJSONStringDefaultSecrets', () => {
         const mask = '*********';
         const defaultData = {
             someSecretData: {
@@ -881,12 +881,12 @@ describe('Misc Util', () => {
         describe('pure JSON data', () => {
             it('should mask secrets (without new lines)', () => {
                 const expected = `this contains secrets: ${jsonOneLine(defaultMaskedData)}`;
-                const masked = util.maskDefaultSecrets(`this contains secrets: ${jsonOneLine(defaultData)}`);
+                const masked = util.maskJSONStringDefaultSecrets(`this contains secrets: ${jsonOneLine(defaultData)}`);
                 assert.deepStrictEqual(masked, expected, 'should mask secrets');
-                assert.deepStrictEqual(util.maskDefaultSecrets(masked), expected, 'should keep message the same when secrets masked already');
+                assert.deepStrictEqual(util.maskJSONStringDefaultSecrets(masked), expected, 'should keep message the same when secrets masked already');
 
                 assert.deepStrictEqual(
-                    JSON.parse(util.maskDefaultSecrets(jsonOneLine(defaultData))),
+                    JSON.parse(util.maskJSONStringDefaultSecrets(jsonOneLine(defaultData))),
                     defaultMaskedData,
                     'should be able to parse JSON with masked data'
                 );
@@ -894,12 +894,12 @@ describe('Misc Util', () => {
 
             it('should mask secrets (with new lines)', () => {
                 const expected = `this contains secrets: ${jsonBeauty(defaultMaskedData)}`;
-                const masked = util.maskDefaultSecrets(`this contains secrets: ${jsonBeauty(defaultData)}`);
+                const masked = util.maskJSONStringDefaultSecrets(`this contains secrets: ${jsonBeauty(defaultData)}`);
                 assert.deepStrictEqual(masked, expected, 'should mask secrets');
-                assert.deepStrictEqual(util.maskDefaultSecrets(masked), expected, 'should keep message the same when secrets masked already');
+                assert.deepStrictEqual(util.maskJSONStringDefaultSecrets(masked), expected, 'should keep message the same when secrets masked already');
 
                 assert.deepStrictEqual(
-                    JSON.parse(util.maskDefaultSecrets(jsonBeauty(defaultData))),
+                    JSON.parse(util.maskJSONStringDefaultSecrets(jsonBeauty(defaultData))),
                     defaultMaskedData,
                     'should be able to parse JSON with masked data'
                 );
@@ -912,13 +912,13 @@ describe('Misc Util', () => {
                 let expectedMsg = jsonBeauty(jsonBeauty(defaultMaskedData));
                 for (let i = 0; i < 10; i += 1) {
                     decl = jsonBeauty(decl);
-                    const masked = util.maskDefaultSecrets(`this contains secrets: ${decl}`);
+                    const masked = util.maskJSONStringDefaultSecrets(`this contains secrets: ${decl}`);
                     assert.include(
                         masked,
                         `this contains secrets: ${expectedMsg}`,
                         `should mask secret event after ${i + 1} serialization(s)`
                     );
-                    assert.include(util.maskDefaultSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
+                    assert.include(util.maskJSONStringDefaultSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
                     expectedMsg = jsonBeauty(expectedMsg);
                 }
             });
@@ -928,16 +928,71 @@ describe('Misc Util', () => {
                 let expectedMsg = jsonOneLine(jsonOneLine(defaultMaskedData));
                 for (let i = 0; i < 10; i += 1) {
                     decl = jsonOneLine(decl);
-                    const masked = util.maskDefaultSecrets(`this contains secrets: ${decl}`);
+                    const masked = util.maskJSONStringDefaultSecrets(`this contains secrets: ${decl}`);
                     assert.include(
                         masked,
                         `this contains secrets: ${expectedMsg}`,
                         `should mask secret event after ${i + 1} serialization(s)`
                     );
-                    assert.include(util.maskDefaultSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
+                    assert.include(util.maskJSONStringDefaultSecrets(masked), expectedMsg, 'should keep message the same when secrets masked already');
                     expectedMsg = jsonOneLine(expectedMsg);
                 }
             });
+        });
+    });
+
+    describe('.maskJSONObjectDefaultSecrets', () => {
+        const mask = '*********';
+        const defaultData = {
+            someSecretData: {
+                cipherText: 'test_passphrase_1'
+            },
+            someSecretData_2: {
+                passphrase: 'test_passphrase_2'
+            },
+            someSecretData_3: {
+                nestedData: {
+                    passphrase: {
+                        cipherText: 'test_passphrase_3'
+                    }
+                }
+            },
+            someSecretData_4: {
+                nestedData: {
+                    passphrase: 'test_passphrase_4'
+                }
+            }
+        };
+        const defaultMaskedData = {
+            someSecretData: {
+                cipherText: mask
+            },
+            someSecretData_2: {
+                passphrase: mask
+            },
+            someSecretData_3: {
+                nestedData: {
+                    passphrase: mask
+                }
+            },
+            someSecretData_4: {
+                nestedData: {
+                    passphrase: mask
+                }
+            }
+        };
+
+        it('should mask secrets in JSON data', () => {
+            const masked = util.maskJSONObjectDefaultSecrets(util.deepCopy(defaultData));
+            assert.deepStrictEqual(masked, defaultMaskedData, 'should mask secrets');
+        });
+
+        it('should not break circular refs by default', () => {
+            const root = util.deepCopy(defaultData);
+            root.someSecretData_3.ref = root;
+
+            const masked = util.maskJSONObjectDefaultSecrets(root);
+            assert.isTrue(masked === masked.someSecretData_3.ref, 'should not break circular ref');
         });
     });
 
@@ -960,8 +1015,34 @@ describe('Misc Util', () => {
         });
     });
 
-    describe('.createJsonSecretsMaskFunc', () => {
+    describe('.createJSONStringSecretsMaskFunc', () => {
         const mask = '*********';
+        const badDataExample = [{
+            data: {
+                timeSeries: [{
+                    metric: {
+                        secretString: 'custom.googleapis.com/system/tmmCpu'
+                    },
+                    points: [{
+                        value: {
+                            int64Value: 10
+                        },
+                        interval: {
+                            endTime: {}
+                        }
+                    }],
+                    resource: {
+                        type: 'generic_node',
+                        labels: {
+                            namespace: 'localhost.localdomain',
+                            node_id: '00000000-0000-0000-0000-000000000000',
+                            location: 'global'
+                        }
+                    }
+                }]
+            },
+            timestamp: '1970-01-01T01:00:00.000Z'
+        }];
         const defaultData = {
             doNotTouch: 'ok',
             someSecretData: {
@@ -1020,7 +1101,7 @@ describe('Misc Util', () => {
         let maskFn;
 
         beforeEach(() => {
-            maskFn = util.createJsonSecretsMaskFunc([
+            maskFn = util.createJSONStringSecretsMaskFunc([
                 'secretArray',
                 'secretFalse',
                 'secretNull',
@@ -1031,21 +1112,21 @@ describe('Misc Util', () => {
         });
 
         it('should do nothing when no properties provided', () => {
-            const emptyMaskFn = util.createJsonSecretsMaskFunc([]);
+            const emptyMaskFn = util.createJSONStringSecretsMaskFunc([]);
             const ret = emptyMaskFn(jsonOneLine({ key: 'val' }));
             assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 secrets');
             assert.deepStrictEqual(ret, '{"key":"val"}', 'should do nothing');
         });
 
         it('should use non-default mask', () => {
-            const myMaskFn = util.createJsonSecretsMaskFunc(['secret'], 'test_passphrase_1');
+            const myMaskFn = util.createJSONStringSecretsMaskFunc(['secret'], 'test_passphrase_1');
             const ret = myMaskFn(jsonOneLine({ secret: 'val' }));
             assert.deepStrictEqual(myMaskFn.matchesFound, 1, 'should replace 1 secrets');
             assert.deepStrictEqual(ret, '{"secret":"test_passphrase_1"}', 'should use non-default mask');
         });
 
         it('should use empty string as  non-default mask', () => {
-            const myMaskFn = util.createJsonSecretsMaskFunc(['secret'], '');
+            const myMaskFn = util.createJSONStringSecretsMaskFunc(['secret'], '');
             const ret = myMaskFn(jsonOneLine({ secret: 'val' }));
             assert.deepStrictEqual(myMaskFn.matchesFound, 1, 'should replace 1 secrets');
             assert.deepStrictEqual(ret, '{"secret":""}', 'should use non-default mask');
@@ -1100,6 +1181,16 @@ describe('Misc Util', () => {
                 );
                 assert.deepStrictEqual(maskFn.matchesFound, 11, 'should replace 11 secrets');
             });
+
+            it('should not fail with catastrophic backtracking issue (without new lines)', () => {
+                maskFn(`this contains secrets: ${jsonOneLine(badDataExample)}`);
+                assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 secret');
+            });
+
+            it('should not fail with catastrophic backtracking issue (with new lines)', () => {
+                maskFn(`this contains secrets: ${jsonBeauty(badDataExample)}`);
+                assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 secret');
+            });
         });
 
         describe('escaped JSON data', () => {
@@ -1138,6 +1229,752 @@ describe('Misc Util', () => {
                     expectedMsg = jsonOneLine(expectedMsg);
                 }
             });
+
+            it('should not fail with catastrophic backtracking issue (without new lines)', () => {
+                maskFn(`this contains secrets: ${jsonOneLine(jsonOneLine(badDataExample))}`);
+                assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 secret');
+            });
+
+            it('should not fail with catastrophic backtracking issue (with new lines)', () => {
+                maskFn(`this contains secrets: ${jsonBeauty(jsonBeauty(badDataExample))}`);
+                assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 secret');
+            });
+        });
+    });
+
+    describe('.createJSONObjectSecretsMaskFunc', () => {
+        const mask = '*********';
+        const defaultData = {
+            secretArray: [],
+            secretFalse: false,
+            secretNull: null,
+            secretNumber: 10,
+            secretString: 'test',
+            secretTrue: true,
+            secretEmptyObject: {},
+            secretObject: {
+                null: null
+            },
+            nestedData: {
+                secretArray: [
+                    'data',
+                    10,
+                    null,
+                    false
+                ],
+                nestedData: [
+                    {
+                        secretArray: [
+                            'data',
+                            10,
+                            null,
+                            false,
+                            {
+                                secretFalse: false
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+        const defaultMaskedData = {
+            secretArray: mask,
+            secretFalse: mask,
+            secretNull: mask,
+            secretNumber: mask,
+            secretString: mask,
+            secretTrue: mask,
+            secretEmptyObject: mask,
+            secretObject: mask,
+            nestedData: {
+                secretArray: mask,
+                nestedData: [
+                    {
+                        secretArray: [
+                            'data',
+                            10,
+                            null,
+                            false,
+                            {
+                                secretFalse: mask
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        it('should do nothing when data is not array/object', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc(['prop']);
+            assert.deepStrictEqual(maskFn({ prop: 'value' }), { prop: mask }, 'should mask data');
+            assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
+
+            assert.deepStrictEqual(maskFn(true), true, 'should do nothing with boolean');
+            assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 matches');
+
+            assert.deepStrictEqual(maskFn(false), false, 'should do nothing with boolean');
+            assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 matches');
+
+            assert.deepStrictEqual(maskFn(null), null, 'should do nothing with null');
+            assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 matches');
+
+            assert.deepStrictEqual(maskFn('string'), 'string', 'should do nothing with string');
+            assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 matches');
+
+            assert.deepStrictEqual(maskFn(10), 10, 'should do nothing with number');
+            assert.deepStrictEqual(maskFn.matchesFound, 0, 'should replace 0 matches');
+        });
+
+        it('should accept all 3 params', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], {
+                mask: 'mask',
+                maxDepth: 2
+            });
+            const ret = maskFn({
+                secretData: 'someValue',
+                nestedData: {
+                    nestedData: {
+                        secretData: 'someValue'
+                    }
+                }
+            });
+            assert.deepStrictEqual(ret, {
+                secretData: 'mask',
+                nestedData: {
+                    nestedData: {
+                        secretData: 'someValue'
+                    }
+                }
+            }, 'should replace data with custom mask');
+            assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
+        });
+
+        it('should mask secrets using custom mask', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], { mask: 'mask' });
+            const ret = maskFn({ secretData: 'someValue' });
+            assert.deepStrictEqual(ret, { secretData: 'mask' }, 'should replace data with custom mask');
+            assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
+        });
+
+        it('should mask secrets using default mask (object)', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc([
+                'secretArray',
+                'secretFalse',
+                'secretNull',
+                'secretNumber',
+                'secretString',
+                'secretTrue',
+                'secretEmptyObject',
+                'secretObject'
+            ]);
+            const ret = maskFn(util.deepCopy(defaultData));
+            assert.deepStrictEqual(ret, defaultMaskedData, 'should replace data with mask');
+            assert.deepStrictEqual(maskFn.matchesFound, 10, 'should replace 10 matches');
+        });
+
+        it('should mask secrets using default mask (array)', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc([
+                'secretArray',
+                'secretFalse',
+                'secretNull',
+                'secretNumber',
+                'secretString',
+                'secretTrue',
+                'secretEmptyObject',
+                'secretObject'
+            ]);
+            const ret = maskFn([util.deepCopy(defaultData)]);
+            assert.deepStrictEqual(ret, [defaultMaskedData], 'should replace data with mask');
+            assert.deepStrictEqual(maskFn.matchesFound, 10, 'should replace 10 matches');
+        });
+
+        it('should respect maxDepth (object)', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc([
+                'secretArray',
+                'secretFalse',
+                'secretNull',
+                'secretNumber',
+                'secretString',
+                'secretTrue',
+                'secretEmptyObject',
+                'secretObject'
+            ], {
+                maxDepth: 2
+            });
+            const ret = maskFn(util.deepCopy(defaultData));
+            assert.deepStrictEqual(ret, {
+                secretArray: mask,
+                secretFalse: mask,
+                secretNull: mask,
+                secretNumber: mask,
+                secretString: mask,
+                secretTrue: mask,
+                secretEmptyObject: mask,
+                secretObject: mask,
+                nestedData: {
+                    secretArray: mask,
+                    nestedData: [
+                        {
+                            secretArray: [
+                                'data',
+                                10,
+                                null,
+                                false,
+                                {
+                                    secretFalse: false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }, 'should respect maxDepth');
+            assert.deepStrictEqual(maskFn.matchesFound, 9, 'should replace 9 matches');
+        });
+
+        it('should respect maxDepth (array)', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc([
+                'secretArray',
+                'secretFalse',
+                'secretNull',
+                'secretNumber',
+                'secretString',
+                'secretTrue',
+                'secretEmptyObject',
+                'secretObject'
+            ], {
+                maxDepth: 2
+            });
+            const ret = maskFn([util.deepCopy(defaultData)]);
+            assert.deepStrictEqual(ret, [{
+                secretArray: mask,
+                secretFalse: mask,
+                secretNull: mask,
+                secretNumber: mask,
+                secretString: mask,
+                secretTrue: mask,
+                secretEmptyObject: mask,
+                secretObject: mask,
+                nestedData: {
+                    secretArray: [
+                        'data',
+                        10,
+                        null,
+                        false
+                    ],
+                    nestedData: [
+                        {
+                            secretArray: [
+                                'data',
+                                10,
+                                null,
+                                false,
+                                {
+                                    secretFalse: false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }], 'should respect maxDepth');
+            assert.deepStrictEqual(maskFn.matchesFound, 8, 'should replace 8 matches');
+        });
+
+        it('should override origin options', () => {
+            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], {
+                mask: 'mask',
+                maxDepth: 1,
+                breakCircularRef: false
+            });
+            const root = {
+                level1: {
+                    level2: {
+                        level3: {
+                            secretData: 'test'
+                        }
+                    }
+                }
+            };
+            root.level1.ref = root;
+
+            const ret = maskFn(root, {
+                mask: 'myMask',
+                maxDepth: 0,
+                breakCircularRef: 'circular-ref'
+            });
+            assert.deepStrictEqual(ret, {
+                level1: {
+                    ref: 'circular-ref',
+                    level2: {
+                        level3: {
+                            secretData: 'myMask'
+                        }
+                    }
+                }
+            }, 'should replace data using custom options');
+            assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
+        });
+    });
+
+    describe('.traverseJSON', () => {
+        const rootObject = {
+            array: [
+                10,
+                20,
+                {
+                    array: [
+                        {
+                            string: 'string',
+                            number: 10
+                        },
+                        [10],
+                        {
+                            boolean: true
+                        }
+                    ]
+                }
+            ],
+            object: {
+                string: 'string',
+                nested: {
+                    float: 10.10
+                }
+            }
+        };
+        const rootArray = [
+            [
+                10,
+                20,
+                {
+                    array: [
+                        {
+                            string: 'string',
+                            number: 10
+                        },
+                        [10],
+                        {
+                            boolean: true
+                        }
+                    ]
+                }
+            ],
+            {
+                string: 'string',
+                nested: {
+                    float: 10.10
+                }
+            }
+        ];
+
+        it('number of arguments', () => {
+            const testObj = { level1: { level2: 10 } };
+            util.traverseJSON(testObj, function () {
+                assert.lengthOf(arguments, 2, 'should pass 2 arguments when no callback params specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent) {
+                assert.lengthOf(arguments, 2, 'should pass 2 arguments when 1 param specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent, key) {
+                assert.lengthOf(arguments, 2, 'should pass 2 arguments when 2 param specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent, key, depth) {
+                assert.lengthOf(arguments, 3, 'should pass 3 arguments when 3 param specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent, key, depth, stop) {
+                assert.lengthOf(arguments, 4, 'should pass 4 arguments when 4 param specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent, key, depth, stop, path) {
+                assert.lengthOf(arguments, 5, 'should pass 5 arguments when 5 param specified');
+            });
+            // eslint-disable-next-line no-unused-vars
+            util.traverseJSON(testObj, function (parent, key, depth, stop, path, unknownArg) {
+                assert.lengthOf(arguments, 5, 'should pass 5 arguments when 6 param specified');
+            });
+        });
+
+        it('should be able to process 10_000 nested objects', () => {
+            const maxDepth = 10000;
+            const root = {};
+            let current = root;
+            for (let i = 0; i < maxDepth; i += 1) {
+                current.level = i;
+                current.next = {};
+                current = current.next;
+            }
+
+            const actualLevels = [];
+            util.traverseJSON(root, (parent, key) => {
+                if (key === 'level') {
+                    actualLevels.push(parent.level);
+                }
+            });
+            assert.lengthOf(actualLevels, maxDepth, 'should traverse all nested objects');
+            for (let i = 0; i < maxDepth; i += 1) {
+                assert.deepStrictEqual(actualLevels[i], i, 'should traverse object in expected order');
+            }
+        });
+
+        it('should be able to process 10_000 nested arrays', () => {
+            const maxDepth = 10000;
+            const root = [];
+            let current = root;
+            for (let i = 0; i < maxDepth; i += 1) {
+                current.push(i);
+                current.push([]);
+                current = current[current.length - 1];
+            }
+
+            const actualLevels = [];
+            util.traverseJSON(root, (parent, key) => {
+                if (key === 0) {
+                    actualLevels.push(parent[key]);
+                }
+            });
+            assert.lengthOf(actualLevels, maxDepth, 'should traverse all nested arrays');
+            for (let i = 0; i < maxDepth; i += 1) {
+                assert.deepStrictEqual(actualLevels[i], i, 'should traverse object in expected order');
+            }
+        });
+
+        it('should traverse mixed data (root - object)', () => {
+            const root = util.deepCopy(rootObject);
+            const actualHistory = [];
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 'array', root.array, 1],
+                [['array'], 0, 10, 2],
+                [['array'], 1, 20, 2],
+                [['array'], 2, root.array[2], 2],
+                [['array', 2], 'array', root.array[2].array, 3],
+                [['array', 2, 'array'], 0, root.array[2].array[0], 4],
+                [['array', 2, 'array', 0], 'string', 'string', 5],
+                [['array', 2, 'array', 0], 'number', 10, 5],
+                [['array', 2, 'array'], 1, [10], 4],
+                [['array', 2, 'array', 1], 0, 10, 5],
+                [['array', 2, 'array'], 2, root.array[2].array[2], 4],
+                [['array', 2, 'array', 2], 'boolean', true, 5],
+                [[], 'object', root.object, 1],
+                [['object'], 'string', 'string', 2],
+                [['object'], 'nested', root.object.nested, 2],
+                [['object', 'nested'], 'float', 10.10, 3]
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse all objects');
+            assert.deepStrictEqual(root, rootObject, 'should not modify original object');
+        });
+
+        it('should traverse mixed data (root - array)', () => {
+            const root = util.deepCopy(rootArray);
+            const actualHistory = [];
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 0, root[0], 1],
+                [[0], 0, 10, 2],
+                [[0], 1, 20, 2],
+                [[0], 2, root[0][2], 2],
+                [[0, 2], 'array', root[0][2].array, 3],
+                [[0, 2, 'array'], 0, root[0][2].array[0], 4],
+                [[0, 2, 'array', 0], 'string', 'string', 5],
+                [[0, 2, 'array', 0], 'number', 10, 5],
+                [[0, 2, 'array'], 1, [10], 4],
+                [[0, 2, 'array', 1], 0, 10, 5],
+                [[0, 2, 'array'], 2, root[0][2].array[2], 4],
+                [[0, 2, 'array', 2], 'boolean', true, 5],
+                [[], 1, root[1], 1],
+                [[1], 'string', 'string', 2],
+                [[1], 'nested', root[1].nested, 2],
+                [[1, 'nested'], 'float', 10.10, 3]
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse all objects');
+            assert.deepStrictEqual(root, rootArray, 'should not modify original object');
+        });
+
+        it('should stop execution when requested', () => {
+            const root = {
+                level1: {
+                    level2: {
+                        level3: true
+                    }
+                }
+            };
+            const actualHistory = [];
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key]);
+                if (key === 'level2') {
+                    stop();
+                }
+            });
+
+            const expectedHistory = [
+                // path, key
+                [[], 'level1'],
+                [['level1'], 'level2']
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+        });
+
+        it('should not inspect nested data when requested', () => {
+            const root = {
+                level1_a: {
+                    level2_a_stop: {
+                        level3_a: {
+                            level4: true
+                        }
+                    },
+                    level2_b: {
+                        level3: false
+                    }
+                },
+                level1_b: {
+                    level2_a: {
+                        level3: true
+                    },
+                    level2_b: {
+                        level3: false
+                    }
+                }
+            };
+            const actualHistory = [];
+            // eslint-disable-next-line consistent-return
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key]);
+                if (key === 'level2_a_stop') {
+                    return false;
+                }
+            });
+
+            const expectedHistory = [
+                // path, key
+                [[], 'level1_a'],
+                [['level1_a'], 'level2_a_stop'],
+                [['level1_a'], 'level2_b'],
+                [['level1_a', 'level2_b'], 'level3'],
+                [[], 'level1_b'],
+                [['level1_b'], 'level2_a'],
+                [['level1_b', 'level2_a'], 'level3'],
+                [['level1_b'], 'level2_b'],
+                [['level1_b', 'level2_b'], 'level3']
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+        });
+
+        it('should handle circular references', () => {
+            const root = util.deepCopy(rootObject);
+            root.object.nested.circular = root;
+            const actualHistory = [];
+
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 'array', root.array, 1],
+                [['array'], 0, 10, 2],
+                [['array'], 1, 20, 2],
+                [['array'], 2, root.array[2], 2],
+                [['array', 2], 'array', root.array[2].array, 3],
+                [['array', 2, 'array'], 0, root.array[2].array[0], 4],
+                [['array', 2, 'array', 0], 'string', 'string', 5],
+                [['array', 2, 'array', 0], 'number', 10, 5],
+                [['array', 2, 'array'], 1, [10], 4],
+                [['array', 2, 'array', 1], 0, 10, 5],
+                [['array', 2, 'array'], 2, root.array[2].array[2], 4],
+                [['array', 2, 'array', 2], 'boolean', true, 5],
+                [[], 'object', root.object, 1],
+                [['object'], 'string', 'string', 2],
+                [['object'], 'nested', root.object.nested, 2],
+                [['object', 'nested'], 'float', 10.10, 3],
+                [['object', 'nested'], 'circular', root, 3] // assert should be able to handle circular refs
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse all objects');
+        });
+
+        it('should break circular references (in objects, boolean value)', () => {
+            const root = {
+                level1: {}
+            };
+            root.level1.circularRef = root;
+
+            const actualHistory = [];
+            util.traverseJSON(root, { breakCircularRef: true }, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key]);
+            });
+
+            const expectedHistory = [
+                // path, key
+                [[], 'level1'],
+                [['level1'], 'circularRef']
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+            assert.deepStrictEqual(root, {
+                level1: {
+                    circularRef: true
+                }
+            }, 'should break circular ref');
+        });
+
+        it('should break circular references (in objects, complex value)', () => {
+            const root = {
+                level1: {}
+            };
+            root.level1.circularRef = root;
+
+            const actualHistory = [];
+            util.traverseJSON(root, { breakCircularRef: { refBreak: true } }, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key]);
+            });
+
+            const expectedHistory = [
+                // path, key
+                [[], 'level1'],
+                [['level1'], 'circularRef']
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+            assert.deepStrictEqual(root, {
+                level1: {
+                    circularRef: { refBreak: true }
+                }
+            }, 'should break circular ref');
+        });
+
+        it('should break circular references (no callback)', () => {
+            const root = {
+                level1: {}
+            };
+            root.level1.circularRef = root;
+            util.traverseJSON(root, { breakCircularRef: true });
+            assert.deepStrictEqual(root, {
+                level1: {
+                    circularRef: true
+                }
+            }, 'should break circular ref');
+        });
+
+        it('should respect maxDepth', () => {
+            const root = util.deepCopy(rootObject);
+            root.object.nested.circular = root;
+
+            const actualHistory = [];
+            util.traverseJSON(root, { maxDepth: 2 }, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 'array', root.array, 1],
+                [['array'], 0, 10, 2],
+                [['array'], 1, 20, 2],
+                [['array'], 2, root.array[2], 2],
+                [[], 'object', root.object, 1],
+                [['object'], 'string', 'string', 2],
+                [['object'], 'nested', root.object.nested, 2]
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+        });
+
+        it('should respect maxDepth (arrays)', () => {
+            const root = [[[[[[[[]]]]]]]];
+
+            const actualHistory = [];
+            util.traverseJSON(root, { maxDepth: 2 }, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 0, root[0], 1],
+                [[0], 0, root[0][0], 2]
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+        });
+
+        it('should allow to swap options and callback', () => {
+            const root = [[[[[[[[]]]]]]]];
+
+            const actualHistory = [];
+            util.traverseJSON(root, (parent, key, depth, stop, path) => {
+                actualHistory.push([path, key, parent[key], depth]);
+            }, { maxDepth: 2 });
+
+            const expectedHistory = [
+                // path, key, value, depth
+                [[], 0, root[0], 1],
+                [[0], 0, root[0][0], 2]
+            ];
+            assert.sameDeepMembers(actualHistory, expectedHistory, 'should traverse expected objects only');
+        });
+
+        it('should do nothing when root object is empty array', () => {
+            const spy = sinon.spy();
+            util.traverseJSON([], spy);
+            assert.isFalse(spy.called, 'should not call callback');
+        });
+
+        it('should do nothing when root object is primitive', () => {
+            const primitives = [
+                0,
+                'string',
+                true,
+                undefined,
+                null
+            ];
+            const spy = sinon.spy();
+            primitives.forEach((primitive) => util.traverseJSON(primitive, spy));
+            assert.isFalse(spy.called, 'should not call callback');
+        });
+    });
+
+    describe('.proxyForNodeCallbackFuncs', () => {
+        it('should wrap origin function into promise-based function', () => {
+            const successFunc = (a, b, cb) => {
+                assert.deepStrictEqual(a, 10, 'should pass expected arg');
+                assert.deepStrictEqual(b, 20, 'should pass expected arg');
+                assert.isFunction(cb, 'should pass expected arg');
+                cb(null, a + b);
+            };
+            const promisified = util.proxyForNodeCallbackFuncs({ successFunc }, 'successFunc');
+            return assert.becomes(promisified(10, 20), [30], 'should resolve with expected value');
+        });
+
+        it('should reject when callback received error as first arg', () => {
+            const funcWithError = (a, b, cb) => {
+                assert.deepStrictEqual(a, 10, 'should pass expected arg');
+                assert.deepStrictEqual(b, 20, 'should pass expected arg');
+                assert.isFunction(cb, 'should pass expected arg');
+                cb(new Error('expected error'), a + b);
+            };
+            const promisified = util.proxyForNodeCallbackFuncs({ funcWithError }, 'funcWithError');
+            return assert.isRejected(promisified(10, 20), /expected error/, 'should reject on error');
+        });
+    });
+
+    describe('.onApplicationExit', () => {
+        afterEach(() => {
+            sinon.restore();
+        });
+
+        it('should register callback', () => {
+            const stub = sinon.stub(process, 'on');
+            stub.callsFake();
+
+            util.onApplicationExit(() => {});
+            assert.sameDeepMembers(
+                stub.args.map((args) => args[0]),
+                ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'],
+                'should register callback'
+            );
         });
     });
 });

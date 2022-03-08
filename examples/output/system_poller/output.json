@@ -391,6 +391,13 @@
                 "max": 0,
                 "name": "sslTps"
             }
+        },
+        "asmAttackSignatures": {
+            "ff8080817a3a4908017a3a490958000e": {
+                "filename": "ASM-AttackSignatures_20190716_122131.im",
+                "createDateTime": 1563279691000,
+                "name": "ff8080817a3a4908017a3a490958000e"
+            }
         }
     },
     "virtualServers": {

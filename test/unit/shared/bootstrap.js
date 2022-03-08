@@ -8,7 +8,12 @@
 
 'use strict';
 
+const values = require('object.values');
 require('./restoreCache');
+
+if (!Object.values) {
+    values.shim();
+}
 
 /* eslint-disable no-console */
 

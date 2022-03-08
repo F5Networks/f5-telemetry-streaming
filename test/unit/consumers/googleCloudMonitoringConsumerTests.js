@@ -23,6 +23,7 @@ const stubs = require('../shared/stubs');
 const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
 const tracer = require('../../../src/lib/utils/tracer');
+const tracerMgr = require('../../../src/lib/tracerManager');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -162,14 +163,15 @@ describe('Google_Cloud_Monitoring', () => {
 
         context = testUtil.deepCopy(originContext);
         context.logger = logger.getChild('gcm');
-        context.tracer = tracer.fromConfig({ path: 'gcm' });
+        context.tracer = tracerMgr.fromConfig({ path: 'gcm' });
     });
 
-    afterEach(() => {
-        testUtil.checkNockActiveMocks(nock);
-        nock.cleanAll();
-        sinon.restore();
-    });
+    afterEach(() => tracerMgr.unregisterAll()
+        .then(() => {
+            testUtil.checkNockActiveMocks(nock);
+            nock.cleanAll();
+            sinon.restore();
+        }));
 
     it('should do nothing when data is not systemInfo', () => {
         context = {
@@ -212,8 +214,9 @@ describe('Google_Cloud_Monitoring', () => {
             .reply(200, {});
 
         return cloudMonitoringIndex(context)
+            .then(() => tracerStub.waitForData())
             .then(() => {
-                assert.deepStrictEqual(tracerStub.data.gcm, [getOriginTimeSeries()], 'should write data to tracer');
+                assert.deepStrictEqual(tracerStub.data.gcm[0].data, getOriginTimeSeries(), 'should write data to tracer');
                 testAssert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] success', 'should log success message');
             });
     });
@@ -354,10 +357,10 @@ describe('Google_Cloud_Monitoring', () => {
                 return cloudMonitoringIndex(context);
             })
             .then(() => {
-                assert.deepStrictEqual(
-                    loggerStub.messages.all,
-                    Array(3).fill('[telemetry.gcm] success'),
-                    'should log success message'
+                assert.lengthOf(
+                    loggerStub.messages.all.filter((r) => r === '[telemetry.gcm] success'),
+                    3,
+                    'should log success messages'
                 );
             });
     });
@@ -436,10 +439,10 @@ describe('Google_Cloud_Monitoring', () => {
             .then(() => cloudMonitoringIndex(context2))
             .then(() => cloudMonitoringIndex(context1))
             .then(() => cloudMonitoringIndex(context2))
-            .then(() => assert.deepStrictEqual(
-                loggerStub.messages.all,
-                Array(4).fill('[telemetry.gcm] success'),
-                'should log success message'
+            .then(() => assert.lengthOf(
+                loggerStub.messages.all.filter((r) => r === '[telemetry.gcm] success'),
+                4,
+                'should log success messages'
             ));
     });
 

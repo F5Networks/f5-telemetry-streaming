@@ -30,6 +30,7 @@ function MockRestOperation(opts) {
     this.method = opts.method || 'GET';
     this.contentType = opts.contentType || '';
     this.body = opts.body;
+    this.headers = opts.headers || null; // according to origin class in restnoded
     this.statusCode = null;
     this.uri = {};
     this.uri.pathname = opts.uri;
@@ -38,6 +39,8 @@ MockRestOperation.prototype.getBody = function () { return this.body; };
 MockRestOperation.prototype.setBody = function (body) { this.body = body; };
 MockRestOperation.prototype.getContentType = function () { return this.contentType; };
 MockRestOperation.prototype.setContentType = function (ct) { this.contentType = ct; };
+MockRestOperation.prototype.getHeaders = function () { return this.headers; };
+MockRestOperation.prototype.setHeaders = function (headers) { this.headers = headers; };
 MockRestOperation.prototype.getMethod = function () { return this.method; };
 MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
 MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };

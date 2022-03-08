@@ -9,15 +9,17 @@
 'use strict';
 
 const path = require('path');
+
 const logger = require('./logger');
 const util = require('./utils/misc');
-const tracers = require('./utils/tracer');
+const tracerMgr = require('./tracerManager');
 const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
 const metadataUtil = require('./utils/metadata');
 const constants = require('./constants');
 const configWorker = require('./config');
 const configUtil = require('./utils/config');
 const DataFilter = require('./dataFilter').DataFilter;
+const promiseUtil = require('./utils/promise');
 
 const CONSUMERS_DIR = '../consumers';
 let CONSUMERS = [];
@@ -69,7 +71,7 @@ function loadConsumers(config) {
                     id: consumerConfig.id,
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
-                    tracer: tracers.fromConfig(consumerConfig.trace),
+                    tracer: tracerMgr.fromConfig(consumerConfig.trace),
                     filter: new DataFilter(consumerConfig)
                 };
                 consumer.config.allowSelfSignedCert = consumer.config.allowSelfSignedCert === undefined
@@ -85,8 +87,8 @@ function loadConsumers(config) {
             }
         }
     }));
-    return Promise.all(loadPromises)
-        .then((loadedConsumers) => loadedConsumers.filter((c) => c !== undefined));
+    return promiseUtil.allSettled(loadPromises)
+        .then((results) => promiseUtil.getValues(results).filter((c) => c !== undefined));
 }
 
 /**

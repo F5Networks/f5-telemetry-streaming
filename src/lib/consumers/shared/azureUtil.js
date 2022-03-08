@@ -9,6 +9,8 @@
 'use strict';
 
 const crypto = require('crypto');
+
+const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 
 /**
@@ -140,9 +142,9 @@ function listWorkspaces(context, accessToken) {
                         return e;
                     }));
 
-            return Promise.all(workspacePromises)
+            return promiseUtil.allSettled(workspacePromises)
                 .then((results) => {
-                    const values = Array.prototype.concat.apply([], results);
+                    const values = Array.prototype.concat.apply([], promiseUtil.getValues(results));
                     const workspaces = values.filter((r) => r.properties && r.properties.customerId);
                     if (workspaces.length === 0) {
                         return Promise.reject(new Error('Unable to list workspaces for subscription(s)'));
@@ -304,10 +306,10 @@ function getInstrumentationKeys(context) {
                         return e;
                     }));
 
-            return Promise.all(aiResourcesPromises);
+            return promiseUtil.allSettled(aiResourcesPromises);
         })
         .then((results) => {
-            const values = Array.prototype.concat.apply([], results);
+            const values = Array.prototype.concat.apply([], promiseUtil.getValues(results));
             const aiResources = values.filter((r) => r.properties && r.properties.InstrumentationKey
                 && (aiNamePattern ? r.name.match(aiNamePattern) : true));
             if (aiResources.length === 0) {

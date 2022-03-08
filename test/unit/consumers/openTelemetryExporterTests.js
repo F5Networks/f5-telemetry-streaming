@@ -43,7 +43,7 @@ describe('OpenTelemetry_Exporter', () => {
 
     before(() => {
         moduleCache.restore();
-        const dir = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/exporter-collector-proto/build/protos');
+        const dir = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/exporter-metrics-otlp-proto/build/protos');
         const root = new protobufjs.Root();
         root.resolvePath = function (_, target) {
             return `${dir}/${target}`;
@@ -131,7 +131,7 @@ describe('OpenTelemetry_Exporter', () => {
                         assert.isFalse(context.logger.error.called, 'should not have logged an error');
                         const traceData = context.tracer.write.firstCall.args[0];
 
-                        assert.strictEqual(Object.keys(traceData).length, 405, 'should have trace record for each metric');
+                        assert.strictEqual(Object.keys(traceData).length, 406, 'should have trace record for each metric');
                         assert.deepStrictEqual(traceData.system_diskLatency__util, {
                             description: 'system.diskLatency.%util',
                             measurements: [
@@ -163,7 +163,7 @@ describe('OpenTelemetry_Exporter', () => {
                         const metrics = convertExportedMetrics(requestBody);
 
                         assert.strictEqual(this.req.headers['content-type'], 'application/x-protobuf', 'should send protobuf data');
-                        assert.strictEqual(metrics.length, 726, 'should export correct number of metrics');
+                        assert.strictEqual(metrics.length, 727, 'should export correct number of metrics');
                     });
                 return openTelemetryExporter(context);
             });

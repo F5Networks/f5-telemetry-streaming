@@ -61,6 +61,14 @@ module.exports = {
                         {
                             afmState: 'quiescent',
                             apmState: 'Policies Consistent',
+                            asmAttackSignatures: {
+                                ff8080817a3a4908017a3a490958000e: {
+                                    filename: 'ASM-AttackSignatures_20190716_122131.im',
+                                    createDateTime: 1563279691000,
+                                    name: 'ff8080817a3a4908017a3a490958000e'
+                                }
+                            },
+
                             asmState: 'Policies Consistent',
                             baseMac: '00:0d:3a:30:34:51',
                             callBackUrl: 'https://10.0.1.100',
@@ -455,7 +463,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:MhUFMWpArwFubi+PU40UVysA1CXL4su+O251IU8/uPQ=',
+                        Authorization: 'SharedKey myWorkspace:4hO6g0PLWeZAgWdyCllFS4NIks9QD/QGoV6R57TYotg=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

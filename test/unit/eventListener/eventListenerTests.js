@@ -27,6 +27,7 @@ const teemReporter = require('../../../src/lib/teemReporter');
 const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
 const tracer = require('../../../src/lib/utils/tracer');
+const tracerMgr = require('../../../src/lib/tracerManager');
 const utilMisc = require('../../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -80,7 +81,7 @@ describe('Event Listener', () => {
         };
 
         const registeredTracerPaths = () => {
-            const paths = tracer.registered().map((t) => t.path);
+            const paths = tracerMgr.registered().map((t) => t.path);
             paths.sort();
             return paths;
         };
@@ -449,7 +450,7 @@ describe('Event Listener', () => {
         it('should enable/disable input tracing', () => {
             const getTracerData = (tracerPath) => coreStub.tracer.data[
                 Object.keys(coreStub.tracer.data).find((key) => key.indexOf(tracerPath) !== -1)
-            ];
+            ].map((d) => d.data);
 
             const newDecl = testUtil.deepCopy(origDecl);
             newDecl.Listener2 = {
@@ -503,6 +504,7 @@ describe('Event Listener', () => {
                         })
                     ]);
                 })
+                .then(() => coreStub.tracer.waitForData())
                 .then(() => {
                     assert.deepStrictEqual(
                         getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
@@ -547,6 +549,7 @@ describe('Event Listener', () => {
                         hrtime: [0, 0]
                     })
                 ]))
+                .then(() => coreStub.tracer.waitForData())
                 .then(() => {
                     assert.includeDeepMembers(
                         getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
@@ -601,6 +604,7 @@ describe('Event Listener', () => {
                         hrtime: [0, 0]
                     })
                 ]))
+                .then(() => coreStub.tracer.waitForData())
                 .then(() => {
                     assert.includeDeepMembers(
                         getTracerData('INPUT.Telemetry_Listener.f5telemetry_default::Listener1'),
@@ -664,6 +668,7 @@ describe('Event Listener', () => {
                         hrtime: [0, 0]
                     })
                 ]))
+                .then(() => coreStub.tracer.waitForData())
                 .then(() => [
                     'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                     'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',

@@ -29,6 +29,7 @@ const teemReporter = require('../../src/lib/teemReporter');
 const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
 const tracer = require('../../src/lib/utils/tracer');
+const tracerMgr = require('../../src/lib/tracerManager');
 const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
@@ -109,7 +110,7 @@ describe('iHealth', () => {
     };
 
     const registeredTracerPaths = () => {
-        const paths = tracer.registered().map((t) => t.path);
+        const paths = tracerMgr.registered().map((t) => t.path);
         paths.sort();
         return paths;
     };

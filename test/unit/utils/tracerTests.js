@@ -18,15 +18,11 @@ const os = require('os');
 const path = require('path');
 const sinon = require('sinon');
 
-const configWorker = require('../../../src/lib/config');
-const deviceUtil = require('../../../src/lib/utils/device');
-const dummies = require('../shared/dummies');
 const logger = require('../../../src/lib/logger');
-const persistentStorage = require('../../../src/lib/persistentStorage');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
 const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
+const timers = require('../../../src/lib/utils/timers');
 const tracer = require('../../../src/lib/utils/tracer');
 const utilMisc = require('../../../src/lib/utils/misc');
 
@@ -36,273 +32,127 @@ const assert = chai.assert;
 moduleCache.remember();
 
 describe('Tracer', () => {
+    const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
+    const tracerEncoding = 'utf8';
+    const tracerFile = `${tracerDir}/tracerTest`;
+    const fakeDate = new Date();
+    let coreStub;
+    let customFS;
+    let tracerInst;
+
+    const readTraceFile = (filePath, encoding) => JSON.parse(fs.readFileSync(filePath, encoding || tracerEncoding));
+    const emptyDir = (dirPath) => {
+        fs.readdirSync(dirPath).forEach((item) => {
+            item = path.join(dirPath, item);
+            if (fs.statSync(item).isDirectory()) {
+                emptyDir(item);
+                fs.rmdirSync(item);
+            } else {
+                fs.unlinkSync(item);
+            }
+        });
+    };
+    const removeDir = (dirPath) => {
+        if (fs.existsSync(dirPath)) {
+            emptyDir(dirPath);
+            fs.rmdirSync(dirPath);
+        }
+    };
+    const addTimestamps = (data) => data.map((item) => ({ data: item, timestamp: new Date().toISOString() }));
+
     before(() => {
         moduleCache.restore();
     });
 
-    afterEach(() => {
-        sinon.restore();
+    beforeEach(() => {
+        coreStub = stubs.coreStub({
+            logger
+        });
+        stubs.clock({ fakeTimersOpts: fakeDate });
+
+        if (fs.existsSync(tracerDir)) {
+            emptyDir(tracerDir);
+        }
+
+        tracerInst = tracer.create(tracerFile);
+        coreStub.logger.removeAllMessages();
+
+        customFS = sinon.spy({
+            R_OK: 1,
+            access() { return Promise.reject(new Error('not exist')); },
+            close() { return Promise.resolve(); },
+            ftruncate() { return Promise.resolve(); },
+            fstat() {
+                return Promise.resolve([{
+                    size: 2
+                }]);
+            },
+            mkdir() { return Promise.resolve(); },
+            open() { return Promise.resolve([1]); },
+            read() { return Promise.resolve([2, Buffer.from('[]')]); },
+            write() { return Promise.resolve(); }
+        });
+    });
+
+    afterEach(() => (tracerInst ? tracerInst.stop() : Promise.resolve())
+        .then(() => sinon.restore()));
+
+    after(() => {
+        removeDir(tracerDir);
+    });
+
+    describe('.create', () => {
+        it('should create new Tracer instance', () => {
+            tracerInst = tracer.create(tracerFile, { maxRecords: 20 });
+            assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
+            assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
+            assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
+            assert.deepStrictEqual(tracerInst.maxRecords, 20, 'should set custom maxRecords');
+            assert.isFalse(tracerInst.disabled, 'should not be disabled');
+            assert.isFalse(tracerInst.suspended, 'should not be suspended');
+            assert.notExists(tracerInst.fd, 'should have no fd');
+
+            return tracerInst.write('foobar-Ӂ-unicode')
+                .then(() => {
+                    assert.deepStrictEqual(
+                        readTraceFile(tracerFile),
+                        addTimestamps(['foobar-Ӂ-unicode'])
+                    );
+                });
+        });
+    });
+
+    describe('.setTracerOptionsDefaults', () => {
+        it('should set default options', () => {
+            assert.deepStrictEqual(
+                tracer.setTracerOptionsDefaults({}),
+                {
+                    encoding: 'utf8',
+                    inactivityTimeout: 15 * 60,
+                    maxRecords: 10
+                },
+                'should set default options'
+            );
+        });
+
+        it('should preserve user-defined options', () => {
+            assert.deepStrictEqual(
+                tracer.setTracerOptionsDefaults({
+                    encoding: 'ascii',
+                    inactivityTimeout: 10,
+                    maxRecords: 100
+                }),
+                {
+                    encoding: 'ascii',
+                    inactivityTimeout: 10,
+                    maxRecords: 100
+                },
+                'should preserve user-defined options'
+            );
+        });
     });
 
     describe('Tracer', () => {
-        const tracerDir = `${os.tmpdir()}/telemetry`; // os.tmpdir for windows + linux
-        const tracerEncoding = 'utf8';
-        const tracerFile = `${tracerDir}/tracerTest`;
-        const fakeDate = new Date();
-        let config;
-        let coreStub;
-        let tracerInst;
-
-        const readTraceFile = (filePath, encoding) => JSON.parse(fs.readFileSync(filePath, encoding || tracerEncoding));
-        const emptyDir = (dirPath) => {
-            fs.readdirSync(dirPath).forEach((item) => {
-                item = path.join(dirPath, item);
-                if (fs.statSync(item).isDirectory()) {
-                    emptyDir(item);
-                    fs.rmdirSync(item);
-                } else {
-                    fs.unlinkSync(item);
-                }
-            });
-        };
-        const removeDir = (dirPath) => {
-            if (fs.existsSync(dirPath)) {
-                emptyDir(dirPath);
-                fs.rmdirSync(dirPath);
-            }
-        };
-        const addTimestamps = (data) => data.map((item) => ({ data: item, timestamp: new Date().toISOString() }));
-
-        beforeEach(() => {
-            coreStub = stubs.coreStub({
-                logger
-            });
-            stubs.clock({ fakeTimersOpts: fakeDate });
-
-            if (fs.existsSync(tracerDir)) {
-                emptyDir(tracerDir);
-            }
-
-            config = {
-                path: tracerFile
-            };
-            tracerInst = tracer.fromConfig(config);
-            coreStub.logger.removeAllMessages();
-        });
-
-        afterEach(() => tracer.unregisterAll());
-
-        after(() => {
-            removeDir(tracerDir);
-        });
-
-        describe('.fromConfig()', () => {
-            it('should create tracer using provided location and write data to it', () => {
-                tracerInst = tracer.fromConfig({
-                    path: tracerFile
-                });
-                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
-                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
-                assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
-                assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
-                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
-                assert.notExists(tracerInst.fd, 'should have no fd');
-
-                return tracerInst.write('foobar')
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            readTraceFile(tracerFile),
-                            addTimestamps(['foobar'])
-                        );
-                    });
-            });
-
-            it('should create tracer using provided location and options and write data to it', () => {
-                tracerInst = tracer.fromConfig({
-                    enable: true,
-                    encoding: 'ascii',
-                    maxRecords: 1,
-                    path: tracerFile
-                });
-                assert.match(tracerInst.name, /tracer_\d+/, 'should set name');
-                assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
-                assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set custom encoding');
-                assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set custom maxRecords');
-                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
-                assert.notExists(tracerInst.fd, 'should have no fd');
-
-                return tracerInst.write('foobar')
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            readTraceFile(tracerFile),
-                            addTimestamps(['foobar'])
-                        );
-                    });
-            });
-
-            it('should return existing tracer', () => {
-                let sameTracerInst;
-                tracerInst = tracer.fromConfig({
-                    path: tracerFile,
-                    options: {
-                        encoding: 'ascii',
-                        maxRecords: 1
-                    }
-                });
-                return tracerInst.write('foobar')
-                    .then(() => {
-                        assert.deepStrictEqual(
-                            readTraceFile(tracerFile),
-                            addTimestamps(['foobar'])
-                        );
-                        sameTracerInst = tracer.fromConfig({
-                            path: tracerFile,
-                            options: {
-                                encoding: 'ascii',
-                                maxRecords: 1
-                            }
-                        });
-                        return sameTracerInst.write('foobar');
-                    })
-                    .then(() => {
-                        assert.isTrue(tracerInst === sameTracerInst, 'should return same instance');
-                        assert.deepStrictEqual(tracerInst, sameTracerInst, 'should return same instance');
-                        assert.exists(sameTracerInst.fd, 'should set fd');
-                        assert.strictEqual(sameTracerInst.fd, tracerInst.fd, 'fd should be the same');
-                        testAssert.notIncludeMatch(
-                            coreStub.logger.messages.debug,
-                            new RegExp(`Creating new tracer instance for file '${tracerFile}'`),
-                            'should not log debug message'
-                        );
-                        testAssert.notIncludeMatch(
-                            coreStub.logger.messages.debug,
-                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
-                            'should not log debug message'
-                        );
-                    });
-            });
-
-            it('should not create tracer when disabled', () => {
-                tracer.unregister(tracerInst);
-                assert.lengthOf(tracer.registered(), 0, 'should have not tracers registered');
-
-                tracerInst = tracer.fromConfig({
-                    enable: false,
-                    encoding: 'ascii',
-                    maxRecords: 1,
-                    path: tracerFile
-                });
-                assert.notExists(tracerInst, 'should not create Tracer when disabled');
-                assert.lengthOf(tracer.registered(), 0, 'should have not tracers registered');
-            });
-
-            it('should stop and create new tracer when maxRecords changed', () => {
-                let newTracer;
-                tracerInst = tracer.fromConfig({
-                    path: tracerFile
-                });
-                return tracerInst.write('somethings')
-                    .then(() => {
-                        newTracer = tracer.fromConfig({
-                            path: tracerFile,
-                            maxRecords: 100
-                        });
-                        return newTracer.write('something3');
-                    })
-                    .then(() => {
-                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
-                        assert.notDeepEqual(tracerInst.maxRecords, newTracer.maxRecords, 'should use different maxRecords');
-
-                        const registered = tracer.registered();
-                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
-                        assert.include(registered, newTracer, 'should register new tracer');
-                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                        testAssert.includeMatch(
-                            coreStub.logger.messages.debug,
-                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
-                            'should log debug message'
-                        );
-                    });
-            });
-
-            it('should stop and create new tracer when encoding changed', () => {
-                let newTracer;
-                tracerInst = tracer.fromConfig({
-                    path: tracerFile
-                });
-                return tracerInst.write('somethings')
-                    .then(() => {
-                        newTracer = tracer.fromConfig({
-                            path: tracerFile,
-                            encoding: 'ascii'
-                        });
-                        return newTracer.write('something3');
-                    })
-                    .then(() => {
-                        assert.notDeepEqual(tracerInst, newTracer, 'should return different instance');
-                        assert.notDeepEqual(tracerInst.encoding, newTracer.encoding, 'should use different paths');
-
-                        const registered = tracer.registered();
-                        assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
-                        assert.include(registered, newTracer, 'should register new tracer');
-                        assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                        testAssert.includeMatch(
-                            coreStub.logger.messages.debug,
-                            new RegExp(`Updating tracer instance for file '${tracerFile}'`),
-                            'should log debug message'
-                        );
-                    });
-            });
-        });
-
-        describe('.registered()', () => {
-            it('should return registered tracers', () => {
-                const tracerInst2 = tracer.fromConfig({ path: 'tracer2' });
-                const tracerInst3 = tracer.fromConfig({ path: 'tracer3' });
-                const registered = tracer.registered();
-
-                assert.lengthOf(registered, 3, 'should register 3 tracers');
-                assert.include(registered, tracerInst, 'should register tracer');
-                assert.include(registered, tracerInst2, 'should register tracer');
-                assert.include(registered, tracerInst3, 'should register tracer');
-            });
-        });
-
-        describe('.unregister()', () => {
-            it('should unregister tracer', () => tracer.unregister(tracerInst)
-                .then(() => {
-                    assert.notInclude(tracer.registered(), tracerInst, 'should unregister tracer');
-                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                }));
-
-            it('should unregister all tracers', () => {
-                const tracerInst2 = tracer.fromConfig({ path: 'tracer2' });
-                const tracerInst3 = tracer.fromConfig({ path: 'tracer3' });
-                assert.lengthOf(tracer.registered(), 3, 'should register 3 tracers');
-                return tracer.unregisterAll()
-                    .then(() => {
-                        assert.isEmpty(tracer.registered(), 'should have no registered tracers');
-                        assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                        assert.isTrue(tracerInst2.disabled, 'should be disabled once unregistered');
-                        assert.isTrue(tracerInst3.disabled, 'should be disabled once unregistered');
-                    });
-            });
-
-            it('should not fail when no tracer passed to .unregister', () => assert.isFulfilled(tracer.unregister()));
-
-            it('should catch rejection on attempt to unregister', () => {
-                sinon.stub(tracer.Tracer.prototype, 'stop').rejects(new Error('stop error'));
-                return tracer.unregister(tracerInst, true)
-                    .then(() => {
-                        testAssert.includeMatch(
-                            coreStub.logger.messages.debug,
-                            /Uncaught error on attempt to unregister tracer[\s\S]*stop error/gm,
-                            'should log debug message with error'
-                        );
-                    });
-            });
-        });
-
         describe('constructor', () => {
             it('should create tracer using provided location and write data to it', () => {
                 tracerInst = new tracer.Tracer(tracerFile);
@@ -310,7 +160,8 @@ describe('Tracer', () => {
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'utf8', 'should set default encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 10, 'should set default maxRecords');
-                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                assert.isFalse(tracerInst.suspended, 'should not be suspended');
                 assert.notExists(tracerInst.fd, 'should have no fd');
 
                 return tracerInst.write('foobar-Ӂ-unicode')
@@ -331,7 +182,8 @@ describe('Tracer', () => {
                 assert.deepStrictEqual(tracerInst.path, tracerFile, 'should set path');
                 assert.deepStrictEqual(tracerInst.encoding, 'ascii', 'should set default encoding');
                 assert.deepStrictEqual(tracerInst.maxRecords, 1, 'should set default maxRecords');
-                assert.deepStrictEqual(tracerInst.disabled, false, 'should not be disabled');
+                assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                assert.isFalse(tracerInst.suspended, 'should not be suspended');
                 assert.notExists(tracerInst.fd, 'should have no fd');
 
                 return tracerInst.write('foobar')
@@ -342,14 +194,117 @@ describe('Tracer', () => {
                         );
                     });
             });
+
+            it('should allow to specify custom FS module', () => {
+                tracerInst = new tracer.Tracer('tracerFile', {
+                    fs: customFS
+                });
+                return tracerInst.write('somethings')
+                    .then(() => tracerInst.stop())
+                    .then(() => {
+                        assert.isAbove(customFS.access.callCount, 0, 'should call customFS.access');
+                        assert.isAbove(customFS.close.callCount, 0, 'should call customFS.close');
+                        assert.isAbove(customFS.fstat.callCount, 0, 'should call customFS.fstat');
+                        assert.isAbove(customFS.mkdir.callCount, 0, 'should call customFS.mkdir');
+                        assert.isAbove(customFS.open.callCount, 0, 'should call customFS.open');
+                        assert.isAbove(customFS.read.callCount, 0, 'should call customFS.read');
+                        assert.isAbove(customFS.write.callCount, 0, 'should call customFS.write');
+                    });
+            });
+
+            it('should not set inactivity timeout when 0 passed', () => {
+                const fakeClock = stubs.clock();
+
+                tracerInst = new tracer.Tracer(tracerFile, {
+                    inactivityTimeout: 0
+                });
+                assert.deepStrictEqual(tracerInst.inactivityTimeout, 0, 'should set custom inactivity timeout');
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timeout set to/,
+                            'should log debug message'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 60, promisify: true });
+                        return testUtil.sleep(60 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                    });
+            });
+
+            it('should set inactivity timeout to default value (15s)', () => {
+                const fakeClock = stubs.clock();
+                tracerInst = new tracer.Tracer(tracerFile);
+                assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timeout set to/,
+                            'should log debug message'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                    });
+            });
+
+            it('should set inactivity timeout to correct value when invalid value provided (-15s)', () => {
+                const fakeClock = stubs.clock();
+                tracerInst = new tracer.Tracer(tracerFile, {
+                    inactivityTimeout: -15
+                });
+                assert.deepStrictEqual(tracerInst.inactivityTimeout, 15, 'should set corrected inactivity timeout');
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timeout set to/,
+                            'should log debug message'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                    });
+            });
+
+            it('should set inactivity timeout to custom value (30s)', () => {
+                const fakeClock = stubs.clock();
+                tracerInst = new tracer.Tracer(tracerFile, {
+                    inactivityTimeout: 30
+                });
+                assert.deepStrictEqual(tracerInst.inactivityTimeout, 30, 'should set custom inactivity timeout');
+                return tracerInst.write('somethings')
+                    .then(() => {
+                        assert.deepStrictEqual(tracerInst.inactivityTimeout, 30, 'should set custom inactivity timeout');
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timeout set to/,
+                            'should log debug message'
+                        );
+                        fakeClock.clockForward(1000, { repeat: 31, promisify: true });
+                        return testUtil.sleep(31 * 1000);
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                    });
+            });
         });
 
         describe('.write()', () => {
             it('should try to create parent directory', () => {
                 sinon.stub(utilMisc.fs, 'mkdir').resolves();
-                tracerInst = tracer.fromConfig({
-                    path: '/test/inaccessible/directory/file'
-                });
+                tracerInst = tracer.create('/test/inaccessible/directory/file');
                 return tracerInst.write('foobar')
                     .then(() => {
                         assert.isAbove(utilMisc.fs.mkdir.callCount, 0, 'should call utilMisc.fs.mkdir');
@@ -369,11 +324,10 @@ describe('Tracer', () => {
                     error.code = 'EEXIST';
                     return Promise.reject(error);
                 });
-                tracerInst = tracer.fromConfig({
-                    path: '/test/inaccessible/directory/file'
-                });
+                tracerInst = tracer.create('/test/inaccessible/directory/file');
                 return tracerInst.write('foobar')
-                    .then(() => {
+                    .then((err) => {
+                        assert.isUndefined(err, 'should return no error');
                         testAssert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to write data[\s\S]*folder exists/gm,
@@ -384,11 +338,10 @@ describe('Tracer', () => {
 
             it('should not reject when unable to create parent directory', () => {
                 sinon.stub(utilMisc.fs, 'mkdir').rejects(new Error('mkdir error'));
-                tracerInst = tracer.fromConfig({
-                    path: '/test/inaccessible/directory/file'
-                });
+                tracerInst = tracer.create('/test/inaccessible/directory/file');
                 return tracerInst.write('foobar')
-                    .then(() => {
+                    .then((err) => {
+                        assert.isUndefined(err, 'should return no error');
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to write data[\s\S]*mkdir error/gm,
@@ -424,13 +377,8 @@ describe('Tracer', () => {
                     assert.deepStrictEqual(data, getExpectedData(allWrittenData));
                 };
 
-                tracerInst = tracer.fromConfig({
-                    name: 'class.obj',
-                    path: tracerFile,
-                    maxRecords
-                });
+                tracerInst = tracer.create(tracerFile, { maxRecords });
                 assert.deepStrictEqual(tracerInst.maxRecords, maxRecords, 'should set value for maxRecords');
-
                 return writeNumbersToTracer(maxRecords * 2 + 2)
                     .then((writtenData) => {
                         validateTracerData(writtenData);
@@ -442,6 +390,11 @@ describe('Tracer', () => {
                     })
                     .then((writtenData) => {
                         validateTracerData(writtenData);
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            new RegExp(`Writing.*out of.*messages \\(limit = ${maxRecords} messages\\)`),
+                            'should write debug message'
+                        );
                     });
             }));
 
@@ -461,7 +414,8 @@ describe('Tracer', () => {
                 sinon.stub(utilMisc, 'deepCopy').throws(new Error('expected copy error'));
                 const data = [1, 2, 3];
                 return tracerInst.write(data)
-                    .then(() => {
+                    .then((err) => {
+                        assert.isUndefined(err, 'should return no error');
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to make copy of data[\s\S]*expected copy error/gm,
@@ -486,19 +440,21 @@ describe('Tracer', () => {
                 }));
 
             it('should not fail if unable to parse existing data', () => tracerInst.write('item1')
-                .then(() => {
+                .then((err) => {
+                    assert.isUndefined(err, 'should return no error');
                     fs.truncateSync(tracerFile, 0);
                     fs.writeFileSync(tracerFile, '{test');
                     return tracerInst.write('item1');
                 })
-                .then(() => {
+                .then((err) => {
+                    assert.isUndefined(err, 'should return no error');
                     assert.deepStrictEqual(
                         readTraceFile(tracerFile),
                         addTimestamps(['item1'])
                     );
                 }));
 
-            it('should write not more data when disabled', () => tracerInst.write('item1')
+            it('should not write more data when disabled', () => tracerInst.write('item1')
                 .then(() => tracerInst.stop())
                 .then(() => tracerInst.write('item2'))
                 .then(() => {
@@ -543,7 +499,23 @@ describe('Tracer', () => {
                     passphrase: 'test_passphrase_4',
                     passphrase2: {
                         cipherText: 'test_passphrase_5'
-                    }
+                    },
+                    anotherText: utilMisc.stringify({
+                        object1: {
+                            passphrase: 'test_passphrase_6'
+                        },
+                        passphrase: {
+                            cipherText: 'test_passphrase_7'
+                        }
+                    }),
+                    oneMoreText: utilMisc.stringify({
+                        object1: {
+                            passphrase: 'test_passphrase_6'
+                        },
+                        passphrase: {
+                            cipherText: 'test_passphrase_7'
+                        }
+                    }, true)
                 };
                 return tracerInst.write(data)
                     .then(() => {
@@ -551,6 +523,8 @@ describe('Tracer', () => {
                         assert.deepStrictEqual(
                             traceData,
                             addTimestamps([{
+                                anotherText: `{"object1":{"passphrase":"${mask}"},"passphrase":{"cipherText":"${mask}"}}`,
+                                oneMoreText: `{\n    "object1": {\n        "passphrase": "${mask}"\n    },\n    "passphrase": {\n        "cipherText": "${mask}"\n    }\n}`,
                                 passphrase: mask,
                                 passphrase2: {
                                     cipherText: mask
@@ -567,6 +541,8 @@ describe('Tracer', () => {
                         assert.deepStrictEqual(
                             readTraceFile(tracerFile),
                             addTimestamps([{
+                                anotherText: `{"object1":{"passphrase":"${mask}"},"passphrase":{"cipherText":"${mask}"}}`,
+                                oneMoreText: `{\n    "object1": {\n        "passphrase": "${mask}"\n    },\n    "passphrase": {\n        "cipherText": "${mask}"\n    }\n}`,
                                 passphrase: mask,
                                 passphrase2: {
                                     cipherText: mask
@@ -577,6 +553,8 @@ describe('Tracer', () => {
                                     + '}'
                             },
                             {
+                                anotherText: `{"object1":{"passphrase":"${mask}"},"passphrase":{"cipherText":"${mask}"}}`,
+                                oneMoreText: `{\n    "object1": {\n        "passphrase": "${mask}"\n    },\n    "passphrase": {\n        "cipherText": "${mask}"\n    }\n}`,
                                 passphrase: mask,
                                 passphrase2: {
                                     cipherText: mask
@@ -614,27 +592,76 @@ describe('Tracer', () => {
                     });
             });
 
-            it('should not create new write request when tracer stopped', () => {
-                const dataHistory = [];
-                const fsWriteStub = sinon.stub(utilMisc.fs, 'write');
-                let writePromise;
+            it('should break circular ref', () => {
+                const root = { level1: {} };
+                root.level1.ref = root;
 
-                fsWriteStub.callsFake(function () {
-                    // see args list in docs
-                    dataHistory.push(arguments[1]);
-                    if (!writePromise) {
-                        // should create new delayed write operation
-                        writePromise = tracerInst.write('delayed record');
-                    }
-                    tracerInst.stop(); // stop it to set 'disabled' to true
-                    return fsWriteStub.wrappedMethod.apply(utilMisc.fs, arguments);
-                });
-                return tracerInst.write('first record')
-                    .then(() => writePromise)
+                return tracerInst.write(root)
                     .then(() => {
-                        assert.lengthOf(dataHistory, 1, 'should not try to write data once stopped');
-                        assert.match(dataHistory[0], /first record/, 'should include first record');
-                        assert.notMatch(dataHistory[0], /delayed record/, 'should not include delayed record');
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile),
+                            addTimestamps([{
+                                level1: {
+                                    ref: 'circularRefFound'
+                                }
+                            }])
+                        );
+                        assert.isTrue(root.level1.ref === root, 'should not modify original object');
+                    });
+            });
+
+            it('should batch multiple .write attempts into one', () => {
+                const readSpy = sinon.spy(fs, 'read');
+                const writeSpy = sinon.spy(fs, 'write');
+
+                const p1 = tracerInst.write('test1');
+                tracerInst.write('test2');
+                tracerInst.write('test3');
+                tracerInst.write('test4');
+                tracerInst.write('test5');
+                tracerInst.write('test6');
+                return p1.then(() => {
+                    assert.sameDeepMembers(
+                        readTraceFile(tracerFile).map((d) => d.data),
+                        ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'],
+                        'should write data to file'
+                    );
+                    assert.lengthOf(
+                        readSpy.args.filter((args) => args[0] === tracerInst.fd),
+                        0,
+                        'should not read file with 0 bytes'
+                    );
+                    assert.lengthOf(
+                        writeSpy.args.filter((args) => args[0] === tracerInst.fd),
+                        1,
+                        'should write file just once'
+                    );
+
+                    const p2 = tracerInst.write('test1');
+                    tracerInst.write('test2');
+                    tracerInst.write('test3');
+                    tracerInst.write('test4');
+                    tracerInst.write('test5');
+                    tracerInst.write('test6');
+
+                    return p2;
+                })
+                    .then(() => {
+                        assert.sameDeepMembers(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test3', 'test4', 'test5', 'test6', 'test1', 'test2', 'test3', 'test4', 'test5', 'test6'],
+                            'should write data to file'
+                        );
+                        assert.lengthOf(
+                            readSpy.args.filter((args) => args[0] === tracerInst.fd),
+                            1,
+                            'should read file just once (second attempt to write brach request)'
+                        );
+                        assert.lengthOf(
+                            writeSpy.args.filter((args) => args[0] === tracerInst.fd),
+                            2,
+                            'should write file just once (second attempt to write brach request)'
+                        );
                     });
             });
         });
@@ -645,12 +672,20 @@ describe('Tracer', () => {
                 coreStub.logger.removeAllMessages();
                 return tracerInst.write('test')
                     .then(() => tracerInst.stop())
-                    .then(() => {
+                    .then((err) => {
+                        assert.isUndefined(err, 'should return no error');
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Closing stream to file/gm,
+                            'should log debug message on file closing'
+                        );
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to close file[\s\S]*close error/gm,
                             'should log debug message with error'
                         );
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
                     });
             });
 
@@ -663,7 +698,18 @@ describe('Tracer', () => {
                     return tracerInst.stop();
                 })
                 .then(() => {
+                    testAssert.includeMatch(
+                        coreStub.logger.messages.debug,
+                        /Closing stream to file/gm,
+                        'should log debug message on file closing'
+                    );
+                    testAssert.includeMatch(
+                        coreStub.logger.messages.debug,
+                        /Stopping stream to file/g,
+                        'should log debug message when stopped'
+                    );
                     assert.isTrue(tracerInst.disabled, 'should disabled tracer once stopped');
+                    assert.isFalse(tracerInst.suspended, 'should not be suspended');
                     assert.notExists(tracerInst.fd, 'should have not fd once stopped');
                     return tracerInst.write('test2');
                 })
@@ -673,335 +719,371 @@ describe('Tracer', () => {
                         addTimestamps(['test'])
                     );
                     assert.isTrue(tracerInst.disabled, 'should disabled tracer once stopped');
+                    assert.isFalse(tracerInst.suspended, 'should not be suspended');
                     assert.notExists(tracerInst.fd, 'should have not fd once stopped');
-                }));
-        });
-    });
 
-    describe('config "on change" event', () => {
-        beforeEach(() => {
-            stubs.coreStub({
-                configWorker,
-                deviceUtil,
-                persistentStorage,
-                teemReporter,
-                tracer,
-                utilMisc
+                    coreStub.logger.removeAllMessages();
+                    return tracerInst.stop();
+                })
+                .then(() => {
+                    testAssert.notIncludeMatch(
+                        coreStub.logger.messages.debug,
+                        /Stopping stream to file/g,
+                        'should not log debug message when stopped already'
+                    );
+                    testAssert.notIncludeMatch(
+                        coreStub.logger.messages.debug,
+                        /Closing stream to file/gm,
+                        'should not log debug message when closed already'
+                    );
+                }));
+
+            it('should stop inactivity timer', () => {
+                const fakeClock = stubs.clock();
+                return tracerInst.write('test')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test'],
+                            'should write data to file'
+                        );
+                        return tracerInst.stop();
+                    })
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timer deactivated/gm,
+                            'should log debug message on timer deactivation'
+                        );
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Closing stream to file/gm,
+                            'should log debug message on file closing'
+                        );
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Stopping stream to file/g,
+                            'should log debug message when stopped'
+                        );
+                        fakeClock.clockForward(1000, { repeat: 31, promisify: true });
+                        return testUtil.sleep(31 * 1000);
+                    })
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Suspending stream to file/gm,
+                            'should not log debug message when stopped already'
+                        );
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+
+                        return tracerInst.write('test-2');
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test'],
+                            'should not write new data once closed'
+                        );
+                    });
+            });
+        });
+
+        describe('.suspend', () => {
+            it('should suspend and resume writing operations', () => {
+                assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                return tracerInst.write('test')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test'],
+                            'should write data to file'
+                        );
+                        return tracerInst.suspend();
+                    })
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Suspending stream to file.*suspend\(\)/gm,
+                            'should log debug message on attempt to suspend tracer'
+                        );
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                        return tracerInst.write('test2');
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test', 'test2'],
+                            'should write data to file'
+                        );
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                    });
             });
 
-            return configWorker.processDeclaration(dummies.declaration.base.decrypted())
-                .then(() => {
-                    assert.isEmpty(tracer.registered(), 'should have no registered tracers');
-                });
+            it('should not change state once disabled', () => {
+                assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                return tracerInst.write('test')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test'],
+                            'should write data to file'
+                        );
+                        return tracerInst.stop();
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                        return tracerInst.suspend();
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                        return tracerInst.write('test2');
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test'],
+                            'should not write new data to file'
+                        );
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                    });
+            });
+
+            it('should behave write data in multi-call situation', () => {
+                assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                return Promise.all([
+                    tracerInst.write('test1'),
+                    tracerInst.write('test2'),
+                    tracerInst.write('test3'),
+                    tracerInst.suspend(),
+                    tracerInst.write('test4'),
+                    tracerInst.write('test5'),
+                    tracerInst.suspend(),
+                    tracerInst.write('test6')
+                ])
+                    .then(() => {
+                        assert.sameDeepMembers(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'],
+                            'should write data to file'
+                        );
+                    });
+            });
         });
 
-        it('should register enabled tracers and then unregister all when removed from config', () => configWorker.processDeclaration(
-            dummies.declaration.base.decrypted({
-                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
-                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
-                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
-                    enable: false,
-                    trace: 'listener2'
-                }),
-                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output' },
-                        { type: 'input' }
-                    ]
-                }),
-                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output', path: 'listener3_output' },
-                        { type: 'input', path: 'listener3_input' }
-                    ]
-                }),
-                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
-                    trace: false
-                })
-            })
-        )
-            .then(() => {
-                const registered = tracer.registered();
-                assert.sameDeepMembers(
-                    registered.map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processDeclaration(dummies.declaration.base.decrypted())
-                    .then(() => registered);
-            })
-            .then((registeredBefore) => {
-                assert.isEmpty(tracer.registered(), 'should have no registered tracers');
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                });
-            }));
-
-        it('should register enabled tracers and then unregister disabled', () => configWorker.processDeclaration(
-            dummies.declaration.base.decrypted({
-                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
-                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
-                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
-                    enable: false,
-                    trace: 'listener2'
-                }),
-                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output' },
-                        { type: 'input' }
-                    ]
-                }),
-                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output', path: 'listener3_output' },
-                        { type: 'input', path: 'listener3_input' }
-                    ]
-                }),
-                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
-                    trace: false
-                })
-            })
-        )
-            .then(() => {
-                const registered = tracer.registered();
-                assert.sameDeepMembers(
-                    registered.map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processDeclaration(
-                    dummies.declaration.base.decrypted({
-                        My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: false }),
-                        My_Listener: dummies.declaration.listener.minimal.decrypted({
-                            enable: false, trace: 'listener'
-                        }),
-                        My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' }),
-                        My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({ trace: false }),
-                        My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
-                            trace: false
-                        }),
-                        My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
-                            trace: true
-                        })
+        describe('suspend due inactivity', () => {
+            it('should suspend tracer due inactivity and resume it on attempt to write data', () => {
+                const closeSpy = sinon.spy(utilMisc.fs, 'close');
+                const fakeClock = stubs.clock();
+                tracerInst = tracer.create(tracerFile);
+                assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');
+                return tracerInst.write('test-1')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1'],
+                            'should write new data'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 14, promisify: true });
+                        return testUtil.sleep(14 * 60 * 1000);
                     })
-                )
-                    .then(() => registered);
-            })
-            .then((registeredBefore) => {
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                });
-                assert.sameDeepMembers(
-                    tracer.registered().map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::My_Enabled_Poller_With_Disabled_Trace::My_Enabled_Poller_With_Disabled_Trace',
-                        'listener2'
-                    ],
-                    'should configure destination as expected'
-                );
-            }));
+                    .then(() => {
+                        assert.deepStrictEqual(closeSpy.callCount, 0, 'should not call fs.close yet');
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        return tracerInst.write('test-2');
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1', 'test-2'],
+                            'should write new data'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(closeSpy.callCount, 1, 'should call fs.close');
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
 
-        /**
-         * Idea of the test below is to be sure that pre-existing instances were not disabled/re-created and etc. -
-         * in other words those instances should survive all config updates
-         */
-        it('should keep pre-existing tracers untouched when processing a new namespace declaration', () => configWorker.processDeclaration(
-            dummies.declaration.base.decrypted({
-                My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
-                My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener' }),
-                My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
-                    enable: false,
-                    trace: 'listener2'
-                }),
-                My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output' },
-                        { type: 'input' }
-                    ]
-                }),
-                My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'output', path: 'listener3_output' },
-                        { type: 'input', path: 'listener3_input' }
-                    ]
-                }),
-                My_Enabled_Poller_With_Disabled_Trace: dummies.declaration.systemPoller.minimal.decrypted({
-                    trace: false
-                })
-            })
-        )
-            .then(() => {
-                const registered = tracer.registered(); // remember those instances - should survive all updates
-                assert.sameDeepMembers(
-                    registered.map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processNamespaceDeclaration(
-                    dummies.declaration.namespace.base.decrypted({
-                        My_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
-                        My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' }),
-                        My_Disabled_Listener: dummies.declaration.listener.minimal.decrypted({
-                            enable: false,
-                            trace: 'listener2'
-                        }),
-                        My_Listener_With_Dual_Tracing: dummies.declaration.listener.minimal.decrypted({
-                            trace: [
-                                { type: 'output' },
-                                { type: 'input' }
-                            ]
-                        }),
-                        My_Listener_With_Dual_Tracing_And_Path: dummies.declaration.listener.minimal.decrypted({
-                            trace: [
-                                { type: 'output', path: 'listener3_output' },
-                                { type: 'input', path: 'listener3_input' }
-                            ]
-                        })
-                    }),
-                    'Namespace'
-                )
-                    .then(() => registered);
-            })
-            .then((registeredBefore) => {
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
-                });
-                assert.sameDeepMembers(
-                    tracer.registered().map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/Telemetry_Consumer.Namespace::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.Namespace::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.Namespace::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output',
-                        'listener2'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processNamespaceDeclaration(
-                    dummies.declaration.namespace.base.decrypted({
-                        My_Consumer: dummies.declaration.consumer.default.decrypted({ enable: false }),
-                        My_Listener: dummies.declaration.listener.minimal.decrypted({ trace: 'listener2' })
-                    }),
-                    'Namespace'
-                )
-                    .then(() => registeredBefore);
-            })
-            .then((registeredBefore) => {
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
-                });
-                assert.sameDeepMembers(
-                    tracer.registered().map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output',
-                        'listener2'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processNamespaceDeclaration(dummies.declaration.namespace.base.decrypted(), 'Namespace')
-                    .then(() => registeredBefore);
-            })
-            .then((registeredBefore) => {
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isFalse(tracerInst.disabled, 'should not disable pre-existing tracers');
-                });
-                assert.sameDeepMembers(
-                    tracer.registered().map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::My_Listener_With_Dual_Tracing',
-                        'listener',
-                        'listener3_input',
-                        'listener3_output'
-                    ],
-                    'should configure destination as expected'
-                );
-            }));
+                        return tracerInst.write('test-3');
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1', 'test-2', 'test-3'],
+                            'should write new data'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(closeSpy.callCount, 2, 'should call fs.close again');
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
 
-        // verify that all classes are supported
-        it('should register enabled tracers and then unregister all when removed from config (ALL classes)', () => configWorker.processDeclaration(
-            dummies.declaration.base.decrypted({
-                Default_Push_Consumer: dummies.declaration.consumer.default.decrypted({ trace: true }),
-                Default_Pull_Consumer: dummies.declaration.pullConsumer.default.decrypted({
-                    systemPoller: ['System_Poller'],
-                    trace: true
-                }),
-                System_With_Inline_Pollers: dummies.declaration.system.full.decrypted({
-                    iHealthPoller: dummies.declaration.ihealthPoller.inlineMinimal.decrypted({ trace: true }),
-                    systemPoller: dummies.declaration.systemPoller.inlineMinimal.decrypted({ trace: true }),
-                    trace: true
-                }),
-                System_With_Referenced_Pollers: dummies.declaration.system.full.decrypted({
-                    iHealthPoller: 'iHealth_Poller',
-                    systemPoller: 'System_Poller',
-                    trace: true
-                }),
-                System_Poller: dummies.declaration.systemPoller.minimal.decrypted({ trace: true }),
-                iHealth_Poller: dummies.declaration.ihealthPoller.minimal.decrypted({ trace: true }),
-                Event_Listener: dummies.declaration.listener.minimal.decrypted({
-                    trace: [
-                        { type: 'input' },
-                        { type: 'output' }
-                    ]
-                })
-            })
-        )
-            .then(() => {
-                const registered = tracer.registered();
-                assert.sameDeepMembers(
-                    registered.map((t) => t.path),
-                    [
-                        '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Default_Push_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Pull_Consumer.f5telemetry_default::Default_Pull_Consumer',
-                        '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::Event_Listener',
-                        '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::Event_Listener',
-                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_With_Inline_Pollers::SystemPoller_1',
-                        '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::System_With_Inline_Pollers::iHealthPoller_1',
-                        '/var/tmp/telemetry/Telemetry_System_Poller.f5telemetry_default::System_With_Referenced_Pollers::System_Poller',
-                        '/var/tmp/telemetry/Telemetry_iHealth_Poller.f5telemetry_default::System_With_Referenced_Pollers::iHealth_Poller'
-                    ],
-                    'should configure destination as expected'
-                );
-                return configWorker.processDeclaration(dummies.declaration.base.decrypted())
-                    .then(() => registered);
-            })
-            .then((registeredBefore) => {
-                assert.isEmpty(tracer.registered(), 'should have no registered tracers');
-                registeredBefore.forEach((tracerInst) => {
-                    assert.isTrue(tracerInst.disabled, 'should be disabled once unregistered');
-                });
-            }));
+                        return tracerInst.stop();
+                    })
+                    .then(() => tracerInst.write('test-4'))
+                    .then(() => {
+                        assert.isTrue(tracerInst.disabled, 'should be disabled');
+                        assert.isFalse(tracerInst.suspended, 'should not be suspended');
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1', 'test-2', 'test-3'],
+                            'should not write new data once stopped'
+                        );
+                    });
+            });
+
+            it('should not fail when unable to start inactivity timer', () => {
+                sinon.stub(timers.BasicTimer.prototype, 'start')
+                    .callsFake(function () {
+                        return timers.BasicTimer.prototype.start.wrappedMethod.call(this);
+                    })
+                    .onFirstCall()
+                    .callsFake(() => Promise.reject(new Error('expected error')));
+
+                const fakeClock = stubs.clock();
+
+                return tracerInst.write('test-1')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1'],
+                            'should write new data'
+                        );
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to start inactivity timer[\s\S]*expected error/g,
+                            'should log debug message when failed'
+                        );
+                        coreStub.logger.removeAllMessages();
+                        return tracerInst.write('test-2');
+                    })
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1', 'test-2'],
+                            'should write new data'
+                        );
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Unable to start inactivity timer[\s\S]*expected error/g,
+                            'should not log debug message'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                    });
+            });
+
+            it('should not fail when unable to stop inactivity timer', () => {
+                sinon.stub(timers.BasicTimer.prototype, 'stop')
+                    .callsFake(function () {
+                        return timers.BasicTimer.prototype.stop.wrappedMethod.call(this);
+                    })
+                    .onFirstCall()
+                    .callsFake(() => Promise.reject(new Error('expected error')));
+
+                const fakeClock = stubs.clock();
+
+                return tracerInst.write('test-1')
+                    .then(() => {
+                        assert.deepStrictEqual(
+                            readTraceFile(tracerFile).map((d) => d.data),
+                            ['test-1'],
+                            'should write new data'
+                        );
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Error on attempt to deactivate the inactivity timer[\s\S]*expected error/g,
+                            'should log debug message when failed'
+                        );
+                        coreStub.logger.removeAllMessages();
+                        fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
+                        return testUtil.sleep(16 * 60 * 1000);
+                    })
+                    .then(() => {
+                        testAssert.notIncludeMatch(
+                            coreStub.logger.messages.debug,
+                            /Error on attempt to deactivate the inactivity timer[\s\S]*expected error/g,
+                            'should have no error message'
+                        );
+                        testAssert.includeMatch(
+                            coreStub.logger.messages.debug,
+                            /Inactivity timer deactivated/g,
+                            'should log debug message'
+                        );
+                        assert.isFalse(tracerInst.disabled, 'should not be disabled');
+                        assert.isTrue(tracerInst.suspended, 'should be suspended');
+                    });
+            });
+        });
+
+        describe('data actions', () => {
+            it('should add data actions and reset to default state', () => {
+                const dataAction = (data) => {
+                    data.changed = true;
+                    return data;
+                };
+                tracerInst.addDataAction(dataAction);
+
+                const mask = '*********';
+                const data = {
+                    text: JSON.stringify({ cipherText: 'test_passphrase_1' }),
+                    passphrase: {
+                        cipherText: 'test_passphrase_2'
+                    }
+                };
+                return tracerInst.write(data)
+                    .then(() => {
+                        const traceData = readTraceFile(tracerFile);
+                        assert.deepStrictEqual(
+                            traceData,
+                            addTimestamps([{
+                                changed: true,
+                                passphrase: mask,
+                                text: `{"cipherText":"${mask}"}`
+                            }]),
+                            'should apply user-define data action'
+                        );
+                        tracerInst.resetDataActions();
+                        return tracerInst.write(data);
+                    })
+                    .then(() => {
+                        const traceData = readTraceFile(tracerFile);
+                        assert.deepStrictEqual(
+                            traceData,
+                            addTimestamps([
+                                {
+                                    changed: true,
+                                    passphrase: mask,
+                                    text: `{"cipherText":"${mask}"}`
+                                },
+                                {
+                                    passphrase: mask,
+                                    text: `{"cipherText":"${mask}"}`
+                                }
+                            ]),
+                            'should apply default actions after reset'
+                        );
+                    });
+            });
+        });
     });
 });

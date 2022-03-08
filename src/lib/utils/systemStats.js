@@ -94,81 +94,64 @@ function resolveConditional(contextData, conditionalBlock) {
 /**
  * Render property using mustache template system.
  *
- * @param {Object} contextData - contextData object
+ * Note: mutates 'property'
+ *
+ * @param {Object} contextData - context object
  * @param {Object} property    - property object
  *
- * @returns {Object} rendered property object
+ * @returns {void} when finished
  */
 function renderTemplate(contextData, property) {
-    // traverse object without recursion
-    const stack = [property];
-    const forKey = (key) => {
-        const val = stack[0][key];
-        switch (typeof val) {
-        case 'object':
-            if (val !== null) {
-                stack.push(val);
+    util.traverseJSON(property, (parent, key) => {
+        const val = parent[key];
+        if (typeof val === 'string') {
+            const startIdx = val.indexOf('{{');
+            if (startIdx !== -1 && val.indexOf('}}', startIdx) > startIdx) {
+                parent[key] = mustache.render(val, contextData);
             }
-            break;
-        case 'string':
-            if (val.indexOf('{{') !== -1) {
-                stack[0][key] = mustache.render(val, contextData);
-            }
-            break;
-        default:
-            break;
         }
-    };
-    while (stack.length) {
-        // expecting objects only to be in stack var
-        Object.keys(stack[0]).forEach(forKey);
-        stack.shift();
-    }
-    return property;
+    });
 }
 
 /**
  * Property pre-processing to resolve conditionals
  *
- * @param {Object} contextData - contextData object
+ * Note: mutates 'property'
+ *
+ * @param {Object} contextData - context object
  * @param {Object} property    - property object
  *
- * @returns {Object} pre-processed deep copy of property object
+ * @returns {void} when finished
  */
 function preprocessProperty(contextData, property) {
-    // traverse object without recursion
-    const stack = [property];
-    let obj;
-
-    const forKey = (key) => {
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-            stack.push(obj[key]);
-        }
-    };
-    while (stack.length) {
-        obj = stack[0];
-        if (obj.if) {
-            const block = resolveConditional(contextData, obj.if) ? obj.then : obj.else;
+    // put 'property' inside of object to be able to
+    // process  'if' on the top level
+    util.traverseJSON({ property }, (parent, key) => {
+        const val = parent[key];
+        // run while 'if' block exist on current level
+        while (typeof val === 'object'
+            && !Array.isArray(val)
+            && val !== null
+            && typeof val.if !== 'undefined'
+        ) {
+            const block = resolveConditional(contextData, val.if) ? val.then : val.else;
             // delete blocks at first to avoid collisions with nested blocks
-            delete obj.if;
-            delete obj.then;
-            delete obj.else;
+            delete val.if;
+            delete val.then;
+            delete val.else;
 
-            if (block) {
-                Object.assign(obj, block);
-                // if nested block has 'if' then process it one more time
-                continue; // eslint-disable-line no-continue
+            if (typeof block === 'object' && !Array.isArray(block)) {
+                Object.assign(val, block);
             }
         }
-        Object.keys(obj).forEach(forKey);
-        stack.shift();
-    }
-    return property;
+    });
 }
 
 module.exports = {
     /**
      * Render property based on template and conditionals
+     *
+     * Note: mutates 'property'
      *
      * @param {Object} contextData - contextData object
      * @param {Object} property    - property object
@@ -176,10 +159,9 @@ module.exports = {
      * @returns {Object} rendered property
      */
     renderProperty(contextData, property) {
-        return preprocessProperty(
-            contextData,
-            renderTemplate(contextData, property)
-        );
+        renderTemplate(contextData, property);
+        preprocessProperty(contextData, property);
+        return property;
     },
 
     /**

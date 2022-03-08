@@ -62,6 +62,7 @@
     * 1.24.0 - 19.2 MB
     * 1.25.0 - 17.7 MB
     * 1.26.0 - 17.8 MB
+    * 1.27.0 - 17.7 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -87,6 +88,7 @@
       * 1.24.0 - 134 MB
       * 1.25.0 - 130 MB
       * 1.26.0 - 127 MB
+      * 1.27.0 - 127 MB
     * Check `node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:

@@ -585,25 +585,12 @@ module.exports = {
                 data = this._formatMACAddress(data);
             } else {
                 const properties = args.properties;
-                const stack = [data];
-                let obj;
-
-                const forKey = (key) => {
-                    const val = obj[key];
-                    if (typeof val === 'object') {
-                        if (val !== null) {
-                            stack.push(val);
-                        }
-                    } else if (properties.indexOf(key) !== -1 && typeof val === 'string') {
-                        obj[key] = this._formatMACAddress(val);
+                util.traverseJSON(data, (parent, key) => {
+                    const val = parent[key];
+                    if (typeof val === 'string' && properties.indexOf(key) !== -1) {
+                        parent[key] = this._formatMACAddress(val);
                     }
-                };
-
-                while (stack.length) {
-                    obj = stack[0];
-                    Object.keys(obj).forEach(forKey);
-                    stack.shift();
-                }
+                });
             }
         }
         return data;
@@ -862,5 +849,38 @@ module.exports = {
             }
         });
         return new Date(latestModifiedDate).toISOString();
+    },
+
+    /**
+     * Get those ASM attacks signatures that are completely installed.
+     * Convert createDateTime to a numerical value.
+     *
+     * @param {Object} args               - args object
+     * @param {Object} [args.data]        - data to process (always included)
+     *
+     * @returns {Object} Returns updated data
+     */
+    getAsmAttackSignatures(args) {
+        const allSignatures = args.data;
+        const allInstalledSignatures = {};
+        Object.keys(allSignatures).forEach((key) => {
+            const signature = allSignatures[key];
+            if (signature.status === 'install-complete' && signature.updateFileReference
+                    && signature.updateFileReference.createDateTime && signature.updateFileReference.id) {
+                const signatureItself = signature.updateFileReference;
+                const createDateTimeCopy = signatureItself.createDateTime;
+                signatureItself.createDateTime = new Date(signatureItself.createDateTime).getTime();
+                // if something went wrong with Date then keep the original date
+                if (Number.isNaN(signatureItself.createDateTime)) {
+                    signatureItself.createDateTime = createDateTimeCopy;
+                }
+                // label each signature by its id
+                const signatureId = signatureItself.id;
+                // remove 'id' property since its value will appear as 'name' property anyway
+                delete signatureItself.id;
+                allInstalledSignatures[signatureId] = signatureItself;
+            }
+        });
+        return allInstalledSignatures;
     }
 };

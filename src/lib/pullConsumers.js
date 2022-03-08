@@ -17,7 +17,8 @@ const systemPoller = require('./systemPoller');
 const errors = require('./errors');
 const logger = require('./logger');
 const configUtil = require('./utils/config');
-const tracers = require('./utils/tracer');
+const tracerMgr = require('./tracerManager');
+const promiseUtil = require('./utils/promise');
 const moduleLoader = require('./utils/moduleLoader').ModuleLoader;
 
 const PULL_CONSUMERS_DIR = '../pullConsumers';
@@ -147,7 +148,7 @@ function loadConsumers(config) {
                     config: util.deepCopy(consumerConfig),
                     consumer: consumerModule,
                     logger: logger.getChild(`${consumerType}.${consumerConfig.traceName}`),
-                    tracer: tracers.fromConfig(consumerConfig.trace)
+                    tracer: tracerMgr.fromConfig(consumerConfig.trace)
                 };
                 // copy consumer's data
                 resolve(consumer);
@@ -155,8 +156,8 @@ function loadConsumers(config) {
         }
     }));
 
-    return Promise.all(loadPromises)
-        .then((loadedConsumers) => loadedConsumers.filter((c) => c !== undefined));
+    return promiseUtil.allSettled(loadPromises)
+        .then((results) => promiseUtil.getValues(results).filter((c) => c !== undefined));
 }
 
 /**

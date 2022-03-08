@@ -360,6 +360,29 @@
                 "disabled": true
             }
         },
+        "asmAttackSignatures": {
+            "structure": { "parentKey": "system" },
+            "if": {
+                "isModuleProvisioned": "asm"
+            },
+            "then": {
+                "key": "asmAttackSignaturesInstallations::items",
+                "normalization": [
+                    {
+                        "convertArrayToMap": { "keyName": "id" }
+                    },
+                    {
+                        "filterKeys": { "exclude": [ "md5", "fileLocationReference", "isFileAvailable","isFileManuallyUploaded", "isGenesis", "kind", "selfLink" ] }
+                    },
+                    {
+                        "runFunctions": [ { "name": "getAsmAttackSignatures" } ]
+                    }
+                ]
+            },
+            "else": {
+                "disabled": true
+            }
+        },
         "apmState": {
             "structure": { "parentKey": "system" },
             "if": {

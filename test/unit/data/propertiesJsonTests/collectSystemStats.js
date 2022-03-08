@@ -365,6 +365,13 @@ module.exports = {
                             max: 0,
                             name: 'sslTps'
                         }
+                    },
+                    asmAttackSignatures: {
+                        ff8080817a3a4908017a3a490958000e: {
+                            filename: 'ASM-AttackSignatures_20190716_122131.im',
+                            name: 'ff8080817a3a4908017a3a490958000e',
+                            createDateTime: 1563279691000
+                        }
                     }
                 }
             },
@@ -1319,6 +1326,44 @@ module.exports = {
                             }
                         }
                     }`
+                },
+                {
+                    endpoint: '/mgmt/tm/live-update/asm-attack-signatures/installations',
+                    response: {
+                        kind: 'tm:live-update:asm-attack-signatures:installations-collectionstate',
+                        totalItems: 1,
+                        selfLink: 'https://localhost/mgmt/tm/live-update/asm-attack-signatures/installations',
+                        items: [
+                            {
+                                id: 'ff8080817a3a4908017a3a490a9a0014',
+                                lastUpdateMicros: 1624475503245000,
+                                loadDateTime: '2021-06-21T06:48:29Z',
+                                updateFileReference: {
+                                    link: 'https://localhost/mgmt/tm/live-update/asm-attack-signatures/update-files/ff8080817a3a4908017a3a490958000e'
+                                },
+                                status: 'install-complete',
+                                kind: 'tm:live-update:asm-attack-signatures:installationsstate',
+                                selfLink: 'https://localhost/mgmt/tm/live-update/asm-attack-signatures/installations/ff8080817a3a4908017a3a490a9a0014'
+                            }
+                        ]
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/live-update/asm-attack-signatures/update-files/ff8080817a3a4908017a3a490958000e',
+                    response: {
+                        id: 'ff8080817a3a4908017a3a490958000e',
+                        filename: 'ASM-AttackSignatures_20190716_122131.im',
+                        md5: 'B6E8F0C59B1C91D65F1BC357C4222714',
+                        fileLocationReference: {
+                            link: 'https://localhost/mgmt/tm/live-update/file-transfer/downloads/ASM-AttackSignatures_20190716_122131.im'
+                        },
+                        createDateTime: '2019-07-16T12:21:31Z',
+                        isFileAvailable: true,
+                        isFileManuallyUploaded: false,
+                        isGenesis: true,
+                        kind: 'tm:live-update:asm-attack-signatures:update-filesstate',
+                        selfLink: 'https://localhost/mgmt/tm/live-update/asm-attack-signatures/update-files/ff8080817a3a4908017a3a490958000e'
+                    }
                 }
             ]
         },

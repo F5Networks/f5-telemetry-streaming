@@ -180,6 +180,11 @@
             "path": "/mgmt/tm/asm/policies"
         },
         {
+            "name": "asmAttackSignaturesInstallations",
+            "path": "/mgmt/tm/live-update/asm-attack-signatures/installations",
+            "expandReferences": { "updateFileReference": { } }
+        },
+        {
             "name": "apmState",
             "path": "/mgmt/tm/util/bash",
             "ignoreCached": true,

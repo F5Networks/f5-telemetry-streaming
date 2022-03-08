@@ -316,6 +316,29 @@ describe('Config', () => {
                 })
                 .then((declaration) => {
                     assert.deepStrictEqual(declaration, { class: 'Telemetry_Test' });
+                    assert.deepStrictEqual(coreStub.configWorker.receivedSpy.callCount, 2, 'should emit "received" event 2 times');
+                    assert.deepStrictEqual(coreStub.configWorker.validationFailedSpy.callCount, 1, 'should emit "validationFailed" event');
+                    assert.deepStrictEqual(coreStub.configWorker.validationSucceedSpy.callCount, 1, 'should emit "validationSucceed" event');
+
+                    let expectedMetadata = { message: 'Loading saved configuration' };
+                    assert.deepStrictEqual(
+                        coreStub.configWorker.receivedSpy.args[0][0].metadata,
+                        expectedMetadata
+                    );
+                    assert.deepStrictEqual(
+                        coreStub.configWorker.validationFailedSpy.args[0][0].metadata,
+                        expectedMetadata
+                    );
+
+                    expectedMetadata = { message: 'Loading default config! Unable to load saved config, see error message in logs' };
+                    assert.deepStrictEqual(
+                        coreStub.configWorker.receivedSpy.args[1][0].metadata,
+                        expectedMetadata
+                    );
+                    assert.deepStrictEqual(
+                        coreStub.configWorker.validationSucceedSpy.args[0][0].metadata,
+                        expectedMetadata
+                    );
                 });
         });
 
@@ -590,7 +613,7 @@ describe('Config', () => {
     });
 
     describe('\'error\' event', () => {
-        it('should log error if caught', () => configWorker.safeEmitAsync('error', new Error('expected error'))
+        it('should log error if caught an error', () => configWorker.safeEmitAsync('error', new Error('expected error'))
             .then(() => {
                 testAssert.includeMatch(
                     coreStub.logger.messages.all,
@@ -617,5 +640,132 @@ describe('Config', () => {
             .then(() => {
                 assert.deepStrictEqual(coreStub.logger.logLevelHistory.slice(-1), ['debug'], 'should set log level to debug');
             }));
+    });
+
+    describe('\'received\' event', () => {
+        it('should send event', () => configWorker.processDeclaration(dummies.declaration.base.decrypted({
+            controls: dummies.declaration.controls.full.decrypted({
+                logLevel: 'error'
+            })
+        }), {
+            metadata: {
+                msg: 'here'
+            }
+        })
+            .then(() => {
+                assert.deepStrictEqual(coreStub.configWorker.receivedSpy.callCount, 1, 'should call listener for "received" event');
+                assert.deepStrictEqual(coreStub.configWorker.receivedSpy.args[0], [{
+                    declaration: dummies.declaration.base.decrypted({
+                        controls: dummies.declaration.controls.full.decrypted({
+                            logLevel: 'error'
+                        })
+                    }),
+                    metadata: {
+                        msg: 'here'
+                    },
+                    transactionID: 'uuid1'
+                }], 'should pass data to event');
+            }));
+
+        it('should send event (namespace)', () => configWorker.processNamespaceDeclaration(dummies.declaration.namespace.base.decrypted({
+            consumer: dummies.declaration.consumer.default.decrypted()
+        }),
+        'Namespace',
+        {
+            metadata: {
+                msg: 'here'
+            }
+        })
+            .then(() => {
+                assert.deepStrictEqual(coreStub.configWorker.receivedSpy.callCount, 1, 'should call listener for "received" event');
+                assert.deepStrictEqual(coreStub.configWorker.receivedSpy.args[0], [{
+                    declaration: dummies.declaration.base.decrypted({
+                        Namespace: dummies.declaration.namespace.base.decrypted({
+                            consumer: dummies.declaration.consumer.default.decrypted()
+                        })
+                    }),
+                    metadata: {
+                        msg: 'here'
+                    },
+                    transactionID: 'uuid1'
+                }], 'should pass data to event');
+            }));
+    });
+
+    describe('\'validationFailed\' event', () => {
+        it('should send event', () => {
+            let validationError;
+            configWorker.on('received', (ctx) => {
+                // want to be sure that original data distributed only
+                ctx.declaration.modified = true;
+                ctx.metadata.modified = true;
+            });
+            return configWorker.processDeclaration(dummies.declaration.base.decrypted({
+                invalid: true,
+                controls: dummies.declaration.controls.full.decrypted({
+                    logLevel: 'error'
+                })
+            }), {
+                metadata: {
+                    msg: 'here'
+                }
+            })
+                .catch((error) => {
+                    validationError = error;
+                })
+                .then(() => {
+                    assert.deepStrictEqual(coreStub.configWorker.validationSucceedSpy.callCount, 0, 'should not call listener for "validationSucceed" event');
+                    assert.deepStrictEqual(coreStub.configWorker.validationFailedSpy.callCount, 1, 'should call listener "validationFailed" event');
+                    assert.deepStrictEqual(coreStub.configWorker.validationFailedSpy.args[0], [{
+                        declaration: dummies.declaration.base.decrypted({
+                            invalid: true,
+                            controls: dummies.declaration.controls.full.decrypted({
+                                logLevel: 'error'
+                            })
+                        }),
+                        errorMsg: `${validationError}`,
+                        metadata: {
+                            msg: 'here'
+                        },
+                        transactionID: 'uuid1'
+                    }], 'should pass data to event');
+                });
+        });
+    });
+
+    describe('\'validationSucceed\' event', () => {
+        it('should send event', () => {
+            configWorker.on('received', (ctx) => {
+                // want to be sure that original data distributed only
+                ctx.declaration.modified = true;
+                ctx.metadata.modified = true;
+            });
+            return configWorker.processDeclaration(dummies.declaration.base.decrypted({
+                controls: dummies.declaration.controls.full.decrypted({
+                    logLevel: 'error'
+                })
+            }), {
+                metadata: {
+                    msg: 'here'
+                }
+            })
+                .then(() => {
+                    assert.deepStrictEqual(coreStub.configWorker.validationFailedSpy.callCount, 0, 'should not call listener for "validationFailed" event');
+                    assert.deepStrictEqual(coreStub.configWorker.validationSucceedSpy.callCount, 1, 'should call listener "validationSucceed" event');
+                    assert.deepStrictEqual(coreStub.configWorker.validationSucceedSpy.args[0], [{
+                        declaration: dummies.declaration.base.decrypted({
+                            controls: dummies.declaration.controls.full.decrypted({
+                                logLevel: 'error',
+                                memoryThresholdPercent: 90
+                            }),
+                            schemaVersion: constants.VERSION
+                        }),
+                        metadata: {
+                            msg: 'here'
+                        },
+                        transactionID: 'uuid1'
+                    }], 'should pass data to event');
+                });
+        });
     });
 });

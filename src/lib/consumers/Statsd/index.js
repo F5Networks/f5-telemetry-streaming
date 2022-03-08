@@ -78,13 +78,22 @@ module.exports = function (context) {
                 boolsToMetrics,
                 onMetric: (metricPath, metricValue, metricTags) => {
                     const metricName = `${metricPrefix}.${makePath(metricPath)}`;
-                    if (context.tracer) {
-                        tracePayload.push([`${metricName}: ${metricValue}`, metricTags]);
+                    let sanitizedTags;
+                    if (metricTags) {
+                        sanitizedTags = {};
+                        Object.keys(metricTags).forEach((tag) => {
+                            sanitizedTags[sanitizeString(tag)] = sanitizeString(metricTags[tag]);
+                        });
                     }
+
+                    if (context.tracer) {
+                        tracePayload.push([`${metricName}: ${metricValue}`, sanitizedTags]);
+                    }
+
                     client.gauge(
                         metricName,
                         metricValue,
-                        metricTags
+                        sanitizedTags
                     );
                 }
             });
@@ -106,5 +115,22 @@ module.exports = function (context) {
  * @returns {string} path to statsd metric
  */
 function makePath(paths) {
-    return paths.map((i) => i.replace(/\.|\/|:/g, '-')).join('.');
+    return paths.map(
+        (i) => sanitizeString(i.replace(/\.|\/|:/g, '-'))
+    ).join('.');
+}
+
+/**
+ * Sanitize a string value into an acceptable StatsD string
+ * Uses regexes from Statsd project:
+ *  https://github.com/statsd/statsd/blob/v0.9.0/stats.js#L166-L168
+ * @param {any} raw   - raw value (boolean, integer, string) to sanitize
+ * @returns {string}    sanitized value as a string
+ */
+function sanitizeString(raw) {
+    return raw.toString()
+        .replace(/\s+/g, '_')
+        .replace(/\//g, '-')
+        // eslint-disable-next-line no-useless-escape
+        .replace(/[^a-zA-Z_\-0-9\.;=]/g, '');
 }

@@ -17,6 +17,7 @@ const constants = require('../lib/constants');
 const logger = require('../lib/logger');
 const util = require('../lib/utils/misc');
 
+const ActivityRecorder = require('../lib/activityRecorder');
 const deviceUtil = require('../lib/utils/device');
 const retryPromise = require('../lib/utils/promise').retry;
 const persistentStorage = require('../lib/persistentStorage');
@@ -30,8 +31,8 @@ const configListenerModulesToLoad = [
     '../lib/systemPoller',
     '../lib/ihealth',
     '../lib/requestHandlers/connections',
-    '../lib/utils/monitor.js',
-    '../lib/utils/tracer.js'
+    '../lib/tracerManager.js',
+    '../lib/utils/monitor.js'
 ];
 
 configListenerModulesToLoad.forEach((module) => {
@@ -111,6 +112,9 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     // register REST endpoints
     this.router = requestRouter;
     this.router.registerAllHandlers(false);
+
+    this.activityRecorder = new ActivityRecorder();
+    this.activityRecorder.recordDeclarationActivity(configWorker);
 
     // configure global socket maximum
     http.globalAgent.maxSockets = 5;

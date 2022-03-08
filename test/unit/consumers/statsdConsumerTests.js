@@ -174,6 +174,39 @@ describe('Statsd', () => {
                 .then(() => assert.deepStrictEqual(metrics, expectedData));
         });
 
+        it('should process data and replace special characters in metric name', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: defaultConsumerConfig
+            });
+            context.event.data = {
+                system: { hostname: 'myHost' },
+                'mydata.subProp/lowestProp:stats': {
+                    'stat with spaces': {
+                        value: 10,
+                        status: 'ready'
+                    },
+                    'stat!with@special#characters': {
+                        value: 20,
+                        status: 'alsoReady'
+                    }
+                }
+            };
+            return statsDIndex(context)
+                .then(() => {
+                    assert.sameDeepMembers(metrics, [
+                        {
+                            metricName: 'f5telemetry.myHost.mydata-subProp-lowestProp-stats.stat_with_spaces.value',
+                            metricValue: 10
+                        },
+                        {
+                            metricName: 'f5telemetry.myHost.mydata-subProp-lowestProp-stats.statwithspecialcharacters.value',
+                            metricValue: 20
+                        }
+                    ]);
+                });
+        });
+
         it('should NOT process event data', () => {
             const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',
@@ -223,6 +256,26 @@ describe('Statsd', () => {
                     assert.ok(Array.isArray(traceData), 'should be formatted as an array');
                     const expectedTraceLine = 'f5telemetry.telemetry-bigip-com.system.cpu: 0';
                     assert.ok(traceData.find((d) => d[0] === expectedTraceLine), 'should find expected line in trace');
+                });
+        });
+
+        it('should trace payload with sanitized data', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: Object.assign({ addTags: { method: 'sibling' } }, defaultConsumerConfig)
+            });
+
+            return statsDIndex(context)
+                .then(() => {
+                    const traceData = context.tracer.write.firstCall.args[0];
+                    assert.ok(Array.isArray(traceData), 'should be formatted as an array');
+
+                    const expectedMetricName = 'f5telemetry.telemetry-bigip-com.system.cpu';
+                    const tracedTags = traceData.find((d) => d[0] === `${expectedMetricName}: 0`)[1];
+                    const expectedTags = getExpectedData(true).find(
+                        (d) => d.metricName === expectedMetricName
+                    ).metricTags;
+                    assert.deepEqual(tracedTags, expectedTags);
                 });
         });
     });

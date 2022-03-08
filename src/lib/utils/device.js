@@ -10,7 +10,6 @@
 
 const fs = require('fs');
 const crypto = require('crypto');
-const diff = require('deep-diff');
 
 const constants = require('../constants');
 const logger = require('../logger');
@@ -1038,83 +1037,34 @@ module.exports = {
      * @returns {Promise<Object>} resolve with decrypted data
      */
     decryptAllSecrets(data) {
-        // helper functions strictly for this function
-        const removePassphrase = (iData) => {
-            if (iData && typeof iData === 'object') {
-                if (Array.isArray(iData)) {
-                    iData.forEach((i) => {
-                        removePassphrase(i);
-                    });
-                } else {
-                    const keys = Object.keys(iData);
-
-                    // check for value containing an object with 'class': 'Secret'
-                    // this applies to named key 'passphrase' as well as unknown key names
-                    keys.forEach((k) => {
-                        if (typeof iData[k] === 'object' && iData[k].class === 'Secret') {
-                            delete iData[k];
-                        }
-                    });
-
-                    // finally recurse child objects
-                    keys.forEach((k) => {
-                        removePassphrase(iData[k]);
-                    });
-                }
-            }
-            return iData;
-        };
-        const getPassphrase = (iData, iPath) => {
-            // assume diff returned valid path, so let's start at root and then
-            // navigate down to object
-            let passphrase = iData;
-            iPath.forEach((i) => {
-                passphrase = passphrase[i];
-            });
-            return passphrase;
-        };
-        // end helper functions
-
-        // deep copy of the data, then remove passphrases and get a diff using deep-diff module
-        // telling us where exactly in the config each passphrase is and how many there are
-        const dataCopy = util.deepCopy(data);
-        const passphrases = diff(removePassphrase(dataCopy), data) || [];
-
-        // now for each passphrase determine if decryption (or download, etc.) is required
         const promises = [];
-        passphrases.forEach((i) => {
-            const passphrase = getPassphrase(data, i.path);
-
-            if (passphrase[constants.PASSPHRASE_CIPHER_TEXT] !== undefined) {
-                // constants.PASSPHRASE_CIPHER_TEXT means local decryption is required
-                promises.push(this.decryptSecret(passphrase[constants.PASSPHRASE_CIPHER_TEXT]));
-            } else if (passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR] !== undefined) {
-                // constants.PASSPHRASE_ENVIRONMENT_VAR means secret resides in an environment variable
-                let envValue = process.env[passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]];
-                if (envValue === undefined) {
-                    envValue = null;
-                    logger.error(`Environment variable does not exist: ${passphrase[constants.PASSPHRASE_ENVIRONMENT_VAR]}`);
+        util.traverseJSON(data, (parent, key) => {
+            const item = parent[key];
+            if (typeof item === 'object' && !Array.isArray(item)
+                && item !== null && item.class === constants.CONFIG_CLASSES.SECRET_CLASS) {
+                if (typeof item[constants.PASSPHRASE_CIPHER_TEXT] !== 'undefined') {
+                    promises.push(this.decryptSecret(item[constants.PASSPHRASE_CIPHER_TEXT])
+                        .then((decryptedVal) => {
+                            parent[key] = decryptedVal;
+                        }));
+                } else if (typeof item[constants.PASSPHRASE_ENVIRONMENT_VAR] !== 'undefined') {
+                    // constants.PASSPHRASE_ENVIRONMENT_VAR means secret resides in an environment variable
+                    parent[key] = process.env[item[constants.PASSPHRASE_ENVIRONMENT_VAR]];
+                    if (typeof parent[key] === 'undefined') {
+                        parent[key] = null;
+                        logger.error(`Environment variable does not exist: ${item[constants.PASSPHRASE_ENVIRONMENT_VAR]}`);
+                    }
+                } else {
+                    parent[key] = null;
                 }
-                promises.push(envValue);
-            } else {
-                // always push a promise to keep index in sync
-                promises.push(null);
+                // no needs to inspect nested data
+                return false;
             }
+            return true;
         });
-
-        return Promise.all(promises)
-            .then((res) => {
-                let idx = 0;
-                passphrases.forEach((i) => {
-                    // navigate to passphrase in data object and replace whole object with
-                    // decrypted value - this allows consumers to reference any key name containing
-                    // a secret (object) and get decrypted value (string) - not just 'passphrase'
-                    const parentKey = i.path[i.path.length - 1];
-                    const passphrase = getPassphrase(data, i.path.slice(0, -1));
-                    passphrase[parentKey] = res[idx];
-                    idx += 1;
-                });
-                // return (modified) data
+        return promiseUtil.allSettled(promises)
+            .then((results) => {
+                promiseUtil.getValues(results);
                 return data;
             });
     },

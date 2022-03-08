@@ -15,10 +15,11 @@ const dataPipeline = require('../dataPipeline');
 const logger = require('../logger');
 const messageStream = require('./messageStream');
 const normalize = require('../normalize');
+const onApplicationExit = require('../utils/misc').onApplicationExit;
 const promiseUtil = require('../utils/promise');
 const properties = require('../properties.json');
 const stringify = require('../utils/misc').stringify;
-const tracers = require('../utils/tracer');
+const tracerMgr = require('../tracerManager');
 
 /** @module EventListener */
 
@@ -393,8 +394,8 @@ configWorker.on('change', (config) => {
             filterFunc: buildFilterFunc(listenerConfig),
             id: listenerConfig.id,
             tags: listenerConfig.tag,
-            tracer: tracers.fromConfig(listenerConfig.trace),
-            inputTracer: tracers.fromConfig(listenerConfig.traceInput)
+            tracer: tracerMgr.fromConfig(listenerConfig.trace),
+            inputTracer: tracerMgr.fromConfig(listenerConfig.traceInput)
         });
         listener.updateRawDataHandling();
     });
@@ -405,12 +406,9 @@ configWorker.on('change', (config) => {
         .catch((err) => logger.exception('Unable to start some (or all) of the event listeners', err));
 });
 
-function sendShutdownEvent() {
+onApplicationExit(() => {
     EventListener.getAll().map(EventListener.remove);
     EventListener.receiversManager.destroyAll().then(() => logger.info('All Event Listeners and Data Receivers destroyed'));
-}
-process.on('SIGINT', sendShutdownEvent);
-process.on('SIGTERM', sendShutdownEvent);
-process.on('SIGHUP', sendShutdownEvent);
+});
 
 module.exports = EventListener;

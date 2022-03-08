@@ -14,6 +14,7 @@ const dataMapping = require('./dataMapping');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 const memConverter = require('./multiMetricEventConverter');
 const httpUtil = require('../shared/httpUtil');
+const promiseUtil = require('../../utils/promise');
 
 const MAX_CHUNK_SIZE = 99000;
 const HEC_EVENTS_URI = '/services/collector/event';
@@ -146,8 +147,11 @@ function transformData(globalCtx) {
     let p = null;
     if (globalCtx.event.type === EVENT_TYPES.SYSTEM_POLLER && !globalCtx.event.isCustom) {
         requestCtx.cache.dataTimestamp = Date.parse(globalCtx.event.data.system.systemTimestamp);
-        p = Promise.all(dataMapping.stats.map((func) => safeDataTransform(func, requestCtx)))
-            .then(() => safeDataTransform(dataMapping.overall, requestCtx));
+        p = promiseUtil.allSettled(dataMapping.stats.map((func) => safeDataTransform(func, requestCtx)))
+            .then((results) => {
+                promiseUtil.getValues(results); // throws error if found it
+                return safeDataTransform(dataMapping.overall, requestCtx);
+            });
     } else if (globalCtx.event.type === EVENT_TYPES.IHEALTH_POLLER) {
         p = safeDataTransform(dataMapping.ihealth, requestCtx);
     }

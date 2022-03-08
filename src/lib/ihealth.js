@@ -18,7 +18,7 @@ const logger = require('./logger').getChild('ihealth');
 const normalize = require('./normalize');
 const promiseUtil = require('./utils/promise');
 const properties = require('./properties.json').ihealth;
-const tracer = require('./utils/tracer');
+const tracerMgr = require('./tracerManager');
 const util = require('./utils/misc');
 
 /** @module ihealth */
@@ -82,7 +82,7 @@ function createReportCallback(poller, pollerConfig, globalConfig) {
         destinationIDs: configUtil.getReceivers(globalConfig, pollerConfig).map((r) => r.id),
         pollerID: pollerConfig.id,
         demoMode: poller.isDemoModeEnabled(),
-        tracer: tracer.fromConfig(pollerConfig.trace)
+        tracer: tracerMgr.fromConfig(pollerConfig.trace)
     };
     return safeProcess.bind(reportCallback.bind(ctx));
 }
@@ -213,11 +213,12 @@ configWorker.on('change', (config) => Promise.resolve()
 
         const pollersToStart = [];
         // wait for disable only - it is faster rather than wait for complete stop
-        return Promise.all([
+        return promiseUtil.allSettled([
             promiseUtil.allSettled(cleanupInactive()),
             promiseUtil.allSettled(cleanupUpdated())
         ])
-            .then(() => {
+            .then((results) => {
+                promiseUtil.getValues(results); // throws error if found it
                 configuredPollers.forEach((pollerConfig) => {
                     if (pollerConfig.skipUpdate || pollerConfig.enable === false) {
                         return;

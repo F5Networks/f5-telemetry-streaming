@@ -11,6 +11,7 @@
 const gcpUtil = require('../shared/gcpUtil');
 
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
+const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 
 const BASE_GCM_URI = 'https://monitoring.googleapis.com/v3/projects';
@@ -94,8 +95,11 @@ module.exports = function (context) {
                 }
             });
 
-            return Promise.all(promises)
-                .then(() => Promise.resolve(metricData))
+            return promiseUtil.allSettled(promises)
+                .then((innerResults) => {
+                    promiseUtil.getValues(innerResults); // throws error if found it
+                    return metricData;
+                })
                 .catch((err) => {
                     context.logger.error(`error: ${err.message ? err.message : err}`);
                     throw err;

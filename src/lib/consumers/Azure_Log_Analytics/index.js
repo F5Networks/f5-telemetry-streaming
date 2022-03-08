@@ -10,6 +10,7 @@
 
 const util = require('../../utils/misc');
 const azureUtil = require('../shared/azureUtil');
+const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 
@@ -84,9 +85,10 @@ module.exports = function (context) {
             if (context.tracer) {
                 context.tracer.write(tracerMsg);
             }
-            return Promise.all(promises);
+            return promiseUtil.allSettled(promises);
         })
-        .then(() => {
+        .then((results) => {
+            promiseUtil.getValues(results); // throws error if found it
             context.logger.debug('success');
         })
         .catch((error) => {

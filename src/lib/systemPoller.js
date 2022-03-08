@@ -19,7 +19,7 @@ const monitor = require('./utils/monitor');
 const promiseUtil = require('./utils/promise');
 const SystemStats = require('./systemStats');
 const timers = require('./utils/timers');
-const tracers = require('./utils/tracer');
+const tracerMgr = require('./tracerManager');
 const util = require('./utils/misc');
 
 /** @module systemPoller */
@@ -95,7 +95,7 @@ function applyConfig(originalConfig) {
         const existingPoller = currPollers[key];
         newPollerIDs.push(key);
         if (!pollerConfig.skipUpdate || !existingPoller) {
-            pollerConfig.tracer = tracers.fromConfig(pollerConfig.trace);
+            pollerConfig.tracer = tracerMgr.fromConfig(pollerConfig.trace);
             const baseMsg = `system poller ${key}. Interval = ${pollerConfig.interval} sec.`;
             // add to data context to track source poller config and destination(s)
             pollerConfig.destinationIds = configUtil.getReceivers(originalConfig, pollerConfig).map((r) => r.id);
@@ -310,24 +310,14 @@ function getPollersConfig(sysOrPollerName, options) {
  * @returns {Promise<Array>} resolved with pollers data
  */
 function fetchPollersData(pollerConfigs, decryptSecrets) {
-    // need to wrap with catch to avoid situations when one of the promises was rejected
-    // and another one left in unknown state
-    const caughtErrors = [];
     const promise = decryptSecrets ? configUtil.decryptSecrets(pollerConfigs)
         : Promise.resolve(pollerConfigs);
 
     return promise
-        .then((decryptedConf) => {
-            const processPollers = decryptedConf.map((pollerConf) => safeProcess(pollerConf, { requestFromUser: true })
-                .catch((err) => caughtErrors.push(err)));
-            return Promise.all(processPollers);
-        })
-        .then((data) => {
-            if (caughtErrors.length > 0) {
-                return Promise.reject(caughtErrors[0]);
-            }
-            return Promise.resolve(data);
-        });
+        .then((decryptedConf) => promiseUtil.allSettled(
+            decryptedConf.map((pollerConf) => safeProcess(pollerConf, { requestFromUser: true }))
+        ))
+        .then((results) => promiseUtil.getValues(results)); // throws error if found it
 }
 
 // config worker change event

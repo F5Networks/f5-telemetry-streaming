@@ -14,6 +14,7 @@ const logger = require('../logger');
 const timers = require('./timers');
 const configWorker = require('../config');
 const configUtil = require('./config');
+const onApplicationExit = require('./misc').onApplicationExit;
 const SafeEventEmitter = require('./eventEmitter').SafeEventEmitter;
 
 // eslint-disable-next-line no-restricted-properties
@@ -51,10 +52,7 @@ class Monitor extends SafeEventEmitter {
             logger: this.logger.getChild('timer')
         });
 
-        const stopSignals = ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'];
-        stopSignals.forEach((signal) => {
-            process.on(signal, this.stop.bind(this));
-        });
+        onApplicationExit(this.stop.bind(this));
     }
 
     /**

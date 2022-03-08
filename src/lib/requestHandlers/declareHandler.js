@@ -9,6 +9,7 @@
 'use strict';
 
 const BaseRequestHandler = require('./baseHandler');
+const deepCopy = require('../utils/misc').deepCopy;
 const ErrorHandler = require('./errorHandler');
 const httpErrors = require('./httpErrors');
 const configWorker = require('../config');
@@ -52,10 +53,22 @@ class DeclareEndpointHandler extends BaseRequestHandler {
                 logger.debug('Can\'t process new declaration while previous one is still in progress');
                 return Promise.resolve(new ErrorHandler(new httpErrors.ServiceUnavailableError()));
             }
+
+            const declaration = this.restOperation.getBody();
+            // compute request metadata
+            const metadata = {
+                message: 'Incoming declaration via REST API',
+                originDeclaration: deepCopy(declaration)
+            };
+            if (namespace) {
+                metadata.namespace = namespace;
+            }
+            metadata.sourceIP = this.getHeaders()['X-Forwarded-For'];
+
             DeclareEndpointHandler.PROCESSING_DECLARATION_FLAG = true;
             promise = namespace
-                ? configWorker.processNamespaceDeclaration(this.restOperation.getBody(), this.params.namespace)
-                : configWorker.processDeclaration(this.restOperation.getBody());
+                ? configWorker.processNamespaceDeclaration(declaration, this.params.namespace, { metadata })
+                : configWorker.processDeclaration(declaration, { metadata });
 
             promise = promise
                 .then((config) => {

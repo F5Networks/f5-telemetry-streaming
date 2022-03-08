@@ -2437,6 +2437,25 @@ module.exports = {
                     ]
                 },
                 {
+                    name: 'system_asmAttackSignatures_createDateTime',
+                    description: 'system.asmAttackSignatures.createDateTime',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'filename',
+                                    value: 'ASM-AttackSignatures_20190716_122131.im'
+                                },
+                                {
+                                    key: 'name',
+                                    value: 'ff8080817a3a4908017a3a490958000e'
+                                }
+                            ],
+                            value: 1563279691000
+                        }
+                    ]
+                },
+                {
                     name: 'virtualServers_clientside_bitsIn',
                     description: 'virtualServers.clientside.bitsIn',
                     dataPoints: [

@@ -56,6 +56,21 @@ describe('BaseRequestHandler', () => {
         });
     });
 
+    describe('.getHeaders()', () => {
+        it('should return empty HTTP headers', () => {
+            assert.deepStrictEqual(requestHandler.getHeaders(), {}, 'should return empty headers object by default');
+        });
+
+        it('should return HTTP headers', () => {
+            restOpMock.setHeaders({ header: 'value' });
+            assert.deepStrictEqual(
+                requestHandler.getHeaders(),
+                { header: 'value' },
+                'should return expected headers'
+            );
+        });
+    });
+
     describe('.getMethod()', () => {
         it('should return HTTP method', () => {
             assert.deepStrictEqual(requestHandler.getMethod(), 'GET', 'should return method in upper case');

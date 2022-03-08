@@ -15,11 +15,17 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const config = require('../../src/lib/config');
+const configWorker = require('../../src/lib/config');
 const deviceUtil = require('../../src/lib/utils/device');
+const logger = require('../../src/lib/logger');
+const persistentStorage = require('../../src/lib/persistentStorage');
 const RestWorker = require('../../src/nodejs/restWorker');
 const requestRouter = require('../../src/lib/requestHandlers/router');
+const stubs = require('./shared/stubs');
+const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
+const tracer = require('../../src/lib/utils/tracer');
+const utilMisc = require('../../src/lib/utils/misc');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -27,8 +33,8 @@ const assert = chai.assert;
 moduleCache.remember();
 
 describe('restWorker', () => {
+    let coreStub;
     let restWorker;
-    let loadConfigStub;
     let gatherHostDeviceInfoStub;
 
     const baseState = {
@@ -39,6 +45,7 @@ describe('restWorker', () => {
             }
         }
     };
+    const declarationTracerFile = '/shared/tmp/telemetry/declarationHistory';
 
     before(() => {
         moduleCache.restore();
@@ -49,22 +56,33 @@ describe('restWorker', () => {
         RestWorker.prototype.saveState = function (first, state, cb) {
             cb(null);
         };
+
+        // remove all existing listeners as consumers, systemPoller and
+        // prev instances of RestWorker
+        configWorker.removeAllListeners();
     });
 
     beforeEach(() => {
+        coreStub = stubs.coreStub({
+            configWorker,
+            deviceUtil,
+            logger,
+            persistentStorage,
+            teemReporter,
+            tracer,
+            utilMisc
+        });
+        coreStub.utilMisc.generateUuid.numbersOnly = false;
+
         restWorker = new RestWorker();
-        // remove all existing listeners as consumers, systemPoller and
-        // prev instances of RestWorker
-        config.removeAllListeners();
-        loadConfigStub = sinon.stub(config, 'load');
-        loadConfigStub.resolves();
         gatherHostDeviceInfoStub = sinon.stub(deviceUtil, 'gatherHostDeviceInfo');
         gatherHostDeviceInfoStub.resolves();
     });
 
-    afterEach(() => {
-        sinon.restore();
-    });
+    afterEach(() => (restWorker.activityRecorder
+        ? restWorker.activityRecorder.stop()
+        : Promise.resolve())
+        .then(() => sinon.restore()));
 
     describe('constructor', () => {
         it('should set WORKER_URI_PATH to shared/telemetry', () => {
@@ -96,6 +114,7 @@ describe('restWorker', () => {
         });
 
         it('should call failure callback if unable to start application when promise chain failed', () => {
+            const loadConfigStub = sinon.stub(configWorker, 'load');
             loadConfigStub.rejects(new Error('loadConfig error'));
             return new Promise((resolve, reject) => {
                 restWorker.onStartCompleted(
@@ -128,6 +147,23 @@ describe('restWorker', () => {
             return new Promise((resolve, reject) => {
                 restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
             });
+        });
+
+        it('should start activity recorder', () => {
+            coreStub.persistentStorage.loadData = { config: { raw: { class: 'Telemetry_Test' } } };
+            return new Promise((resolve, reject) => {
+                restWorker.onStartCompleted(resolve, reject);
+            })
+                .then(() => testUtil.sleep(100))
+                .then(() => coreStub.tracer.waitForData())
+                .then(() => {
+                    const data = coreStub.tracer.data[declarationTracerFile];
+                    assert.lengthOf(data, 4, 'should write 4 events');
+                    assert.sameDeepMembers(
+                        data.map((d) => d.data.event),
+                        ['received', 'received', 'validationSucceed', 'validationFailed']
+                    );
+                });
         });
     });
 

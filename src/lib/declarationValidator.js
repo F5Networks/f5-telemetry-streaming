@@ -13,6 +13,7 @@ const ajvKeywords = require('ajv-keywords');
 
 const CLASSES = require('./constants').CONFIG_CLASSES;
 const customKeywords = require('./customKeywords');
+const promiseUtil = require('./utils/promise');
 const util = require('./utils/misc');
 
 const actionsSchema = require('../schema/latest/actions_schema.json');
@@ -137,10 +138,7 @@ module.exports = {
             return Promise.resolve(data);
         }
 
-        errors = [];
         const deferred = context.deferred;
-        const safeWrapper = (promiseFn) => promiseFn().catch((e) => errors.push(e));
-
         const processDeferred = (idx) => {
             if (idx >= customKeywords.asyncOrder.length) {
                 return Promise.resolve();
@@ -150,14 +148,15 @@ module.exports = {
             keywords.forEach((keyword) => {
                 if (deferred[keyword]) {
                     deferred[keyword].forEach((deferredFn) => {
-                        promises.push(safeWrapper(deferredFn));
+                        promises.push(deferredFn());
                     });
                 }
             });
-            return Promise.all(promises)
-                .then(() => {
-                    if (errors.length) {
-                        return Promise.reject(new Error(util.stringify(processErrors(errors))));
+            return promiseUtil.allSettled(promises)
+                .then((results) => {
+                    const innerErrors = results.filter((r) => typeof r.reason !== 'undefined');
+                    if (innerErrors.length) {
+                        return Promise.reject(new Error(util.stringify(processErrors(innerErrors))));
                     }
                     return processDeferred(idx + 1);
                 });

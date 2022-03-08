@@ -22,19 +22,19 @@ const requestsUtil = require('../../utils/requests');
 const DATA_DOG_METRIC_TYPE = 'gauge';
 const DATA_DOG_REGIONAL_GATEWAYS = {
     US1: {
-        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.com/v1/input',
+        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.com/api/v2/logs',
         METRICS_GATEWAY: 'https://api.datadoghq.com/api/v1/series'
     },
     US3: {
-        LOGS_GATEWAY: 'https://http-intake.logs.us3.datadoghq.com/v1/input',
+        LOGS_GATEWAY: 'https://http-intake.logs.us3.datadoghq.com/api/v2/logs',
         METRICS_GATEWAY: 'https://api.us3.datadoghq.com/api/v1/series'
     },
     EU1: {
-        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.eu/v1/input',
+        LOGS_GATEWAY: 'https://http-intake.logs.datadoghq.eu/api/v2/logs',
         METRICS_GATEWAY: 'https://api.datadoghq.eu/api/v1/series'
     },
     'US1-FED': {
-        LOGS_GATEWAY: 'https://http-intake.logs.ddog-gov.com/v1/input',
+        LOGS_GATEWAY: 'https://http-intake.logs.ddog-gov.com/api/v2/logs',
         METRICS_GATEWAY: 'https://api.ddog-gov.com/api/v1/series'
     }
 };

@@ -1,0 +1,1357 @@
+{
+    "$id": "consumer_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Consumer schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "jmesPathAction": {
+            "title": "JMESPath Action",
+            "description": "Will use a JMESPath expression to modify the incoming data payload",
+            "type": "object",
+            "allOf": [
+                { "$ref": "actions_schema.json#/definitions/baseActionObject" },
+                {
+                    "properties": {
+                        "JMESPath": {
+                            "title": "JMESPath",
+                            "description": "Will use a JMESPath expression to modify the incoming data payload",
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        "expression": {
+                            "title": "Expression",
+                            "description": "The JMESPath expression to be applied to the incoming data payload",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "enable": {}
+                    },
+                    "additionalProperties": false,
+                    "required": ["JMESPath", "expression"]
+                }
+            ]
+        },
+        "autoTaggingStatsd": {
+            "title": "Statsd auto tagging",
+            "description": "Will parse incoming payload for values to automatically add as tags.",
+            "type": "object",
+            "properties": {
+                "method": {
+                    "title": "AutoTagging method",
+                    "description": "AutoTagging method to use to fetch tags",
+                    "type": "string",
+                    "enum": ["sibling"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["method"]
+        },
+        "genericHttpActions": {
+            "title": "Actions",
+            "description": "Actions to be performed on the Generic HTTP Consumer.",
+            "allOf": [
+                { "$ref": "actions_schema.json#/definitions/baseActionsChain" },
+                {
+                    "items": {
+                        "oneOf": [
+                            { "$ref": "#/definitions/jmesPathAction" }
+                        ]
+                    }
+                }
+            ]
+        },
+        "host": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Host",
+            "description": "FQDN or IP address" ,
+            "type": "string",
+            "minLength": 1,
+            "anyOf": [
+                { "format": "ipv4" },
+                { "format": "ipv6" },
+                { "format": "hostname" }
+            ],
+            "hostConnectivityCheck": true   
+        },
+        "protocols": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Protocols (all)",
+            "description": "" ,
+            "type": "string",
+            "enum": [ "https", "http", "tcp", "udp", "binaryTcpTls", "binaryTcp" ]
+        },
+        "port": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Port",
+            "description": "" ,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "path": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Path",
+            "description": "Path to post data to",
+            "type": ["string", "object"],
+            "minLength": 1,
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/stringOrSecret"
+                }
+            ]
+        },
+        "method": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Method",
+            "description": "HTTP method to use (limited to sensical choices)" ,
+            "type": "string",
+            "enum": [ "POST", "GET", "PUT" ]
+        },
+        "headers": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Headers",
+            "description": "HTTP headers to use" ,
+            "type": "array",
+            "items": {
+                "properties": {
+                    "name": {
+                        "description": "Name of this header",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "value": {
+                        "description": "Value of this header",
+                        "type": ["string", "object"],
+                        "f5expand": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/stringOrSecret"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "customOpts": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Custom Opts (Client Library Dependent)",
+            "description": "Additional options for use by consumer client library. Refer to corresponding consumer lib documentation for acceptable keys and values." ,
+            "type": "array",
+            "items": {
+                "properties": {
+                    "name": {
+                        "description": "Name of the option",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "value": {
+                        "description": "Value of the option",
+                        "minLength": 1,
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "f5expand": true
+                                    },
+                                    {
+                                        "$ref": "base_schema.json#/definitions/stringOrSecret"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "minItems": 1
+        },
+        "format": {
+            "$comment": "Required for certain consumers: Splunk and Azure_Log_Analytics",
+            "title": "Format (informs consumer additional formatting may be required)",
+            "description": "",
+            "type": "string"
+        },
+        "username": {
+            "$comment": "Required for certain consumers: standard property",
+            "title": "Username",
+            "description": "" ,
+            "minLength": 1,
+            "type": "string",
+            "f5expand": true
+        },
+        "region": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch, AWS_S3, Azure_Log_Analytics, Azure_App_Insights, DataDog",
+            "title": "Region",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "endpointUrl": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch, AWS_S3",
+            "title": "endpoint url",
+            "description": "The full endpoint URL for service requests",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "bucket": {
+            "$comment": "Required for certain consumers: AWS_S3",
+            "title": "Bucket",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "logGroup": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
+            "title": "Log Group",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "logStream": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
+            "title": "Log Stream",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "metricNamespace": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch",
+            "title": "Metric Namespace",
+            "description": "The namespace for the metrics",
+            "type": "string",
+            "f5expand": true,
+            "minLength": 1
+        },
+        "metricPrefix": {
+            "$comment": "Required for certain consumers: DataDog",
+            "title": "Metric Prefix",
+            "description": "The string value(s) to use as a metric prefix",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "allOf": [{
+                    "type": "string",
+                    "f5expand": true,
+                    "minLength": 1
+                }]
+            }
+        },
+        "workspaceId": {
+            "$comment": "Required for certain consumers: Azure_Log_Analytics",
+            "title": "Workspace ID",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "useManagedIdentity": {
+            "$comment": "Required for certain consumers: Azure_Log_Analytics and Azure_Application_Insights",
+            "title": "Use Managed Identity",
+            "description": "Determines whether to use Managed Identity to perform authorization for Azure services",
+            "type": "boolean",
+            "default": false
+        },
+        "appInsightsResourceName": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Application Insights Resource Name (Pattern)",
+            "description": "Name filter used to determine which App Insights resource to send metrics to. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions to",
+            "type": "string",
+            "minLength": 1
+        },
+        "instrumentationKey": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Instrumentation Key",
+            "description": "Used to determine which App Insights resource to send metrics to",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "f5expand": true,
+                    "minLength": 1
+                },
+                {
+                    "type":"array",
+                    "items": {
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "minItems": 1
+                }
+            ]
+        },
+        "maxBatchIntervalMs": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Maximum Batch Interval (ms)",
+            "description": "The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize",
+            "type": "integer",
+            "minimum": 1000,
+            "default": 5000
+        },
+        "maxBatchSize": {
+            "$comment": "Required for certain consumers: Azure_Application_Insights",
+            "title": "Maximum Batch Size",
+            "description": "The maximum number of telemetry items to include in a payload to the ingestion endpoint",
+            "type": "integer",
+            "minimum": 1,
+            "default": 250
+        },
+        "topic": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Topic",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
+        "index": {
+            "$comment": "Required for certain consumers: ElasticSearch",
+            "title": "Index Name",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "apiVersion": {
+            "$comment": "Required for certain consumers: ElasticSearch",
+            "title": "API Version",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "dataType": {
+            "$comment": "Required for certain consumers: AWS_CloudWatch, ElasticSearch",
+            "title": "Data type",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true
+        },
+        "authenticationProtocol": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Authentication Protocol",
+            "description": "" ,
+            "type": "string",
+            "f5expand": true,
+            "enum": [
+                "SASL-PLAIN",
+                "TLS",
+                "None"
+            ]
+        },
+        "clientCertificate": {
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "title": "Client Certificate",
+            "description": "Certificate(s) to use when connecting to a secured endpoint.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "rootCertificate": {
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "title": "Root Certificate",
+            "description": "Certificate Authority root certificate, used to validate certificate chains.",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "projectId": {
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring",
+            "title": "Project ID",
+            "description": "The ID of the relevant project.",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "serviceEmail": {
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring, Google_Cloud_Logging",
+            "title": "Service Email",
+            "description": "The service email.",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "privateKeyId": {
+            "$comment": "Required for certain consumers when Service Account Token is not used: Google_Cloud_Monitoring, Google_Cloud_Logging",
+            "title": "Private Key ID",
+            "description": "The private key ID.",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "useServiceAccountToken": {
+            "$comment": "Used by certain consumers: Google_Cloud_Monitoring, Google_Cloud_Logging",
+            "title": "Use Service Account Token",
+            "description": "Determines whether to use Service Account Token to perform authorization for Google services",
+            "type": "boolean",
+            "default": false
+        },
+        "logScope": {
+            "$comment": "Required for certain consumers: Google_Cloud_Logging",
+            "title": "Logging Scope Type",
+            "description": "" ,
+            "enum": ["projects", "organizations", "billingAccounts", "folders"],
+            "f5expand": true
+        },
+        "logScopeId": {
+            "$comment": "Required for certain consumers: Google_Cloud_Logging",
+            "title": "Logging Scope ID",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "logId": {
+            "$comment": "Required for certain consumers: Google_Cloud_Logging",
+            "title": "Logging ID",
+            "description": "" ,
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[a-zA-z0-9._-]+$",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "privateKey": {
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "title": "Private Key",
+            "description": "Private Key",
+            "type": "object",
+            "f5expand": true,
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "eventSchemaVersion": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Event Schema Version",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true,
+            "default": "1"
+        },
+        "f5csTenantId": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "F5CS Tenant ID",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "f5csSensorId": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "F5CS Sensor ID",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "payloadSchemaNid": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Namespace ID for payloadSchema",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "serviceAccount": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Service Account",
+            "description": "Service Account to authentication" ,
+            "type": "object",
+            "properties": {
+                    "authType": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "SA Type",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": ["google-auth" ]
+                    },
+                    "type": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "SA Type",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "projectId": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Project Id",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "privateKeyId": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Private Key Id",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "privateKey": {
+                        "$ref": "base_schema.json#/definitions/secret"
+                    },
+                    "clientEmail": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Client Email",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "clientId": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Client Id",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "authUri": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Auth Uri",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "tokenUri": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Token Uri",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "authProviderX509CertUrl": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Auth Provider X509 Cert Url",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    },
+                    "clientX509CertUrl": {
+                        "$comment": "Required for certain consumers: F5_Cloud",
+                        "title": "Client X509 Cert Url",
+                        "description": "" ,
+                        "type": "string",
+                        "minLength": 1,
+                        "f5expand": true
+                    }
+                },
+            "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": { "properties": { "authType": { "const": "google-auth" } } },
+                    "then": {
+                        "required": [
+                            "type",
+                            "projectId",
+                            "privateKeyId",
+                            "privateKey",
+                            "clientEmail",
+                            "clientId",
+                            "authUri",
+                            "tokenUri",
+                            "authProviderX509CertUrl",
+                            "clientX509CertUrl"
+                        ]
+                    },
+                    "else": {}
+                }]
+        },
+        "targetAudience": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "Target Audience",
+            "description": "" ,
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "useSSL": {
+            "$comment": "Required for certain consumers: F5_Cloud",
+            "title": "useSSL",
+            "description": "To decide if GRPC connection should use SSL and then it is secured" ,
+            "type": "boolean",
+            "f5expand": true
+        },
+        "compressionType": {
+            "$comment": "Required for certain consumers: DataDog, Splunk",
+            "title": "Data compression",
+            "description": "Whether or not to compress data and what compression to use before sending it to destination",
+            "type": "string",
+            "enum": ["none", "gzip"]
+        },
+        "reportInstanceMetadata": {
+            "$comment": "Required for certain consumers: Google_Cloud_Monitoring, Google_Cloud_Logging",
+            "title": "Instance metadata reporting",
+            "description": "Enables instance metadata collection and reporting" ,
+            "type": "boolean",
+            "f5expand": true
+        },
+        "apiKey": {
+            "$comment": "Required for certain consumers: DataDog",
+            "title": "API key to use to push data",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "service": {
+            "$comment": "Required for certain consumers: DataDog",
+            "title": "The name of the service generating telemetry data",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "convertBooleansToMetrics": {
+            "$comment": "Required for certain consumers: DataDog, Statsd, OpenTelemetry_Exporter",
+            "title": "Convert boolean values to metrics",
+            "description": "Whether or not to convert boolean values to metrics. True becomes 1, False becomes 0" ,
+            "type": "boolean",
+            "f5expand": true,
+            "default": false
+        },
+        "customTags": {
+            "$comment": "Required for certain consumers: DataDog",
+            "title": "Custom tags",
+            "description": "A collection of custom tags that are appended to the dynamically generated telemetry tags",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "properties": {
+                    "name": {
+                        "description": "Name of this tag",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "value": {
+                        "description": "Value of this tag",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            }
+        }
+    },
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Telemetry_Consumer" } } },
+            "then": {
+                "required": [
+                    "class",
+                    "type"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Consumer class",
+                        "type": "string",
+                        "enum": [ "Telemetry_Consumer" ]
+                    },
+                    "enable": {
+                        "default": true,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/enable"
+                            }
+                        ]
+                    },
+                    "trace": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/trace"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "title": "Type",
+                        "description": "" ,
+                        "type": "string",
+                        "enum": [
+                            "AWS_CloudWatch",
+                            "AWS_S3",
+                            "Azure_Log_Analytics",
+                            "Azure_Application_Insights",
+                            "DataDog",
+                            "default",
+                            "ElasticSearch",
+                            "Generic_HTTP",
+                            "Google_Cloud_Logging",
+                            "Google_Cloud_Monitoring",
+                            "Google_StackDriver",
+                            "Graphite",
+                            "Kafka",
+                            "OpenTelemetry_Exporter",
+                            "Splunk",
+                            "Statsd",
+                            "Sumo_Logic",
+                            "F5_Cloud"
+                        ]
+                    },
+                    "enableHostConnectivityCheck": {
+                        "$ref": "base_schema.json#/definitions/enableHostConnectivityCheck"
+                    },
+                    "allowSelfSignedCert": {
+                        "default": false,
+                        "allOf": [
+                            {
+                                "$ref": "base_schema.json#/definitions/allowSelfSignedCert"
+                            }
+                        ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "$comment": "This allows enforcement of no additional properties in this nested schema - could reuse above properties but prefer a separate block",
+                        "properties": {
+                            "addTags": {},
+                            "actions": {},
+                            "apiKey": {},
+                            "class": {},
+                            "customTags": {},
+                            "enable": {},
+                            "trace": {},
+                            "type": {},
+                            "enableHostConnectivityCheck": {},
+                            "allowSelfSignedCert": {},
+                            "host": {},
+                            "protocol": {},
+                            "port": {},
+                            "path": {},
+                            "method": {},
+                            "headers": {},
+                            "customOpts": {},
+                            "username": {},
+                            "passphrase": {},
+                            "format": {},
+                            "workspaceId": {},
+                            "useManagedIdentity": {},
+                            "instrumentationKey": {},
+                            "appInsightsResourceName": {},
+                            "maxBatchIntervalMs": {},
+                            "maxBatchSize": {},
+                            "region": {},
+                            "endpointUrl": {},
+                            "logGroup": {},
+                            "logStream": {},
+                            "metricNamespace": {},
+                            "metricPrefix": {},
+                            "bucket": {},
+                            "topic": {},
+                            "apiVersion": {},
+                            "index": {},
+                            "dataType": {},
+                            "authenticationProtocol": {},
+                            "projectId": {},
+                            "serviceEmail": {},
+                            "privateKey": {},
+                            "privateKeyId": {},
+                            "useServiceAccountToken": {},
+                            "clientCertificate": {},
+                            "rootCertificate": {},
+                            "fallbackHosts": {},
+                            "eventSchemaVersion": {},
+                            "f5csTenantId": {},
+                            "f5csSensorId": {},
+                            "payloadSchemaNid": {},
+                            "serviceAccount": {},
+                            "targetAudience": {},
+                            "useSSL": {},
+                            "proxy": {},
+                            "compressionType": {},
+                            "logScope": {},
+                            "logScopeId": {},
+                            "logId": {},
+                            "reportInstanceMetadata": {},
+                            "metricsPath": {},
+                            "service": {},
+                            "convertBooleansToMetrics": {}
+                        },
+                        "additionalProperties": false,
+                        "dependencies": {
+                            "actions": {
+                                "allOf": [
+                                    {
+                                        "properties": { "type": { "const": "Generic_HTTP" } }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "default" } } },
+                        "then": {
+                            "required": [],
+                            "properties": {}
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Generic_HTTP" } } },
+                        "then": {
+                            "required": [
+                                "host"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "fallbackHosts": {
+                                    "type": "array",
+                                    "description": "List FQDNs or IP addresses to be used as fallback hosts" ,
+                                    "minItems": 1,
+                                    "items": {
+                                        "allOf": [{
+                                            "$ref": "#/definitions/host"
+                                        }]
+                                    }
+                                },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "path": { "$ref": "#/definitions/path", "default": "/" },
+                                "method": { "$ref": "#/definitions/method", "default": "POST" },
+                                "headers": { "$ref": "#/definitions/headers" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
+                                "privateKey": { "$ref": "#/definitions/privateKey" },
+                                "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
+                                "actions": { "$ref": "#/definitions/genericHttpActions" }
+                            },
+                            "allOf": [
+                                {
+                                    "if": { "required": [ "clientCertificate" ] },
+                                    "then": { "required": [ "privateKey" ] }
+                                },
+                                {
+                                    "if": { "required": [ "privateKey" ] },
+                                    "then": { "required": [ "clientCertificate" ] }
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Splunk" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 8088 },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "format": { "$ref": "#/definitions/format", "enum": [ "default", "legacy", "multiMetric" ], "default": "default" },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
+                                "compressionType": { "$ref": "#/definitions/compressionType", "default": "gzip" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Azure_Log_Analytics" } } },
+                        "then": {
+                            "required": [
+                                "workspaceId"
+                            ],
+                            "properties": {
+                                "workspaceId": { "$ref": "#/definitions/workspaceId" },
+                                "format": { "$ref": "#/definitions/format", "enum": [ "default", "propertyBased" ], "default": "default" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
+                                "region": { "$ref": "#/definitions/region" }
+                            },
+                            "allOf": [
+                                {
+                                    "dependencies": {
+                                        "passphrase": {
+                                            "anyOf": [
+                                                { "not": {"required": [ "useManagedIdentity" ] } },
+                                                { "properties": { "useManagedIdentity": { "const": false } } }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": { "not": { "required" : [ "useManagedIdentity"] } },
+                                    "then": { "required": ["passphrase"] },
+                                    "else": {
+                                            "if": { "properties": { "useManagedIdentity": { "const": true } } },
+                                            "then": { "not": { "required": ["passphrase"] } },
+                                            "else": { "required": ["passphrase"]}
+                                    }
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Azure_Application_Insights" } } },
+                        "then": {
+                            "properties": {
+                                "instrumentationKey": { "$ref": "#/definitions/instrumentationKey" },
+                                "maxBatchSize": { "$ref": "#/definitions/maxBatchSize", "default": 250 },
+                                "maxBatchIntervalMs": { "$ref": "#/definitions/maxBatchIntervalMs", "default": 5000 },
+                                "customOpts": { "$ref": "#/definitions/customOpts" },
+                                "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
+                                "appInsightsResourceName": { "$ref": "#/definitions/appInsightsResourceName" },
+                                "region": { "$ref": "#/definitions/region" }
+                            },
+                            "allOf": [
+                                {
+                                    "dependencies": {
+                                        "instrumentationKey": {
+                                            "allOf": [
+                                                {
+                                                    "anyOf": [
+                                                        { "not": { "required": [ "useManagedIdentity" ] } },
+                                                        { "properties": { "useManagedIdentity": { "const": false } } }
+                                                    ]
+                                                },
+                                                {
+                                                    "not": { "required": ["appInsightsResourceName"] }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": { "not": { "required" : [ "useManagedIdentity"] } },
+                                    "then": { "required": ["instrumentationKey"] },
+                                    "else": {
+                                            "if": { "properties": { "useManagedIdentity": { "const": true } } },
+                                            "then": { "not": { "required": ["instrumentationKey"] } },
+                                            "else": {
+                                                "allOf": [
+                                                    { "required": [ "instrumentationKey" ]},
+                                                    { "not": { "required": [ "appInsightsResourceName" ] } }
+                                                ]
+                                            }
+                                    }
+                                },
+                                {
+                                    "if": { "required": [ "appInsightsResourceName" ] },
+                                    "then": { "properties": { "appInsightsResourceName": { "minLength": 1 } }}
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "AWS_CloudWatch" } } },
+                        "then": {
+                            "required": [
+                                "region",
+                                "dataType"
+                            ],
+                            "properties": {
+                                "region": { "$ref": "#/definitions/region" },
+                                "dataType": { "$ref": "#/definitions/dataType", "default": "logs" },
+                                "username": { "$ref": "#/definitions/username" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "endpointUrl": { "$ref": "#/definitions/endpointUrl" }
+                            },
+                            "allOf": [
+                                { "not": { "required": ["username"], "not": { "required": ["passphrase"] }}},
+                                { "not": { "required": ["passphrase"], "not": { "required": ["username"] }}},
+                                { "oneOf":
+                                    [
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "properties": {
+                                                        "logGroup": { "$ref": "#/definitions/logGroup" },
+                                                        "logStream": { "$ref": "#/definitions/logStream" },
+                                                        "dataType": {
+                                                            "allOf":
+                                                            [
+                                                                { "$ref": "#/definitions/dataType"},
+                                                                { "enum": ["logs", null] }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                { "required":[ "logGroup", "logStream" ] },
+                                                { "not": { "required": ["metricNamespace"] }}
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "properties": {
+                                                        "metricNamespace": { "$ref": "#/definitions/metricNamespace" },
+                                                        "dataType": {
+                                                            "allOf": [
+                                                                { "$ref": "#/definitions/dataType"},
+                                                                { "enum": ["metrics"] }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                { "required":[ "metricNamespace" ] },
+                                                { "not": { "required":[ "logStream" ] }},
+                                                { "not": { "required": [ "logGroup" ] }}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "AWS_S3" } } },
+                        "then": {
+                            "required": [
+                                "region",
+                                "bucket"
+                            ],
+                            "properties": {
+                                "region": { "$ref": "#/definitions/region" },
+                                "bucket": { "$ref": "#/definitions/bucket" },
+                                "username": { "$ref": "#/definitions/username" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "endpointUrl": { "$ref": "#/definitions/endpointUrl" }
+                            },
+                            "dependencies": {
+                                "passphrase": [ "username" ],
+                                "username":[ "passphrase" ]
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Graphite" } } },
+                        "then": {
+                            "required": [
+                                "host"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "path": { "$ref": "#/definitions/path", "default": "/events/" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Kafka" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "topic"
+                            ],
+                            "properties": {
+                                "authenticationProtocol": { "$ref": "#/definitions/authenticationProtocol", "default": "None" },
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "binaryTcpTls" },
+                                "port": { "$ref": "#/definitions/port", "default": 9092 },
+                                "topic": { "$ref": "#/definitions/topic" } 
+                            },
+                            "allOf": [
+                                {
+                                    "if": { "properties": { "authenticationProtocol": { "const": "SASL-PLAIN" } } },
+                                    "then": {
+                                        "required": [
+                                            "username"
+                                        ],
+                                        "properties": {
+                                            "username": { "$ref": "#/definitions/username" },
+                                            "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                                        },
+                                        "dependencies": {
+                                            "passphrase": [ "username" ]
+                                        }
+                                    },
+                                    "else": {}
+                                },
+                                {
+                                    "if": { "properties": { "authenticationProtocol": { "const": "TLS" } } },
+                                    "then": {
+                                        "required": [
+                                            "privateKey",
+                                            "clientCertificate"
+                                        ],
+                                        "allOf": [
+                                            { "not": { "required": [ "username" ] } },
+                                            { "not": { "required": [ "passphrase" ] } }
+                                        ],
+                                        "properties": {
+                                            "privateKey": { "$ref": "#/definitions/privateKey" },
+                                            "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                            "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
+                                            "protocol": { "const": "binaryTcpTls" }
+                                        }
+                                    },
+                                    "else": {}
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "ElasticSearch" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "index"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 9200 },
+                                "path": { "$ref": "#/definitions/path" },
+                                "username": { "$ref": "#/definitions/username" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "apiVersion": { "$ref": "#/definitions/apiVersion", "default": "6.0" },
+                                "index": { "$ref": "#/definitions/index" }
+                            },
+                            "allOf": [
+                                {
+                                    "if": { "properties": { "apiVersion": { "pattern": "^[0-6][.]|^[0-6]$" } } },
+                                    "then": {
+                                        "properties": {
+                                            "dataType": {
+                                                "$ref": "#/definitions/dataType",
+                                                "default": "f5.telemetry",
+                                                "minLength": 1
+                                            }
+                                        }
+                                    },
+                                    "else": {
+                                        "if": { "properties": { "apiVersion": { "pattern": "^7[.]|^7$" } } },
+                                        "then": {
+                                            "properties": {
+                                                "dataType": {
+                                                    "$ref": "#/definitions/dataType",
+                                                    "default": "_doc",
+                                                    "minLength": 1
+                                                }
+                                            }
+                                        },
+                                        "else": {
+                                            "allOf": [
+                                                { "not": { "required": [ "dataType" ] } }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Sumo_Logic" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "passphrase"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": { "$ref": "#/definitions/protocols", "default": "https" },
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "path": { "$ref": "#/definitions/path", "default": "/receiver/v1/http/" },
+                                "passphrase": { "$ref": "base_schema.json#/definitions/secret" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Statsd" } } },
+                        "then": {
+                            "required": [
+                                "host"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "protocol": {
+                                    "title": "Protocol",
+                                    "type": "string",
+                                    "enum": [ "tcp", "udp" ],
+                                    "default": "udp"
+                                },
+                                "port": { "$ref": "#/definitions/port", "default": 8125 },
+                                "addTags": { "$ref": "#/definitions/autoTaggingStatsd" },
+                                "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": {
+                            "properties": { "type": { "enum": ["Google_Cloud_Monitoring", "Google_StackDriver", "Google_Cloud_Logging"] } }
+                        },
+                        "then": {
+                            "required": [
+                                "serviceEmail"
+                            ],
+                            "properties": {
+                                "privateKeyId": { "$ref": "#/definitions/privateKeyId" },
+                                "serviceEmail": { "$ref": "#/definitions/serviceEmail" },
+                                "privateKey": { "$ref": "base_schema.json#/definitions/secret" },
+                                "useServiceAccountToken": { "$ref": "#/definitions/useServiceAccountToken", "default": false },
+                                "reportInstanceMetadata": { "$ref": "#/definitions/reportInstanceMetadata", "default": false }
+                            },
+                            "allOf": [
+                                {
+                                    "dependencies": {
+                                        "privateKeyId": {
+                                            "anyOf": [
+                                                { "not": {"required": [ "useServiceAccountToken" ] } },
+                                                { "properties": { "useServiceAccountToken": { "const": false } } }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "dependencies": {
+                                        "privateKey": {
+                                            "anyOf": [
+                                                { "not": {"required": [ "useServiceAccountToken" ] } },
+                                                { "properties": { "useServiceAccountToken": { "const": false } } }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "if": {
+                                        "anyOf": [
+                                            { "not": { "required" : [ "useServiceAccountToken"] } },
+                                            { "properties": { "useServiceAccountToken": { "const": false } } }
+                                        ]
+                                    },
+                                    "then": { "required": ["privateKeyId", "privateKey"] },
+                                    "else": { "not": { "required": ["privateKeyId", "privateKey"] } }
+                                },
+                                {
+                                    "if": { "properties": { "type": { "enum": ["Google_Cloud_Monitoring", "Google_StackDriver"] } } },
+                                    "then": {
+                                        "properties": {
+                                            "projectId": { "$ref": "#/definitions/projectId"}
+                                        },
+                                        "required": ["projectId"]
+                                    }
+                                },
+                                {
+                                    "if": { "properties": { "type": { "const": "Google_Cloud_Logging" } } },
+                                    "then": {
+                                        "properties": {
+                                            "logScope": { "$ref": "#/definitions/logScope", "default": "projects" },
+                                            "logScopeId": { "$ref": "#/definitions/logScopeId"},
+                                            "logId": { "$ref": "#/definitions/logId"}
+                                        },
+                                        "required": ["logScope", "logScopeId", "logId"]
+                                    }
+                                }
+                            ]
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "F5_Cloud" } } },
+                        "then": {
+                            "required": [
+                                "f5csTenantId",
+                                "f5csSensorId",
+                                "payloadSchemaNid",
+                                "serviceAccount",
+                                "targetAudience"
+                            ],
+                            "properties": {
+                                "port": { "$ref": "#/definitions/port", "default": 443 },
+                                "eventSchemaVersion": { "$ref": "#/definitions/eventSchemaVersion" },
+                                "f5csTenantId": { "$ref": "#/definitions/f5csTenantId" },
+                                "f5csSensorId": { "$ref": "#/definitions/f5csSensorId" },
+                                "payloadSchemaNid": { "$ref": "#/definitions/payloadSchemaNid" },
+                                "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
+                                "targetAudience": { "$ref": "#/definitions/targetAudience" },
+                                "useSSL": { "$ref": "#/definitions/useSSL", "default": true }
+                            },
+                            "nodeSupportVersion": "8.11.1"
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "DataDog" } } },
+                        "then": {
+                            "required": [
+                                "apiKey"
+                            ],
+                            "properties": {
+                                "apiKey": { "$ref": "#/definitions/apiKey" },
+                                "compressionType": { "$ref": "#/definitions/compressionType", "default": "none" },
+                                "region": { "$ref": "#/definitions/region", "enum": ["US1", "US3", "EU1", "US1-FED"], "default": "US1" },
+                                "service": { "$ref": "#/definitions/service", "default": "f5-telemetry" },
+                                "metricPrefix": { "$ref": "#/definitions/metricPrefix" },
+                                "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" },
+                                "customTags": { "$ref": "#/definitions/customTags" }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "OpenTelemetry_Exporter" } } },
+                        "then": {
+                            "required": [
+                                "host",
+                                "port"
+                            ],
+                            "properties": {
+                                "host": { "$ref": "#/definitions/host" },
+                                "port": { "$ref": "#/definitions/port" },
+                                "headers": { "$ref": "#/definitions/headers" },
+                                "metricsPath": { "$ref": "#/definitions/path" },
+                                "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" }
+                            },
+                            "nodeSupportVersion": "8.11.1"
+                        },
+                        "else": {}
+                    }
+                ]
+            },
+            "else": {}
+        }
+    ]
+}

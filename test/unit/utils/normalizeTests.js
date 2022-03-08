@@ -1320,5 +1320,127 @@ describe('Normalize Util', () => {
                 assert.strictEqual(normalizeUtil.getLastAsmChange({ data: [] }), '');
             });
         });
+
+        describe('.getAsmAttackSignatures', () => {
+            it('should return empty object if no signatures exist',
+                () => assert.isEmpty(normalizeUtil.getAsmAttackSignatures({ data: {} })));
+
+            const oneSignatureWithoutStatus = {
+                data: {
+                    d11: {
+                        updateFileReference: {
+                            createDateTime: '2021-07-13T09:45:23Z',
+                            id: '123'
+                        }
+                    }
+                }
+            };
+            it('one signature without status', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithoutStatus), {});
+            });
+
+            const oneSignatureWithBadStatus = util.deepCopy(oneSignatureWithoutStatus);
+            oneSignatureWithBadStatus.data.d11.status = 'not install-complete';
+            it('one signature with bad status', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithBadStatus), {});
+            });
+
+            const oneSignatureWithGoodStatus = util.deepCopy(oneSignatureWithoutStatus);
+            oneSignatureWithGoodStatus.data.d11.status = 'install-complete';
+            it('one signature with good status', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithGoodStatus),
+                    { 123: { createDateTime: 1626169523000 } });
+            });
+
+            it('one signature without updateFileReference', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures({ data: { d11: { status: 'install-complete' } } }), {});
+            });
+
+            const oneSignatureWithoutId = {
+                data: {
+                    d11: {
+                        status: 'install-complete',
+                        updateFileReference: {
+                            createDateTime: '2021-07-13T09:45:23Z'
+                        }
+                    }
+                }
+            };
+            it('one signature without id', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithoutId),
+                    {});
+            });
+
+            const oneSignatureWithoutCreateDateTime = {
+                data: {
+                    d11: {
+                        status: 'install-complete',
+                        updateFileReference: {
+                            id: '123'
+                        }
+                    }
+                }
+            };
+            it('one signature without createDateTime', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithoutCreateDateTime),
+                    {});
+            });
+
+            const oneSignatureWithBadCreateDateTime = {
+                data: {
+                    d11: {
+                        status: 'install-complete',
+                        updateFileReference: {
+                            createDateTime: 'not a date',
+                            id: '123'
+                        }
+                    }
+                }
+            };
+            it('one signature with bad createDateTime', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(oneSignatureWithBadCreateDateTime),
+                    { 123: { createDateTime: 'not a date' } });
+            });
+
+            const twoGoodSignatures = {
+                data: {
+                    d11: {
+                        status: 'install-complete',
+                        updateFileReference: {
+                            createDateTime: '2021-07-13T09:45:23Z',
+                            id: '123',
+                            filename: 'fileA',
+                            someTag: 'valueA'
+                        },
+                        upperLevelTag: 'irrelevant'
+                    },
+                    d22: {
+                        status: 'install-complete',
+                        updateFileReference: {
+                            createDateTime: '2021-12-13T09:45:23Z',
+                            id: '124',
+                            filename: 'fileB',
+                            someTag: 'valueB'
+                        },
+                        upperLevelTag: 'irrelevant'
+                    }
+                }
+            };
+            it('two good signatures', () => {
+                assert.deepStrictEqual(normalizeUtil.getAsmAttackSignatures(twoGoodSignatures),
+                    {
+                        123: {
+                            createDateTime: 1626169523000,
+                            filename: 'fileA',
+                            someTag: 'valueA'
+                        },
+                        124: {
+                            createDateTime: 1639388723000,
+                            filename: 'fileB',
+                            someTag: 'valueB'
+                        }
+                    });
+            });
+        });
     });
 });

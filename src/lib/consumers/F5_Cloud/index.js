@@ -10,7 +10,7 @@
 
 const google = require('google-auth-library');
 const protoLoader = require('@grpc/proto-loader');
-const grpc = require('@grpc/grpc-js');
+const grpc = require('grpc-js-0.2-modified');
 const util = require('../../utils/misc');
 const constants = require('../../constants');
 

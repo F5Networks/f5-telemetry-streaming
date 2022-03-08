@@ -97,7 +97,8 @@ function computeTagValue(data, tagVal, location, statProp) {
         // if no match found then tag will not be applied
         tagVal = undefined;
         if (util.isObjectEmpty(statProp) || statProp.normalization) {
-            /** Possible cases:
+            /**
+             * Possible cases:
              * 1) new-style tagging - attempt to assign pre-defined tag to specific location.
              * 2) old-style tagging - attempt to assign pre-defined tag to System Poller's data.
              *
@@ -106,7 +107,8 @@ function computeTagValue(data, tagVal, location, statProp) {
             const match = normalizeUtil._checkForMatch(location, tagDef.pattern, tagDef.group);
             tagVal = match || undefined;
         } else if (statProp.classifyByKeys) {
-            /** Kind like old-style tagging for Event Listener's data but
+            /**
+             * Kind like old-style tagging for Event Listener's data but
              * still applicable to new-style tagging too.
              *
              * data - expected to be 'object'
@@ -125,25 +127,6 @@ function computeTagValue(data, tagVal, location, statProp) {
 }
 
 /**
- * Search for endpoints values in object
- *
- * @param {Object} data                  - the data
- * @param {Function<Object, String, Any} - callback to call when endpoint's value was found
- *
- * @returns {void}
- */
-function searchForValues(data, cb) {
-    Object.keys(data).forEach((key) => {
-        const val = data[key];
-        if (typeof val === 'object') {
-            searchForValues(val, cb);
-        } else {
-            cb(data, key, val);
-        }
-    });
-}
-
-/**
  * Adds the tag to the data
  *
  * @private - use for testing only
@@ -158,15 +141,17 @@ function searchForValues(data, cb) {
 function addTag(data, tagKey, tagVal, location, statProp) {
     if (typeof tagVal === 'object') {
         tagVal = util.deepCopy(tagVal);
-        // recursively inspect object in case if there are tags that should be computed
-        searchForValues(tagVal, (_tagItem, _tagKey, _tagValue) => {
-            _tagValue = computeTagValue(data, _tagValue, location, statProp);
-            if (typeof _tagValue !== 'undefined') {
-                // assign newly computed value
-                _tagItem[_tagKey] = computeTagValue(data, _tagValue, location, statProp);
-            } else {
-                // delete tag if no value computed
-                delete _tagItem[_tagKey];
+        util.traverseJSON(tagVal, (parent, key) => {
+            const val = parent[key];
+            if (typeof val !== 'object') {
+                const _tagValue = computeTagValue(data, val, location, statProp);
+                if (typeof _tagValue !== 'undefined') {
+                    // assign newly computed value
+                    parent[key] = computeTagValue(data, _tagValue, location, statProp);
+                } else {
+                    // delete tag if no value computed
+                    delete parent[key];
+                }
             }
         });
     } else {

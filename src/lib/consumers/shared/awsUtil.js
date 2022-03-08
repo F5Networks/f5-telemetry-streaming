@@ -10,6 +10,7 @@
 
 const AWS = require('aws-sdk');
 const https = require('https');
+const promiseUtil = require('../../utils/promise');
 const util = require('../../utils/misc');
 const rootCerts = require('./awsRootCerts');
 
@@ -289,9 +290,6 @@ function getMetrics(data, dimensions, key, metrics) {
  * @returns {Promise} Promise with optional debug message
  */
 function sendMetrics(context, metrics) {
-    let errorEncountered;
-    let totalBatches = 0;
-
     return Promise.resolve()
         .then(() => {
             const clientProperties = { apiVersion: '2010-08-01' };
@@ -306,24 +304,22 @@ function sendMetrics(context, metrics) {
                     MetricData: metricsBatch,
                     Namespace: context.config.metricNamespace
                 };
-                const putPromise = cloudWatchMetrics.putMetricData(params)
-                    .promise()
-                    // eslint-disable-next-line no-loop-func
-                    .catch((err) => {
-                        context.logger.exception('Error: AWS CloudWatch (Metrics)', err);
-                        errorEncountered = true;
-                        return Promise.resolve();
-                    });
-                putPromises.push(putPromise);
-                totalBatches += 1;
+                putPromises.push(cloudWatchMetrics.putMetricData(params).promise());
             }
-            return Promise.all(putPromises);
+            return promiseUtil.allSettled(putPromises);
         })
-        .then(() => {
+        .then((results) => {
+            let errorEncountered = false;
+            results.forEach((result) => {
+                if (typeof result.reason !== 'undefined') {
+                    context.logger.exception('Error: AWS CloudWatch (Metrics)', result.reason);
+                    errorEncountered = true;
+                }
+            });
             if (errorEncountered) {
                 return Promise.reject(new Error('At least one batch encountered an error while sending metrics data'));
             }
-            return Promise.resolve(`: processed total batch(es): ${totalBatches}`);
+            return Promise.resolve(`: processed total batch(es): ${results.length}`);
         });
 }
 

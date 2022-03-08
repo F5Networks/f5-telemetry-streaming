@@ -65,7 +65,7 @@ describe('DataDog', () => {
     };
     const DATA_DOG_MOCK_ENDPOINTS = {
         logs: {
-            path: '/v1/input',
+            path: '/api/v2/logs',
             requestHeaders: {
                 'Content-Type': 'application/json',
                 'DD-API-KEY': DATA_DOG_API_KEY

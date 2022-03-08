@@ -11,6 +11,7 @@
 const actionProcessor = require('./actionProcessor');
 const consumersHndlr = require('./consumers');
 const logger = require('./logger'); // eslint-disable-line no-unused-vars
+const promiseUtil = require('./utils/promise');
 
 /**
 * Forward data to consumer
@@ -29,7 +30,7 @@ function forwardData(dataCtx) {
     consumers = consumers.filter((c) => dataCtx.destinationIds.indexOf(c.id) > -1);
     // don't rely on plugins' code, wrap consumer's call to Promise
     // eslint-disable-next-line
-    return Promise.all(consumers.map((consumer) => {
+    return promiseUtil.allSettled(consumers.map((consumer) => {
         return new Promise((resolve) => {
             // standard context
             const context = {

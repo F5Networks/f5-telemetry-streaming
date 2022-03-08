@@ -42,6 +42,15 @@ class BaseRequestHandler {
     }
 
     /**
+     * Get HTTP headers
+     *
+     * @returns {Object<string, any>} HTTP headers
+     */
+    getHeaders() {
+        return this.restOperation.getHeaders() || {};
+    }
+
+    /**
      * Get HTTP method name
      *
      * @returns {String} HTTP method name converted to upper case

@@ -9,7 +9,7 @@
 'use strict';
 
 const MeterProvider = require('@opentelemetry/sdk-metrics-base').MeterProvider;
-const CollectorMetricExporter = require('@opentelemetry/exporter-collector-proto').CollectorMetricExporter;
+const OTLPMetricExporter = require('@opentelemetry/exporter-metrics-otlp-proto').OTLPMetricExporter;
 const otelApi = require('@opentelemetry/api');
 
 const metricsUtil = require('../shared/metricsUtil');
@@ -98,7 +98,7 @@ module.exports = function (context) {
 
     otelApi.diag.setLogger(new LogHandler(context.logger), otelApi.DiagLogLevel.ALL);
 
-    const exporter = new CollectorMetricExporter({
+    const exporter = new OTLPMetricExporter({
         url: `http://${host}:${port}${metricsPath}`,
         headers,
         keepAlive: false

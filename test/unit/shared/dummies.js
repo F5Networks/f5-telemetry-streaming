@@ -484,3 +484,22 @@ module.exports.configuration.ihealthPoller.minimal.decrypted = configComponentGe
         { key: 'iHealth.credentials.passphrase', value: { cipherText: 'test_passphrase_1' } }
     ])
 );
+
+module.exports.declaration.consumer.splunk.full = {
+    encrypted: declarationComponentGenerator(
+        module.exports.declaration.consumer.splunk.minimal.decrypted({
+            allowSelfSignedCert: false,
+            compressionType: 'gzip',
+            enable: true,
+            format: 'default',
+            passphrase: {
+                class: 'Secret',
+                cipherText: '$M$test_passphrase_1',
+                protected: 'SecureVault'
+            },
+            port: 8088,
+            protocol: 'https',
+            trace: false
+        })
+    )
+};

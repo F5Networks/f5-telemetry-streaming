@@ -19,6 +19,7 @@ const configWorker = require('../../../src/lib/config');
 const constants = require('../../../src/lib/constants');
 const DeclareHandler = require('../../../src/lib/requestHandlers/declareHandler');
 const deviceUtil = require('../../../src/lib/utils/device');
+const dummies = require('../shared/dummies');
 const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
 const persistentStorage = require('../../../src/lib/persistentStorage');
 const stubs = require('../shared/stubs');
@@ -32,6 +33,7 @@ const assert = chai.assert;
 moduleCache.remember();
 
 describe('DeclareHandler', () => {
+    let coreStub;
     let requestHandler;
     let uri;
 
@@ -40,7 +42,7 @@ describe('DeclareHandler', () => {
     });
 
     beforeEach(() => {
-        stubs.coreStub({
+        coreStub = stubs.coreStub({
             configWorker,
             deviceUtil,
             persistentStorage,
@@ -119,10 +121,9 @@ describe('DeclareHandler', () => {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: {
-                        class: 'Telemetry',
+                    declaration: dummies.declaration.base.decrypted({
                         schemaVersion: constants.VERSION
-                    }
+                    })
                 }
             };
             requestHandler = new DeclareHandler(getRestOperation('GET'));
@@ -134,13 +135,14 @@ describe('DeclareHandler', () => {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: {
-                        class: 'Telemetry',
+                    declaration: dummies.declaration.base.decrypted({
                         schemaVersion: constants.VERSION
-                    }
+                    })
                 }
             };
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry' }));
+            requestHandler = new DeclareHandler(getRestOperation(
+                'POST', dummies.declaration.base.decrypted()
+            ));
             return assertProcessResult(expected);
         });
 
@@ -153,7 +155,9 @@ describe('DeclareHandler', () => {
                     error: 'should be equal to one of the allowed values'
                 }
             };
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry1' }));
+            requestHandler = new DeclareHandler(getRestOperation(
+                'POST', dummies.declaration.base.decrypted({ class: 'Telemetry_Test' })
+            ));
             return assertProcessResult(expected);
         });
 
@@ -196,16 +200,57 @@ describe('DeclareHandler', () => {
             requestHandler = new DeclareHandler(getRestOperation('GET'));
             return assert.isRejected(requestHandler.process(), 'expectedError');
         });
+
+        it('should compute request metadata', () => {
+            const expected = {
+                code: 200,
+                body: {
+                    message: 'success',
+                    declaration: dummies.declaration.base.decrypted({
+                        schemaVersion: constants.VERSION,
+                        consumer: dummies.declaration.consumer.splunk.full.encrypted()
+                    })
+                }
+            };
+            const restOp = getRestOperation(
+                'POST', dummies.declaration.base.decrypted({
+                    consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                })
+            );
+            restOp.setHeaders({ 'X-Forwarded-For': '192.168.0.1' });
+            requestHandler = new DeclareHandler(restOp);
+
+            return assertProcessResult(expected)
+                .then(() => {
+                    const records = coreStub.configWorker.receivedSpy.args.map((args) => args[0]);
+                    const recent = records[records.length - 1];
+                    assert.deepStrictEqual(
+                        recent,
+                        {
+                            declaration: dummies.declaration.base.decrypted({
+                                consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                            }),
+                            metadata: {
+                                message: 'Incoming declaration via REST API',
+                                originDeclaration: dummies.declaration.base.decrypted({
+                                    consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                                }),
+                                sourceIP: '192.168.0.1'
+                            },
+                            transactionID: 'uuid2'
+                        }
+                    );
+                });
+        });
     });
 
     describe('/namespace/:namespace/declare', () => {
         beforeEach(() => {
             uri = 'http://localhost:8100/mgmt/shared/telemetry/namespace/testNamespace/declare';
-            return configWorker.processDeclaration({
-                class: 'Telemetry',
-                testNamespace: { class: 'Telemetry_Namespace' },
-                otherNamespace: { class: 'Telemetry_Namespace' }
-            });
+            return configWorker.processDeclaration(dummies.declaration.base.decrypted({
+                testNamespace: dummies.declaration.namespace.base.decrypted(),
+                otherNamespace: dummies.declaration.namespace.base.decrypted()
+            }));
         });
 
         it('should get namespace-only raw config on GET request', () => {
@@ -213,7 +258,7 @@ describe('DeclareHandler', () => {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: { class: 'Telemetry_Namespace' }
+                    declaration: dummies.declaration.namespace.base.decrypted()
                 }
             };
             requestHandler = new DeclareHandler(getRestOperation('GET'), { namespace: 'testNamespace' });
@@ -237,12 +282,16 @@ describe('DeclareHandler', () => {
                 code: 200,
                 body: {
                     message: 'success',
-                    declaration: {
-                        class: 'Telemetry_Namespace'
-                    }
+                    declaration: dummies.declaration.namespace.base.decrypted()
                 }
             };
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry_Namespace' }), { namespace: 'testNamespace' });
+            requestHandler = new DeclareHandler(
+                getRestOperation(
+                    'POST',
+                    dummies.declaration.namespace.base.decrypted()
+                ),
+                { namespace: 'testNamespace' }
+            );
             return assertProcessResult(expected);
         });
 
@@ -255,12 +304,18 @@ describe('DeclareHandler', () => {
                     error: /"schemaPath":"#\/properties\/class\/enum","params":{"allowedValues":\["Telemetry_Namespace"\]/
                 }
             };
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry' }), { namespace: 'testNamespace' });
+            requestHandler = new DeclareHandler(
+                getRestOperation(
+                    'POST',
+                    dummies.declaration.namespace.base.decrypted({ class: 'Telemetry' })
+                ),
+                { namespace: 'testNamespace' }
+            );
             return assertProcessResult(expected);
         });
 
         it('should return 503 on attempt to POST declaration while previous one is still in process', () => {
-            const namespaceConfig = { class: 'Telemetry_Namespace' };
+            const namespaceConfig = dummies.declaration.namespace.base.decrypted();
             sinon.stub(configWorker, 'processDeclaration').callsFake(function () {
                 return testUtil.sleep(50)
                     .then(() => {
@@ -300,8 +355,61 @@ describe('DeclareHandler', () => {
 
         it('should reject when unknown error is caught', () => {
             sinon.stub(configWorker, 'getDeclaration').rejects(new Error('expectedError'));
-            requestHandler = new DeclareHandler(getRestOperation('POST', { class: 'Telemetry_Namespace' }), { namespace: 'testNamespace' });
+            requestHandler = new DeclareHandler(
+                getRestOperation(
+                    'POST',
+                    dummies.declaration.namespace.base.decrypted()
+                ),
+                { namespace: 'testNamespace' }
+            );
             return assert.isRejected(requestHandler.process(), 'expectedError');
+        });
+
+        it('should compute request metadata', () => {
+            const expected = {
+                code: 200,
+                body: {
+                    message: 'success',
+                    declaration: dummies.declaration.namespace.base.decrypted({
+                        consumer: dummies.declaration.consumer.splunk.full.encrypted()
+                    })
+                }
+            };
+            requestHandler = new DeclareHandler(
+                getRestOperation(
+                    'POST',
+                    dummies.declaration.namespace.base.decrypted({
+                        consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                    })
+                ),
+                { namespace: 'testNamespace' }
+            );
+            return assertProcessResult(expected)
+                .then(() => {
+                    const records = coreStub.configWorker.receivedSpy.args.map((args) => args[0]);
+                    const recent = records[records.length - 1];
+                    assert.deepStrictEqual(
+                        recent,
+                        {
+                            declaration: dummies.declaration.base.decrypted({
+                                schemaVersion: constants.VERSION,
+                                otherNamespace: dummies.declaration.namespace.base.decrypted({}),
+                                testNamespace: dummies.declaration.namespace.base.decrypted({
+                                    consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                                })
+                            }),
+                            metadata: {
+                                message: 'Incoming declaration via REST API',
+                                originDeclaration: dummies.declaration.namespace.base.decrypted({
+                                    consumer: dummies.declaration.consumer.splunk.minimal.decrypted()
+                                }),
+                                namespace: 'testNamespace',
+                                sourceIP: undefined // not specified in headers
+                            },
+                            transactionID: 'uuid5'
+                        }
+                    );
+                });
         });
     });
 });

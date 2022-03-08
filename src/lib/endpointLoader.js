@@ -11,6 +11,7 @@
 const constants = require('./constants');
 const deviceUtil = require('./utils/device');
 const logger = require('./logger');
+const promiseUtil = require('./utils/promise');
 const retryPromise = require('./utils/promise').retry;
 const util = require('./utils/misc');
 
@@ -194,7 +195,8 @@ EndpointLoader.prototype.expandReferences = function (endpointObj, data) {
             }
         }
     }
-    return Promise.all(promises);
+    return promiseUtil.allSettled(promises)
+        .then((results) => promiseUtil.getValues(results));
 };
 /**
  * Fetch stats for each item
@@ -218,7 +220,8 @@ EndpointLoader.prototype.fetchStats = function (endpointObj, data) {
             }
         }
     }
-    return Promise.all(promises);
+    return promiseUtil.allSettled(promises)
+        .then((results) => promiseUtil.getValues(results));
 };
 /**
  * Substitute data
@@ -312,7 +315,7 @@ EndpointLoader.prototype.getData = function (uri, options) {
     return retryPromise(() => deviceUtil.makeDeviceRequest(this.host, fullUri, httpOptions), retryOpts)
         .then((data) => {
             if (parseDuplicateKeys) {
-                data = util.parseJsonWithDuplicatekeys(data.toString());
+                data = util.parseJsonWithDuplicateKeys(data.toString());
             }
             const ret = {
                 name: options.name !== undefined ? options.name : uri,
@@ -336,22 +339,24 @@ EndpointLoader.prototype.getAndExpandData = function (endpointObj) {
     return this.getData(endpointObj.path, endpointObj)
         // Promise below will be resolved with array of 2 elements:
         // [ baseData, [refData, refData] ]
-        .then((baseData) => Promise.all([
+        .then((baseData) => promiseUtil.allSettled([
             Promise.resolve(baseData),
             this.expandReferences(endpointObj, baseData)
         ]))
-        .then((dataArray) => {
+        .then((results) => {
+            const dataArray = promiseUtil.getValues(results);
             // dataArray === [ baseData, [refData, refData] ]
             const baseData = dataArray[0];
             this.substituteData(baseData, dataArray[1], false);
-            return Promise.all([
+            return promiseUtil.allSettled([
                 Promise.resolve(baseData),
                 this.fetchStats(endpointObj, baseData)
             ]);
         })
         // Promise below will be resolved with array of 2 elements:
         // [ baseData, [statsData, statsData] ]
-        .then((dataArray) => {
+        .then((results) => {
+            const dataArray = promiseUtil.getValues(results);
             // dataArray === [ baseData, [statsData, statsData] ]
             const baseData = dataArray[0];
             this.substituteData(baseData, dataArray[1], true);

@@ -127,6 +127,9 @@
                 },
                 "throughputPerformance": {
                     "type": "object"
+                },
+                "asmAttackSignatures": {
+                    "type": "object"
                 }
             },
             "additionalProperties": false,

@@ -15,6 +15,7 @@ const defaultPaths = require('./paths.json');
 const logger = require('./logger');
 const EndpointLoader = require('./endpointLoader');
 const dataUtil = require('./utils/data');
+const promiseUtil = require('./utils/promise');
 const systemStatsUtil = require('./utils/systemStats');
 
 /** @module systemStats */
@@ -281,10 +282,12 @@ SystemStats.prototype._computeContextData = function () {
         const promises = Object.keys(this.contextProps)
             .map((key) => this._processProperty(key, this.contextProps[key]));
 
-        return Promise.all(promises).then(() => {
-            Object.assign(this.contextData, this.collectedData);
-            this.collectedData = {};
-        });
+        return promiseUtil.allSettled(promises)
+            .then((results) => {
+                promiseUtil.getValues(results); // throws error if found it
+                Object.assign(this.contextData, this.collectedData);
+                this.collectedData = {};
+            });
     }
     return Promise.resolve();
 };
@@ -445,8 +448,12 @@ SystemStats.prototype._convertToProperty = function (keyName, endpoint) {
  * @returns {Object} Promise resolved when all properties were loaded
  */
 SystemStats.prototype._computePropertiesData = function () {
-    return Promise.all(Object.keys(this.stats)
-        .map((key) => this._processProperty(key, this.stats[key])));
+    return promiseUtil.allSettled(
+        Object
+            .keys(this.stats)
+            .map((key) => this._processProperty(key, this.stats[key]))
+    )
+        .then((results) => promiseUtil.getValues(results)); // throws error if found it
 };
 
 /**

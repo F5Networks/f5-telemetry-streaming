@@ -47,6 +47,12 @@ describe('Constants', () => {
         assert.deepStrictEqual(constants, {
             RELEASE: versionInfo[1],
             VERSION: versionInfo[0],
+            ACTIVITY_RECORDER: {
+                DECLARATION_TRACER: {
+                    MAX_RECORDS: 60,
+                    PATH: '/shared/tmp/telemetry/declarationHistory'
+                }
+            },
             APP_NAME: 'Telemetry Streaming',
             APP_THRESHOLDS: {
                 MONITOR_DISABLED: 'MONITOR_DISABLED',
@@ -67,6 +73,7 @@ describe('Constants', () => {
                 PULL_CONSUMER_CLASS_NAME: 'Telemetry_Pull_Consumer',
                 PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME: 'Telemetry_Pull_Consumer_System_Poller_Group',
                 ROOT_CLASS: 'Telemetry',
+                SECRET_CLASS: 'Secret',
                 SYSTEM_CLASS_NAME: 'Telemetry_System',
                 SYSTEM_POLLER_CLASS_NAME: 'Telemetry_System_Poller'
             },
@@ -176,6 +183,7 @@ describe('Constants', () => {
             TRACER: {
                 DIR: '/var/tmp/telemetry',
                 ENCODING: 'utf8',
+                INACTIVITY_TIMEOUT: 15 * 60,
                 MAX_RECORDS_INPUT: 9999,
                 MAX_RECORDS_OUTPUT: 10
             },
