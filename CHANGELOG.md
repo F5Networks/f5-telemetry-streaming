@@ -1,6 +1,13 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.27.1
+### Added
+### Fixed
+### Changed
+- Promoted to LTS
+### Removed
+
 ## 1.27.0
 ### Added
 - AUTOTOOL-2925: Save recent declarations to a file
