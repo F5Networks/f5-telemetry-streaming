@@ -194,10 +194,11 @@ test_node14:
     image: ${ARTIFACTORY_DOCKER_HUB}/node:14
 
 # Node 16 LTS (active, maintenance)
+# Pinned to 16.14.0, as later versions include versions of npm that are incompatible with our package-lock.json file version
 test_node16:
     extends:
         - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:16.14.0
 
 # mostly for containers, unittests only (without coverage check)
 # disabled for now, npm has one issue with DNS (IPv6), probably
