@@ -477,7 +477,7 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
-.. NOTE:: TS 1.24 adds support for sending data to ElasticSearch 7. 
+.. NOTE:: TS 1.24 added support for sending data to ElasticSearch 7 and ElasticSearch 8.
 
 Required Information:
  - Host: The address of the ElasticSearch system.
@@ -915,18 +915,16 @@ Example Declaration:
 
 .. _opent:
 
-OpenTelemetry Exporter (EXPERIMENTAL)
--------------------------------------
+OpenTelemetry Exporter
+----------------------
 |opentelemetry|
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23. 
+    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23, and is supported in DO 1.28 and later.
 
 The OpenTelemetry Exporter Consumer exports telemetry data to an OpenTelemetry Collector, or OpenTelemetry Protocol compatible API.
 
-
-.. IMPORTANT:: Be aware of the following before deploying this consumer: |br| * The OpenTelemetry Exporter consumer is an experimental feature and will change in future releases based on feedback. |br| * There is a possibility this consumer might crash Telemetry Streaming, and send incorrectly formatted data or incomplete metrics. |br| * Some metrics might lack tags or context (such as iRule events) that will be addressed in future updates.
 
 Required Information:
  - Host: The address of the OpenTelemetry Collector, or OpenTelemetry Protocol compatible API

@@ -31,7 +31,10 @@ module.exports = function (context) {
             return awsUtil.sendMetrics(context, metrics);
         })
         .then((optMessage) => {
-            context.logger.debug(`success${optMessage}`);
+            // logs are taken care of at sendLogs level
+            if (context.config.dataType !== 'logs') {
+                context.logger.debug(`success${optMessage}`);
+            }
         })
         .catch((error) => {
             context.logger.exception('Unable to forward to AWS CloudWatch consumer', error);

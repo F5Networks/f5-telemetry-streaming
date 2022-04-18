@@ -50,7 +50,7 @@ describe('Constants', () => {
             ACTIVITY_RECORDER: {
                 DECLARATION_TRACER: {
                     MAX_RECORDS: 60,
-                    PATH: '/shared/tmp/telemetry/declarationHistory'
+                    PATH: '/var/log/restnoded/telemetryDeclarationHistory'
                 }
             },
             APP_NAME: 'Telemetry Streaming',

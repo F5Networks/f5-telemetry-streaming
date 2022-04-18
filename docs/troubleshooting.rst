@@ -97,11 +97,28 @@ The following is an example that enables tracing on the Telemetry_System and Tel
         }
     }
 
+
 |
 
 
 Specific troubleshooting entries
 --------------------------------
+
+.. _save:
+
+I need to access declarations I previously sent to Telemetry Streaming
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+As of Telemetry Streaming 1.27, TS stores up to 30 recent declarations at **/shared/tmp/telemetry/declarationHistory**. 
+
+This includes declarations submitted upon following events:
+
+- TS start
+- Declarations submitted to **/shared/telemetry/declare**
+- Declarations submitted to **/shared/telemetry/namespace/<namespace>/declare**
+  
+.. NOTE:: The data contains information about the submitted declaration and the processed declaration (contains expanded references, default values and so on)
+
+|
 
 I'm receiving a path not registered error when I try to post a declaration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  

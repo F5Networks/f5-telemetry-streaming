@@ -6,6 +6,7 @@
         "region": "us-west-1",
         "logGroup": "f5telemetry",
         "logStream": "default",
+        "maxAwsLogBatchSize" : 100,
         "username": "accesskey",
         "passphrase": {
             "cipherText": "secretkey"

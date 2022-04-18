@@ -45,7 +45,7 @@ describe('restWorker', () => {
             }
         }
     };
-    const declarationTracerFile = '/shared/tmp/telemetry/declarationHistory';
+    const declarationTracerFile = '/var/log/restnoded/telemetryDeclarationHistory';
 
     before(() => {
         moduleCache.restore();

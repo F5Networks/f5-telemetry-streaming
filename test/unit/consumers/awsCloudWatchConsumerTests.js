@@ -120,13 +120,16 @@ describe('AWS_CloudWatch', () => {
         let clock;
         let putLogEventsStub;
         let actualParams;
-
+        const PutLogEventsCoolOff = 5000; // same as in source, long enough to send even half empty batch immediately
+        const PutLogEventsTooClose = 500; // too short to send even full batch immediately
         const defaultConsumerConfig = {
             region: 'us-west-1',
             logGroup: 'myLogGroup',
             logStream: 'theLogStream',
+            maxAwsLogBatchSize: 2,
             username: 'awsuser',
-            passphrase: 'awssecret'
+            passphrase: 'awssecret',
+            trace: true
         };
         const expectedParams = {
             logGroupName: 'myLogGroup',
@@ -168,6 +171,8 @@ describe('AWS_CloudWatch', () => {
 
         afterEach(() => {
             clock.restore();
+            actualParams = undefined;
+            expectedParams.logEvents = [];
         });
 
         it('should process systemInfo data', () => {
@@ -175,11 +180,13 @@ describe('AWS_CloudWatch', () => {
                 eventType: 'systemInfo',
                 config: defaultConsumerConfig
             });
+            context.config.id = 10010; // should be unique to avoid interference with other tests
             expectedParams.logEvents[0] = {
                 message: JSON.stringify(testUtil.deepCopy(context.event.data)),
-                timestamp: 0
+                timestamp: PutLogEventsCoolOff + 1
             };
 
+            clock.tick(PutLogEventsCoolOff + 1);
             return awsCloudWatchIndex(context)
                 .then(() => assert.deepStrictEqual(actualParams, expectedParams));
         });
@@ -189,12 +196,183 @@ describe('AWS_CloudWatch', () => {
                 eventType: 'AVR',
                 config: defaultConsumerConfig
             });
+            context.config.id = 10020; // should be unique to avoid interference with other tests
             expectedParams.logEvents[0] = {
                 message: JSON.stringify(testUtil.deepCopy(context.event.data)),
-                timestamp: 0
+                timestamp: PutLogEventsCoolOff + 1
             };
 
+            clock.tick(PutLogEventsCoolOff + 1);
             return awsCloudWatchIndex(context)
+                .then(() => {
+                    assert.deepStrictEqual(actualParams, expectedParams);
+                    // check the tracer too
+                    assert.deepStrictEqual(context.tracer.write.firstCall.args[0], expectedParams);
+                });
+        });
+
+        it('too soon to process event data', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 10030; // should be unique to avoid interference with other tests
+
+            clock.tick(PutLogEventsTooClose + 1);
+            // PutLogEvents will not be called, so actualParams will not be updated in the stub
+            return awsCloudWatchIndex(context)
+                .then(() => assert.strictEqual(actualParams, undefined));
+        });
+
+        it('record the timestamps of events, not the timestamp of PutLogEvents command', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 10040; // should be unique to avoid interference with other tests
+            // timestamps are different
+            expectedParams.logEvents[0] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsTooClose + 1
+            };
+            expectedParams.logEvents[1] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsTooClose + 1 + 10
+            };
+
+            clock.tick(PutLogEventsTooClose + 1);
+            return awsCloudWatchIndex(context)
+                .then(() => {
+                    // too soon to send a half full batch
+                    assert.strictEqual(actualParams, undefined);
+                    // nothing to trace yet
+                    assert.strictEqual(context.tracer.write.firstCall, null);
+                    clock.tick(10);
+                    return awsCloudWatchIndex(context);
+                })
+                .then(() => {
+                    assert.deepStrictEqual(actualParams, expectedParams);
+                    // check the tracer too
+                    assert.deepStrictEqual(context.tracer.write.firstCall.args[0], expectedParams);
+                });
+        });
+
+        it('two events with the same timestamp in the same batch', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 10050; // should be unique to avoid interference with other tests
+            // timestamps are the same
+            expectedParams.logEvents[0] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsTooClose + 1
+            };
+            expectedParams.logEvents[1] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsTooClose + 1
+            };
+
+            clock.tick(PutLogEventsTooClose + 1);
+            return awsCloudWatchIndex(context)
+                .then(() => {
+                    // too soon to send a half full batch
+                    assert.strictEqual(actualParams, undefined);
+                    return awsCloudWatchIndex(context);
+                })
+                .then(() => assert.deepStrictEqual(actualParams, expectedParams));
+        });
+
+        it('messages are a day apart, cannot be sent together', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 10060; // should be unique to avoid interference with other tests
+            const oneDayWindow = 24 * 60 * 60 * 1000;
+            // only one message will be sent because the other is a day apart
+            expectedParams.logEvents[0] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsTooClose + 1 + oneDayWindow
+            };
+
+            clock.tick(PutLogEventsTooClose + 1);
+            return awsCloudWatchIndex(context)
+                .then(() => {
+                    // too soon to send a half full batch
+                    assert.strictEqual(actualParams, undefined);
+                    clock.tick(oneDayWindow);
+                    return awsCloudWatchIndex(context);
+                })
+                .then(() => assert.deepStrictEqual(actualParams, expectedParams));
+        });
+
+        it('should lose event when an arbitrary error came from AWS', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 10070; // should be unique to avoid interference with other tests
+            // expected timestamp indicates that it is the second message
+            expectedParams.logEvents[0] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsCoolOff + 1 + PutLogEventsCoolOff + 1
+            };
+
+            // the first event will return with an error and will not be readded to the cache
+            putLogEventsStub = () => Promise.reject(new Error('generic exception'));
+            clock.tick(PutLogEventsCoolOff + 1);
+            return awsCloudWatchIndex(context)
+                .then(() => {
+                    assert.strictEqual(actualParams, undefined);
+                    // only the second event will be sent
+                    putLogEventsStub = (params) => {
+                        actualParams = params;
+                        return Promise.resolve();
+                    };
+                    clock.tick(PutLogEventsCoolOff + 1);
+                    return awsCloudWatchIndex(context);
+                })
+                .then(() => assert.deepStrictEqual(actualParams, expectedParams));
+        });
+
+        it('should readd event when InvalidSequenceTokenException came from AWS', () => {
+            class InvalidSequenceTokenExceptionError extends Error {
+                constructor() {
+                    super();
+                    this.code = 'InvalidSequenceTokenException';
+                }
+            }
+
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: defaultConsumerConfig
+            });
+            context.config.id = 1006; // should be unique to avoid interference with other tests
+            expectedParams.logEvents[0] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsCoolOff + 1
+            };
+            expectedParams.logEvents[1] = {
+                message: JSON.stringify(testUtil.deepCopy(context.event.data)),
+                timestamp: PutLogEventsCoolOff + 1 + PutLogEventsCoolOff + 1
+            };
+
+            // the first event will return with an allowed exception and will be readded to the cache
+            putLogEventsStub = () => Promise.reject(new InvalidSequenceTokenExceptionError());
+            clock.tick(PutLogEventsCoolOff + 1);
+            return awsCloudWatchIndex(context)
+                .then(() => {
+                    // on the first event nothing is sent
+                    assert.strictEqual(actualParams, undefined);
+                    // on the second event. both events will be sent
+                    putLogEventsStub = (params) => {
+                        actualParams = params;
+                        return Promise.resolve();
+                    };
+                    clock.tick(PutLogEventsCoolOff + 1);
+                    return awsCloudWatchIndex(context);
+                })
                 .then(() => assert.deepStrictEqual(actualParams, expectedParams));
         });
     });

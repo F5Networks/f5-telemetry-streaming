@@ -130,10 +130,10 @@ You can click the following links to go directly to a specific :doc:`setting-up-
    data-modification
    namespaces
    troubleshooting
+   revision-history
    schema-reference
    
    poller-default-output-reference
-   revision-history
 
 
 

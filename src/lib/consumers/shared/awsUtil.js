@@ -15,6 +15,282 @@ const util = require('../../utils/misc');
 const rootCerts = require('./awsRootCerts');
 
 const METRICS_BATCH_SIZE = 20;
+
+/**
+ * Cache for events used by PutLogEvents command of AWS Logs.
+ * That allows to send multiple events with a single command.
+ * Each AWS Logs stream has its own cache (array), which is identified by the corresponding consumer Id.
+ * A single event has two properties: message and timestamp.
+ */
+class EventCache {
+    constructor() {
+        this.events = {};
+    }
+
+    /**
+     * Adds a new event to the array associated with the stream.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     * @param {String} message    Message to be sent to AWS Logs
+     * @param {Number} timestamp  Timestamp associated with the message
+     */
+    addEvent(consumerId, message, timestamp) {
+        if (!this.events[consumerId]) {
+            this.events[consumerId] = [];
+        }
+
+        const record = {
+            message,
+            timestamp
+        };
+        this.events[consumerId].push(record);
+    }
+
+    /**
+     * Adds multiple events to the array associated with the stream.
+     *
+     * @param {String} consumerId         Unique id associated with the stream (consumer)
+     * @param {Array}  events             Array of messages to be added
+     * @param {String} events[].message   Message to be sent to AWS Logs
+     * @param {Number} events[].timestamp Timestamp associated with the message
+     */
+    addMultipleEvents(consumerId, events) {
+        if (!this.events[consumerId]) {
+            this.events[consumerId] = [];
+        }
+
+        events.forEach((currentEvent) => {
+            this.events[consumerId].push(currentEvent);
+        });
+    }
+
+    /**
+     * Removes multiple events from the array associated with the stream and returns them.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     * @param {Number} maxEvents  Maximum number of events to be removed from the cache
+     *
+     * @returns {Array} Array of removed events.
+     */
+    removeEvents(consumerId, maxEvents) {
+        if (!this.events[consumerId]) {
+            return [];
+        }
+
+        const eventsToRemove = [];
+        const eventsForAnotherBatch = [];
+        let overallLength = 0;
+        let earliestTimestamp;
+        let latestTimestamp;
+        const currentTime = new Date().getTime();
+        /* remove events one at a time in order to check the overall batch size calculated according to the
+           PutLogEvents specs */
+        for (let i = 0; i < maxEvents; i += 1) {
+            let stopFormingTheBatch = false;
+            // go through the cache until one suitable event is found
+            while (this.getLength(consumerId)) {
+                const cachedEventArray = this.events[consumerId].splice(-1, 1);
+                if (cachedEventArray.length) {
+                    const cachedEventTimestamp = cachedEventArray[0].timestamp;
+                    const cachedEventLength = Buffer.byteLength(cachedEventArray[0].message, 'utf8') + 26;
+                    /* Check that the event message is not in the far future, not too old or too big.
+                       All other messages are dropped (this is unlikely).
+                       The following limits are dictated by PutLogEvents specs. */
+                    const twoHours = 2 * 60 * 60 * 1000;
+                    const twoWeeks = 14 * 24 * 60 * 60 * 1000;
+                    const maxBatchSize = 1048576;
+                    if (cachedEventTimestamp - currentTime < twoHours
+                        && currentTime - cachedEventTimestamp < twoWeeks
+                        && cachedEventLength < maxBatchSize) {
+                        if (earliestTimestamp === undefined || latestTimestamp === undefined) {
+                            // the first message in the batch
+                            earliestTimestamp = cachedEventTimestamp;
+                            latestTimestamp = cachedEventTimestamp;
+                            overallLength = cachedEventLength;
+                            eventsToRemove.push(cachedEventArray[0]);
+                            break;
+                        } else if ((overallLength + cachedEventLength) <= 1048576) {
+                            // the batch is not empty and will not be too large
+                            const oneDayWindow = 24 * 60 * 60 * 1000;
+                            // check in the message and the current batch are within 24h window
+                            if (cachedEventTimestamp >= earliestTimestamp && cachedEventTimestamp <= latestTimestamp) {
+                                overallLength += cachedEventLength;
+                                eventsToRemove.push(cachedEventArray[0]);
+                                break;
+                            } else if (cachedEventTimestamp < earliestTimestamp
+                                       && latestTimestamp - cachedEventTimestamp < oneDayWindow) {
+                                earliestTimestamp = cachedEventTimestamp;
+                                overallLength += cachedEventLength;
+                                eventsToRemove.push(cachedEventArray[0]);
+                                break;
+                            } else if (cachedEventTimestamp > latestTimestamp
+                                       && cachedEventTimestamp - earliestTimestamp < oneDayWindow) {
+                                latestTimestamp = cachedEventTimestamp;
+                                overallLength += cachedEventLength;
+                                eventsToRemove.push(cachedEventArray[0]);
+                                break;
+                            }
+                            // the event is out of the batch 24h window
+                            eventsForAnotherBatch.push(cachedEventArray[0]);
+                        } else {
+                            // the batch size plus the event size surpassed the limit
+                            eventsForAnotherBatch.push(cachedEventArray[0]);
+                            /* the batch size might be close to the limit even without the current record,
+                               do not waste cycles, send the batch as is */
+                            stopFormingTheBatch = true;
+                        }
+                    }
+                }
+            }
+            if (stopFormingTheBatch) {
+                break;
+            }
+        }
+        // readd the postponed events back to the cache
+        addMultipleEventsToCache(consumerId, eventsForAnotherBatch);
+        eventsToRemove.sort((a, b) => a.timestamp - b.timestamp);
+        return eventsToRemove;
+    }
+
+    /**
+     * Returns length of the array associated with the stream.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     *
+     * @returns {Number} length of the corresponding array
+     */
+    getLength(consumerId) {
+        if (!this.events[consumerId]) {
+            return 0;
+        }
+        return this.events[consumerId].length;
+    }
+}
+
+const eventCache = new EventCache();
+
+/**
+ * Wrapper function for eventCache.addEvent
+ */
+function addEventToCache(consumerId, message, timestamp) {
+    return eventCache.addEvent(consumerId, message, timestamp);
+}
+
+/**
+ * Wrapper function for eventCache.addMultipleEvents
+ */
+function addMultipleEventsToCache(consumerId, events) {
+    return eventCache.addMultipleEvents(consumerId, events);
+}
+
+/**
+ * Wrapper function for eventCache.removeEvents
+ */
+function removeEventsFromCache(consumerId, maxEvents) {
+    return eventCache.removeEvents(consumerId, maxEvents);
+}
+
+/**
+ * Wrapper function for eventCache.getLength
+ */
+// might be useful for debugging
+// eslint-disable-next-line no-unused-vars
+function getCacheLength(consumerId) {
+    return eventCache.getLength(consumerId);
+}
+
+class SequenceTokenCache {
+    constructor() {
+        this.tokens = {};
+    }
+
+    /**
+     * Gets the sequence token of the stream.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     *
+     * @returns {String} the sequence token
+     */
+    getToken(consumerId) {
+        if (!this.tokens[consumerId]) {
+            return null;
+        }
+        return this.tokens[consumerId];
+    }
+
+    /**
+     * Sets the sequence token of the stream.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     * @param {String} newToken   the sequence token to be used by the next command
+     */
+    setToken(consumerId, newToken) {
+        this.tokens[consumerId] = newToken;
+    }
+}
+
+const sequenceTokenCache = new SequenceTokenCache();
+
+/**
+ * Wrapper function sequenceTokenCache.getToken
+ */
+function getSequenceToken(consumerId) {
+    return sequenceTokenCache.getToken(consumerId);
+}
+
+/**
+ * Wrapper function for sequenceTokenCache.setToken
+ */
+function setSequenceToken(consumerId, newToken) {
+    sequenceTokenCache.setToken(consumerId, newToken);
+}
+
+class PutLogEventsTimestampCache {
+    constructor() {
+        this.timestamps = {};
+    }
+
+    /**
+     * Gets the timestamp when the last PutLogEvents command was issued.
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     *
+     * @returns {String} the timestamp
+     */
+    getTimestamp(consumerId) {
+        if (!this.timestamps[consumerId]) {
+            return 0;
+        }
+        return this.timestamps[consumerId];
+    }
+
+    /**
+     * Sets the current timestamp (when the last PutLogEvents command was issued).
+     *
+     * @param {String} consumerId Unique id associated with the stream (consumer)
+     */
+    setTimestamp(consumerId) {
+        const timestamp = new Date().getTime();
+        this.timestamps[consumerId] = timestamp;
+    }
+}
+
+const putLogEventsTimestampCache = new PutLogEventsTimestampCache();
+
+/**
+ * Wrapper function PutLogEventsTimestampCache.getTimestamp
+ */
+function getPutLogEventsTimestamp(consumerId) {
+    return putLogEventsTimestampCache.getTimestamp(consumerId);
+}
+
+/**
+ * Wrapper function for PutLogEventsTimestampCache.setTimestamp
+ */
+function setPutLogEventsTimestamp(consumerId) {
+    putLogEventsTimestampCache.setTimestamp(consumerId);
+}
+
 /**
  * Configures the aws sdk global settings
  *
@@ -68,59 +344,151 @@ function getAWSRootCerts() {
 }
 
 /**
- * Sends data to CloudWatch Logs
+ * PutLogEvents requires a sequence token, get it from the responses to previous commands
+ * or issue describeLogStreams
  *
- * @param {Object} context Consumer context containing config and data
+ * @param {Object} context        Consumer context containing config and data
  *      See {@link ../../README.md#context}
+ * @param {Object} cloudWatchLogs Client of AWS.CloudWatchLogs
  *
- * @returns {Promise} resolved upon completion
+ * @returns {String} sequence token to be used by PutLogEvents
  */
-function sendLogs(context) {
-    let cloudWatchLogs;
-    let params;
+function produceSequenceToken(context, cloudWatchLogs) {
+    const consumerId = context.config.id;
     return Promise.resolve()
         .then(() => {
-            const clientProperties = { apiVersion: '2014-03-28' };
-            if (context.config.endpointUrl) {
-                clientProperties.endpoint = new AWS.Endpoint(context.config.endpointUrl);
-            }
-            cloudWatchLogs = new AWS.CloudWatchLogs(clientProperties);
-            const logGroup = context.config.logGroup;
-            const logStream = context.config.logStream;
-            const epochDate = new Date().getTime();
-            params = {
-                logGroupName: logGroup,
-                logStreamName: logStream,
-                logEvents: [
-                    {
-                        message: JSON.stringify(context.event.data),
-                        timestamp: epochDate
-                    }
-                ],
-                sequenceToken: undefined
-            };
-            if (context.tracer) {
-                context.tracer.write(params);
-            }
+            // parameters for describeLogStreams command
             const describeParams = {
-                logGroupName: logGroup,
+                logGroupName: context.config.logGroup,
                 limit: 1,
-                logStreamNamePrefix: logStream,
+                logStreamNamePrefix: context.config.logStream,
                 orderBy: 'LogStreamName'
             };
-            // have to get a sequence token first
-            return cloudWatchLogs.describeLogStreams(describeParams).promise();
-        })
-        .then((data) => {
-            const logStreamData = data.logStreams[0]; // there should only be one item
-            const token = logStreamData ? logStreamData.uploadSequenceToken : null;
-            // if token exists update putLogEvents params, otherwise leave as undefined
-            if (token) {
-                params.sequenceToken = token;
+            if (!getSequenceToken(consumerId)) {
+                // expected to happen for the first call of the stream only
+                context.logger.debug('there is no token, calling describeLogStreams');
+                return cloudWatchLogs.describeLogStreams(describeParams).promise();
             }
-            return cloudWatchLogs.putLogEvents(params).promise();
+            return Promise.resolve();
+        })
+        .then((streams) => {
+            let token;
+            if (streams) {
+                const logStreamData = streams.logStreams[0]; // there should be only one item
+                token = logStreamData ? logStreamData.uploadSequenceToken : null;
+            } else {
+                token = getSequenceToken(consumerId);
+            }
+            return token;
         });
 }
+
+/**
+ * Recursive function that issues PutLogEvents (and optionally describeLogStreams)
+ * until events cache is empty.
+ * It does not access context.event.data, that should happen before this function is called.
+ *
+ * @param {Object} context        Consumer context containing config and data
+ *      See {@link ../../README.md#context}
+ * @param {Object} cloudWatchLogs Client of AWS.CloudWatchLogs
+ */
+function sendLogsEngine(context, cloudWatchLogs) {
+    let params;
+    const consumerId = context.config.id;
+    let putLogEventsWasIssued = false;
+    const putLogEventsCoolOff = 5000; // delay to avoid competing PutLogEvents commands
+
+    return Promise.resolve()
+        .then(() => produceSequenceToken(context, cloudWatchLogs))
+        .then((token) => {
+            // parameters for putLogEvents command
+            params = {
+                logGroupName: context.config.logGroup,
+                logStreamName: context.config.logStream,
+                sequenceToken: token
+            };
+
+            // get events from the cache and sent them to AWS only if there are enough events for the full batch
+            params.logEvents = removeEventsFromCache(consumerId, context.config.maxAwsLogBatchSize);
+            if (params.logEvents && params.logEvents.length) {
+                const oldTimestamp = getPutLogEventsTimestamp(consumerId);
+                const newTimestamp = new Date().getTime();
+                /* The chances of failure in sending two PutLogEvents within 500ms is relatively high, avoid it.
+                   If last response to PutLogEvents came more than 5s ago,
+                   most likely all those commands already processed. */
+                if ((params.logEvents && params.logEvents.length === context.config.maxAwsLogBatchSize
+                        && (newTimestamp - oldTimestamp) > 500)
+                        || ((newTimestamp - oldTimestamp) > putLogEventsCoolOff)) {
+                    putLogEventsWasIssued = true;
+                    if (context.tracer) {
+                        context.tracer.write(params);
+                    }
+                    setPutLogEventsTimestamp(consumerId);
+                    return cloudWatchLogs.putLogEvents(params).promise();
+                }
+                // cannot send events yet, readd them back to the cache
+                addMultipleEventsToCache(consumerId, params.logEvents);
+            }
+            // it is ok not to have any unprocessed events, they could have been picked up in a batch of another event
+            return Promise.resolve();
+        })
+        .then((putLogEventsResponse) => {
+            if (putLogEventsWasIssued) {
+                context.logger.debug(`success ${params.logEvents.length} messages were sent`);
+                // store the sequence token for the future commands
+                setSequenceToken(consumerId, putLogEventsResponse.nextSequenceToken);
+                /* buffer might be not empty, so retry is helpful
+                   delay retry by a random interval in order to spread out simultaneous commands
+                   it should be larger than putLogEventsCoolOff */
+                const rndInt = Math.floor(Math.random() * 1000) + putLogEventsCoolOff;
+                setTimeout(() => sendLogsEngine(context, cloudWatchLogs), rndInt);
+            }
+            // it is ok not to have any unprocessed events, they could have been picked up in a batch of another event
+        })
+        .catch((error) => {
+            // InvalidSequenceTokenException is possible, especially under high volume load
+            if (error.code === 'InvalidSequenceTokenException') {
+                // store the sequence token for the future commands
+                const words = error.message.split(' ');
+                const token = words[words.length - 1];
+                if (/^\d+$/.test(token)) {
+                    setSequenceToken(consumerId, token);
+                } else {
+                    setSequenceToken(consumerId, undefined);
+                }
+                // readd events that failed to be sent to AWS
+                if (putLogEventsWasIssued) {
+                    addMultipleEventsToCache(consumerId, params.logEvents);
+                }
+                context.logger.debug('Some messages will be resent later,'
+                   + ' consider increasing value of "maxAwsLogBatchSize" parameter');
+            } else {
+                context.logger.exception('Unable to forward to AWS CloudWatch consumer', error);
+            }
+        });
+}
+
+/**
+ * Sends data to CloudWatch Logs
+ *
+ * @param {Object} context     Consumer context containing config and data
+ *      See {@link ../../README.md#context}
+ */
+function sendLogs(context) {
+    // timestamp the message and add it to the cache
+    const epochDate = new Date().getTime();
+    addEventToCache(context.config.id, JSON.stringify(context.event.data), epochDate);
+
+    const clientProperties = { apiVersion: '2014-03-28' };
+    if (context.config.endpointUrl) {
+        clientProperties.endpoint = new AWS.Endpoint(context.config.endpointUrl);
+    }
+    const cloudWatchLogs = new AWS.CloudWatchLogs(clientProperties);
+
+    // call the potentially recursive engine
+    return sendLogsEngine(context, cloudWatchLogs);
+}
+
 /**
  *
  *

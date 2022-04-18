@@ -222,15 +222,6 @@
             "minLength": 1,
             "f5expand": true
         },
-        "maxAwsLogBatchSize": {
-            "$comment": "Required for certain consumers: AWS_CloudWatch",
-            "title": "Maximum Batch Size",
-            "description": "The maximum number of telemetry items to include in a payload to the ingestion endpoint",
-            "type": "integer",
-            "minimum": 1,
-            "default": 100,
-            "maximum": 10000
-        },
         "logGroup": {
             "$comment": "Required for certain consumers: AWS_CloudWatch",
             "title": "Log Group",
@@ -781,7 +772,6 @@
                             "maxBatchSize": {},
                             "region": {},
                             "endpointUrl": {},
-                            "maxAwsLogBatchSize": {},
                             "logGroup": {},
                             "logStream": {},
                             "metricNamespace": {},
@@ -1004,15 +994,6 @@
                             "allOf": [
                                 { "not": { "required": ["username"], "not": { "required": ["passphrase"] }}},
                                 { "not": { "required": ["passphrase"], "not": { "required": ["username"] }}},
-                                {
-                                    "if": { "properties": { "dataType": { "enum": ["logs", null] } } },
-                                    "then": {
-                                        "properties": {
-                                            "maxAwsLogBatchSize": { "$ref": "#/definitions/maxAwsLogBatchSize", "default": 100 }
-                                        },
-                                        "required": ["maxAwsLogBatchSize"]
-                                    }
-                                },
                                 { "oneOf":
                                     [
                                         {
@@ -1048,9 +1029,8 @@
                                                     }
                                                 },
                                                 { "required":[ "metricNamespace" ] },
-                                                { "not": { "required":[ "maxAwsLogBatchSize" ] }},
                                                 { "not": { "required":[ "logStream" ] }},
-                                                { "not": { "required":[ "logGroup" ] }}
+                                                { "not": { "required": [ "logGroup" ] }}
                                             ]
                                         }
                                     ]

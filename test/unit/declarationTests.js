@@ -3786,6 +3786,14 @@ describe('Declarations', () => {
                                 },
                                 ignoreOther: true
                             },
+                            {
+                                property: 'maxAwsLogBatchSize',
+                                ignoreOther: true,
+                                numberRangeTests: {
+                                    minimum: 1,
+                                    maximum: 10000
+                                }
+                            },
                             'logGroup',
                             'logStream',
                             'region',
@@ -3853,6 +3861,7 @@ describe('Declarations', () => {
                         region: 'region',
                         logGroup: 'logGroup',
                         logStream: 'logStream',
+                        maxAwsLogBatchSize: 100,
                         dataType: 'logs'
                     }
                 ));
@@ -3860,6 +3869,7 @@ describe('Declarations', () => {
                 it('should allow full declaration', () => validateFull(
                     {
                         type: 'AWS_CloudWatch',
+                        maxAwsLogBatchSize: 111,
                         region: 'region',
                         logGroup: 'logGroup',
                         logStream: 'logStream',
@@ -3872,6 +3882,7 @@ describe('Declarations', () => {
                     },
                     {
                         type: 'AWS_CloudWatch',
+                        maxAwsLogBatchSize: 111,
                         region: 'region',
                         logGroup: 'logGroup',
                         logStream: 'logStream',
@@ -3956,7 +3967,7 @@ describe('Declarations', () => {
                     }
                 ));
 
-                it('should not allow non-metrics properties', () => assert.isRejected(
+                it('should not allow non-metrics properties logStream/logGroup', () => assert.isRejected(
                     validateMinimal({
                         type: 'AWS_CloudWatch',
                         dataType: 'metrics',
@@ -3964,6 +3975,17 @@ describe('Declarations', () => {
                         metricNamespace: 'metricsThingee',
                         logStream: 'extraOne',
                         logGroup: 'extraTwo'
+                    }),
+                    /should match exactly one schema in oneOf/
+                ));
+
+                it('should not allow non-metrics property maxAwsLogBatchSize', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'AWS_CloudWatch',
+                        dataType: 'metrics',
+                        region: 'region',
+                        metricNamespace: 'metricsThingee',
+                        maxAwsLogBatchSize: 77
                     }),
                     /should match exactly one schema in oneOf/
                 ));

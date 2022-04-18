@@ -38,7 +38,7 @@ The following properties were introduced in recent Telemetry Streaming versions.
 
       * - 1.23
         - System
-        - **throughtputPerformance**, which shows throughput performance information. 
+        - **throughputPerformance**, which shows throughput performance information. 
 
       * - 1.25
         - Pool Member
@@ -47,6 +47,10 @@ The following properties were introduced in recent Telemetry Streaming versions.
       * - 1.26
         - Pool Member
         - **fqdn**, which shows FQDN information for LTM pool member nodes that are FQDN nodes.
+  
+      * - 1.27
+        - System
+        - **asmAttackSignatures**, which shows ASM attack signature information.
 
 
 

@@ -36,7 +36,7 @@ describe('Activity Recorder', () => {
     let coreStub;
     let recorder;
 
-    const declarationTracerFile = '/shared/tmp/telemetry/declarationHistory';
+    const declarationTracerFile = '/var/log/restnoded/telemetryDeclarationHistory';
 
     before(() => {
         moduleCache.restore();

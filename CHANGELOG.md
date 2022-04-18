@@ -1,6 +1,22 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.28.0
+### Added
+### Fixed
+- AUTOTOOL-3101: [GitHub #191](https://github.com/F5Networks/f5-telemetry-streaming/issues/191): Increased number of messages in a single PutLogEvents command for AWS Logs consumer and added retry logic for InvalidSequenceTokenException.
+### Changed
+- AUTOTOOL-2975: Update npm packages (@grpc/proto-loader from 0.6.4 to 0.6.9). Removed unneeded "long" dependency
+- AUTOTOOL-3122: Qkview should contain Declaration History file
+### Removed
+
+## 1.27.1
+### Added
+### Fixed
+### Changed
+- Promoted to LTS
+### Removed
+
 ## 1.27.0
 ### Added
 - AUTOTOOL-2925: Save recent declarations to a file
