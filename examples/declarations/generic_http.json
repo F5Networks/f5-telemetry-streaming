@@ -20,6 +20,7 @@
         ],
         "passphrase": {
             "cipherText": "apikey"
-        }
+        },
+        "outputMode": "processed"
     }
 }

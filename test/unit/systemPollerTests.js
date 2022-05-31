@@ -597,7 +597,8 @@ describe('System Poller', () => {
                                         endpoint1: {
                                             enable: true,
                                             name: 'endpoint1',
-                                            path: '/mgmt/ltm/pool'
+                                            path: '/mgmt/ltm/pool',
+                                            protocol: 'http'
                                         }
                                     },
                                     destinationIds: []

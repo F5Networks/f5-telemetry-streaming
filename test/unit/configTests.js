@@ -208,7 +208,8 @@ describe('Config', () => {
                     method: 'POST',
                     port: 443,
                     protocol: 'https',
-                    trace: false
+                    trace: false,
+                    outputMode: 'processed'
                 }
             };
             const expectedDeclaration = {
@@ -226,6 +227,7 @@ describe('Config', () => {
                     type: 'Generic_HTTP',
                     enable: true,
                     method: 'POST',
+                    outputMode: 'processed',
                     host: '192.0.2.1',
                     path: '`=/Shared/constants/path`',
                     port: 443,
@@ -269,7 +271,8 @@ describe('Config', () => {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
-                        trace: false
+                        trace: false,
+                        outputMode: 'processed'
                     }
                 }
             };
@@ -288,6 +291,7 @@ describe('Config', () => {
                     enable: true,
                     method: 'POST',
                     host: '192.0.2.1',
+                    outputMode: 'processed',
                     path: '`=/Shared/constants/path`',
                     port: 443,
                     protocol: 'https',

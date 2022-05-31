@@ -11,8 +11,20 @@ Document Revision History
         - Description
         - Date
   
+      * - 1.29.0
+        - **Updated the documentation for Telemetry Streaming v1.29.0. This release contains the following changes:** |br| * Added support for querying SNMP using a custom endpoint (see :ref:`SNMP example<snmpep>`) |br| * Added outputMode parameter to Generic HTTP consumer to support raw data output (see :ref:`Generic HTTP<http-ref>`) |br| |br| Issues Resolved: |br| * Metric Consumers should not fail when 'null' found in data |br| * Prometheus consumer should ignore NaN values
+        - 5-31-22
+
+      * - 1.28.0
+        - Updated the documentation for Telemetry Streaming v1.28.0. This release contains the following changes: |br| * Increased number of messages in a single PutLogEvents command for AWS Logs consumer and added retry logic for InvalidSequenceTokenException, `GitHub #191 <https://github.com/F5Networks/f5-telemetry-streaming/issues/191>`_ |br| * Updated the path to stored declarations, and noted that qkview now has access to the Declaration History file (see :ref:`Stored Declarations<save>`)
+        - 4-19-22
+
+      * - 1.27.1
+        - Released Telemetry Streaming v1.27.1 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy.
+        - 4-19-22
+
       * - 1.27.0
-        - Updated the documentation for Telemetry Streaming v1.27.0. This release contains the following changes: |br| * Telemetry Streaming now stores up to 30 of the most recent declarations (see :ref:`Stored Declarations<save>`) |br| * Verified support for ElasticSearch 8 (see :ref:`ElasticSearch<elasticsearch-ref>`) |br| * Removed the experimental label from the OpenTelemetry Exporter consumer (see :ref:`OpenTelemetry<opent>`) |br| * Updated the DataDog consumer to use the v2 logs API |br| * TS now closes the tracer by timeout when inactive |br| |br| Issues Resolved: |br| * Added additional sanitation to StatsD metric and tag naming, `GitHub #184 <https://github.com/F5Networks/f5-telemetry-streaming/issues/184>`_ |br| * RegEx catastrophic backtracking on attempt to mask secrets in JSON data |br| * Added info about installed ASM attack signatures to output (see :ref:`System Information<sysinfo>`), `GitHub #174 <https://github.com/F5Networks/f5-telemetry-streaming/issues/174>`_)
+        - Updated the documentation for Telemetry Streaming v1.27.0. This release contains the following changes: |br| * Telemetry Streaming now stores up to 30 of the most recent declarations (see :ref:`Stored Declarations<save>`) |br| * Verified support for ElasticSearch 8 (see :ref:`ElasticSearch<elasticsearch-ref>`) |br| * Removed the experimental label from the OpenTelemetry Exporter consumer (see :ref:`OpenTelemetry<opent>`) |br| * Updated the DataDog consumer to use the v2 logs API |br| * TS now closes the tracer by timeout when inactive |br| |br| Issues Resolved: |br| * Added additional sanitation to StatsD metric and tag naming, `GitHub #184 <https://github.com/F5Networks/f5-telemetry-streaming/issues/184>`_ |br| * RegEx catastrophic backtracking on attempt to mask secrets in JSON data |br| * Added info about installed ASM attack signatures to output (see :ref:`System Information<sysinfo>`, `GitHub #174 <https://github.com/F5Networks/f5-telemetry-streaming/issues/174>`_)
         - 3-8-22
 
       * - 1.26.0

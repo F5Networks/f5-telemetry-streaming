@@ -369,7 +369,9 @@ function getMetrics(data, options) {
     options.pathOrKey = (typeof options.pathOrKey === 'undefined') ? '' : options.pathOrKey;
 
     if (typeof data === 'number') {
-        storeMetric(options.pathOrKey, data, metrics);
+        if (!Number.isNaN(data)) {
+            storeMetric(options.pathOrKey, data, metrics);
+        }
     } else if (typeof data === 'string') {
         const numData = Number(data);
         if (!Number.isNaN(numData)) {

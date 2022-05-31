@@ -108,6 +108,7 @@ describe('Normalize', () => {
             const event = '<100> some syslog event: host=x.x.x.x';
             const expectedResult = {
                 data: event,
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
             };
 
@@ -120,6 +121,7 @@ describe('Normalize', () => {
             const expectedResult = {
                 key1: 'value',
                 key3: 'value',
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             };
             const options = {
@@ -138,6 +140,7 @@ describe('Normalize', () => {
             const expectedResult = {
                 key1: 'value',
                 date_time: '2019-01-01T01:00:00.000Z',
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             };
             const options = {
@@ -151,6 +154,7 @@ describe('Normalize', () => {
             const event = '{"key":"value","date_time":"January 01, 2019 01:00:00 UTC"}';
             const expectedResult = {
                 data: event,
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
             };
             const options = {
@@ -164,6 +168,7 @@ describe('Normalize', () => {
             const event = '{"key1":"value1","$F5TelemetryEventCategory":"unrecognized","key3":"value3"}';
             const expectedResult = {
                 data: event,
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.EVENT_LISTENER
             };
             const options = {};
@@ -175,6 +180,7 @@ describe('Normalize', () => {
             const event = '{"key1":"value1","$F5TelemetryEventCategory":"raw","key3":"value3"}';
             const expectedResult = {
                 data: event,
+                originalRawData: event,
                 telemetryEventCategory: EVENT_TYPES.RAW_EVENT
             };
             const options = {};

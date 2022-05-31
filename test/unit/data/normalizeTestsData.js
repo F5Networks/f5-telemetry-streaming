@@ -37,6 +37,7 @@ module.exports = {
                 Access_Profile: 'APM_ACCESS_PROFILE',
                 key1: 'value',
                 key2: 'value2',
+                originalRawData: 'Access_Profile="APM_ACCESS_PROFILE",key1="value",key2="value2"',
                 telemetryEventCategory: 'APM',
                 f5telemetry_timestamp: '2020-12-03T21:56:38.308Z'
             }
@@ -117,6 +118,7 @@ module.exports = {
             expectedData: {
                 key1: 'value',
                 key2: 'value\\",value',
+                originalRawData: 'key1="value",key2="value\\",value"',
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             }
         },
@@ -126,6 +128,7 @@ module.exports = {
             expectedData: {
                 key1: 'value',
                 key2: 'value\",value',
+                originalRawData: 'key1="value",key2="value\",value"',
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             }
         },
@@ -136,6 +139,7 @@ module.exports = {
                 key1: 'value',
                 key2: 'value\",value',
                 key3: 'value3',
+                originalRawData: 'key1="value",key2="value\",value",key3="value3',
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             }
         },
@@ -146,6 +150,7 @@ module.exports = {
                 key1: 'value',
                 key2: 'value\\",value',
                 key3: 'value3',
+                originalRawData: 'key1="value",key2="value\\",value",key3="value3',
                 telemetryEventCategory: EVENT_TYPES.LTM_EVENT
             }
         },
@@ -160,6 +165,7 @@ module.exports = {
             expectedData: {
                 data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
                 hostname: 'bigip14.1.2.3.test',
+                originalRawData: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
                 telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
             }
         },
@@ -169,6 +175,7 @@ module.exports = {
             expectedData: {
                 data: '<133>Aug 12 12:22:41 slot1/TSGuest1.localdomain notice root[22149]: 01420002:5: AUDIT test mumble grumble syslog entry',
                 hostname: 'slot1/TSGuest1.localdomain',
+                originalRawData: '<133>Aug 12 12:22:41 slot1/TSGuest1.localdomain notice root[22149]: 01420002:5: AUDIT test mumble grumble syslog entry',
                 telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
             }
         }

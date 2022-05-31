@@ -1,0 +1,62 @@
+{
+    "class": "Telemetry",
+    "SysStat_Endpoints": {
+        "class": "Telemetry_Endpoints",
+        "items": {
+            "sysGlobalStat.sysStatMemoryUsed": {
+                "name": "usedMemory",
+                "protocol": "snmp",
+                "path": "sysGlobalStat.sysStatMemoryUsed"
+            },
+            "totalMemory": {
+                "protocol": "snmp",
+                "path": "sysGlobalStat.sysStatMemoryTotal"
+            }
+        }
+    },
+    "Virtual_Endpoints": {
+        "class": "Telemetry_Endpoints",
+        "items": {
+            "clientside.totConns": {
+                "name": "virtualTotConns",
+                "path": "/mgmt/tm/ltm/virtual/stats?$select=clientside.totConns"
+            },
+            "virtualAddress": {
+                "path": "/mgmt/tm/ltm/virtual-address/stats"
+            }
+        }
+    },
+    "Custom_System": {
+        "class": "Telemetry_System",
+        "systemPoller": [
+            "Custom_System_Poller1",
+            "Custom_System_Poller2",
+            {
+                "interval": 60
+            }
+        ]
+    },
+    "Custom_System_Poller1": {
+    	"class": "Telemetry_System_Poller",
+        "interval": 60,
+        "endpointList": "SysStat_Endpoints"
+    },
+    "Custom_System_Poller2": {
+    	"class": "Telemetry_System_Poller",
+        "interval": 720,
+        "endpointList": [
+            "Virtual_Endpoints",
+            {
+                "path": "sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry",
+                "protocol": "snmp",
+                "name": "tmmPages"
+            }
+        ]
+    },
+    "Default_System": {
+        "class": "Telemetry_System",
+        "systemPoller": {
+            "interval": 360
+        }
+    }
+}

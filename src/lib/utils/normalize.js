@@ -494,6 +494,31 @@ module.exports = {
     },
 
     /**
+     * Restructure SNMP Telemetry Endpoint response into JSON object
+     *
+     * @param {Object} args            - args object
+     * @param {Object} [args.data]     - data to process (always included)
+     *
+     * @returns {Object} Returns object
+     */
+    restructureSNMPEndpoint(args) {
+        const data = (args.data.commandResult || '').trim();
+        const result = {};
+        data.split('\n').forEach((row) => {
+            const rowParts = row.split(' ');
+            const key = rowParts[0];
+            let value = rowParts[1];
+            if (typeof key !== 'undefined' && typeof value !== 'undefined') {
+                if (!Number.isNaN(value)) {
+                    value = Number(value);
+                }
+                result[key] = value;
+            }
+        });
+        return result;
+    },
+
+    /**
      * restructureGslbPool
      *
      * @param {Object} args              - args object

@@ -1186,6 +1186,10 @@ module.exports = {
                             items: {
                                 endpoint1: {
                                     path: 'endpoint1'
+                                },
+                                snmpEndpoint: {
+                                    path: '1.2.3.4',
+                                    protocol: 'snmp'
                                 }
                             }
                         }
@@ -1253,7 +1257,8 @@ module.exports = {
                             endpoint1: {
                                 path: '/endpoint1',
                                 enable: true,
-                                name: 'endpoint1'
+                                name: 'endpoint1',
+                                protocol: 'http'
                             }
                         },
                         enable: true,
@@ -1299,7 +1304,8 @@ module.exports = {
                             endpoint1: {
                                 path: '/endpoint1',
                                 enable: true,
-                                name: 'endpoint1'
+                                name: 'endpoint1',
+                                protocol: 'http'
                             }
                         },
                         enable: true,
@@ -1402,7 +1408,8 @@ module.exports = {
                             endpoint1: {
                                 path: '/endpoint1',
                                 enable: true,
-                                name: 'endpoint1'
+                                name: 'endpoint1',
+                                protocol: 'http'
                             }
                         },
                         enable: true,
@@ -1448,7 +1455,14 @@ module.exports = {
                             endpoint1: {
                                 path: '/endpoint1',
                                 enable: true,
-                                name: 'endpoint1'
+                                name: 'endpoint1',
+                                protocol: 'http'
+                            },
+                            snmpEndpoint: {
+                                path: '1.2.3.4',
+                                enable: true,
+                                name: 'snmpEndpoint',
+                                protocol: 'snmp'
                             }
                         },
                         enable: true,

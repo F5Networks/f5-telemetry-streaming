@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.28.0-2",
+    "version": "1.29.0-1",
     "author": "F5 Networks",
     "license": "Apache-2.0",
     "repository": {
@@ -70,7 +70,7 @@
         "chai": "^4.3.6",
         "chai-as-promised": "^7.1.1",
         "deep-diff": "^1.0.2",
-        "eslint": "^8.10.0",
+        "eslint": "^8.13.0",
         "eslint-config-airbnb-base": "^14.2.1",
         "eslint-plugin-import": "^2.25.4",
         "grpc": "1.24.7",

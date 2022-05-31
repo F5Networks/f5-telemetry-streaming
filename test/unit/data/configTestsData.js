@@ -141,6 +141,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -167,6 +168,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -196,6 +198,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -222,6 +225,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -256,6 +260,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -289,6 +294,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -327,6 +333,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -364,6 +371,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -456,6 +464,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -486,6 +495,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -514,6 +524,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -547,6 +558,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -585,6 +597,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -664,6 +677,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -692,6 +706,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -718,6 +733,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -746,6 +762,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -780,6 +797,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -814,6 +832,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -852,6 +871,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -889,6 +909,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -970,6 +991,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1000,6 +1022,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1027,6 +1050,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1055,6 +1079,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1089,6 +1114,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1123,6 +1149,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1161,6 +1188,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1198,6 +1226,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1267,6 +1296,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1297,6 +1327,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1317,6 +1348,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1338,6 +1370,7 @@ module.exports = {
                         port: 443,
                         path: '/',
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1372,6 +1405,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1396,6 +1430,7 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1434,6 +1469,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1461,6 +1497,7 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1546,6 +1583,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1576,6 +1614,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1596,6 +1635,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1617,6 +1657,7 @@ module.exports = {
                         port: 443,
                         path: '/',
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1651,6 +1692,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1675,6 +1717,7 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1713,6 +1756,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1740,6 +1784,7 @@ module.exports = {
                             host: '192.0.2.10',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1840,6 +1885,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1870,6 +1916,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1897,6 +1944,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -1925,6 +1973,7 @@ module.exports = {
                         method: 'POST',
                         port: 443,
                         protocol: 'https',
+                        outputMode: 'processed',
                         trace: false,
                         passphrase: {
                             class: 'Secret',
@@ -1959,6 +2008,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -1993,6 +2043,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -2031,6 +2082,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -2068,6 +2120,7 @@ module.exports = {
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -2158,6 +2211,7 @@ module.exports = {
                             method: 'POST',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: false,
                             passphrase: {
                                 class: 'Secret',
@@ -2199,6 +2253,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',
@@ -2238,6 +2293,7 @@ module.exports = {
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
+                            outputMode: 'processed',
                             trace: {
                                 enable: false,
                                 encoding: 'utf8',

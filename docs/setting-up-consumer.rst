@@ -42,7 +42,7 @@ The following items have been added to the Splunk consumer since it was introduc
       * - 1.19
         - **compressionType**
         - Sets the type of compression.  Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property. When set to **none**, this property stops TS from compressing data before sending it to Splunk, which can help reduce memory usage.
-        - 
+
 
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
@@ -566,8 +566,8 @@ The following items have been added to the StatsD consumer since it was introduc
       * - 1.25
         - **convertBooleansToMetrics**
         - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
-        - 
-
+        
+        
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 
@@ -623,6 +623,10 @@ The following items have been added to the Generic HTTP consumer since it was in
         - **rootCertificate**
         - The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters.
 
+      * - 1.29
+        - **outputMode**
+        - Possible values: **raw**, **processed**.  OutputMode provides the options to send data with the Generic HTTP consumer in an "as-is" (**raw**) format instead of the generated JSON payload (**processed**) allowing the data to be sent in Line Protocol format to a raw event listener and have it forwarded through the Generic HTTP consumer. 
+
 |
 
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
@@ -631,6 +635,7 @@ Example Declaration:
 
 .. literalinclude:: ../examples/declarations/generic_http.json
     :language: json
+    :emphasize-lines: 24
 
 
 |
@@ -921,7 +926,7 @@ OpenTelemetry Exporter
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23, and is supported in DO 1.28 and later.
+    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23, and is supported in TS 1.27 and later.
 
 The OpenTelemetry Exporter Consumer exports telemetry data to an OpenTelemetry Collector, or OpenTelemetry Protocol compatible API.
 

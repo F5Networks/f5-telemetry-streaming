@@ -337,14 +337,17 @@ function normalizeTelemetryEndpoints(convertedConfig) {
     }
 
     function fixEndpointPath(endpoint) {
-        endpoint.path = endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`;
+        endpoint.path = endpoint.protocol === 'snmp' || endpoint.path.startsWith('/') ? endpoint.path : `/${endpoint.path}`;
     }
 
     function parseEndpointItem(endpoint, key) {
         const innerEndpoint = util.deepCopy(endpoint.items[key]);
         fixEndpointPath(innerEndpoint);
         innerEndpoint.enable = endpoint.enable && innerEndpoint.enable;
-        innerEndpoint.path = `${endpoint.basePath}${innerEndpoint.path}`;
+        // Only add 'basePath' prefix to http endpoints
+        if (innerEndpoint.protocol === 'http') {
+            innerEndpoint.path = `${endpoint.basePath}${innerEndpoint.path}`;
+        }
         // 'key' is endpoint's name too, but if 'name' defined, then use it
         // because it might be actual endpoint's name and 'key' (in this situation)
         // might be just 'unique key' to store endpoints with similar names but

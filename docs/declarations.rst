@@ -347,6 +347,27 @@ With the **addTags** property, the StatsD consumer also sends numeric metrics bu
 |
 
 
+.. _snmpep:
+
+Querying SNMP using a custom endpoint
+-------------------------------------
+.. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
+
+   Support for SNMP for custom endpoints is available in TS v1.29 and later
+
+
+This example shows how you can query SNMP using a custom endpoint in a Telemetry Streaming declaration using version 1.29 and later. 
+See :doc:`custom-endpoints` for more information on this feature.
+
+
+.. literalinclude:: ../examples/declarations/system_custom_endpoints_with_snmp.json
+    :language: json
+
+
+
+|
+
+
 
 
 .. |proxy| raw:: html

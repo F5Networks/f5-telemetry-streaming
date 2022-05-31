@@ -573,5 +573,191 @@ module.exports = {
                 ]
             }
         ]
+    },
+    collectSNMPCustom: {
+        name: 'snmp data via bash endpoint',
+        tests: [
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should set tmmPages to empty object (if empty response)',
+                endpointList: {
+                    tmmPages: {
+                        path: 'sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry',
+                        protocol: 'snmp'
+                    }
+                },
+                expectedData: {
+                    tmmPages: {}
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: ''
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should set tmmPages to empty object (if no commandResult property)',
+                endpointList: {
+                    tmmPages: {
+                        path: 'sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry',
+                        protocol: 'snmp'
+                    }
+                },
+                expectedData: {
+                    tmmPages: {}
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        response: {
+                            kind: 'tm:util:bash:runstate'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should collect single snmp mib (single stat)',
+                endpointList: {
+                    totalMemory: {
+                        path: 'sysGlobalStat.sysStatMemoryTotal',
+                        protocol: 'snmp'
+                    }
+                },
+                expectedData: {
+                    totalMemory: {
+                        'sysStatMemoryTotal.0': 3179282432
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should collect single snmp mib (multiple stats)',
+                endpointList: {
+                    tmmPages: {
+                        path: 'sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry',
+                        protocol: 'snmp'
+                    }
+                },
+                expectedData: {
+                    tmmPages: {
+                        'sysTmmPagesStatSlot.0.0': 0,
+                        'sysTmmPagesStatSlot.0.1': 0,
+                        'sysTmmPagesStatTmm.0.0': 0,
+                        'sysTmmPagesStatTmm.0.1': 1,
+                        'sysTmmPagesStatPagesUsed.0.0': 45869,
+                        'sysTmmPagesStatPagesUsed.0.1': 50462,
+                        'sysTmmPagesStatPagesAvail.0.0': 387584,
+                        'sysTmmPagesStatPagesAvail.0.1': 388608
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                        }
+                    }
+                ]
+            },
+            /**
+             * TEST DATA STARTS HERE
+             * */
+            {
+                name: 'should collect multiple snmp mibs',
+                endpointList: {
+                    totalMemory: {
+                        path: 'sysGlobalStat.sysStatMemoryTotal',
+                        protocol: 'snmp'
+                    },
+                    usedMemory: {
+                        path: 'sysGlobalStat.sysStatMemoryUsed',
+                        protocol: 'snmp'
+                    },
+                    tmmPages: {
+                        path: 'sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry',
+                        protocol: 'snmp'
+                    }
+                },
+                expectedData: {
+                    tmmPages: {
+                        'sysTmmPagesStatSlot.0.0': 0,
+                        'sysTmmPagesStatSlot.0.1': 0,
+                        'sysTmmPagesStatTmm.0.0': 0,
+                        'sysTmmPagesStatTmm.0.1': 1,
+                        'sysTmmPagesStatPagesUsed.0.0': 45869,
+                        'sysTmmPagesStatPagesUsed.0.1': 50462,
+                        'sysTmmPagesStatPagesAvail.0.0': 387584,
+                        'sysTmmPagesStatPagesAvail.0.1': 388608
+                    },
+                    totalMemory: {
+                        'sysStatMemoryTotal.0': 3179282432
+                    },
+                    usedMemory: {
+                        'sysStatMemoryUsed.0': 290295264
+                    }
+                },
+                endpoints: [
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryUsed"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'sysStatMemoryUsed.0 290295264\n'
+                        }
+                    },
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                        }
+                    },
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                        }
+                    }
+                ]
+            }
+        ]
     }
 };

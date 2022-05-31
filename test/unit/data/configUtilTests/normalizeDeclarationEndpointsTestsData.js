@@ -32,6 +32,10 @@ module.exports = {
                             items: {
                                 endpoint1: {
                                     path: 'endpoint1'
+                                },
+                                endpoint2: {
+                                    path: 'sysStats',
+                                    protocol: 'snmp'
                                 }
                             }
                         }
@@ -49,6 +53,10 @@ module.exports = {
                                 items: {
                                     endpoint1: {
                                         path: 'endpoint1'
+                                    },
+                                    endpoint2: {
+                                        path: 'sysStats',
+                                        protocol: 'snmp'
                                     }
                                 }
                             }
@@ -157,6 +165,10 @@ module.exports = {
                             items: {
                                 endpoint1: {
                                     path: 'endpoint1'
+                                },
+                                endpoint2: {
+                                    path: 'sysStats',
+                                    protocol: 'snmp'
                                 }
                             }
                         }
@@ -173,6 +185,10 @@ module.exports = {
                                 items: {
                                     endpoint1: {
                                         path: 'endpoint1'
+                                    },
+                                    endpoint2: {
+                                        path: 'sysStats',
+                                        protocol: 'snmp'
                                     }
                                 }
                             }
@@ -226,7 +242,14 @@ module.exports = {
                             endpoint1: {
                                 enable: true,
                                 name: 'endpoint1',
-                                path: '/mgmt/endpoint1'
+                                path: '/mgmt/endpoint1',
+                                protocol: 'http'
+                            },
+                            endpoint2: {
+                                enable: true,
+                                name: 'endpoint2',
+                                path: 'sysStats',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -273,7 +296,14 @@ module.exports = {
                             endpoint1: {
                                 enable: true,
                                 name: 'endpoint1',
-                                path: '/mgmt/endpoint1'
+                                path: '/mgmt/endpoint1',
+                                protocol: 'http'
+                            },
+                            endpoint2: {
+                                enable: true,
+                                name: 'endpoint2',
+                                path: 'sysStats',
+                                protocol: 'snmp'
                             }
                         }
                     }
@@ -291,6 +321,10 @@ module.exports = {
                     items: {
                         disabledEndpoint: {
                             path: 'disabledEndpoint'
+                        },
+                        disabledSnmpEndpoint: {
+                            path: 'disabledSnmpEndpoint',
+                            protocol: 'snmp'
                         }
                     }
                 },
@@ -301,6 +335,10 @@ module.exports = {
                     items: {
                         enabledEndpoint1: {
                             path: 'enabledEndpoint1'
+                        },
+                        enabledSnmpEndpoint1: {
+                            path: 'enabledSnmpEndpoint1',
+                            protocol: 'snmp'
                         }
                     }
                 },
@@ -311,6 +349,10 @@ module.exports = {
                     items: {
                         enabledEndpoint2: {
                             path: '/enabledEndpoint2'
+                        },
+                        enabledSnmpEndpoint2: {
+                            path: 'enabledSnmpEndpoint2',
+                            protocol: 'snmp'
                         }
                     }
                 },
@@ -330,13 +372,19 @@ module.exports = {
                             'Enabled_Endpoints_2/enabledEndpoint2',
                             'Enabled_Endpoints_1',
                             'Enabled_Endpoints_2/enabledEndpoint2',
+                            'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                             'Disabled_Endpoints_1/disabledEndpoint',
                             'Disabled_Endpoints_1/disabledEndpoint',
+                            'Disabled_Endpoints_1/disabledSnmpEndpoint',
                             {
                                 enable: false,
                                 items: {
                                     disabledEndpoint_3: {
                                         path: 'disabledEndpoint_3'
+                                    },
+                                    disabledSnmpEndpoint_3: {
+                                        path: 'disabledSnmpEndpoint.3',
+                                        protocol: 'snmp'
                                     }
                                 }
                             },
@@ -346,12 +394,23 @@ module.exports = {
                                     disabledEndpoint_3: {
                                         enable: false,
                                         path: 'disabledEndpoint_3'
+                                    },
+                                    disabledSnmpEndpoint_3: {
+                                        enable: false,
+                                        path: 'disabledSnmpEndpoint.3',
+                                        protocol: 'snmp'
                                     }
                                 }
                             },
                             {
                                 name: 'disabledEndpoint_4',
                                 path: 'disabledEndpoint_4',
+                                enable: false
+                            },
+                            {
+                                name: 'disabledSnmpEndpoint_4',
+                                path: 'disabledSnmpEndpoint.4',
+                                protocol: 'snmp',
                                 enable: false
                             },
                             {
@@ -362,9 +421,19 @@ module.exports = {
                                         enable: true,
                                         path: 'enabledEndpoint_4'
                                     },
+                                    enabledSnmpEndpoint_4: {
+                                        enable: true,
+                                        path: 'enabledSnmpEndpoint.4',
+                                        protocol: 'snmp'
+                                    },
                                     enabledEndpoint_4_2: {
                                         enable: false,
                                         path: 'enabledEndpoint_4_2'
+                                    },
+                                    disabledSnmpEndpoint_4_2: {
+                                        enable: false,
+                                        path: 'disabledSnmpEndpoint.4.2',
+                                        protocol: 'snmp'
                                     }
                                 }
                             },
@@ -372,6 +441,12 @@ module.exports = {
                                 name: 'enabledEndpoint_5',
                                 path: 'enabledEndpoint_5',
                                 enable: true
+                            },
+                            {
+                                name: 'enabledSnmpEndpoint_5',
+                                path: 'enabledSnmpEndpoint.5',
+                                enable: true,
+                                protocol: 'snmp'
                             }
                         ]
                     }
@@ -385,8 +460,10 @@ module.exports = {
                             'Enabled_Endpoints_2/enabledEndpoint2',
                             'Enabled_Endpoints_1',
                             'Enabled_Endpoints_2/enabledEndpoint2',
+                            'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                             'Disabled_Endpoints_1/disabledEndpoint',
-                            'Disabled_Endpoints_1/disabledEndpoint'
+                            'Disabled_Endpoints_1/disabledEndpoint',
+                            'Disabled_Endpoints_1/disabledSnmpEndpoint'
                         ]
                     }
                 },
@@ -399,6 +476,10 @@ module.exports = {
                         items: {
                             disabledEndpoint: {
                                 path: 'disabledEndpoint_2'
+                            },
+                            disabledSnmpEndpoint: {
+                                path: 'disabledSnmpEndpoint.2',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -409,6 +490,10 @@ module.exports = {
                         items: {
                             enabledEndpoint1: {
                                 path: 'enabledEndpoint1_3'
+                            },
+                            enabledSnmpEndpoint: {
+                                path: 'enabledSnmpEndpoint1.3',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -419,6 +504,10 @@ module.exports = {
                         items: {
                             enabledEndpoint2: {
                                 path: '/enabledEndpoint_4'
+                            },
+                            enabledSnmpEndpoint2: {
+                                path: 'enabledSnmpEndpoint.4',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -436,15 +525,28 @@ module.exports = {
                             endpointList: [
                                 'Enabled_Endpoints_1',
                                 'Enabled_Endpoints_2/enabledEndpoint2',
+                                'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                                 'Enabled_Endpoints_1',
                                 'Enabled_Endpoints_2/enabledEndpoint2',
+                                'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                                 'Disabled_Endpoints_1/disabledEndpoint',
                                 'Disabled_Endpoints_1/disabledEndpoint',
+                                'Disabled_Endpoints_1/disabledSnmpEndpoint',
+                                'Disabled_Endpoints_1/disabledSnmpEndpoint',
                                 {
                                     enable: false,
                                     items: {
                                         disabledEndpoint_3: {
                                             path: 'disabledEndpoint_3'
+                                        }
+                                    }
+                                },
+                                {
+                                    enable: false,
+                                    items: {
+                                        disabledSnmpEndpoint_3: {
+                                            path: 'disabledSnmpEndpoint.3',
+                                            protocol: 'snmp'
                                         }
                                     }
                                 },
@@ -458,8 +560,24 @@ module.exports = {
                                     }
                                 },
                                 {
+                                    enable: true,
+                                    items: {
+                                        disabledSnmpEndpoint_3: {
+                                            enable: false,
+                                            path: 'disabledSnmpEndpoint.3',
+                                            protocol: 'snmp'
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'disabledEndpoint_4',
                                     path: 'disabledEndpoint_4',
+                                    enable: false
+                                },
+                                {
+                                    name: 'disabledSnmpEndpoint_4',
+                                    path: 'disabledSnmpEndpoint.4',
+                                    protocol: 'snmp',
                                     enable: false
                                 },
                                 {
@@ -470,15 +588,31 @@ module.exports = {
                                             enable: true,
                                             path: 'enabledEndpoint_4'
                                         },
+                                        enabledSnmpEndpoint_4: {
+                                            enable: true,
+                                            path: 'enabledSnmpEndpoint.4',
+                                            protocol: 'snmp'
+                                        },
                                         enabledEndpoint_4_2: {
                                             enable: false,
                                             path: 'enabledEndpoint_4_2'
+                                        },
+                                        enabledSnmpEndpoint_4_2: {
+                                            enable: false,
+                                            path: 'enabledSnmpEndpoint.4.2',
+                                            protocol: 'snmp'
                                         }
                                     }
                                 },
                                 {
                                     name: 'enabledEndpoint_5',
                                     path: 'enabledEndpoint_5',
+                                    enable: true
+                                },
+                                {
+                                    name: 'enabledSnmpEndpoint_5',
+                                    path: 'enabledSnmpEndpoint.5',
+                                    protocol: 'snmp',
                                     enable: true
                                 }
                             ]
@@ -491,10 +625,14 @@ module.exports = {
                             endpointList: [
                                 'Enabled_Endpoints_1',
                                 'Enabled_Endpoints_2/enabledEndpoint2',
+                                'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                                 'Enabled_Endpoints_1',
                                 'Enabled_Endpoints_2/enabledEndpoint2',
+                                'Enabled_Endpoints_2/enabledSnmpEndpoint2',
                                 'Disabled_Endpoints_1/disabledEndpoint',
-                                'Disabled_Endpoints_1/disabledEndpoint'
+                                'Disabled_Endpoints_1/disabledEndpoint',
+                                'Disabled_Endpoints_1/disabledSnmpEndpoint',
+                                'Disabled_Endpoints_1/disabledSnmpEndpoint'
                             ]
                         }
                     }
@@ -546,7 +684,14 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath/enabledEndpoint1',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint1: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint1',
+                                path: 'enabledSnmpEndpoint1',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -593,22 +738,50 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath/enabledEndpoint1',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
                             },
                             enabledEndpoint2: {
                                 path: '/basePath2/enabledEndpoint2',
                                 enable: true,
-                                name: 'enabledEndpoint2'
+                                name: 'enabledEndpoint2',
+                                protocol: 'http'
                             },
                             enabledEndpoint_4: {
                                 enable: true,
                                 path: '/basePath4/enabledEndpoint_4',
-                                name: 'enabledEndpoint_4'
+                                name: 'enabledEndpoint_4',
+                                protocol: 'http'
                             },
                             enabledEndpoint_5: {
                                 name: 'enabledEndpoint_5',
                                 path: '/enabledEndpoint_5',
-                                enable: true
+                                enable: true,
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint1: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint1',
+                                path: 'enabledSnmpEndpoint1',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint2: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint2',
+                                path: 'enabledSnmpEndpoint2',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint_4: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint_4',
+                                path: 'enabledSnmpEndpoint.4',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint_5: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint_5',
+                                path: 'enabledSnmpEndpoint.5',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -655,12 +828,26 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath/enabledEndpoint1',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
                             },
                             enabledEndpoint2: {
                                 path: '/basePath2/enabledEndpoint2',
                                 enable: true,
-                                name: 'enabledEndpoint2'
+                                name: 'enabledEndpoint2',
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint1: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint1',
+                                path: 'enabledSnmpEndpoint1',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint2: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint2',
+                                path: 'enabledSnmpEndpoint2',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -707,7 +894,14 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath_3/enabledEndpoint1_3',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint',
+                                path: 'enabledSnmpEndpoint1.3',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -754,22 +948,50 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath_3/enabledEndpoint1_3',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
                             },
                             enabledEndpoint2: {
                                 path: '/basePath_4/enabledEndpoint_4',
                                 enable: true,
-                                name: 'enabledEndpoint2'
+                                name: 'enabledEndpoint2',
+                                protocol: 'http'
                             },
                             enabledEndpoint_4: {
                                 enable: true,
                                 path: '/basePath4/enabledEndpoint_4',
-                                name: 'enabledEndpoint_4'
+                                name: 'enabledEndpoint_4',
+                                protocol: 'http'
                             },
                             enabledEndpoint_5: {
                                 name: 'enabledEndpoint_5',
                                 path: '/enabledEndpoint_5',
-                                enable: true
+                                enable: true,
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint',
+                                path: 'enabledSnmpEndpoint1.3',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint2: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint2',
+                                path: 'enabledSnmpEndpoint.4',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint_4: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint_4',
+                                path: 'enabledSnmpEndpoint.4',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint_5: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint_5',
+                                path: 'enabledSnmpEndpoint.5',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -816,12 +1038,26 @@ module.exports = {
                             enabledEndpoint1: {
                                 path: '/basePath_3/enabledEndpoint1_3',
                                 enable: true,
-                                name: 'enabledEndpoint1'
+                                name: 'enabledEndpoint1',
+                                protocol: 'http'
                             },
                             enabledEndpoint2: {
                                 path: '/basePath_4/enabledEndpoint_4',
                                 enable: true,
-                                name: 'enabledEndpoint2'
+                                name: 'enabledEndpoint2',
+                                protocol: 'http'
+                            },
+                            enabledSnmpEndpoint: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint',
+                                path: 'enabledSnmpEndpoint1.3',
+                                protocol: 'snmp'
+                            },
+                            enabledSnmpEndpoint2: {
+                                enable: true,
+                                name: 'enabledSnmpEndpoint2',
+                                path: 'enabledSnmpEndpoint.4',
+                                protocol: 'snmp'
                             }
                         }
                     }

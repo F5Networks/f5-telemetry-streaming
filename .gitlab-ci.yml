@@ -269,8 +269,8 @@ build_docs:
         -   rm -rf docs/_templates
         - fi
         - make html
-        - vale --glob='*.{md,rst}' .
-        #  - make linkcheck
+        - vale --glob='*.rst' .
+        - make linkcheck
     tags:
         - docker-executor
     artifacts:
@@ -479,6 +479,7 @@ pages:
         - develop
         - doc-release-branch
         - joes-new-ts-wip
+        - debs-doc-wip
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:

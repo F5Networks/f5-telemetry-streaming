@@ -108,7 +108,9 @@ Specific troubleshooting entries
 
 I need to access declarations I previously sent to Telemetry Streaming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-As of Telemetry Streaming 1.27, TS stores up to 30 recent declarations at **/shared/tmp/telemetry/declarationHistory**. 
+In Telemetry Streaming 1.27, TS stored up to 30 recent declarations at **/shared/tmp/telemetry/declarationHistory**. 
+
+In Telemetry Streaming 1.28 and later, TS stores up to 30 recent declarations at **/var/log/restnoded/telemetryDeclarationHistory**.  These stored declarations are now accessible by F5's **qkview** utility for use by F5 Technical Support if necessary.  For more information on the qkview utility, see |qkv|.
 
 This includes declarations submitted upon following events:
 
@@ -458,3 +460,7 @@ Telemetry Streaming 1.19 and later includes the **compressionType** property in 
 .. |issues| raw:: html
 
    <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">Issue on GitHub</a>
+
+.. |qkv| raw:: html
+
+   <a href="https://github.com/F5Networks/f5-telemetry-streaming/issues" target="_blank">qkview on AskF5</a>

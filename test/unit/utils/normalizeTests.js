@@ -480,6 +480,57 @@ describe('Normalize Util', () => {
         });
     });
 
+    describe('.restructureSNMPEndpoint', () => {
+        it('should restructure single snmp mib (one stat)', () => {
+            const args = {
+                data: {
+                    commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {
+                'sysStatMemoryTotal.0': 3179282432
+            });
+        });
+
+        it('should restructure single snmp mib (multiple stats)', () => {
+            const args = {
+                data: {
+                    commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {
+                'sysTmmPagesStatSlot.0.0': 0,
+                'sysTmmPagesStatSlot.0.1': 0,
+                'sysTmmPagesStatTmm.0.0': 0,
+                'sysTmmPagesStatTmm.0.1': 1,
+                'sysTmmPagesStatPagesUsed.0.0': 45869,
+                'sysTmmPagesStatPagesUsed.0.1': 50462,
+                'sysTmmPagesStatPagesAvail.0.0': 387584,
+                'sysTmmPagesStatPagesAvail.0.1': 388608
+            });
+        });
+
+        it('should not fail on empty data', () => {
+            const args = {
+                data: {
+                    commandResult: ''
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {});
+        });
+
+        it('should not fail on missing \'commandResult\' property', () => {
+            const args = {
+                data: {}
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {});
+        });
+    });
+
     describe('.restructureGslbWideIp()', () => {
         it('should restructure gslb wideip', () => {
             const pools = [

@@ -1,6 +1,17 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.29.0
+### Added
+- TS-568: Added support for SNMP endpoints in Telemetry_Endpoints
+- TS-233: [GitHub #186](https://github.com/F5Networks/f5-telemetry-streaming/issues/186): Added outputMode parameter to Generic HTTP consumer to support raw data output
+### Fixed
+- TS-660 - Metric Consumers should not fail when 'null' found in data
+- TS-69 - Prometheus consumer should ignore NaN values
+### Changed
+- AUTOTOOL-3077: Update npm packages (fixed medium and low priority vulnerabilities in dependencies - kafka-node)
+### Removed
+
 ## 1.28.0
 ### Added
 ### Fixed

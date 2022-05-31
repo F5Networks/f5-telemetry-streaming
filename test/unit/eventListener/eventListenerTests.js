@@ -203,8 +203,8 @@ describe('Event Listener', () => {
                         EventListener.receiversManager.getMessageStream(defaultTestPort).emitAsync('messages', ['1234'])
                     ])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '1234', telemetryEventCategory: 'event' }],
-                            [listeners['f5telemetry_default::Listener2'].id]: [{ virtual_name: 'somePattern', telemetryEventCategory: 'LTM' }]
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '1234', originalRawData: '1234', telemetryEventCategory: 'event' }],
+                            [listeners['f5telemetry_default::Listener2'].id]: [{ virtual_name: 'somePattern', telemetryEventCategory: 'LTM', originalRawData: 'virtual_name="somePattern"' }]
                         }));
                 });
         });
@@ -246,7 +246,7 @@ describe('Event Listener', () => {
 
                     return existingMessageStream.emitAsync('messages', ['6514'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }]
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', originalRawData: '6514', telemetryEventCategory: 'event' }]
                         }));
                 });
         });
@@ -323,8 +323,8 @@ describe('Event Listener', () => {
 
                     return EventListener.receiversManager.getMessageStream(newDecl.Listener1.port).emitAsync('messages', ['6514'])
                         .then(() => assert.deepStrictEqual(actualData, {
-                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }],
-                            [listeners['New::Listener1'].id]: [{ data: '6514', telemetryEventCategory: 'event' }]
+                            [listeners['f5telemetry_default::Listener1'].id]: [{ data: '6514', originalRawData: '6514', telemetryEventCategory: 'event' }],
+                            [listeners['New::Listener1'].id]: [{ data: '6514', originalRawData: '6514', telemetryEventCategory: 'event' }]
                         }));
                 });
         });
@@ -373,6 +373,7 @@ describe('Event Listener', () => {
                                 virtual_name: 'test',
                                 telemetryEventCategory: 'LTM',
                                 tenant: 'Tenant',
+                                originalRawData: 'virtual_name="test"',
                                 application: 'Application'
                             }]
                         }));
@@ -398,6 +399,7 @@ describe('Event Listener', () => {
                         .then(() => assert.deepStrictEqual(actualData, {
                             [listeners['f5telemetry_default::Listener1'].id]: [{
                                 data: 'data',
+                                originalRawData: 'data',
                                 telemetryEventCategory: 'event'
                             }]
                         }));

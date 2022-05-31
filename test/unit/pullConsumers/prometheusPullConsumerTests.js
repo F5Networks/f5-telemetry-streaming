@@ -79,6 +79,32 @@ describe('Prometheus Pull Consumer', () => {
             });
     });
 
+    it('should ignore NaN', () => {
+        eventStub.value([{
+            data: {
+                memory: {
+                    my_name: {
+                        allocated: NaN
+                    },
+                    my__x20__name: {
+                        allocated: 11
+                    }
+                }
+            },
+            isCustom: true
+        }]);
+
+        const expectedData = arraysToPromLines([
+            ['# HELP f5_memory_my__x20__name_allocated memory_my__x20__name_allocated', '# TYPE f5_memory_my__x20__name_allocated gauge', 'f5_memory_my__x20__name_allocated 11', '']
+        ]);
+
+        return prometheusConsumer(context)
+            .then((response) => {
+                assert.strictEqual(response.data, expectedData);
+                assert.isTrue(context.logger.error.notCalled, 'should not log error');
+            });
+    });
+
     describe('formatting System Poller data', () => {
         it('should format data (unfiltered)', () => {
             eventStub.value([SYSTEM_POLLER_DATA.unfiltered]);

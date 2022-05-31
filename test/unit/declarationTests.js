@@ -1784,6 +1784,16 @@ describe('Declarations', () => {
                         {
                             name: 'myEndpoint',
                             path: 'myPath'
+                        },
+                        {
+                            name: 'myHttpEndpoint',
+                            path: 'httpPath',
+                            protocol: 'http'
+                        },
+                        {
+                            name: 'snmpEndpoint',
+                            path: '1.2.3.4',
+                            protocol: 'snmp'
                         }
                     ]
                 }
@@ -1831,7 +1841,20 @@ describe('Declarations', () => {
                             {
                                 enable: true,
                                 name: 'myEndpoint',
-                                path: 'myPath'
+                                path: 'myPath',
+                                protocol: 'http'
+                            },
+                            {
+                                enable: true,
+                                name: 'myHttpEndpoint',
+                                path: 'httpPath',
+                                protocol: 'http'
+                            },
+                            {
+                                enable: true,
+                                name: 'snmpEndpoint',
+                                path: '1.2.3.4',
+                                protocol: 'snmp'
                             }
                         ]
                     );
@@ -1987,6 +2010,11 @@ describe('Declarations', () => {
                             testB: {
                                 name: 'b',
                                 path: '/test/b'
+                            },
+                            testC: {
+                                name: 'c',
+                                path: '1.2.3.4',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -1995,14 +2023,19 @@ describe('Declarations', () => {
                         enable: true,
                         basePath: '/testing',
                         items: {
-                            testC: {
-                                name: 'c',
-                                path: '/item/c',
-                                enable: false
-                            },
                             testD: {
                                 name: 'd',
-                                path: '/item/d'
+                                path: '/item/d',
+                                enable: false
+                            },
+                            testE: {
+                                name: 'e',
+                                path: '/item/e'
+                            },
+                            testF: {
+                                name: 'f',
+                                path: 'sysStats',
+                                protocol: 'snmp'
                             }
                         }
                     },
@@ -2023,6 +2056,11 @@ describe('Declarations', () => {
                                         path: 'myPath'
                                     }
                                 }
+                            },
+                            {
+                                name: 'hostCpu',
+                                path: '1.2.3.4.5',
+                                protocol: 'snmp'
                             }
                         ]
                     }
@@ -2038,7 +2076,8 @@ describe('Declarations', () => {
                                 {
                                     name: 'anEndpoint',
                                     path: 'aPath',
-                                    enable: true
+                                    enable: true,
+                                    protocol: 'http'
                                 },
                                 {
                                     enable: true,
@@ -2047,9 +2086,16 @@ describe('Declarations', () => {
                                         myEndpoint: {
                                             name: 'myEndpoint',
                                             path: 'myPath',
-                                            enable: true
+                                            enable: true,
+                                            protocol: 'http'
                                         }
                                     }
+                                },
+                                {
+                                    name: 'hostCpu',
+                                    path: '1.2.3.4.5',
+                                    protocol: 'snmp',
+                                    enable: true
                                 }
                             ]
                         );
@@ -2126,7 +2172,8 @@ describe('Declarations', () => {
                                     testA: {
                                         enable: true,
                                         name: 'a',
-                                        path: 'some/a'
+                                        path: 'some/a',
+                                        protocol: 'http'
                                     }
                                 },
                                 basePath: ''
@@ -3519,11 +3566,93 @@ describe('Declarations', () => {
                     assert.deepStrictEqual(endpoints.items, {
                         test: {
                             enable: true,
-                            path: '/test/path'
+                            path: '/test/path',
+                            protocol: 'http'
                         }
                     });
                     // check defaults
                     assert.strictEqual(endpoints.enable, true);
+                });
+        });
+
+        it('should allow setting protocol (http)', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            path: '/test/path',
+                            protocol: 'http'
+                        }
+                    }
+                }
+            };
+            return declValidator(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.strictEqual(endpoints.items.test.protocol, 'http');
+                });
+        });
+
+        it('should allow setting protocol (snmp)', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            path: '1.2.3.4',
+                            protocol: 'snmp'
+                        }
+                    }
+                }
+            };
+            return declValidator(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.strictEqual(endpoints.items.test.protocol, 'snmp');
+                });
+        });
+
+        it('should restrict \'path\' input when protocol is snmp', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            path: '1.2.3.4 && echo hi',
+                            protocol: 'snmp'
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(declValidator(data), /path.*should match pattern/);
+        });
+
+        it('should allow oid as numbers or strings when protocol = snmp', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        asNumbers: {
+                            path: '1.2.3.4',
+                            protocol: 'snmp'
+                        },
+                        asString: {
+                            path: 'sysStats',
+                            protocol: 'snmp'
+                        }
+                    }
+                }
+            };
+            return declValidator(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.strictEqual(endpoints.items.asNumbers.path, '1.2.3.4');
+                    assert.strictEqual(endpoints.items.asString.path, 'sysStats');
                 });
         });
 
@@ -3560,6 +3689,22 @@ describe('Declarations', () => {
                             name: 'testB',
                             path: '/test/B',
                             enable: false
+                        },
+                        c: {
+                            name: 'testC',
+                            path: '/test/C',
+                            protocol: 'http'
+                        },
+                        d: {
+                            name: 'testD',
+                            path: '1.2.3.4.5',
+                            protocol: 'snmp'
+                        },
+                        e: {
+                            name: 'testE',
+                            path: '1.2.3.4.5',
+                            protocol: 'snmp',
+                            enable: false
                         }
                     }
                 }
@@ -3572,11 +3717,31 @@ describe('Declarations', () => {
                         a: {
                             enable: true,
                             name: 'testA',
-                            path: '/test/A'
+                            path: '/test/A',
+                            protocol: 'http'
                         },
                         b: {
                             name: 'testB',
                             path: '/test/B',
+                            enable: false,
+                            protocol: 'http'
+                        },
+                        c: {
+                            name: 'testC',
+                            path: '/test/C',
+                            enable: true,
+                            protocol: 'http'
+                        },
+                        d: {
+                            name: 'testD',
+                            path: '1.2.3.4.5',
+                            enable: true,
+                            protocol: 'snmp'
+                        },
+                        e: {
+                            name: 'testE',
+                            path: '1.2.3.4.5',
+                            protocol: 'snmp',
                             enable: false
                         }
                     });
@@ -4708,7 +4873,8 @@ describe('Declarations', () => {
                     protocol: 'https',
                     port: 443,
                     path: '/',
-                    method: 'POST'
+                    method: 'POST',
+                    outputMode: 'processed'
                 }
             ));
 
@@ -4739,7 +4905,8 @@ describe('Declarations', () => {
                         cipherText: '$M$myKey',
                         class: 'Secret',
                         protected: 'SecureVault'
-                    }
+                    },
+                    outputMode: 'processed'
                 }
             ));
 
@@ -4792,7 +4959,8 @@ describe('Declarations', () => {
                             JMESPath: {},
                             expression: '{ message: @ }'
                         }
-                    ]
+                    ],
+                    outputMode: 'raw'
                 },
                 {
                     type: 'Generic_HTTP',
@@ -4852,7 +5020,8 @@ describe('Declarations', () => {
                             JMESPath: {},
                             expression: '{ message: @ }'
                         }
-                    ]
+                    ],
+                    outputMode: 'raw'
                 }
             ));
 
@@ -6177,7 +6346,8 @@ describe('Declarations', () => {
                     type: 'Generic_HTTP',
                     host: '1.2.3.4',
                     protocol: 'http',
-                    port: 8080
+                    port: 8080,
+                    outputMode: 'processed'
                 }
             };
         });

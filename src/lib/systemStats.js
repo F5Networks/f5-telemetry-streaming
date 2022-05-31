@@ -96,10 +96,33 @@ function SystemStats(config) {
         this.contextProps = properties.context;
         this.contextData = {};
     } else {
-        this.endpoints = config.endpoints;
+        this.endpoints = this._preprocessEndpoints(config.endpoints);
         this.isCustom = true;
     }
 }
+
+/**
+ * Preprocess custom Telemetry_Endpoints. Preprocessing includes:
+ * - Converts SNMP custom endpoint objects to properties
+ *
+ * @param {Object} endpoints - Telemetry Endpoints object
+ *
+ * @returns {Object} preprocessed Telemetry Endpoints
+ */
+SystemStats.prototype._preprocessEndpoints = function (endpoints) {
+    // Deep copy so endpoint object is not modified in the saved configuration
+    const processedEndpoints = util.deepCopy(endpoints);
+    Object.keys(processedEndpoints).forEach((endpoint) => {
+        if (processedEndpoints[endpoint].protocol === 'snmp') {
+            processedEndpoints[endpoint].body = {
+                command: 'run',
+                utilCmdArgs: `-c "snmpwalk -L n -O qUs -c public localhost ${endpoints[endpoint].path}"`
+            };
+            processedEndpoints[endpoint].path = '/mgmt/tm/util/bash';
+        }
+    });
+    return processedEndpoints;
+};
 
 SystemStats.prototype._getNormalizationOpts = function (property) {
     if (property.isCustom) {
@@ -422,6 +445,11 @@ SystemStats.prototype._filterStats = function () {
 
 SystemStats.prototype._convertToProperty = function (keyName, endpoint) {
     const normalization = util.copy(customEndpointNormalization);
+    if (endpoint.protocol === 'snmp') {
+        normalization.push({
+            runFunctions: [{ name: 'restructureSNMPEndpoint', args: {} }]
+        });
+    }
     const statsIndex = endpoint.path.indexOf('/stats');
     const bigipBasePath = 'mgmt/tm/';
     if (statsIndex > -1) {

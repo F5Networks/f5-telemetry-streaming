@@ -139,14 +139,16 @@ module.exports = {
             Object.keys(data).forEach((itemKey) => {
                 const itemData = data[itemKey];
                 if (typeof itemData === 'object') {
-                    if (!ignoreKeysInPath) {
-                        stack.push(itemKey);
-                    }
-                    if (!options.maxDepth || options.maxDepth < stack.length) {
-                        inner(itemData, stack);
-                    }
-                    if (!ignoreKeysInPath) {
-                        stack.pop();
+                    if (itemData !== null) {
+                        if (!ignoreKeysInPath) {
+                            stack.push(itemKey);
+                        }
+                        if (!options.maxDepth || options.maxDepth < stack.length) {
+                            inner(itemData, stack);
+                        }
+                        if (!ignoreKeysInPath) {
+                            stack.pop();
+                        }
                     }
                 } else if (Number.isFinite(itemData)
                     && options.onMetric
@@ -168,6 +170,9 @@ module.exports = {
  * @returns {boolean} true when data can be used as tag
  */
 function canBeTag(data, options) {
+    if (typeof data === 'undefined') {
+        return false;
+    }
     if (typeof data === 'string') {
         if (!data.trim() || (!options.allowIsoDateTag && ISO_DATE_REGEXP.test(data))) {
             return false;

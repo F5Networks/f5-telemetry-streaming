@@ -699,6 +699,34 @@ describe('Metrics Util Tests', () => {
             ], 'should collect all expected metrics');
         });
 
+        it('should not fail when \'null\' found', () => {
+            const origin = {
+                metric: 10,
+                application: '',
+                nullData: null
+            };
+            metricsUtil.findMetricsAndTags(origin, defaultOptions);
+
+            assert.sameDeepMembers(collectedTags, [], 'should collect all expected tags');
+            assert.sameDeepMembers(collectedMetrics, [
+                ['metric', 10, {}]
+            ], 'should collect all expected metrics');
+        });
+
+        it('should not fail when \'undefined\' found', () => {
+            const origin = {
+                metric: 10,
+                application: '',
+                undefinedData: undefined
+            };
+            metricsUtil.findMetricsAndTags(origin, defaultOptions);
+
+            assert.sameDeepMembers(collectedTags, [], 'should collect all expected tags');
+            assert.sameDeepMembers(collectedMetrics, [
+                ['metric', 10, {}]
+            ], 'should collect all expected metrics');
+        });
+
         describe('converting booleans', () => {
             let origin;
             beforeEach(() => {

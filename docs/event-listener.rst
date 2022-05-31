@@ -133,7 +133,7 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
 
    .. code-block:: bash
 
-        create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule }
+        create ltm virtual telemetry_local destination 255.255.255.254:6514 rules { telemetry_local_rule } profiles replace-all-with { f5-tcp-progressive } source-address-translation { type automap } persist replace-all-with { source_addr { default yes }}
 
 
 #. Create the pool.

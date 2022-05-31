@@ -422,6 +422,7 @@ module.exports = {
             if (F5EventCategory[1] === 'raw') {
                 return {
                     data,
+                    originalRawData: data,
                     telemetryEventCategory: constants.EVENT_TYPES.RAW_EVENT
                 };
             }
@@ -492,6 +493,7 @@ module.exports = {
         if (!ret.hostname && hostname) {
             ret.hostname = hostname;
         }
+        ret.originalRawData = originData;
         return ret;
     },
 

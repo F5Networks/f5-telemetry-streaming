@@ -15,7 +15,8 @@ const util = require('../../utils/misc');
  * See {@link ../README.md#context} for documentation
  */
 module.exports = function (context) {
-    const body = context.event.data;
+    const outputMode = context.config.outputMode;
+    const body = (outputMode === 'raw') ? context.event.data.originalRawData : context.event.data;
     const method = context.config.method || 'POST';
     const protocol = context.config.protocol || 'https';
     const port = context.config.port || '';
@@ -75,7 +76,7 @@ module.exports = function (context) {
         body,
         hosts: [host].concat(fallbackHosts),
         headers,
-        json: true, // for 'body' processing
+        json: outputMode !== 'raw', // for 'body' processing
         logger: context.logger,
         method,
         port,

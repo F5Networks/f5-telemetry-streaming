@@ -168,6 +168,27 @@ describe('Generic_HTTP', () => {
 
             return genericHttpIndex(context);
         });
+
+        it('should preserve input data with outputMode set to raw', () => {
+            const originalRawData = 'arbitrary text';
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: {
+                    port: 80,
+                    outputMode: 'raw',
+                    host: 'localhost'
+                }
+            });
+            // buildConsumerContext does not support originalRawData, injecting it directly
+            context.event.data.originalRawData = originalRawData;
+            nock('https://localhost:80')
+                .post('/')
+                .reply(200, (_, requestBody) => {
+                    assert.strictEqual(requestBody, originalRawData);
+                });
+
+            return genericHttpIndex(context);
+        });
     });
 
     describe('fallback', () => {
