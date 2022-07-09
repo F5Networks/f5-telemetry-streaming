@@ -10,9 +10,9 @@
 
 const toCamelCase = require('lodash/camelCase');
 
-const logger = require('../logger'); // eslint-disable-line no-unused-vars
-const util = require('./misc');
 const constants = require('../constants');
+const metricsUtil = require('./metrics');
+const util = require('./misc');
 
 const TRUTHY_REGEXP = /^\s*(true|1|on|yes)\s*$/i;
 
@@ -504,15 +504,24 @@ module.exports = {
     restructureSNMPEndpoint(args) {
         const data = (args.data.commandResult || '').trim();
         const result = {};
+
+        /**
+         * data expected to be like following:
+         * sysStatMemoryUsed.0 = 290295264\nsysStatMemoryUsed.1 = 34545\nifAdmin.up = up\n
+         */
         data.split('\n').forEach((row) => {
-            const rowParts = row.split(' ');
-            const key = rowParts[0];
-            let value = rowParts[1];
-            if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-                if (!Number.isNaN(value)) {
-                    value = Number(value);
-                }
-                result[key] = value;
+            const rowParts = row.split(' = ');
+            // should be something like ['sysStatMemoryUsed.0', '290295264']
+            // ignore if something different
+            if (rowParts.length === 2) {
+                const key = rowParts[0];
+                const value = rowParts[1];
+
+                // value is string or number
+                const parsedVal = metricsUtil.parseNumberStrict(value);
+                result[key] = Number.isFinite(parsedVal)
+                    ? parsedVal
+                    : value;
             }
         });
         return result;

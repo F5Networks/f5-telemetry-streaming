@@ -111,17 +111,19 @@ function SystemStats(config) {
  */
 SystemStats.prototype._preprocessEndpoints = function (endpoints) {
     // Deep copy so endpoint object is not modified in the saved configuration
-    const processedEndpoints = util.deepCopy(endpoints);
-    Object.keys(processedEndpoints).forEach((endpoint) => {
-        if (processedEndpoints[endpoint].protocol === 'snmp') {
-            processedEndpoints[endpoint].body = {
+    endpoints = util.deepCopy(endpoints);
+    Object.keys(endpoints).forEach((endpoint) => {
+        if (endpoints[endpoint].protocol === 'snmp') {
+            const additionalOptions = endpoints[endpoint].numericalEnums ? 'e' : '';
+
+            endpoints[endpoint].body = {
                 command: 'run',
-                utilCmdArgs: `-c "snmpwalk -L n -O qUs -c public localhost ${endpoints[endpoint].path}"`
+                utilCmdArgs: `-c "snmpwalk -L n -O ${additionalOptions}QUs -c public localhost ${endpoints[endpoint].path}"`
             };
-            processedEndpoints[endpoint].path = '/mgmt/tm/util/bash';
+            endpoints[endpoint].path = '/mgmt/tm/util/bash';
         }
     });
-    return processedEndpoints;
+    return endpoints;
 };
 
 SystemStats.prototype._getNormalizationOpts = function (property) {

@@ -8,8 +8,8 @@
 
 'use strict';
 
-const FLOAT_REGEXP_STRICT = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?)$/;
-const FLOAT_REGEXP = /([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?)/;
+const metricsUtil = require('../../utils/metrics');
+
 const ISO_DATE_REGEXP = /^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]+)?(Z)?$/;
 
 /**
@@ -108,9 +108,9 @@ module.exports = {
                     if (typeof parsedVal === 'string') {
                         // still have to parse data despite on "options.parseMetrics" value
                         // to differentiate between "metric" and "non-metric" data
-                        parsedVal = parseNumberStrict(itemData);
+                        parsedVal = metricsUtil.parseNumberStrict(itemData);
                         if (parsedVal === false && tagsToMetrics.indexOf(itemKey) !== -1) {
-                            parsedVal = parseNumber(itemData);
+                            parsedVal = metricsUtil.parseNumber(itemData);
                         }
                     }
                     if (Number.isFinite(parsedVal)) {
@@ -194,41 +194,6 @@ function objectHasKeys(obj) {
     // eslint-disable-next-line guard-for-in, no-restricted-syntax, prefer-const, no-unreachable-loop
     for (let x in obj) {
         return true;
-    }
-    return false;
-}
-
-/**
- * Parses string to integer or float (fetches first number)
- *
- * @param {string} val - string to parse
- *
- * @returns {number | boolean} parsed number or false if unable to parse it
- */
-function parseNumber(val) {
-    val = val.match(FLOAT_REGEXP);
-    if (val) {
-        val = parseFloat(val[0]);
-        if (typeof val === 'number' && Number.isFinite(val)) {
-            return val;
-        }
-    }
-    return false;
-}
-
-/**
- * Parses string to integer or float (only digits and '.' allowed)
- *
- * @param {string} val - string to parse
- *
- * @returns {number | boolean} parsed number or false if unable to parse it
- */
-function parseNumberStrict(val) {
-    if (FLOAT_REGEXP_STRICT.test(val)) {
-        val = parseFloat(val);
-        if (typeof val === 'number' && Number.isFinite(val)) {
-            return val;
-        }
     }
     return false;
 }

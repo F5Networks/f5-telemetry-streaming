@@ -9,7 +9,7 @@
 'use strict';
 
 const crypto = require('crypto');
-
+const hasProperty = require('lodash/has');
 const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 
@@ -329,10 +329,18 @@ function getInstrumentationKeys(context) {
  *
  * @param {Object} data - data to send to the consumer
  * @param {String} type - type of the data
+ * @param {Boolean} isPoolMembersType - true if type is one of pool member types
  *
  * @returns {Boolean} true if keys can be dropped
  */
-function isConfigItems(data, type) {
+function isConfigItems(data, type, isPoolMembersType) {
+    /* Pool members' top keys are artificially generated in splitMembersFromPools
+        in order to handle a pool member participating in several pools.
+        Thus, comparison of the top key and the pool member names is useless. */
+    if (isPoolMembersType) {
+        return true;
+    }
+
     // is it of type sslCerts or keys are of format of format /.../...
     if (type === 'sslCerts' || Object.keys(data).every((key) => /\/[^/]*\/.*/.test(key))) {
         // check that the key is the same as property 'name'
@@ -352,6 +360,102 @@ function isConfigItems(data, type) {
  */
 function transformConfigItems(data) {
     return Object.keys(data).map((key) => data[key]);
+}
+
+class ClassPoolToMembersMapping {
+    constructor() {
+        this.poolToMembersMapping = {
+            pools: 'poolMembers',
+            aPools: 'aPoolMembers',
+            aaaaPools: 'aaaaPoolMembers',
+            cnamePools: 'cnamePoolMembers',
+            mxPools: 'mxPoolMembers',
+            naptrPools: 'naptrPoolMembers',
+            srvPools: 'srvPoolMembers'
+        };
+    }
+
+    /**
+     *
+     * Check if "type" is a type of a pool
+     *
+     * @param {String} type - type of a data (a table name in Azure Logs)
+     *
+     * @returns {Boolean} Returns true iff "type" is a type of a pool
+     */
+    isPoolType(type) {
+        return hasProperty(this.poolToMembersMapping, type);
+    }
+
+    /**
+     *
+     * Check if "type" is a type of a pool members
+     *
+     * @param {String} type - type of a data (a table name in Azure Logs)
+     *
+     * @returns {Boolean} Returns true iff "type" is a type of a pool members
+     */
+    isPoolMembersType(type) {
+        return Object.keys(this.poolToMembersMapping)
+            .some((poolType) => this.poolToMembersMapping[poolType] === type);
+    }
+
+    /**
+     *
+     * Translate the pool type into the pool members Type
+     *
+     * @param {String} poolType - type of a pool
+     *
+     * @returns {String} Returns type of a pool members
+     */
+    getPoolMembersType(poolType) {
+        return this.isPoolType(poolType)
+            ? this.poolToMembersMapping[poolType]
+            : null;
+    }
+
+    /**
+     *
+     * Build an object that will complete the data received by the consumer.
+     * It will eventually contain all the data of pool members.
+     * The top keys (e.g. "poolMembers") will become table names in Azure Logs.
+     *
+     * @param {Object} allPoolMembers - object containing pool member data
+     */
+    buildPoolMemeberHolder(allPoolMembers) {
+        Object.keys(this.poolToMembersMapping).forEach((poolType) => {
+            // initially there are no pool members
+            allPoolMembers[this.poolToMembersMapping[poolType]] = {};
+        });
+    }
+}
+
+/**
+ *
+ * Remove pool members from the pools, and add them to the object of all pool members.
+ *
+ * @param {Object} pool - a pool object that also contains its pool members
+ * @param {Object} poolMembersOfAType - the object that contains all pool members of all the pools of a particular type
+ */
+function splitMembersFromPools(pool, poolMembersOfAType) {
+    if (pool.members && typeof pool.members === 'object') {
+        Object.keys(pool.members).forEach((poolMember) => {
+            const poolMemberObj = pool.members[poolMember];
+            if (typeof poolMemberObj === 'object' && poolMemberObj.poolName) {
+                /* Create a unique name composed of the pool member name and the pool name
+                   in order to handle a pool member participating in several pools.
+                   This name will be discarded later by transformConfigItems */
+                const compositeName = poolMember.concat('-separator-', poolMemberObj.poolName);
+                poolMembersOfAType[compositeName] = poolMemberObj;
+                // Pool member name might not be configured
+                poolMembersOfAType[compositeName].name = poolMember;
+                delete pool.members[poolMember];
+            }
+        });
+        if (Object.keys(pool.members).length === 0) {
+            delete pool.members;
+        }
+    }
 }
 
 /**
@@ -383,5 +487,7 @@ module.exports = {
     getInstanceMetadata,
     isConfigItems,
     transformConfigItems,
+    ClassPoolToMembersMapping,
+    splitMembersFromPools,
     scrubReservedKeys
 };

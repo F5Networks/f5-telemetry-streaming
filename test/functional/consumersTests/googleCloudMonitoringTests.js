@@ -8,127 +8,116 @@
 
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
-const jwt = require('jsonwebtoken');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
-const sharedUtil = require('../shared/util');
-const requestsUtil = require('../../../src/lib/utils/requests');
+const gcpUtil = require('../shared/cloudUtils/gcp');
+const harnessUtils = require('../shared/harness');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
-const DUTS = sharedUtil.getHosts('BIGIP');
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
-const PROJECT_ID = process.env[constants.ENV_VARS.GCP.PROJECT_ID];
-const PRIVATE_KEY_ID = process.env[constants.ENV_VARS.GCP.PRIVATE_KEY_ID];
-const PRIVATE_KEY = process.env[constants.ENV_VARS.GCP.PRIVATE_KEY].replace(/REPLACE/g, '\n');
-const SERVICE_EMAIL = process.env[constants.ENV_VARS.GCP.SERVICE_EMAIL];
+/**
+ * @module test/functional/consumersTests/googleCloudMonitoring
+ */
+
 const GOOGLE_SD_CONSUMER_NAME = 'Google_SD_Consumer';
 
-let accessToken;
+// read in example config
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+let ACCESS_TOKEN = null;
+let GCP = null;
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
-    describe('Consumer Setup: Google Cloud Monitoring - access token', () => {
-        it('should get access token', () => {
-            const newJwt = jwt.sign(
-                {
-                    iss: SERVICE_EMAIL,
-                    scope: 'https://www.googleapis.com/auth/monitoring',
-                    aud: 'https://oauth2.googleapis.com/token',
-                    exp: Math.floor(Date.now() / 1000) + 3600,
-                    iat: Math.floor(Date.now() / 1000)
-                },
-                PRIVATE_KEY,
-                {
-                    algorithm: 'RS256',
-                    header: {
-                        kid: PRIVATE_KEY_ID,
-                        typ: 'JWT',
-                        alg: 'RS256'
-                    }
-                }
-            );
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                form: {
-                    grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                    assertion: newJwt
-                },
-                fullURI: 'https://oauth2.googleapis.com/token'
-            };
-            return requestsUtil.makeRequest(options)
-                .then((result) => {
-                    accessToken = result.access_token;
-                })
-                .catch((err) => {
-                    sharedUtil.logger.error(`Unable to get access token: ${err}`);
-                    return Promise.reject(err);
+    describe('Consumer Setup: Google Cloud Monitoring', () => {
+        before(() => {
+            ACCESS_TOKEN = null;
+            return gcpUtil.getMetadataFromProcessEnv()
+                .then((gcpData) => {
+                    GCP = gcpData;
                 });
         });
+
+        it('should get access token', () => gcpUtil.getOAuthToken(
+            GCP.serviceEmail,
+            GCP.privateKey,
+            GCP.privateKeyID
+        )
+            .then((accessToken) => {
+                ACCESS_TOKEN = accessToken;
+            }));
     });
 }
-
+/**
+ * Tests for DUTs
+ */
 function test() {
-    describe('Consumer Test: Google Cloud Monitoring - Configure TS', () => {
-        const consumerDeclaration = sharedUtil.deepCopy(DECLARATION);
-        consumerDeclaration[GOOGLE_SD_CONSUMER_NAME] = {
-            class: 'Telemetry_Consumer',
-            type: 'Google_Cloud_Monitoring',
-            privateKey: {
-                cipherText: PRIVATE_KEY
-            },
-            projectId: PROJECT_ID,
-            serviceEmail: SERVICE_EMAIL,
-            privateKeyId: PRIVATE_KEY_ID
-        };
-        DUTS.forEach((dut) => it(
-            `should configure TS - ${dut.hostalias}`,
-            () => dutUtils.postDeclarationToDUT(dut, sharedUtil.deepCopy(consumerDeclaration))
-        ));
-    });
+    describe('Consumer Test: Google Cloud Monitoring', () => {
+        const harness = harnessUtils.getDefaultHarness();
 
-    describe('Consumer Test: Google Cloud Monitoring - Test', () => {
-        const queryGoogle = (queryString) => {
-            const options = {
-                fullURI: `https://monitoring.googleapis.com/v3/projects/${PROJECT_ID}/timeSeries?${queryString}`,
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            };
-            return requestsUtil.makeRequest(options);
-        };
+        before(() => {
+            assert.isNotNull(ACCESS_TOKEN, 'should acquire GCP auth token');
+            assert.isNotNull(GCP, 'should fetch GCP API metadata from process.env');
+        });
 
-        DUTS.forEach((dut) => {
-            it(`should check for system poller data from:${dut.hostalias}`, () => {
-                let timeStart = new Date();
-                let timeEnd = new Date();
-                timeStart.setMinutes(timeEnd.getMinutes() - 5);
-                timeStart = timeStart.toJSON();
-                timeEnd = timeEnd.toJSON();
-                const queryString = [
-                    `interval.startTime=${timeStart}`,
-                    `interval.endTime=${timeEnd}`,
-                    `filter=metric.type="custom.googleapis.com/system/tmmCpu" AND resource.labels.namespace="${dut.hostname}"`
-                ].join('&');
-                return new Promise((resolve) => { setTimeout(resolve, 30000); })
-                    .then(() => queryGoogle(queryString))
-                    .then((timeSeries) => {
-                        sharedUtil.logger.info('Response from Google Cloud Monitoring:', { hostname: dut.hostname, timeSeries });
-                        assert.notEqual(timeSeries.timeSeries[0].points[0], undefined);
-                        assert.equal(dut.hostname, timeSeries.timeSeries[0].resource.labels.namespace);
-                    });
+        describe('Configure TS and generate data', () => {
+            let consumerDeclaration;
+
+            before(() => {
+                consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+                consumerDeclaration[GOOGLE_SD_CONSUMER_NAME] = {
+                    class: 'Telemetry_Consumer',
+                    type: 'Google_Cloud_Monitoring',
+                    privateKey: {
+                        cipherText: GCP.privateKey
+                    },
+                    projectId: GCP.projectID,
+                    serviceEmail: GCP.serviceEmail,
+                    privateKeyId: GCP.privateKeyID
+                };
             });
+
+            testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
+        });
+
+        describe('System Poller data', () => {
+            harness.bigip.forEach((bigip) => it(
+                `should check Google Cloud Monitoring for system poller data - ${bigip.name}`,
+                () => {
+                    let timeStart = new Date();
+                    let timeEnd = new Date();
+                    timeStart.setMinutes(timeEnd.getMinutes() - 5);
+                    timeStart = timeStart.toJSON();
+                    timeEnd = timeEnd.toJSON();
+                    const queryString = [
+                        `interval.startTime=${timeStart}`,
+                        `interval.endTime=${timeEnd}`,
+                        `filter=metric.type="custom.googleapis.com/system/tmmCpu" AND resource.labels.namespace="${bigip.hostname}"`
+                    ].join('&');
+
+                    return gcpUtil.queryCloudMonitoring(ACCESS_TOKEN, GCP.projectID, queryString)
+                        .then((timeSeries) => {
+                            assert.isDefined(timeSeries.timeSeries[0].points[0]);
+                            assert.deepStrictEqual(bigip.hostname, timeSeries.timeSeries[0].resource.labels.namespace);
+                        })
+                        .catch((err) => {
+                            bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                            return promiseUtils.sleepAndReject(20000, err);
+                        });
+                }
+            ));
         });
     });
 }
-
-function teardown() {}
 
 module.exports = {
     setup,
-    test,
-    teardown
+    test
 };

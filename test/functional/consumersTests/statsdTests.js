@@ -6,114 +6,216 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const deepDiff = require('deep-diff');
-const util = require('../shared/util');
+
 const constants = require('../shared/constants');
 const DEFAULT_HOSTNAME = require('../../../src/lib/constants').DEFAULT_HOSTNAME;
-const dutUtils = require('../dutTests').utils;
+const harnessUtils = require('../shared/harness');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
+/**
+ * @module test/functional/consumersTests/statsd
+ */
 
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
-const DUTS = util.getHosts('BIGIP');
-const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const STATSD_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}graphiteapp/graphite-statsd:latest`;
-const STATSD_CONTAINER_NAME = 'ts_statsd_consumer';
-const STATSD_HTTP_PROTO = 'http';
-const STATSD_HTTP_PORT = 80;
-const STATSD_DATA_PORT = 8125;
-const STATSD_CONSUMER_NAME = 'StatsD_Consumer';
-const STATSD_PROTOCOLS = ['tcp', 'udp'];
+const STATSD_DEFAULT_DATA_PORT = 8125;
+const STATSD_DEFAULT_HTTP_PORT = 8080;
+const STATSD_DEFAULT_HTTP_PROTO = 'http';
+const STATSD_DEFAULT_HTTP_TIMEOUT = 10000;
+
+const STATSD_DOCKER_CONF = {
+    detach: true,
+    image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}graphiteapp/graphite-statsd:1.1.9-1`, // change to 'latest' when the bug will be fixed
+    restart: 'always'
+};
+
+const STATSD_CONFIGS = {
+    tcp: {
+        CONSUMER_NAME: 'StatsD_Consumer_TCP',
+        DATA_PORT: 58125,
+        HTTP_PORT: 58080,
+        SERVICE_NAME: 'StatsD_TCP'
+    },
+    udp: {
+        CONSUMER_NAME: 'StatsD_Consumer_UDP',
+        DATA_PORT: 58126,
+        HTTP_PORT: 58081,
+        SERVICE_NAME: 'StatsD_UDP'
+    }
+};
+
+const DOCKER_CONTAINERS = {
+    StatsD_TCP: Object.assign(miscUtils.deepCopy(STATSD_DOCKER_CONF), {
+        env: {
+            GOCARBON: 1,
+            STATSD_INTERFACE: 'tcp'
+        },
+        name: 'ts_statsd_consumer_tcp',
+        publish: {
+            [STATSD_CONFIGS.tcp.DATA_PORT]: `${STATSD_DEFAULT_DATA_PORT}/tcp`,
+            [STATSD_CONFIGS.tcp.HTTP_PORT]: STATSD_DEFAULT_HTTP_PORT
+        }
+    }),
+    StatsD_UDP: Object.assign(miscUtils.deepCopy(STATSD_DOCKER_CONF), {
+        env: {
+            GOCARBON: 1,
+            STATSD_INTERFACE: 'udp'
+        },
+        name: 'ts_statsd_consumer_udp',
+        publish: {
+            [STATSD_CONFIGS.udp.DATA_PORT]: `${STATSD_DEFAULT_DATA_PORT}/udp`,
+            [STATSD_CONFIGS.udp.HTTP_PORT]: STATSD_DEFAULT_HTTP_PORT
+        }
+    })
+};
 
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
 
-function runRemoteCmd(cmd) {
-    return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
-}
+let SERVICES_ARE_READY;
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
-    describe('Consumer Setup: Statsd - pull docker image', () => {
-        it('should pull container image', () => runRemoteCmd(`docker pull ${STATSD_IMAGE_NAME}`));
+    describe('Consumer Setup: StatsD', () => {
+        const cs = harnessUtils.getDefaultHarness().other[0];
+        let CONTAINERS_STARTED;
+
+        Object.keys(STATSD_CONFIGS).forEach((proto) => {
+            cs.http.createAndSave(`${proto}Statsd`, {
+                port: STATSD_CONFIGS[proto].HTTP_PORT,
+                protocol: STATSD_DEFAULT_HTTP_PROTO,
+                timeout: STATSD_DEFAULT_HTTP_TIMEOUT
+            });
+        });
+
+        describe('Docker container setup', () => {
+            before(() => {
+                CONTAINERS_STARTED = [];
+            });
+
+            after(() => {
+                CONTAINERS_STARTED = CONTAINERS_STARTED.every((v) => v);
+            });
+
+            it('should pull StatsD docker image', () => cs.docker.pull(DOCKER_CONTAINERS.StatsD_TCP.image));
+
+            Object.keys(STATSD_CONFIGS).forEach((proto) => {
+                it(`should remove pre-existing StatsD docker container (over ${proto})`, () => harnessUtils.docker.stopAndRemoveContainer(
+                    cs.docker, DOCKER_CONTAINERS[STATSD_CONFIGS[proto].SERVICE_NAME].name
+                ));
+            });
+
+            Object.keys(STATSD_CONFIGS).forEach((proto) => {
+                it(`should start new StatsD container (over ${proto})`, () => harnessUtils.docker.startNewContainer(
+                    cs.docker, DOCKER_CONTAINERS[STATSD_CONFIGS[proto].SERVICE_NAME]
+                )
+                    .then(() => {
+                        CONTAINERS_STARTED.push(true);
+                    }));
+            });
+        });
+
+        describe('Configure service', () => {
+            before(() => {
+                assert.isOk(CONTAINERS_STARTED, 'should start StatsD TCP and UDP containers!');
+                SERVICES_ARE_READY = [];
+            });
+
+            after(() => {
+                SERVICES_ARE_READY = SERVICES_ARE_READY.every((v) => v);
+            });
+
+            Object.keys(STATSD_CONFIGS).forEach((proto) => {
+                it(`should check StatsD container is up and running (over ${proto})`, () => cs.http[`${proto}Statsd`].makeRequest({
+                    retry: {
+                        maxTries: 10,
+                        delay: 1000
+                    },
+                    uri: '/render?someUnknownKey&format=json'
+                })
+                    .then((data) => {
+                        cs.logger.info('StatsD response', { data, proto });
+                        assert.isArray(data);
+                        assert.isEmpty(data);
+                        SERVICES_ARE_READY.push(true);
+                    }));
+            });
+        });
     });
 }
 
+/**
+ * Tests for DUTs
+ */
 function test() {
-    STATSD_PROTOCOLS.forEach((protocol) => describe(`Consumer Test: Statsd | Protocol: ${protocol}`, () => {
-        const containerName = `${STATSD_CONTAINER_NAME}-${protocol}`;
-        describe('Consumer Test: Statsd - Configure Service', () => {
-            it('should start container', () => {
-                const envVars = `-e STATSD_INTERFACE=${protocol} -e GOCARBON=1`;
-                const portArgs = `-p ${STATSD_HTTP_PORT}:${STATSD_HTTP_PORT} -p ${STATSD_DATA_PORT}:${STATSD_DATA_PORT}/${protocol}`;
-                const cmd = `docker run -d --restart=always --name ${containerName} ${portArgs} ${envVars} ${STATSD_IMAGE_NAME}`;
+    describe('Consumer Test: StatsD', () => {
+        const harness = harnessUtils.getDefaultHarness();
+        const cs = harness.other[0];
+        const sysPollerMetricNames = {};
 
-                // simple check to see if container already exists
-                return runRemoteCmd(`docker ps | grep ${containerName}`)
-                    .then((data) => {
-                        if (data) {
-                            return Promise.resolve(); // exists, continue
-                        }
-                        return runRemoteCmd(cmd);
-                    });
-            });
-
-            it('should check service is up', () => {
-                const uri = '/render?someUnknownKey&format=json';
-                const options = {
-                    port: STATSD_HTTP_PORT,
-                    protocol: STATSD_HTTP_PROTO
-
-                };
-
-                // splunk container takes about 15 seconds to come up
-                return new Promise((resolve) => { setTimeout(resolve, 1500); })
-                    .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
-                    .then((data) => {
-                        util.logger.info('Statsd response:', data);
-                        assert.strictEqual(Array.isArray(data), true);
-                        assert.strictEqual(data.length, 0);
-                    });
-            });
+        before(() => {
+            assert.isOk(SERVICES_ARE_READY, 'should start StatsD TCP and UDP services!');
         });
 
-        describe('Consumer Test: Statsd - Configure TS', () => {
-            const consumerDeclaration = util.deepCopy(DECLARATION);
-            consumerDeclaration[STATSD_CONSUMER_NAME] = {
-                class: 'Telemetry_Consumer',
-                type: 'Statsd',
-                host: CONSUMER_HOST.ip,
-                protocol,
-                port: STATSD_DATA_PORT
-            };
-            DUTS.forEach((dut) => it(
-                `should configure TS - ${dut.hostalias}`,
-                () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
-            ));
+        describe('Configure TS and generate data', () => {
+            let consumerDeclaration;
+
+            before(() => {
+                consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+                Object.keys(STATSD_CONFIGS).forEach((proto) => {
+                    const config = STATSD_CONFIGS[proto];
+                    consumerDeclaration[config.CONSUMER_NAME] = {
+                        class: 'Telemetry_Consumer',
+                        type: 'Statsd',
+                        host: cs.host.host,
+                        protocol: proto,
+                        port: config.DATA_PORT
+                    };
+                });
+            });
+
+            testUtils.shouldConfigureTS(harness.bigip, () => consumerDeclaration);
         });
 
-        describe('Consumer Test: Statsd - Test', () => {
+        describe('System Poller data', () => {
             /**
              * Note: statsd/graphite stores only counters, no strings.
              * Verification is simple - just check that at least one metric is not empty
              */
-            // helper function to query statsd for data
-            const query = (searchString) => {
-                const uri = `/render?target=stats.gauges.${searchString}&format=json&from=-3minutes`;
-                const options = {
-                    port: STATSD_HTTP_PORT,
-                    protocol: STATSD_HTTP_PROTO
-                };
+            /**
+             * Query metrics from StatsD
+             *
+             * @param {string} searchString - search string
+             *
+             * @returns {Promise<Array<string, string>>} resolved with search results
+             */
+            const queryStatsD = (proto, searchString) => cs.http[`${proto}Statsd`].makeRequest({
+                retry: {
+                    maxTries: 10,
+                    delay: 200
+                },
+                uri: `/render?target=stats.gauges.${searchString}&format=json&from=-3minutes`
+            })
+                .then((data) => [searchString, data]);
 
-                return util.makeRequest(CONSUMER_HOST.ip, uri, options)
-                    .then((data) => Promise.resolve([searchString, data]));
-            };
-
+            /**
+             * Remove metrics from data
+             *
+             * @param {Object} data - data
+             */
             const stripMetrics = (data) => {
                 Object.keys(data).forEach((item) => {
                     if (Number.isInteger(data[item])) {
@@ -124,8 +226,15 @@ function test() {
                 });
             };
 
-            const getMetricsName = (data) => {
-                const copyData = JSON.parse(JSON.stringify(data));
+            /**
+             * Get metric names from data
+             *
+             * @param {Object} data - data
+             *
+             * @returns {Array<string>} array of metric names
+             */
+            const getMetricNames = (data) => {
+                const copyData = miscUtils.deepCopy(data);
                 stripMetrics(copyData);
                 const diff = deepDiff(copyData, data) || [];
 
@@ -140,81 +249,69 @@ function test() {
                 ].concat(item.path).map((i) => i.replace(/\.|\/|:/g, '-')).join('.'));
             };
 
-            const verifyMetrics = (metrics) => {
-                let idx = 0;
-                let hasIndexed = false;
+            harness.bigip.forEach((bigip) => it(
+                `should fetch system poller data via debug endpoint - ${bigip.name}`,
+                () => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME)
+                    .then((data) => {
+                        sysPollerMetricNames[bigip.hostname] = getMetricNames(data[0]);
+                    })
+            ));
 
-                const getNextMetrics = () => {
-                    const promises = [];
+            Object.keys(STATSD_CONFIGS).forEach(
+                (proto) => harness.bigip.forEach((bigip) => it(
+                    `should check StatsD for system poller data - ${bigip.name} (over ${proto})`,
+                    () => {
+                        const metricNames = sysPollerMetricNames[bigip.hostname];
+                        let metricsFound = false;
 
-                    for (let i = 0; i < 4 && idx < metrics.length; i += 1) {
-                        promises.push(query(metrics[idx]));
-                        idx += 1;
-                    }
-                    return Promise.all(promises)
-                        .then((data) => {
-                            data.forEach((item) => {
-                                /**
-                                 * item = [metricName, data]
-                                 * data is array of objects like { targets: {}, tags: {}, datapoints: []}
-                                 */
-                                if (Array.isArray(item[1]) && item[1].length > 0
-                                    && item[1][0].datapoints && item[1][0].datapoints.length > 0) {
-                                    util.logger.info(`Metic ${item[0]}: `, item[1]);
-                                    hasIndexed = true;
+                        assert.isNotEmpty(metricNames, 'should have metric names from system poller data');
+
+                        return promiseUtils.loopForEach(
+                            metricNames,
+                            (metricName, idx, arr, breakCb) => queryStatsD(proto, metricName)
+                                .then((queryRet) => {
+                                    /**
+                                     * queryRet = [metricName, data]
+                                     * data is array of objects like { targets: {}, tags: {}, datapoints: []}
+                                     */
+                                    const data = queryRet[1];
+                                    if (Array.isArray(data) && data.length > 0
+                                        && data[0].datapoints && data[0].datapoints.length > 0) {
+                                        bigip.logger.info('StatsD metric was found', { idx, queryRet });
+                                        metricsFound = true;
+                                        return breakCb();
+                                    }
+                                    return Promise.resolve();
+                                })
+                        )
+                            .then(() => {
+                                if (metricsFound) {
+                                    return Promise.resolve();
                                 }
+                                bigip.logger.info('Waiting for data to be indexed...');
+                                // more sleep time for system poller data to be indexed
+                                return promiseUtils.sleepAndReject(20000, 'should have metrics indexed from system poller data');
                             });
-                            if (hasIndexed) {
-                                return Promise.resolve();
-                            }
-                            if (idx < metrics.length) {
-                                return getNextMetrics();
-                            }
-                            /**
-                             * Reasons for retry:
-                             * - indexing is still in process
-                             * - system poller not sent data yet
-                             * Sleep for 30 second(s) and return Promise.reject to allow retry
-                             */
-                            util.logger.info('Waiting for data to be indexed...');
-                            return new Promise((resolveTimer) => { setTimeout(resolveTimer, 30000); })
-                                .then(() => Promise.reject(new Error('Metrics are empty / not indexed')));
-                        });
-                };
-                return getNextMetrics();
-            };
-
-            // end helper function
-
-            const sysPollerMetricsData = {};
-
-            it('should fetch system poller data via debug endpoint from DUTs', () => dutUtils.getSystemPollersData((hostObj, data) => {
-                sysPollerMetricsData[hostObj.hostname] = getMetricsName(data[0]);
-            }));
-
-            DUTS.forEach((dut) => {
-                // at first we need to retrieve list of metrics to poll
-                it(`should check for system poller data from:${dut.hostalias}`, () => {
-                    const metrics = sysPollerMetricsData[dut.hostname];
-                    if (!metrics) {
-                        throw new Error(`No System Poller Metrics data for ${dut.hostalias} !`);
                     }
-                    // all metrics should be non-empty array - it means they were added to index
-                    return verifyMetrics(metrics);
-                });
-            });
+                ))
+            );
         });
-
-        // Just stop the container, so we can reuse ports on next run
-        describe('Consumer Test: Statsd - Stop container', () => {
-            it('should remove container(s)', () => runRemoteCmd(`docker stop ${containerName}`));
-        });
-    }));
+    });
 }
 
+/**
+ * Teardown CS
+ */
 function teardown() {
-    describe('Consumer Test: Statsd - teardown', () => {
-        STATSD_PROTOCOLS.forEach((protocol) => it(`should remove ${protocol} container(s)`, () => runRemoteCmd(`docker container rm -f ${STATSD_CONTAINER_NAME}-${protocol}`)));
+    describe('Consumer Teardown: StatsD', () => {
+        const cs = harnessUtils.getDefaultHarness().other[0];
+
+        Object.keys(STATSD_CONFIGS).forEach((proto) => it(
+            `should stop and remove StatsD docker container (${proto} data transport)`,
+            () => harnessUtils.docker.stopAndRemoveContainer(
+                cs.docker, DOCKER_CONTAINERS[STATSD_CONFIGS[proto].SERVICE_NAME].name
+            )
+        ));
     });
 }
 

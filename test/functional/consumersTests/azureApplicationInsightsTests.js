@@ -6,20 +6,29 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
-const testUtil = require('../shared/util');
-const azureUtil = require('../shared/azureUtil');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const azureUtil = require('../shared/cloudUtils/azure');
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
+const harnessUtils = require('../shared/harness');
+const logger = require('../shared/utils/logger').getChild('azureAITests');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
-const DUTS = testUtil.getHosts('BIGIP');
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
+/**
+ * @module test/functional/consumersTests/azureAI
+ */
+
+// read in example config
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+
 /**
  * Should look like:
  * [
@@ -34,112 +43,108 @@ const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
  *    }
  * ]
  */
-let APPINS_API_DATA;
+let AI_METADATA;
 
-function setup() {
-    const fileName = process.env[constants.ENV_VARS.AZURE.APPINS_API_DATA];
-    assert.ok(fileName, `should define env variable ${constants.ENV_VARS.AZURE.APPINS_API_DATA} (path to file with Azure App Insights API info)`);
-
-    testUtil.logger.info(`Reading and parsing file '${fileName}' for Azure App Insights`);
-    APPINS_API_DATA = JSON.parse(fs.readFileSync(fileName));
-
-    assert.ok(Array.isArray(APPINS_API_DATA) && APPINS_API_DATA.length > 0, 'should be an array and have 1 or more elements in it');
-    APPINS_API_DATA.forEach((item, idx) => {
-        assert.ok(item.instrKey, `APPINS_API_DATA item #${idx} should have instrKey`);
-        assert.ok(item.apiKey, `APPINS_API_DATA item #${idx} should have apiKey`);
-        assert.ok(item.appID, `APPINS_API_DATA item #${idx} should have appID`);
-    });
-    testUtil.logger.debug(`APPINS_API_DATA has ${APPINS_API_DATA.length} items`);
-}
-
+/**
+ * Tests for DUTs
+ */
 function test() {
-    const getAppInsightAPIInfo = (function () {
-        const key2application = {};
-        let lastID = -1;
-        return function getter(key) {
-            let value = key2application[key];
-            if (!value) {
-                lastID += 1;
-                value = APPINS_API_DATA[lastID];
+    describe('Consumer Test: Azure App Insights', () => {
+        const harness = harnessUtils.getDefaultHarness();
+
+        const getAppInsightAPIInfo = (function () {
+            const key2application = {};
+            let lastID = -1;
+            return function getter(key) {
+                let value = key2application[key];
                 if (!value) {
-                    throw new Error(`Not enough items in APPINS_API_DATA: ${APPINS_API_DATA.length} items configured, but requests for #${lastID}`);
+                    lastID += 1;
+                    value = AI_METADATA[lastID];
+                    if (!value) {
+                        throw new Error(`Not enough items in AI_METADATA: ${AI_METADATA.length} items configured, but requests for #${lastID}`);
+                    }
+                    key2application[key] = value;
                 }
-                key2application[key] = value;
-            }
-            return value;
-        };
-    }());
+                return value;
+            };
+        }());
 
-    describe('Consumer Test: Azure App Insights - Configure TS and generate data', () => {
-        const referenceDeclaration = testUtil.deepCopy(DECLARATION);
-        referenceDeclaration.My_Consumer = {
-            class: 'Telemetry_Consumer',
-            type: 'Azure_Application_Insights',
-            instrumentationKey: null,
-            maxBatchIntervalMs: 2000
-        };
-        DUTS.forEach((dut) => it(`should configure TS - ${dut.hostalias}`, () => {
-            const declaration = testUtil.deepCopy(referenceDeclaration);
-            const apiInfo = getAppInsightAPIInfo(dut.ip);
-            declaration.My_Consumer.instrumentationKey = apiInfo.instrKey;
-            if (apiInfo.region) {
-                declaration.My_Consumer.region = apiInfo.region;
-            }
-            return dutUtils.postDeclarationToDUT(dut, declaration);
-        }));
-    });
+        before(() => azureUtil.getMetadataFromProcessEnv(azureUtil.SERVICE_TYPE.AI)
+            .then((metadata) => {
+                assert.isArray(metadata, 'should be an array');
+                assert.isNotEmpty(metadata, 'should have 1 or more elements');
 
-    describe('Consumer Test: Azure App Insights - Test', function () {
-        this.timeout(180000);
-        let firstAttemptOverAll = true;
+                const props = [
+                    'apiKey',
+                    'appID',
+                    'instrKey'
+                ];
 
-        DUTS.forEach((dut) => {
-            let triedWithoutAddtlDelay = false;
+                metadata.forEach((item, idx) => props.forEach((propName) => {
+                    assert.isDefined(item[propName], `Azure Application Insights metadata item #${idx} should have "${propName}" property`);
+                }));
+                logger.debug(`Azure Application Insights metadata has ${metadata.length} items - 6 BIG-IPs can be used simultaneously`);
 
-            it(`should check for system poller data from:${dut.hostalias}`, () => {
-                const apiInfo = getAppInsightAPIInfo(dut.ip);
-                return Promise.resolve()
-                    .then(() => {
-                        if (firstAttemptOverAll) {
-                            // first attempt in entire suite - data might not be ready yet
-                            firstAttemptOverAll = false;
-                            testUtil.logger.info('Delay 120000ms to ensure App Insights api data ready (first attempt in entire suite)');
-                            return testUtil.sleep(120000);
-                        }
-                        if (!triedWithoutAddtlDelay) {
-                            // let's try to fetch data without delay
-                            triedWithoutAddtlDelay = true;
-                            return Promise.resolve();
-                        }
-                        testUtil.logger.info('Delay 30000ms to ensure App Insights api data ready');
-                        return testUtil.sleep(30000);
-                    })
-                    .then(() => azureUtil.queryAppInsights(apiInfo.appID, apiInfo.apiKey))
-                    .then((response) => {
-                        // Sample response
-                        // {
-                        //     "value": {
-                        //         "start": "2020-03-23T21:44:59.198Z",
-                        //         "end": "2020-03-23T21:47:59.198Z",
-                        //         "customMetrics/F5_system_tmmMemory": {
-                        //             "avg": 15
-                        //         }
-                        //     }
-                        // }
-                        testUtil.logger.info(response);
-                        const val = response.value['customMetrics/F5_system_tmmMemory'];
-                        assert.ok(val && val.avg > 0);
-                    });
+                AI_METADATA = metadata;
+            }));
+
+        describe('Configure TS and generate data', () => {
+            let referenceDeclaration;
+
+            before(() => {
+                referenceDeclaration = miscUtils.deepCopy(DECLARATION);
+                referenceDeclaration.My_Consumer = {
+                    class: 'Telemetry_Consumer',
+                    type: 'Azure_Application_Insights',
+                    instrumentationKey: null,
+                    maxBatchIntervalMs: 2000
+                };
+            });
+
+            testUtils.shouldConfigureTS(harness.bigip, (bigip) => {
+                const declaration = miscUtils.deepCopy(referenceDeclaration);
+                const apiInfo = getAppInsightAPIInfo(bigip.name);
+                declaration.My_Consumer.instrumentationKey = apiInfo.instrKey;
+                if (apiInfo.region) {
+                    declaration.My_Consumer.region = apiInfo.region;
+                }
+                return declaration;
+            });
+        });
+
+        describe('System Poller data', () => {
+            it('sleep for 60sec while AI API is not ready', () => promiseUtils.sleep(60000));
+
+            harness.bigip.forEach((bigip) => {
+                it(`should check Azure AI for system poller data - ${bigip.name}`, () => {
+                    const apiInfo = getAppInsightAPIInfo(bigip.name);
+                    return azureUtil.queryAppInsights(apiInfo.appID, apiInfo.apiKey)
+                        .then((response) => {
+                            // Sample response
+                            // {
+                            //     "value": {
+                            //         "start": "2020-03-23T21:44:59.198Z",
+                            //         "end": "2020-03-23T21:47:59.198Z",
+                            //         "customMetrics/F5_system_tmmMemory": {
+                            //             "avg": 15
+                            //         }
+                            //     }
+                            // }
+                            const val = response.value['customMetrics/F5_system_tmmMemory'];
+                            assert.isDefined(val, 'should have expected property in response');
+                            assert.isDefined(val.avg, 'should have expected "avg" property in response');
+                            assert.isAbove(val.avg, 0, 'should be greater than 0');
+                        })
+                        .catch((err) => {
+                            bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                            return promiseUtils.sleepAndReject(20000, err);
+                        });
+                });
             });
         });
     });
 }
 
-function teardown() {
-}
-
 module.exports = {
-    setup,
-    test,
-    teardown
+    test
 };

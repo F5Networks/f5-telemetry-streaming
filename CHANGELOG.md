@@ -1,6 +1,15 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.30.0
+### Added
+### Fixed
+- TS-668: [GitHub #207](https://github.com/F5Networks/f5-telemetry-streaming/issues/207) Add support for numerical enums, enhance SNMP metrics processing
+- TS-666: Created separate Azure Logs tables for pool members and removed that data from the pool tables.
+### Changed
+- TS-658: Update npm packages (@grpc/proto-loader from 0.6.9 to 0.6.12)
+### Removed
+
 ## 1.29.0
 ### Added
 - TS-568: Added support for SNMP endpoints in Telemetry_Endpoints

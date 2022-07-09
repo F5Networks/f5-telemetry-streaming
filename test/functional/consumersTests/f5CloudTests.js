@@ -8,38 +8,60 @@
 
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
-const scp = require('node-scp');
+/**
+ * ATTENTION: F5 Cloud tests disabled until F5_Cloud interactions resolved
+ */
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
-const sharedUtil = require('../shared/util');
-const util = require('../../../src/lib/utils/misc');
-const requestsUtil = require('../../../src/lib/utils/requests');
-const testUtil = require('../../unit/shared/util');
+const harnessUtils = require('../shared/harness');
+const logger = require('../shared/utils/logger').getChild('f5cloudTests');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const srcMiscUtils = require('../../../src/lib/utils/misc');
+const testUtils = require('../shared/testUtils');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
+/**
+ * @module test/functional/consumersTests/f5cloud
+ */
 
 const MODULE_REQUIREMENTS = { DOCKER: true };
-const CONSUMER_HOST = sharedUtil.getHosts('CONSUMER')[0]; // only expect one
-const DUTS = sharedUtil.getHosts('BIGIP');
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
-const F5_CLOUD_NAME = 'GRPC_F5_CLOUD';
-const MOCK_SERVER_NAME = 'grpc_mock_server';
-const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
-const GRPC_MOCK_SERVER_DOCKER = `${process.env[constants.ENV_VARS.ARTIFACTORY_SERVER]}/f5-magneto-docker/grpc-mock-server:1.0.1`;
+
+const F5_CLOUD_CONSUMER_NAME = 'GRPC_F5_CLOUD';
 const GRPC_MOCK_SENDING_PORT = 4770;
 const GRPC_MOCK_ADMIN_PORT = 4771;
-const SHOULD_RUN_TESTS = {};
+const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
+const REMOTE_PROTO_PATH = '/home/deos.proto';
 
-let VALID_SERVICE_ACCOUNT = {};
+const DOCKER_CONTAINERS = {
+    F5CloudGRPC: {
+        command: '/proto/deos.proto',
+        detach: true,
+        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}f5-magneto-docker/grpc-mock-server:1.0.1`,
+        name: 'grpc-mock-server',
+        publish: {
+            [GRPC_MOCK_ADMIN_PORT]: GRPC_MOCK_ADMIN_PORT,
+            [GRPC_MOCK_SENDING_PORT]: GRPC_MOCK_SENDING_PORT
+        },
+        restart: 'always',
+        volume: {
+            '/home': '/proto'
+        }
+    }
+};
 
-function runRemoteCmd(cmd) {
-    return sharedUtil.performRemoteCmd(
-        CONSUMER_HOST.ip,
-        CONSUMER_HOST.username,
-        cmd,
-        { password: CONSUMER_HOST.password }
-    );
-}
+// read in example config
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const LISTENER_PROTOCOLS = constants.TELEMETRY.LISTENER.PROTOCOLS;
+
+let CONTAINER_STARTED;
+let SHOULD_SKIP_DUE_VERSION;
+let SERVICE_ACCOUNT = null;
 
 /*
     --- Notes about viktorfefilovf5/magneto-grpc-mock-server:0.0.7 ---
@@ -54,65 +76,60 @@ function runRemoteCmd(cmd) {
     GET /clearInteractions - clear interactions
  */
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
-    const serviceAccount = process.env[constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT];
-    assert.ok(serviceAccount, `should define env variable ${constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT} with real service account`);
-    const parsedServiceAccount = JSON.parse(fs.readFileSync(serviceAccount));
-    parsedServiceAccount.privateKey = {
-        cipherText: parsedServiceAccount.privateKey
-    };
-    VALID_SERVICE_ACCOUNT = parsedServiceAccount;
-    assert.ok(VALID_SERVICE_ACCOUNT.type, 'service account is not valid');
+    describe.skip('Consumer Setup: F5 Cloud', () => {
+        const harness = harnessUtils.getDefaultHarness();
+        const cs = harnessUtils.getDefaultHarness().other[0];
 
-    describe('Consumer Setup Check: check bigip requirements', () => {
-        DUTS.forEach((dut) => it(
-            `get bigip version and check if version is good for F5 Cloud - ${dut.hostalias}`,
-            () => sharedUtil.getBigipVersion(dut)
-                .then((response) => {
-                    // F5 Cloud should support bigip 14 and above
-                    SHOULD_RUN_TESTS[dut.hostalias] = util.compareVersionStrings(response, '>=', '14.0.0');
-                })
-        ));
-    });
-
-    // .skip() until F5_Cloud interactions resolved
-    describe.skip('Consumer Setup: configuration', () => {
-        it('should pull grpc-mock-server docker image', () => runRemoteCmd(`docker pull ${GRPC_MOCK_SERVER_DOCKER}`));
-
-        it('should delete proto file if exist', () => runRemoteCmd('rm -f ~/deos.proto'));
-
-        it('should copy proto file using node-scp', () => scp({
-            host: CONSUMER_HOST.ip,
-            port: 22,
-            username: CONSUMER_HOST.username,
-            password: CONSUMER_HOST.password
-        }).then((client) => {
-            client.uploadFile(PROTO_PATH, '/home/ubuntu/deos.proto')
-                .then(() => {
-                    client.close();
-                    assert(true);
-                })
-                .catch((error) => {
-                    assert(false, `Test Error: Couldnt upload proto files to ${CONSUMER_HOST.ip} using scp, error: ${error}`);
-                });
-        }).catch((error) => {
-            assert(false, `Test Error: Couldnt create scp client, error: ${error}`);
-        }));
-
-        it('should set up mock GRPC server', () => runRemoteCmd(`docker ps | grep ${MOCK_SERVER_NAME}`).then((data) => {
-            if (data) {
-                return Promise.resolve(); // exists, continue
+        cs.http.createAndSave('f5cloud', {
+            port: GRPC_MOCK_ADMIN_PORT,
+            protocol: 'http',
+            retry: {
+                maxTries: 10,
+                delay: 1000
             }
-            return runRemoteCmd(`docker run -d -p ${GRPC_MOCK_SENDING_PORT}:${GRPC_MOCK_SENDING_PORT} -p ${GRPC_MOCK_ADMIN_PORT}:${GRPC_MOCK_ADMIN_PORT} -v /home/ubuntu:/proto --name ${MOCK_SERVER_NAME} ${GRPC_MOCK_SERVER_DOCKER} /proto/deos.proto`);
-        }));
+        });
 
-        it('should add stub to mock server', () => {
-            const options = {
-                method: 'POST',
-                fullURI: `http://${CONSUMER_HOST.ip}:${GRPC_MOCK_ADMIN_PORT}/add`,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+        before(() => {
+            CONTAINER_STARTED = false;
+            SERVICE_ACCOUNT = null;
+            SHOULD_SKIP_DUE_VERSION = {};
+
+            const envVar = miscUtils.getEnvArg(constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT);
+            logger.info('Reading service account info from file', {
+                envVar: constants.ENV_VARS.F5_CLOUD.SERVICE_ACCOUNT,
+                envVal: envVar
+            });
+            return miscUtils.readJsonFile(envVar, true)
+                .then((serviceAccount) => {
+                    assert.isDefined(serviceAccount.type, 'service account is not valid');
+                    SERVICE_ACCOUNT = serviceAccount;
+                    SERVICE_ACCOUNT.privateKey = {
+                        cipherText: SERVICE_ACCOUNT.privateKey
+                    };
+                });
+        });
+
+        // .skip() until F5_Cloud interactions resolved
+        describe('Docker container setup', () => {
+            it('should pull F5 Cloud GRPC docker image', () => cs.docker.pull(DOCKER_CONTAINERS.F5CloudGRPC.image));
+
+            it('should delete proto file if exist', () => cs.ssh.default.unlinkIfExists(REMOTE_PROTO_PATH));
+
+            it('should copy proto file', () => cs.ssh.default.copyFileToRemote(PROTO_PATH, REMOTE_PROTO_PATH));
+
+            it('should start new F5 Cloud GRPC docker container', () => harnessUtils.docker.startNewContainer(
+                cs.docker,
+                DOCKER_CONTAINERS.F5CloudGRPC
+            )
+                .then(() => {
+                    CONTAINER_STARTED = true;
+                }));
+
+            it('should add stub to mock server', () => cs.http.f5cloud.makeRequest({
                 body: {
                     service: 'Ingestion',
                     method: 'Post',
@@ -124,86 +141,143 @@ function setup() {
                     output: {
                         data: {}
                     }
-                }
-            };
-            return requestsUtil.makeRequest(options);
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                json: true,
+                method: 'POST',
+                uri: '/add'
+            }));
+        });
+
+        describe('Gather information about DUTs version', () => {
+            harness.bigip.forEach((bigip) => it(
+                `should get bigip version and check if version is high enough for F5 Cloud - ${bigip.name}`,
+                () => bigip.icAPI.default.getSoftwareVersion()
+                    .then((version) => {
+                        // OpenTelemetry Exporter consumer is supported on bigip 14.1 and above
+                        SHOULD_SKIP_DUE_VERSION[bigip.hostname] = srcMiscUtils.compareVersionStrings(version, '<', '14.0');
+
+                        logger.info('DUT\' version', {
+                            hostname: bigip.hostname,
+                            shouldSkipTests: SHOULD_SKIP_DUE_VERSION[bigip.hostname],
+                            version
+                        });
+                    })
+            ));
         });
     });
 }
 
+/**
+ * Tests for DUTs
+ */
 function test() {
-    const testDataTimestamp = Date.now();
-    const msg = (hostName) => `hostname="${hostName}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_NAME}"`;
+    describe.skip('Consumer Test: F5 Cloud', () => {
+        const harness = harnessUtils.getDefaultHarness();
+        const cs = harness.other[0];
+        const testDataTimestamp = Date.now();
 
-    // .skip() until F5_Cloud interactions resolved
-    describe.skip('Consumer Test: F5 Cloud - Configure TS', () => {
-        DUTS.forEach((dut) => it(`should configure TS - ${dut.hostalias}`, function () {
-            if (!SHOULD_RUN_TESTS[dut.hostalias]) {
-                this.skip();
-            }
-            const consumerDeclaration = sharedUtil.deepCopy(DECLARATION);
-            consumerDeclaration[F5_CLOUD_NAME] = {
-                allowSelfSignedCert: true,
-                class: 'Telemetry_Consumer',
-                type: 'F5_Cloud',
-                enable: true,
-                trace: true,
-                f5csTenantId: 'a-blabla-a',
-                f5csSensorId: '12345',
-                payloadSchemaNid: 'f5',
-                serviceAccount: testUtil.deepCopy(VALID_SERVICE_ACCOUNT),
-                targetAudience: CONSUMER_HOST.ip,
-                useSSL: false,
-                port: GRPC_MOCK_SENDING_PORT
-            };
-            return dutUtils.postDeclarationToDUT(dut, sharedUtil.deepCopy(consumerDeclaration));
-        }));
-        DUTS.forEach((dut) => it(`should send event to TS Event Listener - ${dut.hostalias}`, function () {
-            if (!SHOULD_RUN_TESTS[dut.hostalias]) {
-                this.skip();
-            }
-            return dutUtils.sendDataToEventListener(dut, `${msg(dut.hostname)}`);
-        }));
-    });
+        /**
+         * @returns {boolean} true if DUt satisfies version restriction
+         */
+        const isValidDut = (dut) => !SHOULD_SKIP_DUE_VERSION[dut.hostname];
 
-    // .skip() until F5_Cloud interactions resolved
-    describe.skip('Consumer Test: F5 Cloud - Test', () => {
-        DUTS.forEach((dut) => it(`should find the right interactions on mock server - ${dut.hostalias}`, function () {
-            if (!SHOULD_RUN_TESTS[dut.hostalias]) {
-                this.skip();
-            }
-            const options = {
-                method: 'GET',
-                fullURI: `http://${CONSUMER_HOST.ip}:${GRPC_MOCK_ADMIN_PORT}/interactions`,
-                headers: {}
-            };
-            const responseDataJSONList = [];
-            return requestsUtil.makeRequest(options).then((responseList) => {
-                if (responseList && responseList.length > 0) {
-                    responseList.forEach((response) => {
-                        assert(response.service === 'Ingestion', `Test Error: Incorrect service name, should be 'Ingestion', got '${response.service}'`);
-                        assert(response.method === 'Post', `Test Error: Incorrect method name, should be 'Post', got '${response.method}'`);
-                        assert(response.data.account_id === 'urn:f5_cs::account:a-blabla-a', `Test Error: Incorrect method name, should be 'urn:f5_cs::account:a-blabla-a', got '${response.data.account_id}'`);
-                        const stringData = Buffer.from(response.data.payload, 'base64').toString(); // decode base64
-                        const jsonData = JSON.parse(stringData);
-                        if (jsonData.testType === F5_CLOUD_NAME) {
-                            responseDataJSONList.push(jsonData);
-                        }
-                    });
-                    assert(responseDataJSONList.some((responseDataJSON) => responseDataJSON.hostname === dut.hostname), `Test Error: ${dut.hostname} does not exist`);
-                    assert(responseDataJSONList.every((responseDataJSON) => responseDataJSON.testDataTimestamp === testDataTimestamp.toString()), `Test Error: testDataTimestamp should be ${testDataTimestamp}`);
-                } else {
-                    assert(false, 'no response from mock server');
-                }
+        before(() => {
+            assert.isOk(CONTAINER_STARTED, 'should start F5 Cloud GRPC container!');
+            assert.isNotNull(SERVICE_ACCOUNT, 'should fetch F5 Cloud API metadata from process.env');
+        });
+
+        describe('Configure TS and generate data', () => {
+            let consumerDeclaration;
+
+            before(() => {
+                consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+                consumerDeclaration[F5_CLOUD_CONSUMER_NAME] = {
+                    allowSelfSignedCert: true,
+                    class: 'Telemetry_Consumer',
+                    type: 'F5_Cloud',
+                    enable: true,
+                    trace: true,
+                    f5csTenantId: 'a-blabla-a',
+                    f5csSensorId: '12345',
+                    payloadSchemaNid: 'f5',
+                    serviceAccount: miscUtils.deepCopy(SERVICE_ACCOUNT),
+                    targetAudience: cs.host.host,
+                    useSSL: false,
+                    port: GRPC_MOCK_SENDING_PORT
+                };
             });
-        }));
+
+            testUtils.shouldConfigureTS(harness.bigip, (bigip) => (isValidDut(bigip)
+                ? miscUtils.deepCopy(consumerDeclaration)
+                : null));
+
+            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => (isValidDut(bigip)
+                ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`
+                : null));
+        });
+
+        describe('Event Listener data', () => {
+            harness.bigip.forEach((bigip) => LISTENER_PROTOCOLS
+                .forEach((proto) => it(
+                    `should check F5 Cloud GRCP server for event listener data (over ${proto}) for - ${bigip.name}`,
+                    function () {
+                        if (!isValidDut(bigip)) {
+                            return this.skip();
+                        }
+                        return cs.http.otel.makeRequest({
+                            headers: {},
+                            method: 'GET',
+                            uri: '/interactions'
+                        })
+                            .then((data) => {
+                                assert.isArray(data, 'should be array');
+                                assert.isNotEmpty(data, 'should not be empty');
+
+                                const responseDataJSONList = [];
+                                data.forEach((response) => {
+                                    assert(response.service === 'Ingestion', `Test Error: Incorrect service name, should be 'Ingestion', got '${response.service}'`);
+                                    assert(response.method === 'Post', `Test Error: Incorrect method name, should be 'Post', got '${response.method}'`);
+                                    assert(response.data.account_id === 'urn:f5_cs::account:a-blabla-a', `Test Error: Incorrect method name, should be 'urn:f5_cs::account:a-blabla-a', got '${response.data.account_id}'`);
+                                    const stringData = Buffer.from(response.data.payload, 'base64').toString(); // decode base64
+                                    const jsonData = JSON.parse(stringData);
+                                    if (jsonData.testType === F5_CLOUD_CONSUMER_NAME) {
+                                        responseDataJSONList.push(jsonData);
+                                    }
+                                });
+                                assert.isOk(
+                                    responseDataJSONList.some((responseDataJSON) => (
+                                        responseDataJSON.hostname === bigip.hostname
+                                        && responseDataJSON.testDataTimestamp === testDataTimestamp.toString()
+                                        && responseDataJSON.protocol === proto)),
+                                    `Test Error: no valid event listener data for ${bigip.hostname}`
+                                );
+                            })
+                            .catch((err) => {
+                                bigip.logger.info('No event listener data found. Going to wait another 20sec');
+                                return promiseUtils.sleepAndReject(20000, err);
+                            });
+                    }
+                )));
+        });
     });
 }
 
+/**
+ * Teardown CS
+ */
 function teardown() {
-    // .skip() until F5_Cloud interactions resolved
-    describe.skip('Consumer Test: teardown mock server', () => {
-        it(`should remove ${MOCK_SERVER_NAME} container`, () => runRemoteCmd(`docker container rm -f ${MOCK_SERVER_NAME}`));
+    describe.skip('Consumer Teardown: F5 Cloud', () => {
+        const cs = harnessUtils.getDefaultHarness().other[0];
+
+        it('should stop and remove F5 Cloud GRPC docker container', () => harnessUtils.docker.stopAndRemoveContainer(
+            cs.docker,
+            DOCKER_CONTAINERS.F5CloudGRPC.name
+        ));
+
+        it('should remove GRPC proto file', () => cs.ssh.default.unlinkIfExists(REMOTE_PROTO_PATH));
     });
 }
 

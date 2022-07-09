@@ -237,7 +237,7 @@ describe('Statsd', () => {
             return statsDIndex(context)
                 .then(() => {
                     assert.strictEqual(context.logger.exception.callCount, 1);
-                    assert.deepEqual(
+                    assert.deepStrictEqual(
                         context.logger.exception.firstCall.args,
                         ['Unable to forward to statsd client', 'Connection failure to server']
                     );
@@ -275,7 +275,7 @@ describe('Statsd', () => {
                     const expectedTags = getExpectedData(true).find(
                         (d) => d.metricName === expectedMetricName
                     ).metricTags;
-                    assert.deepEqual(tracedTags, expectedTags);
+                    assert.deepStrictEqual(tracedTags, expectedTags);
                 });
         });
     });

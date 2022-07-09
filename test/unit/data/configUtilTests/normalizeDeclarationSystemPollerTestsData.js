@@ -581,6 +581,11 @@ module.exports = {
                             snmpEndpoint: {
                                 path: '1.2.3.4',
                                 protocol: 'snmp'
+                            },
+                            snmpEndpointWithOptions: {
+                                numericalEnums: true,
+                                path: '1.2.3.4',
+                                protocol: 'snmp'
                             }
                         }
                     }
@@ -654,10 +659,18 @@ module.exports = {
                                 protocol: 'http'
                             },
                             snmpEndpoint: {
+                                numericalEnums: false,
                                 path: '1.2.3.4',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp'
+                            },
+                            snmpEndpointWithOptions: {
+                                numericalEnums: true,
+                                path: '1.2.3.4',
+                                protocol: 'snmp',
+                                enable: true,
+                                name: 'snmpEndpointWithOptions'
                             }
                         },
                         name: 'My_Poller_1',
@@ -730,6 +743,7 @@ module.exports = {
                                 protocol: 'http'
                             },
                             snmpEndpoint: {
+                                numericalEnums: false,
                                 path: '1.2.3.4',
                                 enable: true,
                                 name: 'snmpEndpoint',
@@ -913,7 +927,8 @@ module.exports = {
                                 path: '1.2.3.4',
                                 enable: true,
                                 name: 'snmpEndpoint',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         },
                         name: 'My_Poller_1',
@@ -985,7 +1000,8 @@ module.exports = {
                                 path: '1.2.3.4',
                                 enable: true,
                                 name: 'snmpEndpoint',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         },
                         name: 'My_Poller_1',

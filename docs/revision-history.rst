@@ -12,7 +12,7 @@ Document Revision History
         - Date
   
       * - 1.29.0
-        - **Updated the documentation for Telemetry Streaming v1.29.0. This release contains the following changes:** |br| * Added support for querying SNMP using a custom endpoint (see :ref:`SNMP example<snmpep>`) |br| * Added outputMode parameter to Generic HTTP consumer to support raw data output (see :ref:`Generic HTTP<http-ref>`) |br| |br| Issues Resolved: |br| * Metric Consumers should not fail when 'null' found in data |br| * Prometheus consumer should ignore NaN values
+        - Updated the documentation for Telemetry Streaming v1.29.0. This release contains the following changes: |br| * Added support for querying SNMP using a custom endpoint (see :ref:`SNMP example<snmpep>`) |br| * Added outputMode parameter to Generic HTTP consumer to support raw data output (see :ref:`Generic HTTP<http-ref>`) |br| |br| Issues Resolved: |br| * Metric Consumers should not fail when 'null' found in data |br| * Prometheus consumer should ignore NaN values
         - 5-31-22
 
       * - 1.28.0

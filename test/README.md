@@ -143,12 +143,16 @@ If you already have an existing set of devices, you can run the functional tests
 
         Env variables
     
+        ARTIFACTORY_DOCKER_HUB - set to the Docker Hub mirror of your choice. If ommitted, will pull Docker images from Docker Hub
+        CONSUMER_EXCLUDE_REGEX - specify RegEx to exclude Consumers by name
+        CONSUMER_INCLUDE_REGEX - specify RegEx to include Consumers by name
+        DUT_EXCLUDE_REGEX - specify RegEx to exclude DUT by hostname
+        DUT_INCLUDE_REGEX - specify RegEx to include DUT by hostname
+        SKIP_DUT_SETUP - set value to 1 or true to skip BIG-IP setup step
+        SKIP_DUT_TEARDOWN - set value to 1 or true to skip BIG-IP teardown step
         SKIP_DUT_TESTS - set value to 1 or true to skip package tests against BIG-IP. DUT device setup/teardown will still run.
         SKIP_CONSUMER_TESTS - set value to 1 or true to skip package tests against Consumers
-        CONSUMER_TYPE_REGEX - specify RegEx to filter Consumers by name
-        SKIP_PULL_CONSUMER_TESTS - set value to 1 or true to skip package tests against Pull Consumers
         TEST_HARNESS_FILE - set to the filepath of the test harness file; example harness file above
-        ARTIFACTORY_DOCKER_HUB - set to the Docker Hub mirror of your choice. If ommitted, will pull Docker images from Docker Hub
 
 3. Trigger the test run with `npm run test-functional`.
 
@@ -159,8 +163,7 @@ If you already have an existing set of devices, you can run the functional tests
         #!/usr/bin/env bash
         export SKIP_DUT_TESTS="true"
         export SKIP_CONSUMER_TESTS="false"
-        export CONSUMER_TYPE_REGEX="splunk"
-        export SKIP_PULL_CONSUMER_TESTS="true"
+        export CONSUMER_INCLUDE_REGEX="splunk"
         export TEST_HARNESS_FILE="/path/to/harness_facts_flat.json"
         export ARTIFACTORY_DOCKER_HUB="mymirror.test.com/path"
         npm run test-functional
@@ -174,6 +177,6 @@ These tests are under /test/functional/consumers/googleCloudMonitoringTests.js. 
 - GCP_PROJECT_ID
 - GCP_SERVICE_EMAIL
 
-The above environment variables all come from a service account in GCP. The service account that the tests are using is named telemetryStreamingTesting. In the GCP GUI, you can go to IAM & Admin -> Service Accounts to get to the list of service account. Once the service profile has been selected, you will be able to see what the service account email is and should also see any private key ids for keys that have been created. To get a new private key, the service account should be edited and the "CREATE KEY" option is used. After choosing to create a new key, select the JSON file option. You will be given a file that will have the private key inside of it. 
+The above environment variables all come from a service account in GCP. The service account that the tests are using is named telemetryStreamingTesting. In the GCP GUI, you can go to IAM & Admin -> Service Accounts to get to the list of service account. Once the service profile has been selected, you will be able to see what the service account email is and should also see any private key ids for keys that have been created. To get a new private key, the service account should be edited and the "CREATE KEY" option is used. After choosing to create a new key, select the JSON file option. You will be given a file that will have the private key inside of it.
 
 Important note: Gitlab does not like \n's and there are many of these in the private key given from GCP. Currently the \n's have all been replaced with "REPLACE" as an easy way to identify where \n's should go so that we can manually add them in the code. The \n's should be replaced before adding the private key to the environment variable in Gitlab.

@@ -74,7 +74,33 @@ describe('Declarations', () => {
         files.forEach((file) => {
             it(`should validate example: ${file}`, () => {
                 const data = JSON.parse(fs.readFileSync(`${baseDir}/${file}`));
-                return assert.isFulfilled(declValidator(data));
+                return declValidator(data);
+            });
+        });
+    });
+
+    describe('Validate Example Declaration from test/functional/shared/data/declarations', () => {
+        beforeEach(() => {
+            // fs access modification to skip folder check
+            const originFsAccess = fs.access;
+            sinon.stub(fs, 'access').callsFake(function () {
+                const path = arguments[0];
+                const callback = arguments[arguments.length - 1];
+                if (path === 'example_download_folder') {
+                    callback();
+                } else {
+                    originFsAccess.apply(null, arguments);
+                }
+            });
+            coreStub.utilMisc.getRuntimeInfo.nodeVersion = '8.12.0';
+        });
+        // first let's validate all example declarations
+        const baseDir = `${__dirname}/../functional/shared/data/declarations`;
+        const files = fs.readdirSync(baseDir);
+        files.forEach((file) => {
+            it(`should validate example: ${file}`, () => {
+                const data = JSON.parse(fs.readFileSync(`${baseDir}/${file}`));
+                return declValidator(data);
             });
         });
     });
@@ -1794,6 +1820,12 @@ describe('Declarations', () => {
                             name: 'snmpEndpoint',
                             path: '1.2.3.4',
                             protocol: 'snmp'
+                        },
+                        {
+                            name: 'snmpEndpointWithOptions',
+                            path: '1.2.3.4',
+                            protocol: 'snmp',
+                            numericalEnums: true
                         }
                     ]
                 }
@@ -1854,7 +1886,15 @@ describe('Declarations', () => {
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 path: '1.2.3.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
+                            },
+                            {
+                                enable: true,
+                                name: 'snmpEndpointWithOptions',
+                                path: '1.2.3.4',
+                                protocol: 'snmp',
+                                numericalEnums: true
                             }
                         ]
                     );
@@ -2014,7 +2054,8 @@ describe('Declarations', () => {
                             testC: {
                                 name: 'c',
                                 path: '1.2.3.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: true
                             }
                         }
                     },
@@ -2061,6 +2102,12 @@ describe('Declarations', () => {
                                 name: 'hostCpu',
                                 path: '1.2.3.4.5',
                                 protocol: 'snmp'
+                            },
+                            {
+                                name: 'hostCpu_2',
+                                path: '1.2.3.4.5',
+                                protocol: 'snmp',
+                                numericalEnums: true
                             }
                         ]
                     }
@@ -2095,7 +2142,15 @@ describe('Declarations', () => {
                                     name: 'hostCpu',
                                     path: '1.2.3.4.5',
                                     protocol: 'snmp',
-                                    enable: true
+                                    enable: true,
+                                    numericalEnums: false
+                                },
+                                {
+                                    name: 'hostCpu_2',
+                                    path: '1.2.3.4.5',
+                                    protocol: 'snmp',
+                                    enable: true,
+                                    numericalEnums: true
                                 }
                             ]
                         );
@@ -3592,6 +3647,7 @@ describe('Declarations', () => {
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.strictEqual(endpoints.items.test.protocol, 'http');
+                    assert.isUndefined(endpoints.items.test.numericalEnums);
                 });
         });
 
@@ -3612,6 +3668,29 @@ describe('Declarations', () => {
                 .then((validConfig) => {
                     const endpoints = validConfig.My_Endpoints;
                     assert.strictEqual(endpoints.items.test.protocol, 'snmp');
+                    assert.isFalse(endpoints.items.test.numericalEnums);
+                });
+        });
+
+        it('should allow setting SNMP options', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            path: '1.2.3.4',
+                            protocol: 'snmp',
+                            numericalEnums: true
+                        }
+                    }
+                }
+            };
+            return declValidator(data)
+                .then((validConfig) => {
+                    const endpoints = validConfig.My_Endpoints;
+                    assert.strictEqual(endpoints.items.test.protocol, 'snmp');
+                    assert.isTrue(endpoints.items.test.numericalEnums);
                 });
         });
 
@@ -3673,6 +3752,23 @@ describe('Declarations', () => {
             return assert.isRejected(declValidator(data), /something.*should NOT have additional properties/);
         });
 
+        it('should not allow SNMP options when protocol is not "snmp"', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Endpoints: {
+                    class: 'Telemetry_Endpoints',
+                    items: {
+                        test: {
+                            name: 'test',
+                            path: '/test/path',
+                            numericalEnums: true
+                        }
+                    }
+                }
+            };
+            return assert.isRejected(declValidator(data), /should NOT be valid/);
+        });
+
         it('should allow full declaration', () => {
             const data = {
                 class: 'Telemetry',
@@ -3705,6 +3801,13 @@ describe('Declarations', () => {
                             path: '1.2.3.4.5',
                             protocol: 'snmp',
                             enable: false
+                        },
+                        f: {
+                            name: 'testF',
+                            path: '1.2.3.4.5',
+                            protocol: 'snmp',
+                            numericalEnums: true,
+                            enable: false
                         }
                     }
                 }
@@ -3736,12 +3839,21 @@ describe('Declarations', () => {
                             name: 'testD',
                             path: '1.2.3.4.5',
                             enable: true,
+                            numericalEnums: false,
                             protocol: 'snmp'
                         },
                         e: {
                             name: 'testE',
                             path: '1.2.3.4.5',
                             protocol: 'snmp',
+                            numericalEnums: false,
+                            enable: false
+                        },
+                        f: {
+                            name: 'testF',
+                            path: '1.2.3.4.5',
+                            protocol: 'snmp',
+                            numericalEnums: true,
                             enable: false
                         }
                     });

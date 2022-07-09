@@ -38,6 +38,14 @@ describe('Azure_Log_Analytics', () => {
         allowSelfSignedCert: false
     };
 
+    const propertyBasedConsumerConfig = {
+        workspaceId: 'myWorkspace',
+        passphrase: 'secret',
+        useManagedIdentity: false,
+        allowSelfSignedCert: false,
+        format: 'propertyBased'
+    };
+
     const getOpsInsightsReq = () => {
         const opInsightsReq = requests.find((r) => r.fullURI === 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01');
         assert.notStrictEqual(opInsightsReq, undefined);
@@ -183,6 +191,16 @@ describe('Azure_Log_Analytics', () => {
             });
             return azureAnalyticsIndex(context)
                 .then(() => assert.sameDeepMembers(getAllOpsInsightsReqs(), azureLogData.systemData[0].expectedData));
+        });
+
+        it('should process systemInfo data with propertyBased setting', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: propertyBasedConsumerConfig
+            });
+            return azureAnalyticsIndex(context)
+                .then(() => assert.sameDeepMembers(getAllOpsInsightsReqs(),
+                    azureLogData.propertyBasedSystemData[0].expectedData));
         });
 
         it('should process event data', () => {

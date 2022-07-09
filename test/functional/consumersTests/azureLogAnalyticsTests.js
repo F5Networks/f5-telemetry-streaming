@@ -6,112 +6,142 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
-const util = require('../shared/util');
-const azureUtil = require('../shared/azureUtil');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+const azureUtil = require('../shared/cloudUtils/azure');
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
+const harnessUtils = require('../shared/harness');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
-const DUTS = util.getHosts('BIGIP');
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
-const PASSPHRASE = process.env[constants.ENV_VARS.AZURE.PASSPHRASE];
-const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE.WORKSPACE];
-const TENANT_ID = process.env[constants.ENV_VARS.AZURE.TENANT];
-const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE.LOG_KEY];
-const CLIENT_ID = process.env[constants.ENV_VARS.AZURE.CLIENT_ID];
+/**
+ * @module test/functional/consumersTests/azureLA
+ */
+
+// read in example config
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const LISTENER_PROTOCOLS = constants.TELEMETRY.LISTENER.PROTOCOLS;
 const AZURE_LA_CONSUMER_NAME = 'Azure_LA_Consumer';
 
-let oauthToken = null;
+let ACCESS_TOKEN = null;
+let AZURE = null;
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
-    describe('Consumer Setup: Azure Log Analytics - OAuth token', () => {
-        it('should get OAuth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID)
-            .then((data) => {
-                oauthToken = data.access_token;
-                return assert.notStrictEqual(oauthToken, undefined);
-            })
-            .catch((err) => {
-                util.logger.error(`Unable to get OAuth token: ${err}`);
-                return Promise.reject(err);
+    describe('Consumer Setup: Azure Log Analytics', () => {
+        before(() => {
+            ACCESS_TOKEN = null;
+            return azureUtil.getMetadataFromProcessEnv(azureUtil.SERVICE_TYPE.LA)
+                .then((azureData) => {
+                    AZURE = azureData;
+                });
+        });
+
+        it('should get OAuth token', () => azureUtil.getOAuthToken(AZURE.clientID, AZURE.logKey, AZURE.tenant)
+            .then((authToken) => {
+                assert.isDefined(authToken, 'should acquire auth token');
+                ACCESS_TOKEN = authToken;
             }));
     });
 }
 
+/**
+ * Tests for DUTs
+ */
 function test() {
-    const testDataTimestamp = Date.now();
+    describe('Consumer Test: Azure Log Analytics', () => {
+        const harness = harnessUtils.getDefaultHarness();
+        const testDataTimestamp = Date.now();
 
-    describe('Consumer Test: Azure Log Analytics - Configure TS and generate data', () => {
-        const consumerDeclaration = util.deepCopy(DECLARATION);
-        consumerDeclaration[AZURE_LA_CONSUMER_NAME] = {
-            class: 'Telemetry_Consumer',
-            type: 'Azure_Log_Analytics',
-            workspaceId: WORKSPACE_ID,
-            passphrase: {
-                cipherText: PASSPHRASE
-            }
-        };
-        DUTS.forEach((dut) => it(
-            `should configure TS - ${dut.hostalias}`,
-            () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
-        ));
-
-        it('should send event to TS Event Listener', () => {
-            const msg = `timestamp="${testDataTimestamp}",test="${testDataTimestamp}",testType="${AZURE_LA_CONSUMER_NAME}"`;
-            return dutUtils.sendDataToEventListeners((dut) => `hostname="${dut.hostname}",${msg}`);
+        before(() => {
+            assert.isNotNull(ACCESS_TOKEN, 'should acquire Azure LA token');
+            assert.isNotNull(AZURE, 'should acquire Azure LA API metadata from process.env');
         });
-    });
 
-    describe('Consumer Test: Azure Log Analytics - Test', () => {
-        DUTS.forEach((dut) => {
-            it(`should check for system poller data from:${dut.hostalias}`, () => {
-                // system poller is on an interval, so space out the retries
-                // NOTE: need to determine mechanism to shorten the minimum interval
-                // for a system poller cycle to reduce the test time here
-                const queryString = [
-                    'F5Telemetry_system_CL',
-                    `where hostname_s == "${dut.hostname}"`,
-                    'where TimeGenerated > ago(5m)'
-                ].join(' | ');
-                return new Promise((resolve) => { setTimeout(resolve, 30000); })
-                    .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
-                    .then((results) => {
-                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
-                        assert(results.tables[0], 'Log Analytics query returned no results');
-                        assert(results.tables[0].rows, 'Log Analytics query returned no rows');
-                        assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
-                    });
+        describe('Configure TS and generate data', () => {
+            let consumerDeclaration;
+
+            before(() => {
+                consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+                consumerDeclaration[AZURE_LA_CONSUMER_NAME] = {
+                    class: 'Telemetry_Consumer',
+                    type: 'Azure_Log_Analytics',
+                    workspaceId: AZURE.workspace,
+                    passphrase: {
+                        cipherText: AZURE.passphrase
+                    }
+                };
             });
 
-            it(`should check for event listener data from:${dut.hostalias}`, () => {
-                const queryString = [
-                    'F5Telemetry_LTM_CL',
-                    `where hostname_s == "${dut.hostname}"`,
-                    `where test_s == "${testDataTimestamp}"`
-                ].join(' | ');
-                return new Promise((resolve) => { setTimeout(resolve, 10000); })
-                    .then(() => azureUtil.queryLogs(oauthToken, WORKSPACE_ID, queryString))
-                    .then((results) => {
-                        util.logger.info('Response from Log Analytics:', { hostname: dut.hostname, results });
-                        assert(results.tables[0], 'Log Analytics query returned no results');
-                        assert(results.tables[0].rows, 'Log Analytics query returned no rows');
-                        assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
-                    });
-            });
+            testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
+            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${AZURE_LA_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`);
+        });
+
+        describe('Event Listener data', () => {
+            harness.bigip.forEach((bigip) => LISTENER_PROTOCOLS
+                .forEach((proto) => it(
+                    `should check Azure LA for event listener data (over ${proto}) for - ${bigip.name}`,
+                    () => {
+                        const queryString = [
+                            'F5Telemetry_LTM_CL',
+                            `where hostname_s == "${bigip.hostname}"`,
+                            `where testDataTimestamp_s == "${testDataTimestamp}"`,
+                            `where testType_s == "${AZURE_LA_CONSUMER_NAME}"`,
+                            `where protocol_s == "${proto}"`
+                        ].join(' | ');
+                        return azureUtil.queryLogs(
+                            ACCESS_TOKEN, AZURE.workspace, queryString
+                        )
+                            .then((results) => {
+                                assert(results.tables[0], 'Log Analytics query returned no results');
+                                assert(results.tables[0].rows, 'Log Analytics query returned no rows');
+                                assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
+                            })
+                            .catch((err) => {
+                                bigip.logger.error('No event listener data found. Going to wait another 20sec', err);
+                                return promiseUtils.sleepAndReject(20000, err);
+                            });
+                    }
+                )));
+        });
+
+        describe('System Poller data', () => {
+            harness.bigip.forEach((bigip) => it(
+                `should check Azure LA system poller data - ${bigip.name}`,
+                () => {
+                    const queryString = [
+                        'F5Telemetry_system_CL',
+                        `where hostname_s == "${bigip.hostname}"`,
+                        'where TimeGenerated > ago(5m)'
+                    ].join(' | ');
+                    return azureUtil.queryLogs(
+                        ACCESS_TOKEN, AZURE.workspace, queryString
+                    )
+                        .then((results) => {
+                            assert(results.tables[0], 'Log Analytics query returned no results');
+                            assert(results.tables[0].rows, 'Log Analytics query returned no rows');
+                            assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
+                        })
+                        .catch((err) => {
+                            bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                            return promiseUtils.sleepAndReject(20000, err);
+                        });
+                }
+            ));
         });
     });
-}
-
-function teardown() {
 }
 
 module.exports = {
     setup,
-    test,
-    teardown
+    test
 };

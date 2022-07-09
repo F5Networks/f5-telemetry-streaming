@@ -8,91 +8,61 @@
 
 'use strict';
 
-const assert = require('assert');
-const constants = require('../shared/constants');
-const testUtil = require('../shared/util');
-const azureUtil = require('../shared/azureUtil');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
-const VM_HOSTNAME = process.env[constants.ENV_VARS.AZURE.VM_HOSTNAME];
-const VM_IP = process.env[constants.ENV_VARS.AZURE.VM_IP];
-const VM_PORT = process.env[constants.ENV_VARS.AZURE.VM_PORT] || 8443;
-const VM_USER = process.env[constants.ENV_VARS.AZURE.VM_USER] || 'admin';
-const VM_PWD = process.env[constants.ENV_VARS.AZURE.VM_PWD];
-const WORKSPACE_ID = process.env[constants.ENV_VARS.AZURE.WORKSPACE_MI];
-const TENANT_ID = process.env[constants.ENV_VARS.AZURE.TENANT];
-const CLIENT_SECRET = process.env[constants.ENV_VARS.AZURE.LOG_KEY];
-const CLIENT_ID = process.env[constants.ENV_VARS.AZURE.CLIENT_ID];
-const APPINS_API_KEY = process.env[constants.ENV_VARS.AZURE.APPINS_API_KEY];
-const APPINS_APP_ID = process.env[constants.ENV_VARS.AZURE.APPINS_APP_ID];
-const CLOUD_TYPE = process.env[constants.ENV_VARS.AZURE.CLOUD_TYPE];
+const azureUtil = require('../shared/cloudUtils/azure');
+const harnessUtils = require('../shared/harness');
+const logger = require('../shared/utils/logger').getChild('azureCloudTests');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
-describe('Azure Cloud-based Tests', function () {
-    this.timeout(600000);
-    let options = {};
-    let vmAuthToken;
-    const deviceInfo = {
-        ip: VM_IP,
-        username: VM_USER,
-        port: VM_PORT,
-        password: VM_PWD
-    };
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
-    const assertPost = (declaration) => testUtil.postDeclaration(deviceInfo, declaration)
-        .then((response) => {
-            testUtil.logger.info('Response from declaration post', { hostname: VM_HOSTNAME, response });
-            return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
-        });
+/**
+ * @module test/functional/cloud/azureTests
+ */
 
-    before((done) => {
-        testUtil.getAuthToken(VM_IP, VM_USER, VM_PWD, VM_PORT)
-            .then((data) => {
-                vmAuthToken = data.token;
-                options = {
-                    protocol: 'https',
-                    port: VM_PORT,
-                    headers: {
-                        'X-F5-Auth-Token': vmAuthToken
-                    }
-                };
-                done();
-            })
-            .catch((err) => { done(err); });
+logger.info('Initializing harness info');
+const harnessInfo = azureUtil.getCloudHarnessJSON();
+const newHarness = harnessUtils.initializeFromJSON(harnessInfo);
+
+assert.isDefined(newHarness, 'should have harness be initialized at this point');
+assert.isNotEmpty(newHarness.bigip, 'should initialize harness');
+harnessUtils.setDefaultHarness(newHarness);
+logger.info('Harness info initialized');
+
+describe('Azure Cloud-based Tests', () => {
+    const harness = harnessUtils.getDefaultHarness();
+    const tsRPMInfo = miscUtils.getPackageDetails();
+
+    before(() => {
+        assert.isDefined(harness, 'should have harness be initialized at this point');
+        assert.isNotEmpty(harness.bigip, 'should initialize harness');
     });
 
-    describe('Setup', () => {
-        it('should install package', () => {
-            const packageDetails = testUtil.getPackageDetails();
-            const fullPath = `${packageDetails.path}/${packageDetails.name}`;
-            return testUtil.installPackage(VM_IP, vmAuthToken, fullPath, VM_PORT)
-                .then(() => {
-                    testUtil.logger.info(`Successfully installed RPM: ${fullPath} on ${VM_IP}`);
-                });
-        });
-
-        it('should verify TS service is running', () => {
-            const uri = `${constants.BASE_ILX_URI}/info`;
-
-            return new Promise((resolve) => { setTimeout(resolve, 5000); })
-                .then(() => testUtil.makeRequest(VM_IP, uri, options))
-                .then((data) => {
-                    data = data || {};
-                    testUtil.logger.info(`${uri} response`, { host: VM_IP, data });
-                    return assert.notStrictEqual(data.version, undefined);
-                });
-        });
+    describe('DUT Setup', () => {
+        testUtils.shouldRemovePreExistingTSDeclaration(harness.bigip);
+        testUtils.shouldRemovePreExistingTSPackage(harness.bigip);
+        testUtils.shouldInstallTSPackage(harness.bigip, () => tsRPMInfo);
+        testUtils.shouldVerifyTSPackageInstallation(harness.bigip);
     });
 
     describe('Managed Identities', () => {
-        describe('Azure_Log_Analytics', () => {
-            let laReaderToken;
-            it('should get log reader oauth token', () => azureUtil.getOAuthToken(CLIENT_ID, CLIENT_SECRET, TENANT_ID, CLOUD_TYPE)
-                .then((data) => {
-                    laReaderToken = data.access_token;
-                    return assert.notStrictEqual(laReaderToken, undefined);
+        describe('Azure Log Analytics', function () {
+            let AZURE_LA;
+
+            this.timeout(180000);
+
+            before(() => azureUtil.getCloudMetadataFromProcessEnv(azureUtil.SERVICE_TYPE.LA)
+                .then((metadata) => {
+                    AZURE_LA = metadata;
                 }));
 
-            it('should post systemPoller declaration with useManagedIdentity enabled', () => {
-                const declaration = {
+            describe('Configure TS and generate data', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry',
                     My_System: {
                         class: 'Telemetry_System',
@@ -103,43 +73,69 @@ describe('Azure Cloud-based Tests', function () {
                     My_MI_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Azure_Log_Analytics',
-                        workspaceId: WORKSPACE_ID,
+                        workspaceId: AZURE_LA.workspace,
                         useManagedIdentity: true
                     }
-                };
-                return assertPost(declaration);
+                }));
             });
 
-            it('should retrieve systemPoller info from Log Analytics workspace', function () {
-                this.timeout(120000);
-                const resourceIdMatch = VM_HOSTNAME.substring(0, VM_HOSTNAME.indexOf('.'));
-                const queryString = [
-                    'F5Telemetry_system_CL',
-                    `where hostname_s == "${VM_HOSTNAME}" and _ResourceId contains "${resourceIdMatch}"`,
-                    'where TimeGenerated > ago(5m)'
-                ].join(' | ');
+            describe('System Poller data', () => {
+                let ACCESS_TOKEN;
 
-                return new Promise((resolve) => { setTimeout(resolve, 60000); })
-                    .then(() => azureUtil.queryLogs(laReaderToken, WORKSPACE_ID, queryString, CLOUD_TYPE))
-                    .then((results) => {
-                        testUtil.logger.info('Response from Log Analytics:', { hostname: VM_HOSTNAME, results });
-                        const hasRows = results.tables[0] && results.tables[0].rows && results.tables[0].rows[0];
-                        return assert(hasRows, 'Log Analytics query returned no tables/rows');
-                    });
+                before(() => azureUtil.getOAuthToken(
+                    AZURE_LA.clientID,
+                    AZURE_LA.logKey,
+                    AZURE_LA.tenant,
+                    AZURE_LA.cloudType
+                )
+                    .then((_accessToken) => {
+                        ACCESS_TOKEN = _accessToken;
+                    }));
+
+                harness.bigip.forEach((bigip) => it(
+                    `should check Azure LA for system poller data - ${bigip.name}`,
+                    () => {
+                        const resourceIdMatch = bigip.hostname.substring(0, bigip.hostname.indexOf('.'));
+                        const queryString = [
+                            'F5Telemetry_system_CL',
+                            `where hostname_s == "${bigip.hostname}" and _ResourceId contains "${resourceIdMatch}"`,
+                            'where TimeGenerated > ago(5m)'
+                        ].join(' | ');
+                        return azureUtil.queryLogs(
+                            ACCESS_TOKEN, AZURE_LA.workspace, queryString, AZURE_LA.cloudType
+                        )
+                            .then((results) => {
+                                assert(results.tables[0], 'Log Analytics query returned no results');
+                                assert(results.tables[0].rows, 'Log Analytics query returned no rows');
+                                assert(results.tables[0].rows[0], 'Log Analytics query returned no rows');
+                            })
+                            .catch((err) => {
+                                bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                                return promiseUtils.sleepAndReject(20000, err);
+                            });
+                    }
+                ));
             });
 
-            it('should remove configuration', () => {
-                const declaration = {
+            describe('Teardown TS', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry'
-                };
-                return assertPost(declaration);
+                }));
             });
         });
 
-        describe('Azure_Application_Insights', function () {
+        describe('Azure Application Insights', function () {
+            let AZURE_AI;
+
             this.timeout(180000);
-            it('should post systemPoller declaration with useManagedIdentity enabled', () => {
-                const declaration = {
+
+            before(() => azureUtil.getCloudMetadataFromProcessEnv(azureUtil.SERVICE_TYPE.AI)
+                .then((metadata) => {
+                    AZURE_AI = metadata;
+                }));
+
+            describe('Configure TS and generate data', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry',
                     My_System: {
                         class: 'Telemetry_System',
@@ -152,26 +148,41 @@ describe('Azure Cloud-based Tests', function () {
                         type: 'Azure_Application_Insights',
                         useManagedIdentity: true
                     }
-                };
-                return assertPost(declaration);
+                }));
             });
 
-            it('should retrieve system poller info from Application Insights', () => {
-                testUtil.logger.info('Delay 120000ms to ensure App Insights api data ready');
-                return new Promise((resolve) => { setTimeout(resolve, 120000); })
-                    .then(() => azureUtil.queryAppInsights(APPINS_APP_ID, APPINS_API_KEY, CLOUD_TYPE))
-                    .then((response) => {
-                        testUtil.logger.info(response);
-                        const val = response.value['customMetrics/F5_system_tmmMemory'];
-                        return assert.ok(val && val.avg > 0);
-                    });
+            describe('System Poller data', () => {
+                it('sleep for 60sec while AI API is not ready', () => promiseUtils.sleep(60000));
+
+                harness.bigip.forEach((bigip) => {
+                    it(`should check Azure AI for system poller data - ${bigip.name}`, () => azureUtil.queryAppInsights(AZURE_AI.appID, AZURE_AI.apiKey, AZURE_AI.cloudType)
+                        .then((response) => {
+                            // Sample response
+                            // {
+                            //     "value": {
+                            //         "start": "2020-03-23T21:44:59.198Z",
+                            //         "end": "2020-03-23T21:47:59.198Z",
+                            //         "customMetrics/F5_system_tmmMemory": {
+                            //             "avg": 15
+                            //         }
+                            //     }
+                            // }
+                            const val = response.value['customMetrics/F5_system_tmmMemory'];
+                            assert.isDefined(val, 'should have expected property in response');
+                            assert.isDefined(val.avg, 'should have expected "avg" property in response');
+                            assert.isAbove(val.avg, 0, 'should be greater than 0');
+                        })
+                        .catch((err) => {
+                            bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                            return promiseUtils.sleepAndReject(20000, err);
+                        }));
+                });
             });
 
-            it('should remove configuration', () => {
-                const declaration = {
+            describe('Teardown TS', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry'
-                };
-                return assertPost(declaration);
+                }));
             });
         });
     });

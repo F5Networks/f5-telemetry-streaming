@@ -1,0 +1,38 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "SNMP_Endpoints": {
+        "class": "Telemetry_Endpoints",
+        "items": {
+            "hrDeviceStatusAsMetric": {
+                "protocol": "snmp",
+                "path": "hrDeviceStatus.196608",
+                "numericalEnums": true
+            },
+            "hrDeviceStatusOrigin": {
+                "protocol": "snmp",
+                "path": "hrDeviceStatus.196608"
+            },
+            "hrDeviceStatusOriginWithOptions": {
+                "protocol": "snmp",
+                "path": "hrDeviceStatus.196608",
+                "numericalEnums": false
+            }
+        }
+    },
+    "My_System": {
+        "class": "Telemetry_System",
+        "systemPoller": [
+            "My_System_Poller"
+        ]
+    },
+    "My_System_Poller": {
+    	"class": "Telemetry_System_Poller",
+        "interval": 60,
+        "endpointList": "SNMP_Endpoints"
+    }
+}

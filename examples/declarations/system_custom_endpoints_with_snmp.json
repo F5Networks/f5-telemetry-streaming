@@ -11,6 +11,11 @@
             "totalMemory": {
                 "protocol": "snmp",
                 "path": "sysGlobalStat.sysStatMemoryTotal"
+            },
+            "hrFSBootable": {
+                "protocol": "snmp",
+                "path": "hrFSBootable.1",
+                "numericalEnums": true
             }
         }
     },
