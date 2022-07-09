@@ -484,7 +484,7 @@ describe('Normalize Util', () => {
         it('should restructure single snmp mib (one stat)', () => {
             const args = {
                 data: {
-                    commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                    commandResult: 'sysStatMemoryTotal.0 = 3179282432\n'
                 }
             };
             const actual = normalizeUtil.restructureSNMPEndpoint(args);
@@ -493,14 +493,53 @@ describe('Normalize Util', () => {
             });
         });
 
-        it('should restructure single snmp mib (multiple stats)', () => {
+        it('should restructure single snmp mib (one stat, non-numeric)', () => {
             const args = {
                 data: {
-                    commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                    commandResult: 'ifAdmin.isUp = false\n'
                 }
             };
             const actual = normalizeUtil.restructureSNMPEndpoint(args);
             assert.deepStrictEqual(actual, {
+                'ifAdmin.isUp': 'false'
+            });
+        });
+
+        it('should ignore invalid response (one stat)', () => {
+            const args = {
+                data: {
+                    commandResult: 'ifAdmin.isUp false\n'
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {});
+        });
+
+        it('should ignore invalid response (multiple stats)', () => {
+            const args = {
+                data: {
+                    commandResult: 'sysTmmPagesStatSlot.0.0 = 0\nsysTmmPagesStatSlot.0.1 = 0\nifAdmin.isUp false\nsysTmmPagesStatTmm.0.0 = 0\nsysTmmPagesStatTmm.0.1 = 1\ninvalidVal = 10.0.0'
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {
+                invalidVal: '10.0.0',
+                'sysTmmPagesStatSlot.0.0': 0,
+                'sysTmmPagesStatSlot.0.1': 0,
+                'sysTmmPagesStatTmm.0.0': 0,
+                'sysTmmPagesStatTmm.0.1': 1
+            });
+        });
+
+        it('should restructure single snmp mib (multiple stats)', () => {
+            const args = {
+                data: {
+                    commandResult: 'sysTmmPagesStatSlot.0.0 = 0\nsysTmmPagesStatSlot.0.1 = 0\nifAdmin.isUp = false\nsysTmmPagesStatTmm.0.0 = 0\nsysTmmPagesStatTmm.0.1 = 1\nsysTmmPagesStatPagesUsed.0.0 = 45869\nsysTmmPagesStatPagesUsed.0.1 = 50462\nsysTmmPagesStatPagesAvail.0.0 = 387584\nsysTmmPagesStatPagesAvail.0.1 = 388608\n'
+                }
+            };
+            const actual = normalizeUtil.restructureSNMPEndpoint(args);
+            assert.deepStrictEqual(actual, {
+                'ifAdmin.isUp': 'false',
                 'sysTmmPagesStatSlot.0.0': 0,
                 'sysTmmPagesStatSlot.0.1': 0,
                 'sysTmmPagesStatTmm.0.0': 0,

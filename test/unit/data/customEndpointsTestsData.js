@@ -595,7 +595,7 @@ module.exports = {
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
                         response: {
                             kind: 'tm:util:bash:runstate',
                             commandResult: ''
@@ -621,7 +621,7 @@ module.exports = {
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
                         response: {
                             kind: 'tm:util:bash:runstate'
                         }
@@ -648,10 +648,10 @@ module.exports = {
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
                         response: {
                             kind: 'tm:util:bash:runstate',
-                            commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                            commandResult: 'sysStatMemoryTotal.0 = 3179282432\n'
                         }
                     }
                 ]
@@ -683,10 +683,10 @@ module.exports = {
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
                         response: {
                             kind: 'tm:util:bash:runstate',
-                            commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                            commandResult: 'sysTmmPagesStatSlot.0.0 = 0\nsysTmmPagesStatSlot.0.1 = 0\nsysTmmPagesStatTmm.0.0 = 0\nsysTmmPagesStatTmm.0.1 = 1\nsysTmmPagesStatPagesUsed.0.0 = 45869\nsysTmmPagesStatPagesUsed.0.1 = 50462\nsysTmmPagesStatPagesAvail.0.0 = 387584\nsysTmmPagesStatPagesAvail.0.1 = 388608\n'
                         }
                     }
                 ]
@@ -708,6 +708,15 @@ module.exports = {
                     tmmPages: {
                         path: 'sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry',
                         protocol: 'snmp'
+                    },
+                    enumToNumeric: {
+                        path: 'ifAdmin.isUp',
+                        protocol: 'snmp',
+                        numericalEnums: true
+                    },
+                    enumAsIs: {
+                        path: 'ifAdmin.isUp',
+                        protocol: 'snmp'
                     }
                 },
                 expectedData: {
@@ -726,34 +735,58 @@ module.exports = {
                     },
                     usedMemory: {
                         'sysStatMemoryUsed.0': 290295264
+                    },
+                    enumToNumeric: {
+                        'ifAdmin.isUp': 1
+                    },
+                    enumAsIs: {
+                        'ifAdmin.isUp': 'true'
                     }
                 },
                 endpoints: [
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryUsed"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysGlobalStat.sysStatMemoryUsed"',
                         response: {
                             kind: 'tm:util:bash:runstate',
-                            commandResult: 'sysStatMemoryUsed.0 290295264\n'
+                            commandResult: 'sysStatMemoryUsed.0 = 290295264\n'
                         }
                     },
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysGlobalStat.sysStatMemoryTotal"',
                         response: {
                             kind: 'tm:util:bash:runstate',
-                            commandResult: 'sysStatMemoryTotal.0 3179282432\n'
+                            commandResult: 'sysStatMemoryTotal.0 = 3179282432\n'
                         }
                     },
                     {
                         endpoint: /\/mgmt\/tm\/util\/bash/,
                         method: 'POST',
-                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O qUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost sysTmmPagesStat.sysTmmPagesStatTable.sysTmmPagesStatEntry"',
                         response: {
                             kind: 'tm:util:bash:runstate',
-                            commandResult: 'sysTmmPagesStatSlot.0.0 0\nsysTmmPagesStatSlot.0.1 0\nsysTmmPagesStatTmm.0.0 0\nsysTmmPagesStatTmm.0.1 1\nsysTmmPagesStatPagesUsed.0.0 45869\nsysTmmPagesStatPagesUsed.0.1 50462\nsysTmmPagesStatPagesAvail.0.0 387584\nsysTmmPagesStatPagesAvail.0.1 388608\n'
+                            commandResult: 'sysTmmPagesStatSlot.0.0 = 0\nsysTmmPagesStatSlot.0.1 = 0\nsysTmmPagesStatTmm.0.0 = 0\nsysTmmPagesStatTmm.0.1 = 1\nsysTmmPagesStatPagesUsed.0.0 = 45869\nsysTmmPagesStatPagesUsed.0.1 = 50462\nsysTmmPagesStatPagesAvail.0.0 = 387584\nsysTmmPagesStatPagesAvail.0.1 = 388608\n'
+                        }
+                    },
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O eQUs -c public localhost ifAdmin.isUp"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'ifAdmin.isUp = 1\n'
+                        }
+                    },
+                    {
+                        endpoint: /\/mgmt\/tm\/util\/bash/,
+                        method: 'POST',
+                        request: (body) => body.utilCmdArgs && body.utilCmdArgs === '-c "snmpwalk -L n -O QUs -c public localhost ifAdmin.isUp"',
+                        response: {
+                            kind: 'tm:util:bash:runstate',
+                            commandResult: 'ifAdmin.isUp = true\n'
                         }
                     }
                 ]

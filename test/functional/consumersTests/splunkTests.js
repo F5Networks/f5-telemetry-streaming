@@ -6,189 +6,227 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const fs = require('fs');
 const querystring = require('querystring');
 
-const util = require('../shared/util');
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
+const harnessUtils = require('../shared/harness');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+/**
+ * @module test/functional/consumersTests/splunk
+ */
+
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
-const DUTS = util.getHosts('BIGIP');
-const CONSUMER_HOST = util.getHosts('CONSUMER')[0]; // only expect one
-const SPLUNK_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}splunk/splunk:latest`;
-const SPLUNK_CONTAINER_NAME = 'ts_splunk_consumer';
 const SPLUNK_USERNAME = 'admin';
-const SPLUNK_PASSWORD = `${CONSUMER_HOST.password}splunk!`; // might want to generate one instead
+const SPLUNK_PASSWORD = `${miscUtils.randomString()}splunk!`; // might want to generate one instead
 const SPLUNK_AUTH_HEADER = `Basic ${Buffer.from(`${SPLUNK_USERNAME}:${SPLUNK_PASSWORD}`).toString('base64')}`;
 const SPLUNK_HTTP_PORT = 8000;
+const SPLUNK_HTTP_PROTOCOL = 'https';
 const SPLUNK_HEC_PORT = 8088;
 const SPLUNK_SVC_PORT = 8089;
 const SPLUNK_CONSUMER_NAME = 'Splunk_Consumer';
 
+const DOCKER_CONTAINERS = {
+    Splunk: {
+        detach: true,
+        env: {
+            SPLUNK_START_ARGS: '--accept-license',
+            SPLUNK_PASSWORD
+        },
+        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}splunk/splunk:latest`,
+        name: 'ts_splunk_consumer',
+        publish: {
+            [SPLUNK_HEC_PORT]: SPLUNK_HEC_PORT,
+            [SPLUNK_HTTP_PORT]: SPLUNK_HTTP_PORT,
+            [SPLUNK_SVC_PORT]: SPLUNK_SVC_PORT
+        },
+        restart: 'always'
+    }
+};
+
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const LISTENER_PROTOCOLS = constants.TELEMETRY.LISTENER.PROTOCOLS;
 
-function runRemoteCmd(cmd) {
-    return util.performRemoteCmd(CONSUMER_HOST.ip, CONSUMER_HOST.username, cmd, { password: CONSUMER_HOST.password });
-}
+let SERVICE_IS_READY;
+let SPLUNK_TOKENS;
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
-    describe('Consumer Setup: Splunk - pull docker image', () => {
-        it('should pull container image', () => runRemoteCmd(`docker pull ${SPLUNK_IMAGE_NAME}`));
+    describe('Consumer Setup: Splunk', () => {
+        const cs = harnessUtils.getDefaultHarness().other[0];
+        let CONTAINER_STARTED;
+
+        cs.http.createAndSave('splunk', {
+            allowSelfSignedCert: true,
+            headers: {
+                Authorization: SPLUNK_AUTH_HEADER
+            },
+            json: false,
+            port: SPLUNK_SVC_PORT,
+            protocol: SPLUNK_HTTP_PROTOCOL
+        });
+
+        describe('Docker container setup', () => {
+            before(() => {
+                CONTAINER_STARTED = false;
+            });
+
+            it('should pull Splunk docker image', () => cs.docker.pull(DOCKER_CONTAINERS.Splunk.image));
+
+            it('should remove pre-existing Splunk docker container', () => harnessUtils.docker.stopAndRemoveContainer(
+                cs.docker,
+                DOCKER_CONTAINERS.Splunk.name
+            ));
+
+            it('should start new Splunk docker container', () => harnessUtils.docker.startNewContainer(
+                cs.docker,
+                DOCKER_CONTAINERS.Splunk
+            )
+                .then(() => {
+                    CONTAINER_STARTED = true;
+                }));
+        });
+
+        describe('Configure service', () => {
+            before(() => {
+                SPLUNK_TOKENS = {
+                    events: null,
+                    metrics: null
+                };
+                SERVICE_IS_READY = false;
+                assert.isOk(CONTAINER_STARTED, 'should start Splunk container!');
+            });
+
+            it('should check service is up', () => cs.http.splunk.makeRequest({
+                uri: '/services/server/control?output_mode=json'
+            })
+                // splunk container takes about 30 seconds to come up
+                .then((data) => {
+                    cs.logger.info('Splunk output:', { data });
+                    assert.deepStrictEqual(data.links.restart, '/services/server/control/restart', 'should return expected response');
+                })
+                .catch((err) => {
+                    cs.logger.error('Caught error on attempt to check service state. Re-trying in 10sec', err);
+                    return promiseUtils.sleepAndReject(10000, err);
+                }));
+
+            it('should configure HTTP data collector for events', () => {
+                const baseUri = '/services/data/inputs/http';
+                const outputMode = 'output_mode=json';
+                const tokenName = 'eventsToken';
+
+                return cs.http.splunk.makeRequest({
+                    method: 'POST',
+                    uri: `${baseUri}/http?${outputMode}&enableSSL=1&disabled=0`
+                })
+                    .then(() => cs.http.splunk.makeRequest({
+                        method: 'GET',
+                        uri: `${baseUri}?${outputMode}`
+                    }))
+                    .then((data) => {
+                        data = data || {};
+                        // check for existence of the token first
+                        if (data.entry && data.entry.length) {
+                            const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
+                            if (exists.length) {
+                                return Promise.resolve({ entry: exists }); // exists, continue
+                            }
+                        }
+                        return cs.http.splunk.makeRequest({
+                            body: `name=${tokenName}`,
+                            method: 'POST',
+                            uri: `${baseUri}?${outputMode}`
+                        });
+                    })
+                    .then((data) => {
+                        SPLUNK_TOKENS.events = data.entry[0].content.token;
+                        assert.isNotEmpty(SPLUNK_TOKENS.events, 'should acquire token for events');
+                    })
+                    .catch((err) => {
+                        cs.logger.error('Caught error on attempt to configured HTT data collector. Re-trying in 500ms', err);
+                        return promiseUtils.sleepAndReject(500, err);
+                    });
+            });
+
+            it('should configure HTTP data collector for metrics', () => {
+                const indexesUri = '/services/data/indexes';
+                const tokensUri = '/services/data/inputs/http';
+                const outputMode = 'output_mode=json';
+                const indexName = 'metrics_index';
+                const tokenName = 'metrics_token';
+
+                return cs.http.splunk.makeRequest({
+                    method: 'POST',
+                    uri: `${tokensUri}/http?${outputMode}&enableSSL=1&disabled=0`
+                })
+                    .then(() => cs.http.splunk.makeRequest({
+                        uri: `${indexesUri}/${indexName}?${outputMode}`
+                    })
+                        .catch((err) => {
+                            // index doesn't exist, let's create it
+                            cs.logger.error(`Index "${indexName}" doesn't exit. Going to create new one...`, err);
+                            return cs.http.splunk.makeRequest({
+                                body: `name=${indexName}&datatype=metric`,
+                                method: 'POST',
+                                uri: `${indexesUri}?${outputMode}`
+                            });
+                        }))
+                    // create new token for metrics
+                    .then(() => cs.http.splunk.makeRequest({
+                        uri: `${tokensUri}?${outputMode}`
+                    }))
+                    .then((data) => {
+                        data = data || {};
+                        // check for existence of the token first
+                        if (data.entry && data.entry.length) {
+                            const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
+                            if (exists.length) {
+                                return Promise.resolve({ entry: exists }); // exists, continue
+                            }
+                        }
+                        return cs.http.splunk.makeRequest({
+                            body: `name=${tokenName}&index=${indexName}&source=metricsSourceType&sourcetype=Metrics`,
+                            method: 'POST',
+                            uri: `${tokensUri}?${outputMode}`
+                        });
+                    })
+                    .then((data) => {
+                        SPLUNK_TOKENS.metrics = data.entry[0].content.token;
+                        assert.isNotEmpty(SPLUNK_TOKENS.metrics, 'should acquire token for metrics');
+                    })
+                    .catch((err) => {
+                        cs.logger.error('Caught error on attempt to configured HTT metrics collector. Re-trying in 500ms', err);
+                        return promiseUtils.sleepAndReject(500, err);
+                    });
+            });
+
+            it('should acquire all tokens', () => {
+                assert.isNotNull(SPLUNK_TOKENS.events, 'should acquire token for events');
+                assert.isNotNull(SPLUNK_TOKENS.metrics, 'should acquire token for metrics');
+                SERVICE_IS_READY = true;
+            });
+        });
     });
 }
 
+/**
+ * Tests for DUTs
+ */
 function test() {
-    let testDataTimestamp;
-    const splunkHecTokens = {
-        events: null,
-        metrics: null
-    };
-
-    describe('Consumer Test: Splunk - Configure Service', () => {
-        it('should start container', () => {
-            const portArgs = `-p ${SPLUNK_HTTP_PORT}:${SPLUNK_HTTP_PORT} -p ${SPLUNK_SVC_PORT}:${SPLUNK_SVC_PORT} -p ${SPLUNK_HEC_PORT}:${SPLUNK_HEC_PORT}`;
-            const eArgs = `-e 'SPLUNK_START_ARGS=--accept-license' -e 'SPLUNK_PASSWORD=${SPLUNK_PASSWORD}'`;
-            const cmd = `docker run -d --name ${SPLUNK_CONTAINER_NAME} ${portArgs} ${eArgs} ${SPLUNK_IMAGE_NAME}`;
-
-            // simple check to see if container already exists
-            return runRemoteCmd(`docker ps | grep ${SPLUNK_CONTAINER_NAME}`)
-                .then((data) => {
-                    if (data) {
-                        return Promise.resolve(); // exists, continue
-                    }
-                    return runRemoteCmd(cmd);
-                });
-        });
-
-        it('should check service is up', () => {
-            const uri = '/services/server/control?output_mode=json';
-            const options = {
-                port: SPLUNK_SVC_PORT,
-                headers: {
-                    Authorization: SPLUNK_AUTH_HEADER
-                }
-            };
-
-            // splunk container takes about 30 seconds to come up
-            return new Promise((resolve) => { setTimeout(resolve, 10000); })
-                .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
-                .then((data) => {
-                    util.logger.info(`Splunk response ${uri}`, data);
-                    assert.strictEqual(data.links.restart, '/services/server/control/restart');
-                });
-        });
-
-        it('should configure HTTP data collector for events', () => {
-            const baseUri = '/services/data/inputs/http';
-            const outputMode = 'output_mode=json';
-            const tokenName = 'eventsToken';
-
-            let uri = `${baseUri}/http?${outputMode}&enableSSL=1&disabled=0`;
-            const options = {
-                method: 'POST',
-                port: SPLUNK_SVC_PORT,
-                headers: {
-                    Authorization: SPLUNK_AUTH_HEADER
-                }
-            };
-
-            // configure global settings, create token
-            return util.makeRequest(CONSUMER_HOST.ip, uri, options)
-                .then(() => {
-                    uri = `${baseUri}?${outputMode}`;
-                    return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), { method: 'GET' }));
-                })
-                .then((data) => {
-                    data = data || {};
-                    // check for existence of the token first
-                    if (data.entry && data.entry.length) {
-                        const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
-                        if (exists.length) {
-                            return Promise.resolve({ entry: exists }); // exists, continue
-                        }
-                    }
-                    uri = `${baseUri}?${outputMode}`;
-                    return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), { body: `name=${tokenName}` }));
-                })
-                .then((data) => {
-                    try {
-                        splunkHecTokens.events = data.entry[0].content.token;
-                    } catch (error) {
-                        throw new Error('HTTP data collector api token could not be retrieved');
-                    }
-                    assert.notStrictEqual(splunkHecTokens.events, undefined);
-                });
-        });
-
-        it('should configure HTTP data collector for metrics', () => {
-            const indexesUri = '/services/data/indexes';
-            const tokensUri = '/services/data/inputs/http';
-            const outputMode = 'output_mode=json';
-            const indexName = 'metrics_index';
-            const tokenName = 'metrics_token';
-            const options = {
-                method: 'POST',
-                port: SPLUNK_SVC_PORT,
-                headers: {
-                    Authorization: SPLUNK_AUTH_HEADER
-                }
-            };
-
-            // configure global settings, create index and token
-            let uri = `${tokensUri}/http?${outputMode}&enableSSL=1&disabled=0`;
-            return util.makeRequest(CONSUMER_HOST.ip, uri, options)
-                .then(() => {
-                    uri = `${indexesUri}/${indexName}?${outputMode}`;
-                    return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), { method: 'GET' }))
-                        .catch(() => {
-                            // index doesn't exist, let's create it
-                            uri = `${indexesUri}?${outputMode}`;
-                            return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), { body: `name=${indexName}&datatype=metric` }));
-                        });
-                })
-                .then(() => {
-                    // create new token for metrics
-                    uri = `${tokensUri}?${outputMode}`;
-                    return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), { method: 'GET' }));
-                })
-                .then((data) => {
-                    data = data || {};
-                    // check for existence of the token first
-                    if (data.entry && data.entry.length) {
-                        const exists = data.entry.filter((item) => item.name.indexOf(tokenName) !== -1);
-                        if (exists.length) {
-                            return Promise.resolve({ entry: exists }); // exists, continue
-                        }
-                    }
-                    uri = `${tokensUri}?${outputMode}`;
-                    return util.makeRequest(CONSUMER_HOST.ip, uri, Object.assign(util.deepCopy(options), {
-                        body: `name=${tokenName}&index=${indexName}&source=metricsSourceType&sourcetype=Metrics`
-                    }));
-                })
-                .then((data) => {
-                    try {
-                        splunkHecTokens.metrics = data.entry[0].content.token;
-                    } catch (error) {
-                        throw new Error('HTTP data collector api token could not be retrieved');
-                    }
-                    assert.notStrictEqual(splunkHecTokens.metrics, undefined);
-                });
-        });
-    });
-
     const testSetupOptions = {
         compression: [
             {
@@ -224,194 +262,229 @@ function test() {
     });
 
     testSetups.forEach((testSetup) => {
-        describe(`${testSetup.compression.name}, ${testSetup.format.name}`, () => {
-            describe('Consumer Test: Splunk - Configure TS and generate data', () => {
-                const consumerDeclaration = util.deepCopy(DECLARATION);
-
-                // this need only to insert 'splunkHecEventsToken'
-                it('should compute declaration', () => {
-                    consumerDeclaration[SPLUNK_CONSUMER_NAME] = {
-                        class: 'Telemetry_Consumer',
-                        type: 'Splunk',
-                        host: CONSUMER_HOST.ip,
-                        protocol: 'https',
-                        port: SPLUNK_HEC_PORT,
-                        passphrase: {
-                            cipherText: splunkHecTokens[testSetup.format.tokenName]
-                        },
-                        format: testSetup.format.value,
-                        allowSelfSignedCert: true,
-                        compressionType: testSetup.compression.value
-                    };
-                });
-
-                DUTS.forEach((dut) => it(
-                    `should configure TS - ${dut.hostalias}`,
-                    () => dutUtils.postDeclarationToDUT(dut, util.deepCopy(consumerDeclaration))
-                ));
-
-                if (testSetup.format.eventListenerTests) {
-                    it('set data timestamp', () => {
-                        testDataTimestamp = (new Date()).getTime();
-                    });
-
-                    it('should send event to TS Event Listener', () => {
-                        const msg = `testDataTimestamp="${testDataTimestamp}",test="true",testType="${SPLUNK_CONSUMER_NAME}"`;
-                        return dutUtils.sendDataToEventListeners((dut) => `hostname="${dut.hostname}",${msg}`);
-                    });
-                }
+        describe(`Consumer Test: Splunk - ${testSetup.compression.name}, ${testSetup.format.name}`, () => {
+            before(() => {
+                assert.isTrue(SERVICE_IS_READY, 'should start Splunk service');
             });
-
-            describe('Consumer Test: Splunk - Test', () => {
-                const splunkSourceStr = 'f5.telemetry';
-                const splunkSourceTypeStr = 'f5:telemetry:json';
-
-                // helper function to query splunk for data
-                const query = (searchString) => {
-                    const baseUri = '/services/search/jobs';
-                    const outputMode = 'output_mode=json';
-                    const options = {
-                        port: SPLUNK_SVC_PORT,
-                        headers: {
-                            Authorization: SPLUNK_AUTH_HEADER
-                        }
-                    };
-
-                    let uri = `${baseUri}?${outputMode}`;
-                    let sid;
-
-                    return util.makeRequest(
-                        CONSUMER_HOST.ip,
-                        uri,
-                        Object.assign(util.deepCopy(options), {
-                            method: 'POST',
-                            body: querystring.stringify({
-                                search: searchString
-                            })
-                        })
-                    )
-                        .then((data) => {
-                            sid = data.sid;
-                            assert.notStrictEqual(sid, undefined);
-
-                            // wait until job search is complete using dispatchState:'DONE'
-                            return new Promise((resolve, reject) => {
-                                const waitUntilDone = () => {
-                                    uri = `${baseUri}/${sid}?${outputMode}`;
-                                    return new Promise((resolveTimer) => { setTimeout(resolveTimer, 100); })
-                                        .then(() => util.makeRequest(CONSUMER_HOST.ip, uri, options))
-                                        .then((status) => {
-                                            const dispatchState = status.entry[0].content.dispatchState;
-                                            if (dispatchState === 'DONE') {
-                                                resolve(status);
-                                                return Promise.resolve(status);
-                                            }
-                                            return waitUntilDone();
-                                        })
-                                        .catch(reject);
-                                };
-                                waitUntilDone(); // start
-                            });
-                        })
-                        .then(() => {
-                            uri = `${baseUri}/${sid}/results/?${outputMode}`;
-                            return util.makeRequest(CONSUMER_HOST.ip, uri, options);
-                        });
-                };
-                // end helper function
-
-                DUTS.forEach((dut) => {
-                    // use earliest and latests query modifiers to filter results
-                    const searchMetrics = () => `| mcatalog values(metric_name) WHERE index=* AND host="${dut.hostname}" AND earliest=-30s latest=now`;
-                    const searchQuerySP = () => `search source=f5.telemetry earliest=-30s latest=now | search "system.hostname"="${dut.hostname}" | head 1`;
-                    const searchQueryEL = () => `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${dut.hostname}" | search testDataTimestamp="${testDataTimestamp}" | head 1`;
-
-                    if (testSetup.format.queryEventsTests) {
-                        it(`should check for system poller data from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
-                            .then(() => {
-                                util.logger.info(`Splunk search query for system poller data: ${searchQuerySP()}`);
-                                return query(searchQuerySP());
-                            })
-                            .then((data) => {
-                                util.logger.info('Splunk response:', data);
-                                // check we have results
-                                const results = data.results;
-                                assert.strictEqual(results.length > 0, true, 'No results');
-                                // check that the event is what we expect
-                                const result = results[0];
-                                const rawData = JSON.parse(result._raw);
-                                // validate raw data against schema
-                                const schema = JSON.parse(fs.readFileSync(constants.DECL.SYSTEM_POLLER_SCHEMA));
-                                const valid = util.validateAgainstSchema(rawData, schema);
-                                if (valid !== true) {
-                                    assert.fail(`output is not valid: ${JSON.stringify(valid.errors)}`);
-                                }
-                                // validate data parsed by Splunk
-                                assert.strictEqual(result.host, dut.hostname);
-                                assert.strictEqual(result.source, splunkSourceStr);
-                                assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
-                            }));
-                    }
-
-                    if (testSetup.format.metricsTests) {
-                        it(`should check for system poller metrics from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
-                            .then(() => {
-                                util.logger.info(`Splunk search query for system poller data: ${searchMetrics()}`);
-                                return query(searchMetrics());
-                            })
-                            .then((data) => {
-                                util.logger.info('Splunk response:', data);
-                                // check we have results
-                                const results = data.results;
-                                assert.strictEqual(results.length > 0, true, 'No results');
-                                // check that the event is what we expect
-                                const metrics = results[0]['values(metric_name)'];
-                                // check that at least some metrics exists
-                                assert.includeMembers(metrics, [
-                                    'avgCycles',
-                                    'cpu',
-                                    'systemTimestamp',
-                                    'tmmCpu',
-                                    'tmmMemory'
-                                ], 'should at least have some metrics');
-                            }));
-                    }
-
-                    if (testSetup.format.eventListenerTests) {
-                        it(`should check for event listener data from:${dut.hostalias}`, () => new Promise((resolve) => { setTimeout(resolve, 30000); })
-                            .then(() => {
-                                util.logger.info(`Splunk search query for event listener data: ${searchQueryEL()}`);
-                                return query(searchQueryEL());
-                            })
-                            .then((data) => {
-                                util.logger.info('Splunk response:', data);
-                                // check we have results
-                                const results = data.results;
-                                assert.strictEqual(results.length > 0, true, 'No results');
-                                // check that the event is what we expect
-                                const result = results[0];
-                                const rawData = JSON.parse(result._raw);
-
-                                assert.strictEqual(rawData.testType, SPLUNK_CONSUMER_NAME);
-                                assert.strictEqual(rawData.hostname, dut.hostname);
-                                // validate data parsed by Splunk
-                                assert.strictEqual(result.host, dut.hostname);
-                                assert.strictEqual(result.source, splunkSourceStr);
-                                assert.strictEqual(result.sourcetype, splunkSourceTypeStr);
-                                assert.strictEqual(result.hostname, dut.hostname);
-                                assert.strictEqual(result.testType, SPLUNK_CONSUMER_NAME);
-                                assert.strictEqual(result.testDataTimestamp, `${testDataTimestamp}`);
-                            }));
-                    }
-                });
-            });
+            testsForSuite(testSetup);
         });
     });
 }
 
+/**
+ * Generate tests using test config
+ *
+ * @param {Object} testSetup - test config
+ */
+function testsForSuite(testSetup) {
+    const harness = harnessUtils.getDefaultHarness();
+    const cs = harnessUtils.getDefaultHarness().other[0];
+    let testDataTimestamp;
+
+    describe('Configure TS and generate data', () => {
+        let consumerDeclaration;
+
+        before(() => {
+            testDataTimestamp = Date.now();
+
+            consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+            consumerDeclaration[SPLUNK_CONSUMER_NAME] = {
+                class: 'Telemetry_Consumer',
+                type: 'Splunk',
+                host: cs.host.host,
+                protocol: 'https',
+                port: SPLUNK_HEC_PORT,
+                passphrase: {
+                    cipherText: SPLUNK_TOKENS[testSetup.format.tokenName]
+                },
+                format: testSetup.format.value,
+                allowSelfSignedCert: true,
+                compressionType: testSetup.compression.value
+            };
+        });
+
+        testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
+        testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${SPLUNK_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`);
+    });
+
+    /**
+     * Query to search metrics
+     *
+     * @param {harness.BigIp} bigip - BIG-IP
+     *
+     * @returns {string} query
+     */
+    const searchMetrics = (bigip) => `| mcatalog values(metric_name) WHERE index=* AND host="${bigip.hostname}" AND earliest=-30s latest=now`;
+
+    /**
+     * Query to search system poller data
+     *
+     * @param {harness.BigIp} bigip - BIG-IP
+     *
+     * @returns {string} query
+     */
+    const searchQuerySP = (bigip) => `search source=f5.telemetry earliest=-30s latest=now | search "system.hostname"="${bigip.hostname}" | head 1`;
+
+    /**
+     * Query to search event listener data
+     *
+     * @param {harness.BigIp} bigip - BIG-IP
+     *
+     * @returns {string} query
+     */
+    const searchQueryEL = (bigip, proto) => `search source=f5.telemetry | spath testType | search testType="${SPLUNK_CONSUMER_NAME}" | search hostname="${bigip.hostname}" | search testDataTimestamp="${testDataTimestamp}" | search protocol="${proto}" | head 1`;
+
+    const splunkSourceStr = 'f5.telemetry';
+    const splunkSourceTypeStr = 'f5:telemetry:json';
+
+    /**
+     * Send query to Splunk
+     *
+     * @param {string} searchString - query string
+     *
+     * @returns {Promise<Object>} resolved once search request processed
+     */
+    const query = (searchString) => {
+        const baseUri = '/services/search/jobs';
+        const outputMode = 'output_mode=json';
+        let sid;
+
+        return cs.http.splunk.makeRequest({
+            body: querystring.stringify({
+                search: searchString
+            }),
+            expectedResponseCode: [200, 201],
+            method: 'POST',
+            uri: `${baseUri}?${outputMode}`
+        })
+            .then((data) => {
+                sid = data.sid;
+                assert.isDefined(sid, 'should have sid');
+
+                return promiseUtils.loopUntil((breakCb) => cs.http.splunk.makeRequest({
+                    uri: `${baseUri}/${sid}?${outputMode}`
+                })
+                    .then((status) => {
+                        if (status.entry[0].content.dispatchState === 'DONE') {
+                            return breakCb();
+                        }
+                        return promiseUtils.sleep(300);
+                    }));
+            })
+            .then(() => cs.http.splunk.makeRequest({
+                uri: `${baseUri}/${sid}/results/?${outputMode}`
+            }));
+    };
+
+    if (testSetup.format.eventListenerTests) {
+        describe('Event Listener data', () => {
+            harness.bigip.forEach((bigip) => LISTENER_PROTOCOLS
+                .forEach((proto) => it(
+                    `should check Splunk for event listener data (over ${proto}) for - ${bigip.name}`,
+                    () => query(searchQueryEL(bigip, proto))
+                        .then((data) => {
+                            // check we have results
+                            const results = data.results;
+                            assert.isArray(results, 'should be array');
+                            assert.isNotEmpty(results, 'should return search results');
+
+                            // check that the event is what we expect
+                            const result = results[0];
+                            const rawData = JSON.parse(result._raw);
+
+                            assert.deepStrictEqual(rawData.testType, SPLUNK_CONSUMER_NAME);
+                            assert.deepStrictEqual(rawData.hostname, bigip.hostname);
+                            // validate data parsed by Splunk
+                            assert.deepStrictEqual(result.host, bigip.hostname);
+                            assert.deepStrictEqual(result.source, splunkSourceStr);
+                            assert.deepStrictEqual(result.sourcetype, splunkSourceTypeStr);
+                            assert.deepStrictEqual(result.hostname, bigip.hostname);
+                            assert.deepStrictEqual(result.protocol, proto);
+                            assert.deepStrictEqual(result.testType, SPLUNK_CONSUMER_NAME);
+                            assert.deepStrictEqual(result.testDataTimestamp, `${testDataTimestamp}`);
+                        })
+                        .catch((err) => {
+                            bigip.logger.info('No event listener data found. Going to wait another 20sec');
+                            return promiseUtils.sleepAndReject(20000, err);
+                        })
+                )));
+        });
+    }
+
+    describe('System Poller data', () => {
+        // use earliest and latests query modifiers to filter results
+        if (testSetup.format.queryEventsTests) {
+            harness.bigip.forEach((bigip) => it(
+                `should check Splunk for system poller data - ${bigip.name}`,
+                () => query(searchQuerySP(bigip))
+                    .then((data) => {
+                        // check we have results
+                        const results = data.results;
+                        assert.isArray(results, 'should be array');
+                        assert.isNotEmpty(results, 'should return search results');
+
+                        // check that the event is what we expect
+                        const result = results[0];
+                        const rawData = JSON.parse(result._raw);
+
+                        // validate raw data against schema
+                        const schema = miscUtils.readJsonFile(constants.DECL.SYSTEM_POLLER_SCHEMA);
+                        const valid = miscUtils.validateAgainstSchema(rawData, schema);
+                        assert.isTrue(valid, `should have valid output: ${JSON.stringify(valid.errors)}`);
+
+                        // validate data parsed by Splunk
+                        assert.deepStrictEqual(result.host, bigip.hostname);
+                        assert.deepStrictEqual(result.source, splunkSourceStr);
+                        assert.deepStrictEqual(result.sourcetype, splunkSourceTypeStr);
+                    })
+                    .catch((err) => {
+                        bigip.logger.info('No system poller data found. Going to wait another 20sec');
+                        return promiseUtils.sleepAndReject(20000, err);
+                    })
+            ));
+        }
+
+        if (testSetup.format.metricsTests) {
+            harness.bigip.forEach((bigip) => it(
+                `should check Splunk for system poller metrics for - ${bigip.name}`,
+                () => query(searchMetrics(bigip))
+                    .then((data) => {
+                        // check we have results
+                        const results = data.results;
+                        assert.isArray(results, 'should be array');
+                        assert.isNotEmpty(results, 'should return search results');
+
+                        // check that the event is what we expect
+                        const metrics = results[0]['values(metric_name)'];
+                        // check that at least some metrics exists
+                        assert.includeMembers(metrics, [
+                            'avgCycles',
+                            'cpu',
+                            'systemTimestamp',
+                            'tmmCpu',
+                            'tmmMemory'
+                        ], 'should at least have some metrics');
+                    })
+                    .catch((err) => {
+                        bigip.logger.info('No system poller metrics found. Going to wait another 20sec');
+                        return promiseUtils.sleepAndReject(20000, err);
+                    })
+            ));
+        }
+    });
+}
+
+/**
+ * Teardown CS
+ */
 function teardown() {
-    describe('Consumer Test: Splunk - teardown', () => {
-        it('should remove container', () => runRemoteCmd(`docker container rm -f ${SPLUNK_CONTAINER_NAME}`));
+    describe('Consumer Teardown: Splunk', () => {
+        const cs = harnessUtils.getDefaultHarness().other[0];
+
+        it('should stop and remove Splunk docker container', () => harnessUtils.docker.stopAndRemoveContainer(
+            cs.docker,
+            DOCKER_CONTAINERS.Splunk.name
+        ));
     });
 }
 

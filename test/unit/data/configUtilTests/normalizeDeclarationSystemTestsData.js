@@ -1462,7 +1462,8 @@ module.exports = {
                                 path: '1.2.3.4',
                                 enable: true,
                                 name: 'snmpEndpoint',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         },
                         enable: true,

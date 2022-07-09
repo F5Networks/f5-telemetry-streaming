@@ -6,17 +6,18 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
 const fs = require('fs');
 
 const constants = require('./shared/constants');
-const util = require('./shared/util');
+const harnessUtils = require('./shared/harness');
+const logger = require('./shared/utils/logger').getChild('cs');
+const miscUtils = require('./shared/utils/misc');
 
-const consumerHost = util.getHosts('CONSUMER')[0]; // only expect one
-const checkDockerCmd = 'if [[ -e $(which docker) ]]; then echo exists; fi';
+/**
+ * @module test/functional/consumerSystemTests
+ */
 
 // string -> object (consumer module)
 let consumersMap = {};
@@ -26,38 +27,48 @@ let consumerRequirements = {};
 const systemRequirements = {};
 
 /**
- * Execute command over SSH on CS
- *
- * @param {String} cmd - command to execute on CS
- *
- * @returns Promise resolved when command was executed on CS
- */
-function runRemoteCmdOnCS(cmd) {
-    return util.performRemoteCmd(consumerHost.ip, consumerHost.username, cmd, { password: consumerHost.password });
-}
-
-/**
  * Load Consumers Tests modules
  *
- * @returns mapping consumer name -> consumer module
+ * @returns {bject} mapping consumer name -> consumer module
  */
 function loadConsumers() {
-    // env var to run only specific consumer type(s) (e.g. 'elast')
-    const consumerFilter = process.env[constants.ENV_VARS.CONSUMER_HARNESS.TYPE_REGEX];
-    const consumerDir = constants.CONSUMERS_DIR;
-    let consumers = fs.readdirSync(consumerDir);
-    // filter consumers by module name if needed
-    if (consumerFilter) {
-        util.logger.info(`Using filter '${consumerFilter}' to filter modules from '${consumerDir}'`);
-        consumers = consumers.filter((fName) => fName.match(new RegExp(consumerFilter, 'i')) !== null);
+    const ignorePattern = miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.CONSUMER.EXCLUDE, { defaultValue: '' });
+    const includePattern = miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.CONSUMER.INCLUDE, { defaultValue: '' });
+
+    let consumerFilter;
+    if (ignorePattern || includePattern) {
+        logger.info('Filtering Consumers using following patterns', {
+            ignore: ignorePattern,
+            include: includePattern
+        });
+
+        let ignoreFilter = () => true; // accept by default
+        if (ignorePattern) {
+            const regex = new RegExp(ignorePattern, 'i');
+            ignoreFilter = (hostname) => !hostname.match(regex);
+        }
+        let includeFilter = () => true; // accept by default
+        if (includePattern) {
+            const regex = new RegExp(includePattern, 'i');
+            includeFilter = (hostname) => hostname.match(regex);
+        }
+        consumerFilter = (consumer) => includeFilter(consumer) && ignoreFilter(consumer);
     }
 
+    const consumerDir = constants.CONSUMERS_DIR;
     const mapping = {};
-    consumers.forEach((consumer) => {
-        const cpath = `${consumerDir}/${consumer}`;
-        mapping[consumer] = require(cpath); //eslint-disable-line
-        util.logger.info(`Consumer Tests from '${cpath}' loaded`);
-    });
+
+    fs.readdirSync(consumerDir)
+        .forEach((consumer) => {
+            if (consumerFilter && !consumerFilter(consumer)) {
+                logger.warning('Ignoring Consumer file', { consumer });
+            } else {
+                const cpath = `${consumerDir}/${consumer}`;
+                mapping[consumer] = require(cpath); //eslint-disable-line
+                logger.info(`Consumer Tests from '${cpath}' loaded`);
+            }
+        });
+
     return mapping;
 }
 
@@ -100,6 +111,9 @@ function hasMeetRequirements(consumer) {
     return meet;
 }
 
+/**
+ * Setup CS
+ */
 function setup() {
     describe('Load modules with tests for consumers', () => {
         // should be loaded at the beginning of process
@@ -107,62 +121,40 @@ function setup() {
         consumerRequirements = loadConsumersRequirements();
     });
 
-    // purpose: consumer tests
-    describe(`Consumer System setup - ${consumerHost.ip}`, () => {
-        describe('Docker installation', () => {
-            before(function () {
-                const needDocker = consumerRequirements.DOCKER && consumerRequirements.DOCKER.indexOf(true) !== -1;
-                if (!needDocker) {
-                    util.logger.info('Docker is not required for testing. Skip CS setup...');
-                    this.skip();
-                }
-            });
+    describe('Consumer System: Setup', () => {
+        harnessUtils.getDefaultHarness().other.forEach((cs) => describe(cs.name, () => {
+            describe('Docker installation', () => {
+                before(function () {
+                    const needDocker = consumerRequirements.DOCKER && consumerRequirements.DOCKER.indexOf(true) !== -1;
+                    if (!needDocker) {
+                        logger.info('Docker is not required for testing. Skip CS setup...');
+                        this.skip();
+                    }
+                });
 
-            it('should install docker', () => {
-                // install docker - assume it does not exist
-                const installCmd = 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
-                return runRemoteCmdOnCS(checkDockerCmd)
-                    .then((response) => {
-                        if (response.includes('exists')) {
-                            return Promise.resolve(); // exists, continue
+                it('should install docker', () => cs.docker.installed()
+                    .then((isOk) => {
+                        if (isOk) {
+                            cs.logger.info('Docker installed already!');
+                            return Promise.resolve();
                         }
-                        return runRemoteCmdOnCS(installCmd);
+                        return cs.docker.install();
                     })
                     .then(() => {
+                        cs.logger.info('Docker installed!');
                         systemRequirements.DOCKER = true;
-                    })
-                    .catch((err) => {
-                        util.logger.error(`Unable to install 'docker': ${err}`);
-                        return Promise.reject(err);
-                    });
+                    }));
+
+                it('should remove all docker containers, images and etc.', () => cs.docker.removeAll());
             });
-
-            it('should remove all docker "container"', () => runRemoteCmdOnCS('docker ps -a -q')
-                .then((response) => {
-                    if (response) {
-                        return runRemoteCmdOnCS(`docker rm -f ${response}`);
-                    }
-                    return Promise.resolve();
-                }));
-
-            it('should remove all docker "image"', () => runRemoteCmdOnCS('docker images -q')
-                .then((response) => {
-                    if (response) {
-                        return runRemoteCmdOnCS(`docker rmi -f ${response}`);
-                    }
-                    return Promise.resolve();
-                }));
-
-            it('should prune all docker "system"', () => runRemoteCmdOnCS('docker system prune -f'));
-
-            it('should prune all docker "volume"', () => runRemoteCmdOnCS('docker volume prune -f'));
-        });
+        }));
     });
 }
 
+/**
+ * Run tests
+ */
 function test() {
-    const methodsToCall = ['setup', 'test', 'teardown'];
-
     describe('Consumer Tests', () => {
         // consumers tests should be loaded already
         Object.keys(consumersMap).forEach((consumer) => {
@@ -173,7 +165,7 @@ function test() {
                 before(() => {
                     skipTests = !hasMeetRequirements(consumerModule);
                     if (skipTests) {
-                        util.logger.warn(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
+                        logger.warning(`CS for Consumer Tests '${consumer}' doesn't meet requirements - skip all tests`);
                     }
                 });
                 beforeEach(function () {
@@ -183,11 +175,12 @@ function test() {
                     }
                 });
 
-                methodsToCall.forEach((method) => {
+                ['setup', 'test', 'teardown'].forEach((method) => {
                     if (consumerModule[method]) {
                         consumerModule[method].apply(consumerModule);
                     } else {
-                        util.logger.console.warn(`WARN: ConsumerTest "${consumer}" has no '${method}' method to call`);
+                        // eslint-disable-next-line no-console
+                        console.warn(`WARN: ConsumerTest "${consumer}" has no '${method}' method to call`);
                     }
                 });
             });
@@ -195,38 +188,28 @@ function test() {
     });
 }
 
+/**
+ * Teardown CS
+ */
 function teardown() {
-    // purpose: consumer tests
-    describe(`Consumer host teardown - ${consumerHost.ip}`, () => {
-        describe('Docker containers and images cleanup', () => {
-            before(function () {
-                // skip docker cleanup if docker was not installed
-                if (!systemRequirements.DOCKER) {
-                    util.logger.info('Docker is not required for testing. Skip CS teardown...');
-                    this.skip();
-                }
+    describe('Consumer System: Teardown', () => {
+        harnessUtils.getDefaultHarness().other.forEach((cs) => describe(cs.name, () => {
+            describe('Docker containers and images cleanup', () => {
+                before(function () {
+                    // skip docker cleanup if docker was not installed
+                    if (!systemRequirements.DOCKER) {
+                        logger.info('Docker is not required for testing. Skip CS teardown...');
+                        this.skip();
+                    }
+                });
+
+                it('should remove all docker containers, images and etc.', () => cs.docker.removeAll());
             });
 
-            it('should remove all docker "container"', () => runRemoteCmdOnCS('docker ps -a -q')
-                .then((response) => {
-                    if (response) {
-                        return runRemoteCmdOnCS(`docker rm -f ${response}`);
-                    }
-                    return Promise.resolve();
-                }));
-
-            it('should remove all docker "image"', () => runRemoteCmdOnCS('docker images -q')
-                .then((response) => {
-                    if (response) {
-                        return runRemoteCmdOnCS(`docker rmi -f ${response}`);
-                    }
-                    return Promise.resolve();
-                }));
-
-            it('should prune all docker "system"', () => runRemoteCmdOnCS('docker system prune -f'));
-
-            it('should prune all docker "volume"', () => runRemoteCmdOnCS('docker volume prune -f'));
-        });
+            describe('Other cleanup', () => {
+                it('teardown all connections', () => cs.teardown());
+            });
+        }));
     });
 }
 

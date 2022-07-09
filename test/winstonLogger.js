@@ -101,23 +101,38 @@ const formatter = (options) => `[${options.timestamp()}][${options.level.toUpper
     + `${maskSecrets(options.meta && Object.keys(options.meta).length ? ('\n' + JSON.stringify(options.meta, null, 4)) : '')}`;
 
 // json === false to allow custom formatting
-const fileTransport = new (winston.transports.File)({
-    name: 'fileOutput',
-    filename: LOG_FILE,
-    level: 'debug',
-    json: false,
-    options: {
-        flags: 'w'
-    },
-    timestamp,
-    formatter
-});
-
 const fileLogger = new (winston.Logger)({
+    levels: winston.config.syslog.levels,
     transports: [
-        fileTransport
+        new (winston.transports.File)({
+            name: 'fileOutput',
+            filename: LOG_FILE,
+            level: 'debug',
+            json: false,
+            options: {
+                flags: 'w'
+            },
+            timestamp,
+            formatter
+        })
     ]
 });
+let mainLogger = fileLogger;
+
+if (LOG_DST === 'console') {
+    mainLogger = new (winston.Logger)({
+        levels: winston.config.syslog.levels,
+        transports: [
+            new (winston.transports.Console)({
+                name: 'consoleOutput',
+                level: 'debug',
+                json: false,
+                timestamp,
+                formatter
+            })
+        ]
+    });
+}
 
 function hookStream(stream, callback) {
     stream.write = (function (write) {
@@ -151,21 +166,15 @@ if (LOG_DST === 'file') {
 }
 
 module.exports = {
-    logger: fileLogger,
+    logger: mainLogger,
     tsLogger: (function () {
-        let logger = fileLogger;
-        if (LOG_DST === 'console') {
-            logger = console;
-        } else if (LOG_DST !== 'file') {
-            logger = null;
-        }
         return {
-            logger,
+            logger: mainLogger,
             levels: {
                 finest: 'debug',
                 info: 'info',
                 severe: 'error',
-                warning: 'warn'
+                warning: 'warning'
             }
         };
     }())

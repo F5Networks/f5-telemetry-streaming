@@ -68,7 +68,9 @@ function CustomMochaReporter(runner, options) {
                 startTime: Date.now()
             };
         }
-        fileLogger.info(`${currentTest.attempts ? 'Retrying' : 'Starting'} test - ${currentTest.title}`);
+
+        const retryInfo = currentTest.attempts ? ` (${currentTest.attempts} attempt(s) made)` : '';
+        fileLogger.info(`${currentTest.attempts ? 'Retrying' : 'Starting'} test - ${currentTest.title}${retryInfo}`);
         currentTest.attempts += 1;
     });
 
@@ -77,13 +79,12 @@ function CustomMochaReporter(runner, options) {
         const fmtArgs = [test.title];
         currentTest.endTime = Date.now();
 
-        if (test.speed !== 'fast') {
+        if (currentTest.attempts > 1) {
+            fmt += color('fail', ' (attempts=%d total_time=%dms last_exec_time=%dms)');
+            fmtArgs.push(currentTest.attempts, currentTest.endTime - currentTest.startTime, test.duration);
+        } else {
             fmt += color(test.speed, ' (%dms)');
             fmtArgs.push(test.duration);
-        }
-        if (currentTest.attempts > 1) {
-            fmt += color('fail', ' (attempts=%d duration=%dms)');
-            fmtArgs.push(currentTest.attempts, currentTest.endTime - currentTest.startTime);
         }
         currentTest = {};
         fmtArgs.unshift(fmt);
@@ -103,8 +104,11 @@ function CustomMochaReporter(runner, options) {
         const fmtArgs = [failedTests, test.title];
 
         if (currentTest.attempts > 1) {
-            fmt += color('fail', ' (attempts=%d duration=%dms)');
-            fmtArgs.push(currentTest.attempts, currentTest.endTime - currentTest.startTime);
+            fmt += color('fail', ' (attempts=%d total_time=%dms last_exec_time=%dms)');
+            fmtArgs.push(currentTest.attempts, currentTest.endTime - currentTest.startTime, test.duration);
+        } else {
+            fmt += color('fail', ' (%dms)');
+            fmtArgs.push(test.duration);
         }
         currentTest = {};
         fmtArgs.unshift(fmt);

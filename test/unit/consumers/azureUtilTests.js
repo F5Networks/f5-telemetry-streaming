@@ -352,7 +352,16 @@ describe('Azure Util Tests', () => {
                     name: 'topLevelKey1'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType', false));
+        });
+
+        it('poolMembers type is always config item', () => {
+            const testData = {
+                topLevelKey1: {
+                    name: 'topLevelKey1'
+                }
+            };
+            assert.isTrue(azureUtil.isConfigItems(testData, 'poolMembers', true));
         });
 
         it('"proper path" record, but not matching name', () => {
@@ -363,7 +372,7 @@ describe('Azure Util Tests', () => {
                     name: 'bad name'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType', false));
         });
 
         it('two "proper path" records, first name does not match', () => {
@@ -375,7 +384,7 @@ describe('Azure Util Tests', () => {
                     name: '/path2a/path2b'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType', false));
         });
 
         it('two "proper path" records, second name does not match', () => {
@@ -387,7 +396,7 @@ describe('Azure Util Tests', () => {
                     name: 'bad name'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType', false));
         });
 
         it('"proper path" records with matching names', () => {
@@ -401,7 +410,7 @@ describe('Azure Util Tests', () => {
                     name: '/path2a/path2b'
                 }
             };
-            assert.isTrue(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isTrue(azureUtil.isConfigItems(testData, 'someType', false));
         });
 
         it('one "proper path" record, one not', () => {
@@ -413,7 +422,7 @@ describe('Azure Util Tests', () => {
                     name: '/badPath'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'someType'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'someType', false));
         });
 
         it('sslCerts type with matching name', () => {
@@ -423,7 +432,7 @@ describe('Azure Util Tests', () => {
                     name: 'topLevelKey1'
                 }
             };
-            assert.isTrue(azureUtil.isConfigItems(testData, 'sslCerts'));
+            assert.isTrue(azureUtil.isConfigItems(testData, 'sslCerts', false));
         });
 
         it('sslCerts type with name does not match', () => {
@@ -437,7 +446,7 @@ describe('Azure Util Tests', () => {
                     name: 'badKey'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts', false));
         });
 
         it('sslCerts type with missing name', () => {
@@ -450,7 +459,7 @@ describe('Azure Util Tests', () => {
                     key1: 'value1'
                 }
             };
-            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts'));
+            assert.isFalse(azureUtil.isConfigItems(testData, 'sslCerts', false));
         });
     });
 
@@ -505,6 +514,306 @@ describe('Azure Util Tests', () => {
                 }
             ];
             assert.deepStrictEqual(azureUtil.transformConfigItems(inputData), expectedData);
+        });
+    });
+
+    describe('ClassPoolToMembersMapping', () => {
+        it('test isPoolType', () => {
+            const poolMemberMapping = new azureUtil.ClassPoolToMembersMapping();
+            assert.strictEqual(poolMemberMapping.isPoolType('pools'), true);
+            assert.strictEqual(poolMemberMapping.isPoolType('mxPools'), true);
+            assert.strictEqual(poolMemberMapping.isPoolType('arbitrary'), false);
+        });
+
+        it('test isPoolMembersType', () => {
+            const poolMemberMapping = new azureUtil.ClassPoolToMembersMapping();
+            assert.strictEqual(poolMemberMapping.isPoolMembersType('poolMembers'), true);
+            assert.strictEqual(poolMemberMapping.isPoolMembersType('mxPoolMembers'), true);
+            assert.strictEqual(poolMemberMapping.isPoolMembersType('arbitrary'), false);
+        });
+
+        it('test getPoolMembersType', () => {
+            const poolMemberMapping = new azureUtil.ClassPoolToMembersMapping();
+            assert.strictEqual(poolMemberMapping.getPoolMembersType('pools'), 'poolMembers');
+            assert.strictEqual(poolMemberMapping.getPoolMembersType('mxPools'), 'mxPoolMembers');
+            assert.strictEqual(poolMemberMapping.getPoolMembersType('arbitrary'), null);
+        });
+
+        it('test buildPoolMemeberHolder', () => {
+            const expectedPoolMembersHolder = {
+                poolMembers: {},
+                aPoolMembers: {},
+                aaaaPoolMembers: {},
+                cnamePoolMembers: {},
+                mxPoolMembers: {},
+                naptrPoolMembers: {},
+                srvPoolMembers: {}
+            };
+            const poolMemberMapping = new azureUtil.ClassPoolToMembersMapping();
+            const allPoolMembers = {};
+            poolMemberMapping.buildPoolMemeberHolder(allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembersHolder);
+        });
+    });
+
+    describe('splitMembersFromPools', () => {
+        it('no pool members', () => {
+            const pool = {
+                key: 'value'
+            };
+            // expectedPool is the same as pool
+            const expectedPool = {
+                key: 'value'
+            };
+            const allPoolMembers = {};
+            // expectedPoolMembers is the same as allPoolMembers
+            const expectedPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('members is a string (not observed)', () => {
+            const pool = {
+                key: 'value',
+                members: 'not an object'
+            };
+            // expectedPool is the same as pool
+            const expectedPool = {
+                key: 'value',
+                members: 'not an object'
+            };
+            const allPoolMembers = {};
+            // expectedPoolMembers is the same as allPoolMembers
+            const expectedPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('members is an empty object', () => {
+            const pool = {
+                key: 'value',
+                members: {}
+            };
+            // empty object deleted
+            const expectedPool = {
+                key: 'value'
+            };
+            const allPoolMembers = {};
+            // expectedPoolMembers is the same as allPoolMembers
+            const expectedPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('pool member is a string (not observed)', () => {
+            const pool = {
+                key: 'value',
+                members: {
+                    key: 'arbitrary string',
+                    topName: {
+                        name: 'topName',
+                        poolName: 'poolName'
+                    }
+                }
+            };
+            // expectedPool is the same as pool
+            const expectedPool = {
+                key: 'value',
+                members: {
+                    key: 'arbitrary string'
+                }
+            };
+            const allPoolMembers = {};
+            // expectedPoolMembers is the same as allPoolMembers
+            const expectedPoolMembers = {
+                'topName-separator-poolName': {
+                    name: 'topName',
+                    poolName: 'poolName'
+                }
+            };
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('pool member does not have poolName (not observed)', () => {
+            const pool = {
+                key: 'value',
+                members: {
+                    topNameA: {
+                        name: 'topNameA',
+                        poolName: 'poolName'
+                    },
+                    topNameB: {
+                        name: 'topNameB'
+                    }
+                }
+            };
+            // expectedPool is the same as pool
+            const expectedPool = {
+                key: 'value',
+                members: {
+                    topNameB: {
+                        name: 'topNameB'
+                    }
+                }
+            };
+            const allPoolMembers = {};
+            // expectedPoolMembers is the same as allPoolMembers
+            const expectedPoolMembers = {
+                'topNameA-separator-poolName': {
+                    name: 'topNameA',
+                    poolName: 'poolName'
+                }
+            };
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('pool member without name', () => {
+            const pool = {
+                key: 'value',
+                members: {
+                    topName: {
+                        poolName: 'poolName'
+                    }
+                }
+            };
+            // topName is added as expectedPoolMembers.poolMembers.topName-separator-poolName.name
+            const expectedPoolMembers = {
+                'topName-separator-poolName': {
+                    name: 'topName',
+                    poolName: 'poolName'
+                }
+            };
+            // no pool.members anymore
+            const expectedPool = {
+                key: 'value'
+            };
+            const allPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('pool member name different from top name', () => {
+            const pool = {
+                key: 'value',
+                members: {
+                    topName: {
+                        name: 'memberName',
+                        poolName: 'poolName'
+                    }
+                }
+            };
+            /* 'topName' overwrites 'memberName' in added as
+                expectedPoolMembers.poolMembers.topName-separator-poolName.name */
+            // in reality, I've only seen that that if the member name is defined, it matches the top name
+            const expectedPoolMembers = {
+                'topName-separator-poolName': {
+                    name: 'topName',
+                    poolName: 'poolName'
+                }
+            };
+            // no pool.members anymore
+            const expectedPool = {
+                key: 'value'
+            };
+            const allPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('two pool members', () => {
+            const pool = {
+                key: 'value',
+                members: {
+                    topNameA: {
+                        name: 'topNameA',
+                        poolName: 'poolName'
+                    },
+                    topNameB: {
+                        name: 'topNameB',
+                        poolName: 'poolName'
+                    }
+                }
+            };
+            const expectedPoolMembers = {
+                'topNameA-separator-poolName': {
+                    name: 'topNameA',
+                    poolName: 'poolName'
+                },
+                'topNameB-separator-poolName': {
+                    name: 'topNameB',
+                    poolName: 'poolName'
+                }
+            };
+            // no pool.members anymore
+            const expectedPool = {
+                key: 'value'
+            };
+            const allPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(pool, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(pool, expectedPool);
+        });
+
+        it('two pools, same member name', () => {
+            const poolA = {
+                key: 'valueA',
+                members: {
+                    topName: {
+                        name: 'topName',
+                        poolName: 'poolNameA'
+                    }
+                }
+            };
+            const poolB = {
+                key: 'valueB',
+                members: {
+                    topName: {
+                        name: 'topName',
+                        poolName: 'poolNameB'
+                    }
+                }
+            };
+            const expectedPoolMembers = {
+                'topName-separator-poolNameA': {
+                    name: 'topName',
+                    poolName: 'poolNameA'
+                },
+                'topName-separator-poolNameB': {
+                    name: 'topName',
+                    poolName: 'poolNameB'
+                }
+            };
+            // no pool.members anymore
+            const expectedPoolA = {
+                key: 'valueA'
+            };
+            const expectedPoolB = {
+                key: 'valueB'
+            };
+            const allPoolMembers = {};
+
+            azureUtil.splitMembersFromPools(poolA, allPoolMembers);
+            azureUtil.splitMembersFromPools(poolB, allPoolMembers);
+            assert.deepStrictEqual(allPoolMembers, expectedPoolMembers);
+            assert.deepStrictEqual(poolA, expectedPoolA);
+            assert.deepStrictEqual(poolB, expectedPoolB);
         });
     });
 

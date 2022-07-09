@@ -23,7 +23,7 @@ include:
 
 ##############################################################
 #                                                            #
-# Jobs and commands templates                                 #
+# Jobs and commands templates                                #
 #                                                            #
 ##############################################################
 .install_unittest_packages_cmd: &install_unittest_packages_cmd

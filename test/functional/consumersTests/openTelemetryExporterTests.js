@@ -6,28 +6,31 @@
  * the software product on devcentral.f5.com.
  */
 
-// this object not passed with lambdas, which mocha uses
-
 'use strict';
 
-const assert = require('assert');
-const fs = require('fs');
-const testUtil = require('../shared/util');
-const utils = require('../../../src/lib/utils/misc');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const pathUtil = require('path');
+
 const constants = require('../shared/constants');
-const dutUtils = require('../dutTests').utils;
+const harnessUtils = require('../shared/harness');
+const logger = require('../shared/utils/logger').getChild('otelTests');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const srcMiscUtils = require('../../../src/lib/utils/misc');
+const testUtils = require('../shared/testUtils');
+
+chai.use(chaiAsPromised);
+const assert = chai.assert;
+
+/**
+ * @module test/functional/consumersTests/openTelemetryExporter
+ */
 
 // module requirements
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
-const DUTS = testUtil.getHosts('BIGIP');
-const SHOULD_SKIP_TESTS = {};
-
-const CONSUMER_HOST = testUtil.getHosts('CONSUMER')[0]; // only expect one
 const OTEL_METRICS_PATH = '/v1/metrics';
-const OTEL_COLLECTOR_IMAGE_NAME = `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}otel/opentelemetry-collector-contrib`;
-const OTEL_COLLECTOR_NAME = 'otel-collector';
-const OTEL_COLLECTOR_HOST = CONSUMER_HOST.ip;
 const OTEL_COLLECTOR_FOLDER = 'otel';
 const OTEL_COLLECTOR_CONF_FILE = 'config.yaml';
 const OTEL_COLLECTOR_RECEIVER_PORT = 55681;
@@ -52,130 +55,203 @@ service:
       processors: [batch]
       exporters: [prometheus]`;
 
+const DOCKER_CONTAINERS = {
+    OTELCollector: {
+        detach: true,
+        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}otel/opentelemetry-collector-contrib`,
+        name: 'otel-collector',
+        publish: {
+            [OTEL_COLLECTOR_PROMETHEUS_PORT]: OTEL_COLLECTOR_PROMETHEUS_PORT,
+            [OTEL_COLLECTOR_RECEIVER_PORT]: OTEL_COLLECTOR_RECEIVER_PORT
+        },
+        restart: 'always',
+        volume: {
+            [`$(pwd)/${OTEL_COLLECTOR_FOLDER}/${OTEL_COLLECTOR_CONF_FILE}`]: '/etc/otel/config.yaml'
+        }
+    }
+};
+
 // read in example config
-const DECLARATION = JSON.parse(fs.readFileSync(constants.DECL.BASIC));
+const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const LISTENER_PROTOCOLS = constants.TELEMETRY.LISTENER.PROTOCOLS;
 
-function runRemoteCmd(cmd) {
-    return testUtil.performRemoteCmd(
-        CONSUMER_HOST.ip,
-        CONSUMER_HOST.username,
-        cmd,
-        { password: CONSUMER_HOST.password }
-    );
-}
+let CONTAINER_STARTED;
+let SHOULD_SKIP_DUE_VERSION;
 
+/**
+ * Setup CS and DUTs
+ */
 function setup() {
     describe('Consumer Setup: OpenTelemetry Exporter', () => {
-        it('should pull OpenTelemetry Collector docker image', () => runRemoteCmd(`docker pull ${OTEL_COLLECTOR_IMAGE_NAME}`));
-
-        it('should write OpenTelemetry Collector configuration', () => runRemoteCmd(`mkdir -p ${OTEL_COLLECTOR_FOLDER} && echo "${OTEL_COLLECTOR_CONF}" > ${OTEL_COLLECTOR_FOLDER}/${OTEL_COLLECTOR_CONF_FILE}`));
-
-        it('should start OpenTelemetry Collector docker container', () => {
-            const otelCollectorParams = `-p ${OTEL_COLLECTOR_RECEIVER_PORT}:${OTEL_COLLECTOR_RECEIVER_PORT} -p ${OTEL_COLLECTOR_PROMETHEUS_PORT}:${OTEL_COLLECTOR_PROMETHEUS_PORT} -v $(pwd)/${OTEL_COLLECTOR_FOLDER}/${OTEL_COLLECTOR_CONF_FILE}:/etc/otel/config.yaml`;
-            const cmdOtelCollector = `docker run -d ${otelCollectorParams} --name ${OTEL_COLLECTOR_NAME} ${OTEL_COLLECTOR_IMAGE_NAME}`;
-
-            // simple check to see if OpenTelemetry Collector container already exists
-            return runRemoteCmd(`docker ps | grep ${OTEL_COLLECTOR_NAME}`)
-                .then((data) => {
-                    if (data) {
-                        return Promise.resolve(); // exists, continue
-                    }
-                    return runRemoteCmd(cmdOtelCollector);
-                });
+        const harness = harnessUtils.getDefaultHarness();
+        const cs = harnessUtils.getDefaultHarness().other[0];
+        cs.http.createAndSave('otel', {
+            port: OTEL_COLLECTOR_PROMETHEUS_PORT,
+            protocol: 'http',
+            retry: {
+                maxTries: 10,
+                delay: 1000
+            }
         });
 
-        DUTS.forEach((dut) => it(
-            `get bigip version and check if version is high enough for OpenTelemetry Exporter - ${dut.hostalias}`,
-            () => testUtil.getBigipVersion(dut)
-                .then((response) => {
-                    // OpenTelemetry Exporter consumer is supported on bigip 14.1 and above
-                    SHOULD_SKIP_TESTS[dut.hostalias] = utils.compareVersionStrings(response, '<', '14.1');
-                })
-        ));
+        describe('Docker container setup', () => {
+            before(() => {
+                CONTAINER_STARTED = false;
+                SHOULD_SKIP_DUE_VERSION = {};
+            });
+
+            it('should pull OTEL docker image', () => cs.docker.pull(DOCKER_CONTAINERS.OTELCollector.image));
+
+            it('should remove pre-existing OTEL docker container', () => harnessUtils.docker.stopAndRemoveContainer(
+                cs.docker,
+                DOCKER_CONTAINERS.OTELCollector.name
+            ));
+
+            it('should write OTEL configuration', () => cs.ssh.default.mkdirIfNotExists(OTEL_COLLECTOR_FOLDER)
+                .then(() => cs.ssh.default.writeToFile(
+                    pathUtil.join(OTEL_COLLECTOR_FOLDER, OTEL_COLLECTOR_CONF_FILE),
+                    OTEL_COLLECTOR_CONF
+                )));
+
+            it('should start new OTEL docker container', () => harnessUtils.docker.startNewContainer(
+                cs.docker,
+                DOCKER_CONTAINERS.OTELCollector
+            )
+                .then(() => {
+                    CONTAINER_STARTED = true;
+                }));
+        });
+
+        describe('Gather information about DUTs version', () => {
+            harness.bigip.forEach((bigip) => it(
+                `should get bigip version and check if version is high enough for OpenTelemetry Exporter - ${bigip.name}`,
+                () => bigip.icAPI.default.getSoftwareVersion()
+                    .then((version) => {
+                        // OpenTelemetry Exporter consumer is supported on bigip 14.1 and above
+                        SHOULD_SKIP_DUE_VERSION[bigip.hostname] = srcMiscUtils.compareVersionStrings(version, '<', '14.1');
+
+                        logger.info('DUT\' version', {
+                            hostname: bigip.hostname,
+                            shouldSkipTests: SHOULD_SKIP_DUE_VERSION[bigip.hostname],
+                            version
+                        });
+                    })
+            ));
+        });
     });
 }
 
+/**
+ * Tests for DUTs
+ */
 function test() {
-    const verifyResponse = (response, dutHostname) => {
-        const dutSystemMemoryRegex = new RegExp(`\\nsystem_memory{.*hostname="${dutHostname}".*} \\d{1,2}\\n`);
-        const mockAVRMetricRegex = new RegExp(`\\nfunctionalTestMetric{.*hostname="${dutHostname}".*} 147\\n`);
+    describe('Consumer Test: OpenTelemetry Exporter', () => {
+        const harness = harnessUtils.getDefaultHarness();
+        const cs = harness.other[0];
+        const testDataTimestamp = Date.now();
 
-        assert.notStrictEqual(
-            response.indexOf('# HELP system_tmmCpu system.tmmCpu'),
-            -1,
-            'help text should exist, and contain original metric name'
-        );
+        /**
+         * @returns {boolean} true if DUt satisfies version restriction
+         */
+        const isValidDut = (dut) => !SHOULD_SKIP_DUE_VERSION[dut.hostname];
 
-        assert.notStrictEqual(
-            response.indexOf('# TYPE system_tmmCpu gauge'),
-            -1,
-            'metric type should be of type \'gauge\''
-        );
-
-        assert.ok(
-            dutSystemMemoryRegex.test(response),
-            'response should include \'system_memory\' metric with appropriate label, and a value'
-        );
-
-        assert.ok(
-            mockAVRMetricRegex.test(response),
-            'response should include \'functionalTestMetric\' metric with appropriate label, and a value'
-        );
-    };
-
-    describe('Consumer Test: OpenTelemetry Exporter - Configure TS and generate data', () => {
-        const consumerDeclaration = testUtil.deepCopy(DECLARATION);
-        delete consumerDeclaration.My_Consumer;
-        consumerDeclaration[OTEL_COLLECTOR_CONSUMER_NAME] = {
-            class: 'Telemetry_Consumer',
-            type: 'OpenTelemetry_Exporter',
-            host: OTEL_COLLECTOR_HOST,
-            port: OTEL_COLLECTOR_RECEIVER_PORT,
-            metricsPath: `${OTEL_METRICS_PATH}`
-        };
-        DUTS.forEach((dut) => {
-            it(`should configure TS - ${dut.hostalias}`, function () {
-                if (SHOULD_SKIP_TESTS[dut.hostalias]) {
-                    this.skip();
-                }
-                return dutUtils.postDeclarationToDUT(dut, testUtil.deepCopy(consumerDeclaration));
-            });
-
-            it(`should send known event to TS Event Listener - ${dut.hostalias}`, function () {
-                if (SHOULD_SKIP_TESTS[dut.hostalias]) {
-                    this.skip();
-                }
-                const mockMsgAVR = `EOCTimestamp="1231232",hostname="${dut.hostname}",functionalTestMetric="147"`;
-                return dutUtils.sendDataToEventListener(dut, mockMsgAVR, { numOfMsg: 4 });
-            });
+        before(() => {
+            assert.isOk(CONTAINER_STARTED, 'should start OTEL container!');
         });
-    });
 
-    describe('Consumer Test: OpenTelemetry Exporter - Tests', () => {
-        DUTS.forEach((dut) => {
-            it(`should check the OpenTelemetry Collector for published data data for - ${dut.hostalias}`, function () {
-                if (SHOULD_SKIP_TESTS[dut.hostalias]) {
-                    this.skip();
-                }
-                const httpOptions = {
-                    method: 'GET',
-                    port: OTEL_COLLECTOR_PROMETHEUS_PORT,
-                    protocol: 'http'
+        describe('Configure TS and generate data', () => {
+            let consumerDeclaration;
+
+            before(() => {
+                consumerDeclaration = miscUtils.deepCopy(DECLARATION);
+                consumerDeclaration[OTEL_COLLECTOR_CONSUMER_NAME] = {
+                    class: 'Telemetry_Consumer',
+                    type: 'OpenTelemetry_Exporter',
+                    host: cs.host.host,
+                    port: OTEL_COLLECTOR_RECEIVER_PORT,
+                    metricsPath: `${OTEL_METRICS_PATH}`
                 };
-
-                testUtil.logger.info('Delay 15000ms to ensure data is sent to OpenTelemetry Collector');
-                return testUtil.sleep(15 * 1000)
-                    .then(() => testUtil.makeRequest(OTEL_COLLECTOR_HOST, '/metrics', httpOptions))
-                    .then((response) => verifyResponse(response, dut.hostname));
             });
+
+            testUtils.shouldConfigureTS(harness.bigip, (bigip) => (isValidDut(bigip)
+                ? miscUtils.deepCopy(consumerDeclaration)
+                : null));
+
+            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => (isValidDut(bigip)
+                ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${OTEL_COLLECTOR_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`
+                : null));
+        });
+
+        describe('Event Listener data', () => {
+            harness.bigip.forEach((bigip) => LISTENER_PROTOCOLS
+                .forEach((proto) => it(
+                    `should check OTEL for event listener data (over ${proto}) for - ${bigip.name}`,
+                    function () {
+                        if (!isValidDut(bigip)) {
+                            return this.skip();
+                        }
+                        return cs.http.otel.makeRequest({
+                            uri: '/metrics'
+                        })
+                            .then((data) => {
+                                const mockAVRMetricRegex = new RegExp(`functionalTestMetric{.*hostname="${bigip.hostname}".*} 147`);
+                                assert.isOk(
+                                    data.split('\n')
+                                        .some((line) => mockAVRMetricRegex.test(line) && line.indexOf(`protocol="${proto}"`) !== -1),
+                                    `should have metrics(s) for a data from event listener (over ${proto})`
+                                );
+                            })
+                            .catch((err) => {
+                                bigip.logger.info('No event listener data found. Going to wait another 20sec');
+                                return promiseUtils.sleepAndReject(20000, err);
+                            });
+                    }
+                )));
+        });
+
+        describe('System Poller data', () => {
+            harness.bigip.forEach((bigip) => it(
+                `should check OTEL for system poller data - ${bigip.name}`,
+                function () {
+                    if (!isValidDut(bigip)) {
+                        return this.skip();
+                    }
+                    return cs.http.otel.makeRequest({
+                        uri: '/metrics'
+                    })
+                        .then((data) => {
+                            const dutSystemMemoryRegex = new RegExp(`system_memory{.*hostname="${bigip.hostname}".*} \\d{1,2}`);
+                            assert.isOk(
+                                data.split('\n')
+                                    .some((line) => dutSystemMemoryRegex.test(line)),
+                                'should have metric(s) for a data from system poller'
+                            );
+                        })
+                        .catch((err) => {
+                            bigip.logger.info('No system poller data found. Going to wait another 20sec');
+                            return promiseUtils.sleepAndReject(20000, err);
+                        });
+                }
+            ));
         });
     });
 }
 
+/**
+ * Teardown CS
+ */
 function teardown() {
     describe('Consumer Teardown: OpenTelemetry Exporter', () => {
-        it('should remove OpenTelemetry Collector container', () => runRemoteCmd(`docker container rm -f ${OTEL_COLLECTOR_NAME}`));
-        it('should remove OpenTelemetry Collector configuration file', () => runRemoteCmd(`rm -rf ${OTEL_COLLECTOR_FOLDER}`));
+        const cs = harnessUtils.getDefaultHarness().other[0];
+
+        it('should stop and remove OTEL docker container', () => harnessUtils.docker.stopAndRemoveContainer(
+            cs.docker,
+            DOCKER_CONTAINERS.OTELCollector.name
+        ));
+
+        it('should remove OTEL configuration file', () => cs.ssh.default.unlinkIfExists(pathUtil.join(OTEL_COLLECTOR_FOLDER, OTEL_COLLECTOR_CONF_FILE)));
+
+        it('should remove OTEL directory', () => cs.ssh.default.rmdirIfExists(OTEL_COLLECTOR_FOLDER));
     });
 }
 

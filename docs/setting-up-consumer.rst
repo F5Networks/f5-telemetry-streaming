@@ -114,8 +114,8 @@ Microsoft Azure Log Analytics
 |azure_img|
 
 Required Information:
- - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources`.
- - Shared Key: Navigate to :guilabel:`Log Analytics workspace > Advanced Settings > Connected Sources` and use the primary key.
+ - Workspace ID: Navigate to :guilabel:`Log Analytics workspace > [your workspace] > Agents Management > Workspace ID`.
+ - Shared Key: Navigate to :guilabel:`Log Analytics workspace > [your workspace] > Agents Management > Primary key`.
 
 .. IMPORTANT:: The Azure Log Analytics Consumer only supports sending 500 items. Each configuration item (such as virtual server, pool, node) uses part of this limit.
 

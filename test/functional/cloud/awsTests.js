@@ -8,98 +8,62 @@
 
 'use strict';
 
-const fs = require('fs');
-const assert = require('assert');
-const AWS = require('aws-sdk');
-const constants = require('../shared/constants');
-const testUtil = require('../shared/util');
-const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
-const ENV_FILE = process.env[constants.ENV_VARS.CLOUD.FILE];
-const ENV_INFO = JSON.parse(fs.readFileSync(ENV_FILE));
-const VM_IP = ENV_INFO.instances[0].mgmt_address;
-const VM_PORT = ENV_INFO.instances[0].mgmt_port;
-const VM_USER = ENV_INFO.instances[0].admin_username;
-const VM_PWD = ENV_INFO.instances[0].admin_password;
-const BUCKET = ENV_INFO.bucket;
-const REGION = ENV_INFO.region;
-const METRIC_NAMESPACE = process.env[constants.ENV_VARS.AWS.METRIC_NAMESPACE];
+const awsUtil = require('../shared/cloudUtils/aws');
+const awsSrcUtil = require('../../../src/lib/consumers/shared/awsUtil');
+const harnessUtils = require('../shared/harness');
+const logger = require('../shared/utils/logger').getChild('awsCloudTests');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
 
-const CLIENT_SECRET = process.env[constants.ENV_VARS.AWS.ACCESS_KEY_SECRET];
-const CLIENT_ID = process.env[constants.ENV_VARS.AWS.ACCESS_KEY_ID];
+chai.use(chaiAsPromised);
+const assert = chai.assert;
 
-describe('AWS Cloud-based Tests', function () {
-    this.timeout(600000);
-    let s3;
-    let cloudWatch;
-    let options = {};
-    let vmAuthToken;
+/**
+ * @module test/functional/cloud/awsTests
+ */
 
-    const deviceInfo = {
-        ip: VM_IP,
-        username: VM_USER,
-        port: VM_PORT,
-        password: VM_PWD
-    };
+logger.info('Initializing harness info');
+const harnessInfo = awsUtil.getCloudHarnessJSON();
+const newHarness = harnessUtils.initializeFromJSON(harnessInfo);
 
-    const assertPost = (declaration) => testUtil.postDeclaration(deviceInfo, declaration)
-        .then((response) => {
-            testUtil.logger.info('Response from declaration post', { host: VM_IP, response });
-            return assert.strictEqual(response.message, 'success', 'POST declaration should return success');
-        });
+assert.isDefined(newHarness, 'should have harness be initialized at this point');
+assert.isNotEmpty(newHarness.bigip, 'should initialize harness');
+harnessUtils.setDefaultHarness(newHarness);
+logger.info('Harness info initialized');
 
-    before((done) => {
-        testUtil.getAuthToken(VM_IP, VM_USER, VM_PWD, VM_PORT)
-            .then((data) => {
-                vmAuthToken = data.token;
-                options = {
-                    protocol: 'https',
-                    port: VM_PORT,
-                    headers: {
-                        'X-F5-Auth-Token': vmAuthToken
-                    }
-                };
+describe('AWS Cloud-based Tests', () => {
+    const harness = harnessUtils.getDefaultHarness();
+    const tsRPMInfo = miscUtils.getPackageDetails();
+    let AWS_META = null;
 
-                AWS.config.update({
-                    region: REGION,
-                    accessKeyId: CLIENT_ID,
-                    secretAccessKey: CLIENT_SECRET
-                });
-                s3 = new AWS.S3({ apiVersion: '2006-03-01' });
-                cloudWatch = new AWS.CloudWatch({ apiVersion: '2010-08-01' });
-
-                done();
-            })
-            .catch((err) => { done(err); });
+    before(() => {
+        assert.isDefined(harness, 'should have harness be initialized at this point');
+        assert.isNotEmpty(harness.bigip, 'should initialize harness');
     });
 
-    describe('Setup', () => {
-        it('should install package', () => {
-            const packageDetails = testUtil.getPackageDetails();
-            const fullPath = `${packageDetails.path}/${packageDetails.name}`;
-            return testUtil.installPackage(VM_IP, vmAuthToken, fullPath, VM_PORT)
-                .then(() => {
-                    testUtil.logger.info(`Successfully installed RPM: ${fullPath} on ${VM_IP}`);
-                });
-        });
-
-        it('should verify TS service is running', () => {
-            const uri = `${constants.BASE_ILX_URI}/info`;
-
-            return new Promise((resolve) => { setTimeout(resolve, 5000); })
-                .then(() => testUtil.makeRequest(VM_IP, uri, options))
-                .then((data) => {
-                    data = data || {};
-                    testUtil.logger.info(`${uri} response`, { host: VM_IP, data });
-                    return assert.notStrictEqual(data.version, undefined);
-                });
-        });
+    describe('DUT Setup', () => {
+        testUtils.shouldRemovePreExistingTSDeclaration(harness.bigip);
+        testUtils.shouldRemovePreExistingTSPackage(harness.bigip);
+        testUtils.shouldInstallTSPackage(harness.bigip, () => tsRPMInfo);
+        testUtils.shouldVerifyTSPackageInstallation(harness.bigip);
     });
 
-    describe('IAM Roles', () => {
-        describe('AWS_S3', () => {
-            it('should post systemPoller declaration without credentials', () => {
-                const declaration = {
+    describe('IAM Roles', function () {
+        this.timeout(600000);
+
+        before(() => awsUtil.getCloudMetadataFromProcessEnv()
+            .then((metadata) => {
+                AWS_META = metadata;
+                awsUtil.configureAWSGlobal(AWS_META);
+            }));
+
+        describe('AWS S3', () => {
+            describe('Configure TS and generate data', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry',
                     My_System: {
                         class: 'Telemetry_System',
@@ -110,52 +74,67 @@ describe('AWS Cloud-based Tests', function () {
                     My_IAM_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'AWS_S3',
-                        bucket: BUCKET,
-                        region: REGION
+                        bucket: AWS_META.bucket,
+                        region: AWS_META.region
                     }
-                };
-                return assertPost(declaration);
+                }));
             });
 
-            it('should retrieve systemPoller info from bucket', function () {
-                this.timeout(180000);
+            describe('System Poller data', () => {
+                let s3;
 
-                return new Promise((resolve) => { setTimeout(resolve, 90000); })
-                    .then(() => new Promise((resolve, reject) => {
-                        s3.listObjects({ Bucket: BUCKET, MaxKeys: 5 }, (err, data) => {
-                            if (err) reject(err);
-                            let bucketContents = data.Contents;
-                            assert.notDeepStrictEqual(bucketContents, []);
-                            bucketContents = bucketContents.sort((o1, o2) => o2.LastModified - o1.LastModified);
-                            resolve(bucketContents);
+                before(() => {
+                    s3 = awsUtil.getS3Client();
+                });
+
+                harness.bigip.forEach((bigip) => it(
+                    `should check AWS S3 for system poller data - ${bigip.name}`,
+                    () => (new Promise((resolve, reject) => {
+                        s3.listObjects({ Bucket: AWS_META.bucket, MaxKeys: 5 }, (err, data) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve((data.Contents || []).sort((o1, o2) => o2.LastModified - o1.LastModified));
+                            }
                         });
                     }))
-                    .then((bucketContents) => new Promise((resolve, reject) => {
-                        const key = bucketContents[0].Key;
-                        s3.getObject({ Bucket: BUCKET, Key: key, ResponseContentType: 'application/json' }, (err, data) => {
-                            if (err) reject(err);
+                        .then((bucketContents) => new Promise((resolve, reject) => {
+                            assert.isNotEmpty(bucketContents, 'should return non empty response');
+
+                            const key = bucketContents[0].Key;
+                            s3.getObject({ Bucket: AWS_META.bucket, Key: key, ResponseContentType: 'application/json' }, (err, data) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(data);
+                                }
+                            });
+                        }))
+                        .then((data) => {
                             const body = JSON.parse(data.Body.toString());
                             // depending on onboarding result, hostname may vary
                             // sufficient to check that there's an entry here
                             // (deployment creates a bucket per instance)
-                            assert.notDeepStrictEqual(body.system, {});
-                            assert.strictEqual(body.telemetryEventCategory, 'systemInfo');
-                            resolve();
-                        });
-                    }));
+                            assert.isNotEmpty(body.system);
+                            assert.deepStrictEqual(body.telemetryEventCategory, 'systemInfo');
+                        })
+                        .catch((err) => {
+                            bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                            return promiseUtils.sleepAndReject(20000, err);
+                        })
+                ));
             });
 
-            it('should remove configuration', () => {
-                const declaration = {
+            describe('Teardown TS', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry'
-                };
-                return assertPost(declaration);
+                }));
             });
         });
 
-        describe('AWS_CloudWatch_Metrics', () => {
-            it('should post systemPoller declaration without credentials', () => {
-                const declaration = {
+        describe('AWS CloudWatch Metrics', () => {
+            describe('Configure TS and generate data', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry',
                     controls: {
                         class: 'Controls',
@@ -172,31 +151,40 @@ describe('AWS Cloud-based Tests', function () {
                         class: 'Telemetry_Consumer',
                         type: 'AWS_CloudWatch',
                         dataType: 'metrics',
-                        metricNamespace: METRIC_NAMESPACE,
-                        region: REGION
+                        metricNamespace: AWS_META.metricNamespace,
+                        region: AWS_META.region
                     }
-                };
-                return assertPost(declaration);
+                }));
             });
 
-            it('should retrieve systemPoller info from metric namespace', function () {
-                this.timeout(300000);
+            describe('System Poller data', () => {
+                let cloudWatch;
+                let metricDimensions;
 
-                const startTime = new Date().toISOString();
-                // metrics take around 2-3 minutes to show up
-                return new Promise((resolve) => { setTimeout(resolve, 180000); })
-                    .then(() => {
-                        // get system poller data
-                        const uri = `${constants.BASE_ILX_URI}/systempoller/My_System`;
-                        return testUtil.makeRequest(VM_IP, uri, options);
-                    })
-                    .then((sysPollerData) => {
-                        const defDimensions = awsUtil.getDefaultDimensions(sysPollerData[0]);
-                        const endTime = new Date().toISOString();
+                before(() => {
+                    cloudWatch = awsUtil.getCloudWatchClient();
+                    metricDimensions = {};
+                });
+
+                harness.bigip.forEach((bigip) => it(
+                    `should fetch system poller data via debug endpoint - ${bigip.name}`,
+                    () => bigip.telemetry.getSystemPollerData('My_System')
+                        .then((data) => {
+                            metricDimensions[bigip.hostname] = awsSrcUtil.getDefaultDimensions(data[0]);
+                        })
+                ));
+
+                harness.bigip.forEach((bigip) => it(
+                    `should check AWS CloudWatch Metrics for system poller data - ${bigip.name}`,
+                    () => {
+                        const timeStart = new Date();
+                        const timeEnd = new Date();
+                        timeStart.setMinutes(timeEnd.getMinutes() - 5);
+
                         const getOpts = {
                             MaxDatapoints: 10,
-                            StartTime: startTime,
-                            EndTime: endTime,
+                            StartTime: timeStart.toISOString(),
+                            EndTime: timeEnd.toISOString(),
                             // API requires all dimension values if present for the results to appear
                             // you can't match with just one or no dimension value
                             MetricDataQueries: [
@@ -204,9 +192,9 @@ describe('AWS Cloud-based Tests', function () {
                                     Id: 'm1',
                                     MetricStat: {
                                         Metric: {
-                                            Namespace: METRIC_NAMESPACE,
+                                            Namespace: AWS_META.metricNamespace,
                                             MetricName: 'F5_system_cpu',
-                                            Dimensions: defDimensions
+                                            Dimensions: miscUtils.deepCopy(metricDimensions[bigip.hostname])
                                         },
                                         Period: 300,
                                         Stat: 'Average'
@@ -215,22 +203,26 @@ describe('AWS Cloud-based Tests', function () {
 
                             ]
                         };
-                        return cloudWatch.getMetricData(getOpts).promise();
-                    })
-                    .then((data) => {
-                        // if no match, result = null
-                        assert.notStrictEqual(data, null);
-                        const metricDataRes = data.MetricDataResults;
-                        assert.notDeepStrictEqual(metricDataRes, []);
-                        assert.notStrictEqual(metricDataRes[0].Values.length, 0);
-                    });
+                        return cloudWatch.getMetricData(getOpts).promise()
+                            .then((data) => {
+                                // if no match, result = null
+                                assert.isNotNull(data);
+                                const metricDataRes = data.MetricDataResults;
+                                assert.isNotEmpty(metricDataRes);
+                                assert.isNotEmpty(metricDataRes[0].Values);
+                            })
+                            .catch((err) => {
+                                bigip.logger.error('No system poller data found. Going to wait another 20sec', err);
+                                return promiseUtils.sleepAndReject(20000, err);
+                            });
+                    }
+                ));
             });
 
-            it('should remove configuration', () => {
-                const declaration = {
+            describe('Teardown TS', () => {
+                testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy({
                     class: 'Telemetry'
-                };
-                return assertPost(declaration);
+                }));
             });
         });
     });

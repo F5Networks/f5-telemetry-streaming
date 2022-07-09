@@ -169,6 +169,11 @@ module.exports = {
                                 endpoint2: {
                                     path: 'sysStats',
                                     protocol: 'snmp'
+                                },
+                                endpoint3: {
+                                    path: 'sysStats',
+                                    protocol: 'snmp',
+                                    numericalEnums: true
                                 }
                             }
                         }
@@ -249,7 +254,15 @@ module.exports = {
                                 enable: true,
                                 name: 'endpoint2',
                                 path: 'sysStats',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
+                            },
+                            endpoint3: {
+                                enable: true,
+                                name: 'endpoint3',
+                                path: 'sysStats',
+                                protocol: 'snmp',
+                                numericalEnums: true
                             }
                         }
                     },
@@ -303,7 +316,8 @@ module.exports = {
                                 enable: true,
                                 name: 'endpoint2',
                                 path: 'sysStats',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     }
@@ -338,7 +352,8 @@ module.exports = {
                         },
                         enabledSnmpEndpoint1: {
                             path: 'enabledSnmpEndpoint1',
-                            protocol: 'snmp'
+                            protocol: 'snmp',
+                            numericalEnums: true
                         }
                     }
                 },
@@ -691,7 +706,8 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint1',
                                 path: 'enabledSnmpEndpoint1',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: true
                             }
                         }
                     },
@@ -763,25 +779,29 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint1',
                                 path: 'enabledSnmpEndpoint1',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: true
                             },
                             enabledSnmpEndpoint2: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint2',
                                 path: 'enabledSnmpEndpoint2',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint_4: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint_4',
                                 path: 'enabledSnmpEndpoint.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint_5: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint_5',
                                 path: 'enabledSnmpEndpoint.5',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     },
@@ -841,13 +861,15 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint1',
                                 path: 'enabledSnmpEndpoint1',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: true
                             },
                             enabledSnmpEndpoint2: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint2',
                                 path: 'enabledSnmpEndpoint2',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     },
@@ -901,7 +923,8 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint',
                                 path: 'enabledSnmpEndpoint1.3',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     },
@@ -973,25 +996,29 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint',
                                 path: 'enabledSnmpEndpoint1.3',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint2: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint2',
                                 path: 'enabledSnmpEndpoint.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint_4: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint_4',
                                 path: 'enabledSnmpEndpoint.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint_5: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint_5',
                                 path: 'enabledSnmpEndpoint.5',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     },
@@ -1051,13 +1078,15 @@ module.exports = {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint',
                                 path: 'enabledSnmpEndpoint1.3',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             },
                             enabledSnmpEndpoint2: {
                                 enable: true,
                                 name: 'enabledSnmpEndpoint2',
                                 path: 'enabledSnmpEndpoint.4',
-                                protocol: 'snmp'
+                                protocol: 'snmp',
+                                numericalEnums: false
                             }
                         }
                     }

@@ -10,53 +10,78 @@
 
 /* eslint-disable no-console */
 
-// initialize logger
-const util = require('./shared/util'); // eslint-disable-line
+/**
+ * @module test/functional/testRunner
+ */
+
 const constants = require('./shared/constants');
-const dutTests = require('./dutTests');
 const consumerHostTests = require('./consumerSystemTests');
-const pullConsumerHostTests = require('./pullConsumerSystemTests');
+const dutTests = require('./dutTests');
+const harnessUtils = require('./shared/harness');
+const miscUtils = require('./shared/utils/misc');
 
-const skipDut = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_DUT_TESTS];
-const skipConsumer = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_CONSUMER_TESTS];
-const skipPullConsumer = process.env[constants.ENV_VARS.TEST_CONTROLS.SKIP_PULL_CONSUMER_TESTS];
-const truthyRegex = /^\s*(true|1)\s*$/i;
+const runConsumerTests = !miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.SKIP_CONSUMER_TESTS, {
+    castTo: 'boolean',
+    defaultValue: false
+});
+const runDutSetup = !miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.SKIP_DUT_SETUP, {
+    castTo: 'boolean',
+    defaultValue: false
+});
+const runDutTeardown = !miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.SKIP_DUT_TEARDOWN, {
+    castTo: 'boolean',
+    defaultValue: false
+});
+const runDutTests = !miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.SKIP_DUT_TESTS, {
+    castTo: 'boolean',
+    defaultValue: false
+});
 
-const runDut = !skipDut || !truthyRegex.test(skipDut);
-const runConsumer = !skipConsumer || !truthyRegex.test(skipConsumer);
-const runPullConsumer = !skipPullConsumer || !truthyRegex.test(skipPullConsumer);
+console.info('Directory for artifacts:', constants.ARTIFACTS_DIR);
+miscUtils.createDir(constants.ARTIFACTS_DIR);
+
+console.info('Harness initialization');
+const harness = harnessUtils.initializeFromEnv();
+harnessUtils.setDefaultHarness(harness);
 
 describe('Global: Setup', () => {
-    dutTests.setup();
-    if (runConsumer) {
-        consumerHostTests.setup();
+    if (runDutSetup) {
+        describe('DUT(s) setup', dutTests.setup);
+    } else {
+        console.warn('WARN: skipping DUT setup');
     }
-    if (runPullConsumer) {
-        pullConsumerHostTests.setup();
+
+    if (runConsumerTests) {
+        describe('CS(s) and tests setup', consumerHostTests.setup);
+    } else {
+        console.warn('WARN: skipping Consumer setup');
     }
 });
 
 describe('Global: Test', () => {
-    if (runDut) {
-        dutTests.test();
+    if (runDutTests) {
+        describe('DUT(s) tests', dutTests.test);
     } else {
         console.warn('WARN: skipping DUT tests');
     }
-    if (runConsumer) {
-        consumerHostTests.test();
+
+    if (runConsumerTests) {
+        describe('CS(s) tests', consumerHostTests.test);
     } else {
         console.warn('WARN: skipping Consumers tests');
-    }
-    if (runPullConsumer) {
-        pullConsumerHostTests.test();
-    } else {
-        console.warn('WARN: skipping Pull Consumers tests');
     }
 });
 
 describe('Global: Teardown', () => {
-    dutTests.teardown();
-    if (runConsumer) {
-        consumerHostTests.teardown();
+    if (runDutTeardown) {
+        describe('DUT(s) teardown', dutTests.teardown);
+    } else {
+        console.warn('WARN: skipping DUT teardown');
+    }
+
+    if (runConsumerTests) {
+        describe('CS(s) teardown', consumerHostTests.teardown);
+    } else {
+        console.warn('WARN: skipping Consumer teardown');
     }
 });
