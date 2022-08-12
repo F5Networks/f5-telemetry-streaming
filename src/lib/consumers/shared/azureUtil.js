@@ -70,7 +70,47 @@ function getApiDomain(region, apiType) {
     }
 }
 
+function getCustomOptionForApiUrl(option) {
+    if (context.config.customOpts) {
+        const optionData = context.config.customOpts.find(element => element.name === option);
+        if (optionData) {
+            return optionData.value.toString();
+        }
+    }
+
+    return '';
+}
+
 function getApiUrl(context, apiType) {
+    // If the user specified a URL in the customOpts configuration, use that instead of calculating a URL. Example:
+    // {
+    //     "class": "Telemetry",
+    //     "My_Consumer": {
+    //         "class": "Telemetry_Consumer",
+    //         "type": "Azure_Log_Analytics",
+    //         "workspaceId": "workspaceid",
+    //         "passphrase": {
+    //             "cipherText": "sharedkey"
+    //         },
+    //         "useManagedIdentity": false,
+    //         "format": "propertyBased",
+    //         "customOpts": [
+    //              {
+    //                  "name": "managementUrl",
+    //                  "value": " https://management.azure.cn"
+    //              },
+    //              {
+    //                  "name": "opinsightsUrl",
+    //                  "value": " https://workspaceid.ods.opinsights.azure.cn/api/logs?api-version=2016-04-01"
+    //              }
+    //          ]
+    //     }
+    // }
+    const url = getCustomOptionForApiUrl(`${apiType}Url`);
+    if (url) {
+        return url;
+    }
+
     const region = getInstanceRegion(context);
     const domain = getApiDomain(region, apiType);
     if (apiType === AZURE_API_TYPES.OPINSIGHTS) {
