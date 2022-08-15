@@ -10,6 +10,7 @@
 
 const crypto = require('crypto');
 const hasProperty = require('lodash/has');
+const logging = require('../../logging');
 const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 
@@ -70,7 +71,7 @@ function getApiDomain(region, apiType) {
     }
 }
 
-function getCustomOptionForApiUrl(option) {
+function getCustomOptionForApiUrl(context, option) {
     if (context.config.customOpts) {
         const optionData = context.config.customOpts.find(element => element.name === option);
         if (optionData) {
@@ -97,17 +98,18 @@ function getApiUrl(context, apiType) {
     //         "customOpts": [
     //              {
     //                  "name": "managementUrl",
-    //                  "value": " https://management.azure.cn"
+    //                  "value": "https://management.azure.cn"
     //              },
     //              {
     //                  "name": "opinsightsUrl",
-    //                  "value": " https://workspaceid.ods.opinsights.azure.cn/api/logs?api-version=2016-04-01"
+    //                  "value": "https://workspaceid.ods.opinsights.azure.cn/api/logs?api-version=2016-04-01"
     //              }
     //          ]
     //     }
     // }
-    const url = getCustomOptionForApiUrl(`${apiType}Url`);
+    const url = getCustomOptionForApiUrl(context, `${apiType}Url`);
     if (url) {
+        logging.debug(`using custom API URL ${url}`);
         return url;
     }
 
