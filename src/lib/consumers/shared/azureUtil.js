@@ -10,7 +10,7 @@
 
 const crypto = require('crypto');
 const hasProperty = require('lodash/has');
-const logging = require('../../logging');
+const logger = require('../../logger');
 const promiseUtil = require('../../utils/promise');
 const requestsUtil = require('../../utils/requests');
 
@@ -109,7 +109,7 @@ function getApiUrl(context, apiType) {
     // }
     const url = getCustomOptionForApiUrl(context, `${apiType}Url`);
     if (url) {
-        logging.debug(`using custom API URL ${url}`);
+        logger.debug(`using custom API URL ${url}`);
         return url;
     }
 
