@@ -147,6 +147,10 @@ The following items have been added to the Azure Log Analytics consumer since it
         - **region**
         - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
 
+      * - 1.31
+        - **customOpts**
+        - The **customOpts** property for Azure Log Analytics was added to support "managementUrl" and "opinsightsUrl" options that enable the use of the TC in environments where the cloud URLs can not be publicly published. Setting these values in the consumer configuration will override the calculated value based on region.
+
 
 
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
@@ -159,6 +163,11 @@ To see more information about sending data to Log Analytics, see |HTTP Data Coll
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/azure_log_analytics.json
+    :language: json
+
+Example Declaration with `customOps` (available in TC 1.31)
+
+.. literalinclude:: ../examples/declarations/azure_log_analytics_customOpts.json
     :language: json
 
 
@@ -1093,7 +1102,9 @@ In the following table, we list the Azure Government regions.
 | USGov Arizona        |  33.4484   | -112.0740  | usgovarizona       |
 +----------------------+------------+------------+--------------------+
 
+|
 
+If you are using this tool in a cloud other than Azure Public or Azure Government, use the `managementUrl` and `opinsightsUrl` options for the `customOpts` array to specifically set the URLs.
 
 
 .. |splunk_img| image:: /images/splunk_logo.png
