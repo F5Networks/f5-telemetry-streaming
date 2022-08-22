@@ -3762,6 +3762,240 @@ module.exports = {
                     time: 1546304461000
                 },
                 {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'blade1',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'blade2',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'client',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientAccepts',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'clientConnects',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'connections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'httpRequests',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'pvaClient',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'pvaServer',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'server',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'activeSslClientConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'newSslClientConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'activeSslServerConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'newSslServerConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverNewConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
+                    time: 1546304461000,
+                    source: 'f5-telemetry',
+                    sourcetype: 'f5:telemetry',
+                    host: 'telemetry.bigip.com',
+                    fields: {
+                        'metric_name:average': 0,
+                        'metric_name:current': 0,
+                        'metric_name:max': 0,
+                        name: 'serverNewTcpConnections',
+                        telemetryStreamingStatisticSet: 'system.connectionsPerformance'
+                    }
+                },
+                {
                     fields: {
                         filename: 'ASM-AttackSignatures_20190716_122131.im',
                         'metric_name:createDateTime': 1563279691000,

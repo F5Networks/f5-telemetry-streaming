@@ -353,7 +353,7 @@ const tpm = {
             if (cache.length >= this.maxRecords) {
                 // write last N messages only
                 const dataLen = cache.length - this.maxRecords;
-                this.logger.debug(`Writing ${dataLen} out of ${cache.length} messages (limit = ${this.maxRecords} messages)`);
+                this.logger.debug(`Writing last ${this.maxRecords} out of ${cache.length} messages (limit = ${this.maxRecords} messages)`);
                 data = cache.slice(dataLen);
             } else {
                 // this.maxRecords - cache.length = X old messages can be carried over

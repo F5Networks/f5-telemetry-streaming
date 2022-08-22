@@ -1977,4 +1977,264 @@ describe('Misc Util', () => {
             );
         });
     });
+
+    describe('Chunks', () => {
+        describe('constructor', () => {
+            it('should not throw error on missing maxChunkSize value', () => {
+                let chunks = new util.Chunks();
+                assert.deepStrictEqual(chunks.maxChunkSize, Number.MAX_SAFE_INTEGER, 'should set default value for maxChunkSize');
+
+                chunks = new util.Chunks({});
+                assert.deepStrictEqual(chunks.maxChunkSize, Number.MAX_SAFE_INTEGER, 'should set default value for maxChunkSize');
+            });
+
+            it('should throw error on invalid maxChunkSize value', () => {
+                assert.throws(
+                    () => new util.Chunks({ maxChunkSize: 'not a number' }),
+                    '\'maxChunkSize\' should be > 0, got \'not a number\' (string)',
+                    'should throw error on invalid maxChunkSize value'
+                );
+                assert.throws(
+                    () => new util.Chunks({ maxChunkSize: -1 }),
+                    '\'maxChunkSize\' should be > 0, got \'-1\' (number)',
+                    'should throw error on invalid maxChunkSize value'
+                );
+                assert.throws(
+                    () => new util.Chunks({ maxChunkSize: 0 }),
+                    '\'maxChunkSize\' should be > 0, got \'0\' (number)',
+                    'should throw error on invalid maxChunkSize value'
+                );
+            });
+
+            it('should use default serializer', () => {
+                const chunks = new util.Chunks();
+                chunks.add([1, 2, 3]);
+                assert.deepStrictEqual(chunks.getAll(), [['[1,2,3]']], 'should return expected data');
+            });
+
+            it('should use non-default serializer', () => {
+                const chunks = new util.Chunks({ serializer: (data) => JSON.stringify(data, null, 4) });
+                chunks.add([1, 2, 3]);
+                assert.deepStrictEqual(chunks.getAll(), [['[\n    1,\n    2,\n    3\n]']], 'should return expected data');
+            });
+
+            it('should use "this" as context for serializer', () => {
+                const chunks = new util.Chunks({
+                    serializer(data) {
+                        assert.instanceOf(this, util.Chunks);
+                        assert.deepStrictEqual(this.currentChunkSize, 0, 'should return expected value');
+                        return JSON.stringify(data, null, 4);
+                    }
+                });
+                chunks.add('test');
+            });
+        });
+
+        describe('.add()', () => {
+            it('should add data', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.getAll(), [], 'should return expected value');
+                assert.deepStrictEqual(chunks.totalChunks, 0, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 0, 'should return expected value');
+
+                chunks.add('test1test');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 9, 'should return expected value');
+
+                chunks.add('test2test');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 18, 'should return expected value');
+
+                chunks.add('t');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test', 't']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 19, 'should return expected value');
+
+                chunks.add('est');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test', 't'], ['est']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 3, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 22, 'should return expected value');
+
+                chunks.add('3test');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test', 't'], ['est', '3test']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 3, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 27, 'should return expected value');
+            });
+
+            it('should convert data to JSON', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.getAll(), [], 'should return expected value');
+                assert.deepStrictEqual(chunks.totalChunks, 0, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 0, 'should return expected value');
+
+                chunks.add(10);
+                assert.deepStrictEqual(chunks.getAll(), [['10']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 2, 'should return expected value');
+
+                chunks.add({ test: 10 });
+                assert.deepStrictEqual(chunks.getAll(), [['10'], ['{"test":10}']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 13, 'should return expected value');
+            });
+
+            it('should add data when serializer returns Array', () => {
+                const chunks = new util.Chunks({
+                    maxChunkSize: 10,
+                    serializer: (data) => [data.slice(0, 2), data.slice(2)]
+                });
+                chunks.add('message');
+                assert.deepStrictEqual(chunks.getAll(), [['me', 'ssage']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 7, 'should return expected value');
+
+                chunks.add('messageB');
+                assert.deepStrictEqual(chunks.getAll(), [['me', 'ssage', 'me'], ['ssageB']], 'should return expected data');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 15, 'should return expected value');
+            });
+        });
+
+        describe('.clear()', () => {
+            it('should reset state', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.totalSize, 0, 'should return expected value');
+
+                chunks.add('test1test');
+                chunks.add('test2test');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 18, 'should return expected value');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test']], 'should return expected data');
+
+                chunks.clear();
+                assert.deepStrictEqual(chunks.totalChunks, 0, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 0, 'should return expected value');
+                assert.deepStrictEqual(chunks.getAll(), [], 'should return expected data');
+
+                chunks.add('test3test');
+                chunks.add('test4test');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalSize, 18, 'should return expected value');
+                assert.deepStrictEqual(chunks.getAll(), [['test3test'], ['test4test']], 'should return expected data');
+            });
+        });
+
+        describe('.currentChunkSize', () => {
+            it('should return size of current chunk', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.currentChunkSize, 0, 'should return expected value');
+
+                chunks.add('test1test');
+                assert.deepStrictEqual(chunks.currentChunkSize, 9, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+
+                chunks.add('t');
+                assert.deepStrictEqual(chunks.currentChunkSize, 10, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+
+                chunks.add('e');
+                assert.deepStrictEqual(chunks.currentChunkSize, 1, 'should return expected value');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+            });
+        });
+
+        describe('.getAll()', () => {
+            it('should return all data', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.getAll(), [], 'should return expected value');
+
+                chunks.add('test1test');
+                chunks.add('test2test');
+                assert.deepStrictEqual(chunks.getAll(), [['test1test'], ['test2test']], 'should return expected data');
+            });
+        });
+
+        describe('.maxChunkSize', () => {
+            it('should be read-only property', () => {
+                const chunks = new util.Chunks();
+                const origin = chunks.maxChunkSize;
+                assert.throws(() => {
+                    chunks.maxChunkSize = 10;
+                });
+                assert.isTrue(origin === chunks.maxChunkSize, 'should not be able to update read-only property');
+            });
+
+            it('should set property value', () => {
+                let chunks = new util.Chunks();
+                assert.deepStrictEqual(chunks.maxChunkSize, Number.MAX_SAFE_INTEGER, 'should set default value for maxChunkSize');
+
+                chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.maxChunkSize, 10, 'should set provided value for maxChunkSize');
+            });
+        });
+
+        describe('.serializer', () => {
+            it('should be read-only property', () => {
+                const chunks = new util.Chunks();
+                const origin = chunks.serializer;
+                assert.throws(() => {
+                    chunks.serializer = 10;
+                });
+                assert.isTrue(origin === chunks.serializer, 'should not be able to update read-only property');
+            });
+
+            it('should use default serializer', () => {
+                const chunks = new util.Chunks();
+                assert.deepStrictEqual(chunks.serializer([1, 2, 3]), '[1,2,3]', 'should return expected data');
+            });
+
+            it('should use non-default serializer', () => {
+                const chunks = new util.Chunks({ serializer: (data) => JSON.stringify(data, null, 4) });
+                assert.deepStrictEqual(chunks.serializer([1, 2, 3]), '[\n    1,\n    2,\n    3\n]', 'should return expected data');
+            });
+        });
+
+        describe('.totalChunks', () => {
+            it('should be read-only property', () => {
+                const chunks = new util.Chunks();
+                const origin = chunks.totalChunks;
+                assert.throws(() => {
+                    chunks.totalChunks = 10;
+                });
+                assert.isTrue(origin === chunks.totalChunks, 'should not be able to update read-only property');
+            });
+
+            it('should return number of chunks', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.totalChunks, 0, 'should return expected value');
+
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalChunks, 1, 'should return expected value');
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalChunks, 2, 'should return expected value');
+            });
+        });
+
+        describe('.totalSize', () => {
+            it('should be read-only property', () => {
+                const chunks = new util.Chunks();
+                const origin = chunks.totalSize;
+                assert.throws(() => {
+                    chunks.totalSize = 10;
+                });
+                assert.isTrue(origin === chunks.totalSize, 'should not be able to update read-only property');
+            });
+
+            it('should return number of bytes', () => {
+                const chunks = new util.Chunks({ maxChunkSize: 10 });
+                assert.deepStrictEqual(chunks.totalSize, 0, 'should return expected value');
+
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalSize, 4, 'should return expected value');
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalSize, 8, 'should return expected value');
+                chunks.add('test');
+                assert.deepStrictEqual(chunks.totalSize, 12, 'should return expected value');
+            });
+        });
+    });
 });

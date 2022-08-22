@@ -1261,11 +1261,11 @@ describe('Normalize Util', () => {
         });
     });
 
-    describe('.throughputPerformancePreProcessing()', () => {
+    describe('.sysPerformancePreProcessing()', () => {
         it('should convert array to mapping and set appropriate keys according to description', () => {
-            const actual = normalizeUtil.throughputPerformancePreProcessing({
+            const actual = normalizeUtil.sysPerformancePreProcessing({
                 data: {
-                    statsArray: [
+                    In: [
                         { val: 20, 'Throughput(packets)': 'stats' },
                         { val: 30, 'Throughput(bits)': 'stats' },
                         { val: 40 },
@@ -1278,11 +1278,11 @@ describe('Normalize Util', () => {
                 }
             });
             assert.deepStrictEqual(actual, {
-                'statsArray Packets': { val: 20, 'Throughput(packets)': 'stats' },
-                'statsArray Bits': { val: 30, 'Throughput(bits)': 'stats' },
-                statsArray: { val: 40 },
-                statsArray1: { val: 50 },
-                'statsArray Bits1': { val: 60, 'Throughput(bits)': 'stats' },
+                In: { val: 40 },
+                In0: { val: 50 },
+                'In Packets': { val: 20, 'Throughput(packets)': 'stats' },
+                'In Bits': { val: 30, 'Throughput(bits)': 'stats' },
+                'In Bits0': { val: 60, 'Throughput(bits)': 'stats' },
                 stats: { val: 40 },
                 statsArray0: { val: 70 },
                 'statsArray Bits0': { val: 80 }
@@ -1290,9 +1290,9 @@ describe('Normalize Util', () => {
         });
     });
 
-    describe('.throughputPerformancePostProcessing()', () => {
+    describe('.sysPerformancePostProcessing()', () => {
         it('should convert keys to camelCase and include only average, current and max properties', () => {
-            const actual = normalizeUtil.throughputPerformancePostProcessing({
+            const actual = normalizeUtil.sysPerformancePostProcessing({
                 data: {
                     'statsArray Packets': {
                         average: '100',

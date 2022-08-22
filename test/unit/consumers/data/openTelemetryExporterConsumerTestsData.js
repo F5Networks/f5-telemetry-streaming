@@ -76,7 +76,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'configSyncSucceeded',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'syncMode',
@@ -179,7 +179,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'configSyncSucceeded',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'syncMode',
@@ -282,7 +282,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'configSyncSucceeded',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'syncMode',
@@ -385,7 +385,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'configSyncSucceeded',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'syncMode',
@@ -488,7 +488,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'configSyncSucceeded',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'syncMode',
@@ -579,13 +579,7 @@ module.exports = {
                                 }
                             ],
                             value: 436342
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -594,13 +588,7 @@ module.exports = {
                                 }
                             ],
                             value: 7181064
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -609,13 +597,7 @@ module.exports = {
                                 }
                             ],
                             value: 3269592
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -624,13 +606,7 @@ module.exports = {
                                 }
                             ],
                             value: 4136432
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -639,13 +615,7 @@ module.exports = {
                                 }
                             ],
                             value: 3096336
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -654,13 +624,7 @@ module.exports = {
                                 }
                             ],
                             value: 20642428
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -669,13 +633,7 @@ module.exports = {
                                 }
                             ],
                             value: 3023760
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -684,13 +642,7 @@ module.exports = {
                                 }
                             ],
                             value: 51607740
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -699,13 +651,7 @@ module.exports = {
                                 }
                             ],
                             value: 7181064
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -714,13 +660,7 @@ module.exports = {
                                 }
                             ],
                             value: 7181064
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -729,13 +669,7 @@ module.exports = {
                                 }
                             ],
                             value: 7181064
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -744,13 +678,7 @@ module.exports = {
                                 }
                             ],
                             value: 4096
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -759,13 +687,7 @@ module.exports = {
                                 }
                             ],
                             value: 298004
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -774,13 +696,7 @@ module.exports = {
                                 }
                             ],
                             value: 7181064
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_1024_blocks',
-                    description: 'system.diskStorage.1024-blocks',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -804,13 +720,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.55
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -819,13 +729,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.09
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -834,13 +738,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.11
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -849,13 +747,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.83
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -864,13 +756,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.37
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -879,13 +765,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.03
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -894,13 +774,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.08
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -909,13 +783,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.03
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -924,13 +792,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -939,13 +801,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -954,13 +810,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -969,13 +819,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -984,13 +828,7 @@ module.exports = {
                                 }
                             ],
                             value: 1
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -999,13 +837,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskStorage_Capacity_Float',
-                    description: 'system.diskStorage.Capacity_Float',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1029,13 +861,7 @@ module.exports = {
                                 }
                             ],
                             value: 1.46
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1044,13 +870,7 @@ module.exports = {
                                 }
                             ],
                             value: 1
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1059,13 +879,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1074,13 +888,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1089,13 +897,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.14
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1104,13 +906,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1119,13 +915,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1134,13 +924,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.04
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1149,13 +933,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.13
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1164,13 +942,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_r_s',
-                    description: 'system.diskLatency.r/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1194,13 +966,7 @@ module.exports = {
                                 }
                             ],
                             value: 8.25
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1209,13 +975,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1224,13 +984,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1239,13 +993,7 @@ module.exports = {
                                 }
                             ],
                             value: 11.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1254,13 +1002,7 @@ module.exports = {
                                 }
                             ],
                             value: 2.56
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1269,13 +1011,7 @@ module.exports = {
                                 }
                             ],
                             value: 4.28
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1284,13 +1020,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1299,13 +1029,7 @@ module.exports = {
                                 }
                             ],
                             value: 1.52
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1314,13 +1038,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1329,13 +1047,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.05
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency_w_s',
-                    description: 'system.diskLatency.w/s',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1359,13 +1071,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.09
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1374,13 +1080,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.04
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1389,13 +1089,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1404,13 +1098,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1419,13 +1107,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1434,13 +1116,7 @@ module.exports = {
                                 }
                             ],
                             value: 0.01
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1449,13 +1125,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1464,13 +1134,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1479,13 +1143,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1494,13 +1152,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_diskLatency__util',
-                    description: 'system.diskLatency.%util',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1528,13 +1180,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_networkInterfaces_counters_bitsIn',
-                    description: 'system.networkInterfaces.counters.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1547,13 +1193,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_networkInterfaces_counters_bitsIn',
-                    description: 'system.networkInterfaces.counters.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1585,13 +1225,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_networkInterfaces_counters_bitsOut',
-                    description: 'system.networkInterfaces.counters.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1604,13 +1238,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_networkInterfaces_counters_bitsOut',
-                    description: 'system.networkInterfaces.counters.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1638,13 +1266,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1653,13 +1275,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1668,13 +1284,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1683,13 +1293,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1698,13 +1302,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1713,13 +1311,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1728,13 +1320,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1743,13 +1329,7 @@ module.exports = {
                                 }
                             ],
                             value: 2969820
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1758,13 +1338,7 @@ module.exports = {
                                 }
                             ],
                             value: 133
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1773,13 +1347,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1788,13 +1356,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1803,13 +1365,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1818,13 +1374,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1833,13 +1383,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1848,13 +1392,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1863,13 +1401,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1878,13 +1410,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_average',
-                    description: 'system.throughputPerformance.average',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1908,13 +1434,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1923,13 +1443,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1938,13 +1452,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1953,13 +1461,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1968,13 +1470,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1983,13 +1479,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -1998,13 +1488,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2013,13 +1497,7 @@ module.exports = {
                                 }
                             ],
                             value: 846485
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2028,13 +1506,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2043,13 +1515,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2058,13 +1524,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2073,13 +1533,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2088,13 +1542,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2103,13 +1551,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2118,13 +1560,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2133,13 +1569,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2148,13 +1578,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_current',
-                    description: 'system.throughputPerformance.current',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2178,13 +1602,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2193,13 +1611,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2208,13 +1620,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2223,13 +1629,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2238,13 +1638,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2253,13 +1647,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2268,13 +1656,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2283,13 +1665,7 @@ module.exports = {
                                 }
                             ],
                             value: 36591317
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2298,13 +1674,7 @@ module.exports = {
                                 }
                             ],
                             value: 12478
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2313,13 +1683,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2328,13 +1692,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2343,13 +1701,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2358,13 +1710,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2373,13 +1719,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2388,13 +1728,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2403,13 +1737,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2418,18 +1746,516 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'system_throughputPerformance_max',
-                    description: 'system.throughputPerformance.max',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
                                     key: 'name',
                                     value: 'sslTps'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'system_connectionsPerformance_average',
+                    description: 'system.connectionsPerformance.average',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade1'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade2'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'client'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientAccepts'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnects'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'connections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'httpRequests'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaClient'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaServer'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'server'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewTcpConnections'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'system_connectionsPerformance_current',
+                    description: 'system.connectionsPerformance.current',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade1'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade2'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'client'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientAccepts'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnects'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'connections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'httpRequests'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaClient'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaServer'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'server'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewTcpConnections'
+                                }
+                            ],
+                            value: 0
+                        }
+                    ]
+                },
+                {
+                    name: 'system_connectionsPerformance_max',
+                    description: 'system.connectionsPerformance.max',
+                    dataPoints: [
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade1'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'blade2'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'client'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientAccepts'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'clientConnects'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'connections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'httpRequests'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaClient'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'pvaServer'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'server'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslClientConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'activeSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'newSslServerConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewConnections'
+                                }
+                            ],
+                            value: 0
+                        },
+                        {
+                            labels: [
+                                {
+                                    key: 'name',
+                                    value: 'serverNewTcpConnections'
                                 }
                             ],
                             value: 0
@@ -2475,11 +2301,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2515,13 +2341,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_bitsIn',
-                    description: 'virtualServers.clientside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2538,11 +2358,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2574,13 +2394,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_bitsIn',
-                    description: 'virtualServers.clientside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2597,11 +2411,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2644,11 +2458,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2684,13 +2498,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_bitsOut',
-                    description: 'virtualServers.clientside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2707,11 +2515,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2743,13 +2551,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_bitsOut',
-                    description: 'virtualServers.clientside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2766,11 +2568,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2813,11 +2615,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2853,13 +2655,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_curConns',
-                    description: 'virtualServers.clientside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2876,11 +2672,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2912,13 +2708,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_curConns',
-                    description: 'virtualServers.clientside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -2935,11 +2725,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -2982,11 +2772,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3022,13 +2812,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_evictedConns',
-                    description: 'virtualServers.clientside.evictedConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3045,11 +2829,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3081,13 +2865,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_evictedConns',
-                    description: 'virtualServers.clientside.evictedConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3104,11 +2882,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3151,11 +2929,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3191,13 +2969,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_maxConns',
-                    description: 'virtualServers.clientside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3214,11 +2986,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3250,13 +3022,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_maxConns',
-                    description: 'virtualServers.clientside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3273,11 +3039,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3320,11 +3086,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3360,13 +3126,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_pktsIn',
-                    description: 'virtualServers.clientside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3383,11 +3143,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3419,13 +3179,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_pktsIn',
-                    description: 'virtualServers.clientside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3442,11 +3196,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3489,11 +3243,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3529,13 +3283,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_pktsOut',
-                    description: 'virtualServers.clientside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3552,11 +3300,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3588,13 +3336,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_pktsOut',
-                    description: 'virtualServers.clientside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3611,11 +3353,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3658,11 +3400,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3698,13 +3440,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_slowKilled',
-                    description: 'virtualServers.clientside.slowKilled',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3721,11 +3457,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3757,13 +3493,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_slowKilled',
-                    description: 'virtualServers.clientside.slowKilled',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3780,11 +3510,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3827,11 +3557,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3867,13 +3597,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_totConns',
-                    description: 'virtualServers.clientside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3890,11 +3614,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'false'
+                                    value: false
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -3926,13 +3650,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'virtualServers_clientside_totConns',
-                    description: 'virtualServers.clientside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -3949,11 +3667,11 @@ module.exports = {
                                 },
                                 {
                                     key: 'isAvailable',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'isEnabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'status.statusReason',
@@ -4008,13 +3726,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_activeMemberCnt',
-                    description: 'pools.activeMemberCnt',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4039,13 +3751,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_activeMemberCnt',
-                    description: 'pools.activeMemberCnt',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4074,13 +3780,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_activeMemberCnt',
-                    description: 'pools.activeMemberCnt',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4144,13 +3844,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsIn',
-                    description: 'pools.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4175,13 +3869,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsIn',
-                    description: 'pools.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4210,13 +3898,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsIn',
-                    description: 'pools.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4280,13 +3962,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsOut',
-                    description: 'pools.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4311,13 +3987,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsOut',
-                    description: 'pools.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4346,13 +4016,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_bitsOut',
-                    description: 'pools.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4416,13 +4080,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_curConns',
-                    description: 'pools.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4447,13 +4105,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_curConns',
-                    description: 'pools.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4482,13 +4134,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_curConns',
-                    description: 'pools.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4552,13 +4198,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_maxConns',
-                    description: 'pools.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4583,13 +4223,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_maxConns',
-                    description: 'pools.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4618,13 +4252,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_maxConns',
-                    description: 'pools.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4688,13 +4316,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsIn',
-                    description: 'pools.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4719,13 +4341,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsIn',
-                    description: 'pools.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4754,13 +4370,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsIn',
-                    description: 'pools.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4824,13 +4434,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsOut',
-                    description: 'pools.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4855,13 +4459,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsOut',
-                    description: 'pools.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4890,13 +4488,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_pktsOut',
-                    description: 'pools.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4960,13 +4552,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_totConns',
-                    description: 'pools.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -4991,13 +4577,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_totConns',
-                    description: 'pools.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5026,13 +4606,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_serverside_totConns',
-                    description: 'pools.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5100,13 +4674,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5139,13 +4707,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5178,13 +4740,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5217,13 +4773,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5256,13 +4806,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5299,13 +4843,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsIn',
-                    description: 'pools.members.serverside.bitsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5381,13 +4919,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5420,13 +4952,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5459,13 +4985,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5498,13 +5018,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5537,13 +5051,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5580,13 +5088,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_bitsOut',
-                    description: 'pools.members.serverside.bitsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5662,13 +5164,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5701,13 +5197,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5740,13 +5230,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5779,13 +5263,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5818,13 +5296,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5861,13 +5333,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_curConns',
-                    description: 'pools.members.serverside.curConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5943,13 +5409,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -5982,13 +5442,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6021,13 +5475,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6060,13 +5508,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6099,13 +5541,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6142,13 +5578,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_maxConns',
-                    description: 'pools.members.serverside.maxConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6224,13 +5654,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6263,13 +5687,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6302,13 +5720,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6341,13 +5753,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6380,13 +5786,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6423,13 +5823,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsIn',
-                    description: 'pools.members.serverside.pktsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6505,13 +5899,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6544,13 +5932,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6583,13 +5965,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6622,13 +5998,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6661,13 +6031,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6704,13 +6068,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_pktsOut',
-                    description: 'pools.members.serverside.pktsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6786,13 +6144,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6825,13 +6177,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6864,13 +6210,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6903,13 +6243,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6942,13 +6276,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -6985,13 +6313,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_serverside_totConns',
-                    description: 'pools.members.serverside.totConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7071,13 +6393,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'pools_members_totRequests',
-                    description: 'pools.members.totRequests',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7137,13 +6453,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'ltmPolicies_invoked',
-                    description: 'ltmPolicies.invoked',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7179,13 +6489,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'ltmPolicies_succeeded',
-                    description: 'ltmPolicies.succeeded',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7241,13 +6545,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_cookiePersistInserts',
-                    description: 'httpProfiles.cookiePersistInserts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7260,13 +6558,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_cookiePersistInserts',
-                    description: 'httpProfiles.cookiePersistInserts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7306,13 +6598,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_getReqs',
-                    description: 'httpProfiles.getReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7325,13 +6611,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_getReqs',
-                    description: 'httpProfiles.getReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7371,13 +6651,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_maxKeepaliveReq',
-                    description: 'httpProfiles.maxKeepaliveReq',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7390,13 +6664,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_maxKeepaliveReq',
-                    description: 'httpProfiles.maxKeepaliveReq',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7436,13 +6704,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_numberReqs',
-                    description: 'httpProfiles.numberReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7455,13 +6717,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_numberReqs',
-                    description: 'httpProfiles.numberReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7501,13 +6757,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_postReqs',
-                    description: 'httpProfiles.postReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7520,13 +6770,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_postReqs',
-                    description: 'httpProfiles.postReqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7566,13 +6810,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_2xxResp',
-                    description: 'httpProfiles.2xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7585,13 +6823,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_2xxResp',
-                    description: 'httpProfiles.2xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7631,13 +6863,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_3xxResp',
-                    description: 'httpProfiles.3xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7650,13 +6876,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_3xxResp',
-                    description: 'httpProfiles.3xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7696,13 +6916,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_4xxResp',
-                    description: 'httpProfiles.4xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7715,13 +6929,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_4xxResp',
-                    description: 'httpProfiles.4xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7761,13 +6969,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_5xxResp',
-                    description: 'httpProfiles.5xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7780,13 +6982,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_5xxResp',
-                    description: 'httpProfiles.5xxResp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7826,13 +7022,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_respLessThan2m',
-                    description: 'httpProfiles.respLessThan2m',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7845,13 +7035,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_respLessThan2m',
-                    description: 'httpProfiles.respLessThan2m',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7891,13 +7075,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_respGreaterThan2m',
-                    description: 'httpProfiles.respGreaterThan2m',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7910,13 +7088,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_respGreaterThan2m',
-                    description: 'httpProfiles.respGreaterThan2m',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7956,13 +7128,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v10Reqs',
-                    description: 'httpProfiles.v10Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -7975,13 +7141,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v10Reqs',
-                    description: 'httpProfiles.v10Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8021,13 +7181,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v10Resp',
-                    description: 'httpProfiles.v10Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8040,13 +7194,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v10Resp',
-                    description: 'httpProfiles.v10Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8086,13 +7234,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v11Reqs',
-                    description: 'httpProfiles.v11Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8105,13 +7247,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v11Reqs',
-                    description: 'httpProfiles.v11Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8151,13 +7287,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v11Resp',
-                    description: 'httpProfiles.v11Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8170,13 +7300,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v11Resp',
-                    description: 'httpProfiles.v11Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8216,13 +7340,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v9Reqs',
-                    description: 'httpProfiles.v9Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8235,13 +7353,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v9Reqs',
-                    description: 'httpProfiles.v9Reqs',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8281,13 +7393,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v9Resp',
-                    description: 'httpProfiles.v9Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8300,13 +7406,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'httpProfiles_v9Resp',
-                    description: 'httpProfiles.v9Resp',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8342,13 +7442,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_activeHandshakeRejected',
-                    description: 'clientSslProfiles.activeHandshakeRejected',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8384,13 +7478,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_adhKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.adhKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8426,13 +7514,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_aesBulk',
-                    description: 'clientSslProfiles.cipherUses.aesBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8468,13 +7550,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_aesGcmBulk',
-                    description: 'clientSslProfiles.cipherUses.aesGcmBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8510,13 +7586,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_camelliaBulk',
-                    description: 'clientSslProfiles.cipherUses.camelliaBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8552,13 +7622,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_chacha20Poly1305Bulk',
-                    description: 'clientSslProfiles.cipherUses.chacha20Poly1305Bulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8594,13 +7658,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_desBulk',
-                    description: 'clientSslProfiles.cipherUses.desBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8636,13 +7694,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_dhRsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.dhRsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8678,13 +7730,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_dheDssKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.dheDssKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8720,13 +7766,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_ecdhEcdsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.ecdhEcdsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8762,13 +7802,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_ecdhRsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.ecdhRsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8804,13 +7838,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_ecdheEcdsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.ecdheEcdsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8846,13 +7874,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_ecdheRsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.ecdheRsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8888,13 +7910,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_edhRsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.edhRsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8930,13 +7946,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_ideaBulk',
-                    description: 'clientSslProfiles.cipherUses.ideaBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -8972,13 +7982,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_md5Digest',
-                    description: 'clientSslProfiles.cipherUses.md5Digest',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9014,13 +8018,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_nullBulk',
-                    description: 'clientSslProfiles.cipherUses.nullBulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9056,13 +8054,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_nullDigest',
-                    description: 'clientSslProfiles.cipherUses.nullDigest',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9098,13 +8090,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_rc2Bulk',
-                    description: 'clientSslProfiles.cipherUses.rc2Bulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9140,13 +8126,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_rc4Bulk',
-                    description: 'clientSslProfiles.cipherUses.rc4Bulk',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9182,13 +8162,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_rsaKeyxchg',
-                    description: 'clientSslProfiles.cipherUses.rsaKeyxchg',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9224,13 +8198,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_cipherUses_shaDigest',
-                    description: 'clientSslProfiles.cipherUses.shaDigest',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9266,13 +8234,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_currentCompatibleConnections',
-                    description: 'clientSslProfiles.currentCompatibleConnections',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9308,13 +8270,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_currentConnections',
-                    description: 'clientSslProfiles.currentConnections',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9350,13 +8306,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_currentNativeConnections',
-                    description: 'clientSslProfiles.currentNativeConnections',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9392,13 +8342,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_currentActiveHandshakes',
-                    description: 'clientSslProfiles.currentActiveHandshakes',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9434,13 +8378,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_decryptedBytesIn',
-                    description: 'clientSslProfiles.decryptedBytesIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9476,13 +8414,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_decryptedBytesOut',
-                    description: 'clientSslProfiles.decryptedBytesOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9518,13 +8450,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_encryptedBytesIn',
-                    description: 'clientSslProfiles.encryptedBytesIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9560,13 +8486,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_encryptedBytesOut',
-                    description: 'clientSslProfiles.encryptedBytesOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9602,13 +8522,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_fatalAlerts',
-                    description: 'clientSslProfiles.fatalAlerts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9644,13 +8558,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_handshakeFailures',
-                    description: 'clientSslProfiles.handshakeFailures',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9686,13 +8594,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_peercertInvalid',
-                    description: 'clientSslProfiles.peercertInvalid',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9728,13 +8630,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_peercertNone',
-                    description: 'clientSslProfiles.peercertNone',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9770,13 +8666,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_peercertValid',
-                    description: 'clientSslProfiles.peercertValid',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9812,13 +8702,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_dtlsv1',
-                    description: 'clientSslProfiles.protocolUses.dtlsv1',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9854,13 +8738,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_sslv2',
-                    description: 'clientSslProfiles.protocolUses.sslv2',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9896,13 +8774,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_sslv3',
-                    description: 'clientSslProfiles.protocolUses.sslv3',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9938,13 +8810,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_tlsv1',
-                    description: 'clientSslProfiles.protocolUses.tlsv1',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -9980,13 +8846,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_tlsv1_1',
-                    description: 'clientSslProfiles.protocolUses.tlsv1_1',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10022,13 +8882,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_tlsv1_2',
-                    description: 'clientSslProfiles.protocolUses.tlsv1_2',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10064,13 +8918,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_protocolUses_tlsv1_3',
-                    description: 'clientSslProfiles.protocolUses.tlsv1_3',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10106,13 +8954,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_recordsIn',
-                    description: 'clientSslProfiles.recordsIn',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10148,13 +8990,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_recordsOut',
-                    description: 'clientSslProfiles.recordsOut',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10190,13 +9026,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_sniRejects',
-                    description: 'clientSslProfiles.sniRejects',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10232,13 +9062,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_totCompatConns',
-                    description: 'clientSslProfiles.totCompatConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -10274,13 +9098,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'clientSslProfiles_totNativeConns',
-                    description: 'clientSslProfiles.totNativeConns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11194,13 +10012,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'sslCerts_expirationDate',
-                    description: 'sslCerts.expirationDate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11221,13 +10033,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'sslCerts_expirationDate',
-                    description: 'sslCerts.expirationDate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11244,13 +10050,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'sslCerts_expirationDate',
-                    description: 'sslCerts.expirationDate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11290,13 +10090,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcInBroadcastPkts',
-                    description: 'networkTunnels.hcInBroadcastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11328,13 +10122,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcInMulticastPkts',
-                    description: 'networkTunnels.hcInMulticastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11366,13 +10154,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcInOctets',
-                    description: 'networkTunnels.hcInOctets',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11404,13 +10186,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcInUcastPkts',
-                    description: 'networkTunnels.hcInUcastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11442,13 +10218,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcOutBroadcastPkts',
-                    description: 'networkTunnels.hcOutBroadcastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11480,13 +10250,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcOutMulticastPkts',
-                    description: 'networkTunnels.hcOutMulticastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11518,13 +10282,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcOutOctets',
-                    description: 'networkTunnels.hcOutOctets',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11556,13 +10314,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_hcOutUcastPkts',
-                    description: 'networkTunnels.hcOutUcastPkts',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11594,13 +10346,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_inDiscards',
-                    description: 'networkTunnels.inDiscards',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11632,13 +10378,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_inErrors',
-                    description: 'networkTunnels.inErrors',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11670,13 +10410,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_inUnknownProtos',
-                    description: 'networkTunnels.inUnknownProtos',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11708,13 +10442,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_outDiscards',
-                    description: 'networkTunnels.outDiscards',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11746,13 +10474,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'networkTunnels_outErrors',
-                    description: 'networkTunnels.outErrors',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -11905,7 +10627,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -11964,7 +10686,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12023,7 +10745,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12082,7 +10804,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12141,7 +10863,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12200,7 +10922,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12259,7 +10981,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12318,7 +11040,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12377,7 +11099,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12436,7 +11158,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12495,7 +11217,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12554,7 +11276,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12613,7 +11335,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12672,7 +11394,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12731,7 +11453,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12794,7 +11516,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12857,7 +11579,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12920,7 +11642,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -12983,7 +11705,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13046,7 +11768,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13109,7 +11831,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13172,7 +11894,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13235,7 +11957,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13298,7 +12020,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13361,7 +12083,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13424,7 +12146,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13487,7 +12209,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13550,7 +12272,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13613,7 +12335,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13676,7 +12398,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13735,7 +12457,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13747,13 +12469,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_alternate',
-                    description: 'cnameWideIps.alternate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -13798,7 +12514,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13857,7 +12573,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13869,13 +12585,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_cnameResolutions',
-                    description: 'cnameWideIps.cnameResolutions',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -13920,7 +12630,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13979,7 +12689,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -13991,13 +12701,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_dropped',
-                    description: 'cnameWideIps.dropped',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14042,7 +12746,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14101,7 +12805,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14113,13 +12817,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_fallback',
-                    description: 'cnameWideIps.fallback',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14164,7 +12862,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14223,7 +12921,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14235,13 +12933,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_persisted',
-                    description: 'cnameWideIps.persisted',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14286,7 +12978,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14345,7 +13037,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14357,13 +13049,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_preferred',
-                    description: 'cnameWideIps.preferred',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14408,7 +13094,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14467,7 +13153,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14479,13 +13165,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_rcode',
-                    description: 'cnameWideIps.rcode',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14530,7 +13210,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14589,7 +13269,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14601,13 +13281,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_requests',
-                    description: 'cnameWideIps.requests',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14652,7 +13326,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14711,7 +13385,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14723,13 +13397,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_resolutions',
-                    description: 'cnameWideIps.resolutions',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14774,7 +13442,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14833,7 +13501,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14845,13 +13513,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_returnFromDns',
-                    description: 'cnameWideIps.returnFromDns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -14896,7 +13558,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14955,7 +13617,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -14967,13 +13629,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_returnToDns',
-                    description: 'cnameWideIps.returnToDns',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -15018,7 +13674,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15077,7 +13733,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15089,13 +13745,7 @@ module.exports = {
                                 }
                             ],
                             value: 32
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_persistCidrIpv4',
-                    description: 'cnameWideIps.persistCidrIpv4',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -15140,7 +13790,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15199,7 +13849,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15211,13 +13861,7 @@ module.exports = {
                                 }
                             ],
                             value: 3600
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_ttlPersistence',
-                    description: 'cnameWideIps.ttlPersistence',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -15262,7 +13906,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15321,7 +13965,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15333,13 +13977,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_failureRcodeTtl',
-                    description: 'cnameWideIps.failureRcodeTtl',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -15384,7 +14022,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15443,7 +14081,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15455,13 +14093,7 @@ module.exports = {
                                 }
                             ],
                             value: 128
-                        }
-                    ]
-                },
-                {
-                    name: 'cnameWideIps_persistCidrIpv6',
-                    description: 'cnameWideIps.persistCidrIpv6',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -15506,7 +14138,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15569,7 +14201,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15632,7 +14264,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15695,7 +14327,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15758,7 +14390,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15821,7 +14453,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15884,7 +14516,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -15947,7 +14579,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16010,7 +14642,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16073,7 +14705,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16136,7 +14768,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16199,7 +14831,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16262,7 +14894,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16325,7 +14957,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16388,7 +15020,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16451,7 +15083,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16514,7 +15146,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16577,7 +15209,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16640,7 +15272,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16703,7 +15335,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16766,7 +15398,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16829,7 +15461,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16892,7 +15524,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -16955,7 +15587,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17018,7 +15650,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17081,7 +15713,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17144,7 +15776,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17207,7 +15839,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17270,7 +15902,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17333,7 +15965,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17396,7 +16028,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17459,7 +16091,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17522,7 +16154,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17585,7 +16217,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17648,7 +16280,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17711,7 +16343,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17774,7 +16406,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17837,7 +16469,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17900,7 +16532,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -17963,7 +16595,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18026,7 +16658,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18089,7 +16721,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18152,7 +16784,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18215,7 +16847,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18278,7 +16910,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18341,7 +16973,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'failureRcodeResponse',
@@ -18408,7 +17040,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18491,7 +17123,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18574,7 +17206,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18657,7 +17289,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18740,7 +17372,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18823,7 +17455,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18906,7 +17538,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -18989,7 +17621,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19072,7 +17704,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19155,7 +17787,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19226,7 +17858,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19289,7 +17921,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19352,7 +17984,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19415,7 +18047,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19478,7 +18110,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19541,7 +18173,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19604,7 +18236,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19667,7 +18299,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19742,7 +18374,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19825,7 +18457,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19908,7 +18540,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -19991,7 +18623,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20074,7 +18706,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20157,7 +18789,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20240,7 +18872,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20323,7 +18955,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20406,7 +19038,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20489,7 +19121,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20572,7 +19204,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20655,7 +19287,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20738,7 +19370,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20821,7 +19453,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20904,7 +19536,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -20987,7 +19619,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21070,7 +19702,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21153,7 +19785,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21236,7 +19868,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21319,7 +19951,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21390,7 +20022,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21453,7 +20085,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21516,7 +20148,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21579,7 +20211,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21642,7 +20274,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21705,7 +20337,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21768,7 +20400,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21831,7 +20463,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21906,7 +20538,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -21989,7 +20621,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22072,7 +20704,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22155,7 +20787,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22238,7 +20870,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22321,7 +20953,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22404,7 +21036,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22487,7 +21119,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22570,7 +21202,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22653,7 +21285,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'limitMaxBpsStatus',
@@ -22724,7 +21356,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -22787,7 +21419,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -22850,7 +21482,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -22913,7 +21545,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -22976,7 +21608,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23039,7 +21671,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23102,7 +21734,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23270,7 +21902,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23333,7 +21965,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23396,7 +22028,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23459,7 +22091,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23522,7 +22154,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23585,7 +22217,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23648,7 +22280,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23711,7 +22343,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23774,7 +22406,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23837,7 +22469,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23900,7 +22532,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -23963,7 +22595,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24026,7 +22658,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24089,7 +22721,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24152,7 +22784,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24215,7 +22847,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24270,13 +22902,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'mxPools_members_alternate',
-                    description: 'mxPools.members.alternate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -24340,13 +22966,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'mxPools_members_fallback',
-                    description: 'mxPools.members.fallback',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -24410,13 +23030,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'mxPools_members_preferred',
-                    description: 'mxPools.members.preferred',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -24488,7 +23102,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24551,7 +23165,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24614,7 +23228,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24677,7 +23291,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24740,7 +23354,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24803,7 +23417,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24866,7 +23480,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24929,7 +23543,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -24992,7 +23606,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25055,7 +23669,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25118,7 +23732,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25181,7 +23795,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25244,7 +23858,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25307,7 +23921,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25370,7 +23984,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25433,7 +24047,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25496,7 +24110,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25551,13 +24165,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'naptrPools_members_alternate',
-                    description: 'naptrPools.members.alternate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -25621,13 +24229,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'naptrPools_members_fallback',
-                    description: 'naptrPools.members.fallback',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -25691,13 +24293,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'naptrPools_members_preferred',
-                    description: 'naptrPools.members.preferred',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -25769,7 +24365,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25832,7 +24428,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25895,7 +24491,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -25958,7 +24554,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26021,7 +24617,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26084,7 +24680,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26147,7 +24743,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26210,7 +24806,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26273,7 +24869,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26336,7 +24932,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26399,7 +24995,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26462,7 +25058,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26525,7 +25121,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26588,7 +25184,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26651,7 +25247,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26714,7 +25310,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26777,7 +25373,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -26832,13 +25428,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'srvPools_members_alternate',
-                    description: 'srvPools.members.alternate',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -26902,13 +25492,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'srvPools_members_fallback',
-                    description: 'srvPools.members.fallback',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -26972,13 +25556,7 @@ module.exports = {
                                 }
                             ],
                             value: 0
-                        }
-                    ]
-                },
-                {
-                    name: 'srvPools_members_preferred',
-                    description: 'srvPools.members.preferred',
-                    dataPoints: [
+                        },
                         {
                             labels: [
                                 {
@@ -27050,7 +25628,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27113,7 +25691,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27176,7 +25754,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27239,7 +25817,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27302,7 +25880,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27365,7 +25943,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27428,7 +26006,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27491,7 +26069,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27554,7 +26132,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',
@@ -27617,7 +26195,7 @@ module.exports = {
                                 },
                                 {
                                     key: 'enabled',
-                                    value: 'true'
+                                    value: true
                                 },
                                 {
                                     key: 'loadBalancingMode',

@@ -529,7 +529,121 @@ function createJSONObjectSecretsMaskFunc(properties, options) {
  * 'createJSONObjectSecretsMaskFunc' block - END
  */
 
+/**
+ * Chunks - class to manage chunked data
+ *
+ * Using JSON.stringify as default serializer and treats any input string as serialized already
+ *
+ * @property {integer} currentChunkSize - size of current chunk of data
+ * @property {integer} maxChunkSize - max chunk size in bytes
+ * @property {function(any): any} serializer - data serializer, returns object with '.length' property
+ * @property {integer} totalChunks - number of chunks
+ * @property {integer} totalSize - total size of data
+ */
+class Chunks {
+    /**
+     * Constructor
+     *
+     * @param {object} [options] - options
+     * @param {integer} [options.maxChunkSize = Number.MAX_SAFE_INTEGER] - max chunk size in bytes
+     * @param {function(any): any} [options.serializer] - data serializer,
+     *      returns object with '.length' property. If the serializer returns Array then every element will be added
+     *      separately
+     */
+    constructor(options) {
+        options = assignDefaults(options, {
+            maxChunkSize: Number.MAX_SAFE_INTEGER,
+            serializer: (data) => (typeof data !== 'string' ? JSON.stringify(data) : data)
+        });
+        if (typeof options.maxChunkSize !== 'number' || options.maxChunkSize <= 0) {
+            throw new Error(`'maxChunkSize' should be > 0, got '${options.maxChunkSize}' (${typeof options.maxChunkSize})`);
+        }
+
+        Object.defineProperties(this, {
+            currentChunkSize: {
+                get() { return this._current ? this._current.size : 0; }
+            },
+            maxChunkSize: {
+                value: options.maxChunkSize
+            },
+            serializer: {
+                value: options.serializer.bind(this)
+            },
+            totalChunks: {
+                get() { return this._chunks.length; }
+            },
+            totalSize: {
+                get() { return this._chunks.reduce((p, c) => p + c.size, 0); }
+            }
+        });
+        this.clear();
+    }
+
+    /**
+     * Add data to current chunk
+     *
+     * @private
+     *
+     * @param {any} data - data to add
+     *
+     * @returns {void} once data added
+     */
+    _add(data) {
+        if (!this._current || (this._current.size && this._current.size + data.length > this.maxChunkSize)) {
+            this._current = {
+                chunk: [],
+                size: 0
+            };
+            this._chunks.push(this._current);
+        }
+        this._current.chunk.push(data);
+        this._current.size += data.length;
+    }
+
+    /**
+     * Add data to chunks
+     *
+     * @public
+     *
+     * @param {any} data - data to add
+     *
+     * @returns {void} once data added
+     */
+    add(data) {
+        data = this.serializer(data);
+        if (Array.isArray(data)) {
+            data.forEach((d) => this._add(d));
+        } else {
+            this._add(data);
+        }
+    }
+
+    /**
+     * Get all chunks
+     *
+     * @public
+     *
+     * @returns {Array<Array<any>>} chunks of data
+     */
+    getAll() {
+        return this._chunks.map((c) => c.chunk);
+    }
+
+    /**
+     * Remove all previously added chunks of data
+     *
+     * @public
+     *
+     * @returns {void} once state was reset
+     */
+    clear() {
+        this._chunks = [];
+        this._current = null;
+    }
+}
+
 module.exports = {
+    Chunks,
     createJSONObjectSecretsMaskFunc,
     createJSONStringSecretsMaskFunc,
     proxyForNodeCallbackFuncs,
@@ -773,7 +887,7 @@ module.exports = {
                 });
         });
 
-        options = this.assignDefaults(options, {
+        options = assignDefaults(options, {
             period: 100,
             timeout: 5 * 1000
         });

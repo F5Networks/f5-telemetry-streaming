@@ -627,8 +627,15 @@ The following items have been added to the Generic HTTP consumer since it was in
         - **outputMode**
         - Possible values: **raw**, **processed**.  OutputMode provides the options to send data with the Generic HTTP consumer in an "as-is" (**raw**) format instead of the generated JSON payload (**processed**) allowing the data to be sent in Line Protocol format to a raw event listener and have it forwarded through the Generic HTTP consumer. 
 
-|
+      * - 1.31
+        - **compressionType**
+        - Sets the type of compression. The acceptable values are none for no compression (the default), or gzip, where the payload will be compressed using gzip. 
 
+      * -  
+        - **customOpts** experimental
+        - This experimental feature relies on Node.js for each value when the user specifies nothing in **customOpts**.  Node.js values may differ based on version used. Refer to node.js documentation for more information. 
+
+|
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 Example Declaration:
@@ -870,6 +877,13 @@ DataDog
 Required Information:
  - apiKey: The DataDog API key required to submit metrics and events to DataDog
 
+Optional Properties:
+ - proxy: Proxy server configuration
+
+Additional examples for HTTP consumers:
+ - DataDog with proxy settings in TS 1.31 and later, see :ref:`proxy`.
+
+
 Additions to the DataDog consumer
 `````````````````````````````````
 The following items have been added to the DataDog consumer since it was introduced.
@@ -906,6 +920,9 @@ The following items have been added to the DataDog consumer since it was introdu
         - **customTags**
         - This property allows you to add custom tags that are appended to the dynamically generated telemetry tags. You specify tags as an array of **name** and **value** pairs.  You can set more than one tag in a declaration, but if you use this property, you must specify at least one custom tag. 
 
+      * - 1.31 
+        - **customOpts** experimental
+        - This experimental feature relies on Node.js for each value when the user specifies nothing in **customOpts**.  Node.js values may differ based on version used. Refer to node.js documentation for more information.
 
 
 **IMPORTANT**: The following declaration includes all of the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the lines highlighted in yellow (and the comma from line 7).
@@ -938,6 +955,9 @@ Required Information:
 Optional Properties:
  - metricsPath: The URL path to send metrics telemetry to
  - headers: Any required HTTP headers, required to send metrics telemetry to an OpenTelemetry Protocol compatible API
+ - Protocol: The protocol of the system.  Note: **protocol** is allowed only when **exporter** is **json** or **protobuf**. When **exporter** is **grpc** then **useSSL** can be specified.
+   **privateKey**, **clientCertificate**, **rootCertificate** allowed for any **exporter** but only when **protocol** is **https** or **useSSL** set to ``true``.
+
 
 Note: As of Telemetry Streaming 1.23, this consumer:
  - Only exports OpenTelemetry metrics (logs and traces are not supported)
@@ -961,6 +981,29 @@ The following items have been added to the OpenTelemetry consumer since it was i
         - **convertBooleansToMetrics**
         - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
 
+      * - 1.31
+        - **exporter**
+        - **exporter** allowed values: **grpc**, **json** and **protobuf**. Default is **protobuf**, while **grpc** is experimental.  Note: When **exporter** is **grpc**, then **useSSL** can be specified.
+
+      * - 
+        - **privateKey**
+        - This and the following properties provide the ability to add TLS client authentication using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **clientCertificate**
+        - The client certificate chain. Must be formatted as a 1-line string, with literal new line characters. 
+
+      * - 
+        - **rootCertificate**
+        - The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters.
+
+      * -
+        - **Protocol** 
+        - The protocol of the system. 
+      
+      * - 
+        - **useSSL**
+        - To ensure the data that is transferred between a client and a server remains private.
 
 **IMPORTANT**: The following declaration includes all of the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line.
 

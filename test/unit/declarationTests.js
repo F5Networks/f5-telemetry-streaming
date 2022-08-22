@@ -4775,7 +4775,25 @@ describe('Declarations', () => {
                     service: 'my-great-application',
                     metricPrefix: ['f5', 'bigip'],
                     convertBooleansToMetrics: true,
-                    customTags: [{ name: 'deploymentName', value: 'best version' }]
+                    customTags: [{ name: 'deploymentName', value: 'best version' }],
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 },
+                        { name: 'anotherFeatureOption', value: 'test' }
+                    ],
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            cipherText: 'proxyPassphrase'
+                        }
+                    }
                 },
                 {
                     type: 'DataDog',
@@ -4785,7 +4803,27 @@ describe('Declarations', () => {
                     service: 'my-great-application',
                     metricPrefix: ['f5', 'bigip'],
                     convertBooleansToMetrics: true,
-                    customTags: [{ name: 'deploymentName', value: 'best version' }]
+                    customTags: [{ name: 'deploymentName', value: 'best version' }],
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 },
+                        { name: 'anotherFeatureOption', value: 'test' }
+                    ],
+                    proxy: {
+                        host: 'localhost',
+                        protocol: 'http',
+                        port: 80,
+                        allowSelfSignedCert: true,
+                        enableHostConnectivityCheck: false,
+                        username: 'username',
+                        passphrase: {
+                            class: 'Secret',
+                            protected: 'SecureVault',
+                            cipherText: '$M$proxyPassphrase'
+                        }
+                    }
                 }
             ));
 
@@ -4796,7 +4834,13 @@ describe('Declarations', () => {
                     apiKey: 'test',
                     index: 'index',
                     metricPrefix: ['f5', 'bigip'],
-                    customTags: [{ name: 'deploymentName', value: 'best version' }]
+                    customTags: [{ name: 'deploymentName', value: 'best version' }],
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 }
+                    ]
                 },
                 [
                     { property: 'apiKey', requiredTests: true, stringLengthTests: true },
@@ -4827,6 +4871,48 @@ describe('Declarations', () => {
                         ignoreOther: true,
                         arrayLengthTests: {
                             minItems: 1
+                        }
+                    },
+                    {
+                        property: 'customOpts',
+                        ignoreOther: true,
+                        arrayLengthTests: {
+                            minItems: 1
+                        }
+                    },
+                    {
+                        property: 'customOpts.0.value',
+                        ignoreOther: true,
+                        booleanTests: true
+                    },
+                    {
+                        property: 'customOpts.1.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
+                        }
+                    },
+                    {
+                        property: 'customOpts.2.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
+                        }
+                    },
+                    {
+                        property: 'customOpts.3.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
                         }
                     }
                 ]
@@ -4986,7 +5072,8 @@ describe('Declarations', () => {
                     port: 443,
                     path: '/',
                     method: 'POST',
-                    outputMode: 'processed'
+                    outputMode: 'processed',
+                    compressionType: 'none'
                 }
             ));
 
@@ -5018,7 +5105,8 @@ describe('Declarations', () => {
                         class: 'Secret',
                         protected: 'SecureVault'
                     },
-                    outputMode: 'processed'
+                    outputMode: 'processed',
+                    compressionType: 'none'
                 }
             ));
 
@@ -5072,7 +5160,15 @@ describe('Declarations', () => {
                             expression: '{ message: @ }'
                         }
                     ],
-                    outputMode: 'raw'
+                    outputMode: 'raw',
+                    compressionType: 'gzip',
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 },
+                        { name: 'anotherFeatureOption', value: 'test' }
+                    ]
                 },
                 {
                     type: 'Generic_HTTP',
@@ -5133,7 +5229,15 @@ describe('Declarations', () => {
                             expression: '{ message: @ }'
                         }
                     ],
-                    outputMode: 'raw'
+                    outputMode: 'raw',
+                    compressionType: 'gzip',
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 },
+                        { name: 'anotherFeatureOption', value: 'test' }
+                    ]
                 }
             ));
 
@@ -5154,7 +5258,13 @@ describe('Declarations', () => {
                     privateKey: {
                         cipherText: 'myKey'
                     },
-                    type: 'Generic_HTTP'
+                    type: 'Generic_HTTP',
+                    customOpts: [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 0 },
+                        { name: 'maxSockets', value: 0 },
+                        { name: 'maxFreeSockets', value: 0 }
+                    ]
                 },
                 [
                     'actions.0.expression',
@@ -5208,6 +5318,56 @@ describe('Declarations', () => {
                         valueTests: {
                             subTitle: 'allow empty array',
                             valid: []
+                        }
+                    },
+                    {
+                        property: 'compressionType',
+                        ignoreOther: true,
+                        enumTests: {
+                            allowed: ['none', 'gzip'],
+                            notAllowed: ['compressionType']
+                        }
+                    },
+                    {
+                        property: 'customOpts',
+                        ignoreOther: true,
+                        arrayLengthTests: {
+                            minItems: 1
+                        }
+                    },
+                    {
+                        property: 'customOpts.0.value',
+                        ignoreOther: true,
+                        booleanTests: true
+                    },
+                    {
+                        property: 'customOpts.1.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
+                        }
+                    },
+                    {
+                        property: 'customOpts.2.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
+                        }
+                    },
+                    {
+                        property: 'customOpts.3.value',
+                        ignoreOther: true,
+                        numberRangeTests: {
+                            minimum: 0
+                        },
+                        valueTests: {
+                            invalid: 'invalid'
                         }
                     }
                 ],
@@ -6147,7 +6307,9 @@ describe('Declarations', () => {
                     type: 'OpenTelemetry_Exporter',
                     host: 'host',
                     port: 55681,
-                    convertBooleansToMetrics: false
+                    convertBooleansToMetrics: false,
+                    exporter: 'protobuf',
+                    protocol: 'http'
                 }
             ));
 
@@ -6156,7 +6318,7 @@ describe('Declarations', () => {
                     type: 'OpenTelemetry_Exporter',
                     host: 'host',
                     port: 55681,
-                    path: '/v1/metrics',
+                    metricsPath: '/v1/metrics',
                     headers: [
                         {
                             name: 'headerName',
@@ -6169,14 +6331,16 @@ describe('Declarations', () => {
                     type: 'OpenTelemetry_Exporter',
                     host: 'host',
                     port: 55681,
-                    path: '/v1/metrics',
+                    metricsPath: '/v1/metrics',
                     headers: [
                         {
                             name: 'headerName',
                             value: 'headerValue'
                         }
                     ],
-                    convertBooleansToMetrics: true
+                    convertBooleansToMetrics: true,
+                    exporter: 'protobuf',
+                    protocol: 'http'
                 }
             ));
 
@@ -6189,9 +6353,56 @@ describe('Declarations', () => {
                 },
                 [
                     'host',
-                    'metricsPath'
+                    'metricsPath',
+                    {
+                        property: 'exporter',
+                        enumTests: {
+                            allowed: ['grpc', 'json', 'protobuf'],
+                            notAllowed: ['', 'not-grpc', 'not-json', 'not-protobuf']
+                        },
+                        ignoreOther: true
+                    },
+                    {
+                        property: 'protocol',
+                        enumTests: {
+                            allowed: ['http', 'https'],
+                            notAllowed: ['', 'not-http', 'not-https']
+                        },
+                        ignoreOther: true
+                    }
                 ],
                 { stringLengthTests: true }
+            );
+
+            schemaValidationUtil.generateSchemaBasicTests(
+                basicSchemaTestsValidator,
+                {
+                    host: 'host',
+                    type: 'OpenTelemetry_Exporter',
+                    port: 80,
+                    protocol: 'https',
+                    exporter: 'json',
+                    clientCertificate: {
+                        cipherText: '$M$myCert',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    privateKey: {
+                        cipherText: '$M$myKey',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    rootCertificate: {
+                        cipherText: '$M$myCA',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    }
+                },
+                [
+                    { property: 'rootCertificate', optionalPropTests: true },
+                    { property: 'privateKey', dependenciesTests: 'clientCertificate', ignoreOther: true },
+                    { property: 'clientCertificate', dependenciesTests: 'privateKey', ignoreOther: true }
+                ]
             );
 
             it('should fail when invalid \'convertBooleansToMetrics\' value specified', () => assert.isRejected(
@@ -6203,6 +6414,228 @@ describe('Declarations', () => {
                 }),
                 /convertBooleansToMetrics\/type.*should be boolean/
             ));
+
+            it('should fail when protocol === https and privateKey and clientCertificate specified', () => assert.isRejected(
+                validateMinimal({
+                    type: 'OpenTelemetry_Exporter',
+                    host: 'host',
+                    port: 55681,
+                    exporter: 'json',
+                    protocol: 'http',
+                    clientCertificate: {
+                        cipherText: '$M$myCert',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    privateKey: {
+                        cipherText: '$M$myKey',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    },
+                    rootCertificate: {
+                        cipherText: '$M$myCA',
+                        class: 'Secret',
+                        protected: 'SecureVault'
+                    }
+                }),
+                /should NOT be valid/
+            ));
+
+            describe('gRPC exporter', () => {
+                it('should pass minimal declaration', () => validateMinimal(
+                    {
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        exporter: 'grpc'
+                    },
+                    {
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        convertBooleansToMetrics: false,
+                        exporter: 'grpc',
+                        useSSL: true
+                    }
+                ));
+
+                it('should allow full declaration', () => validateFull(
+                    {
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        headers: [
+                            {
+                                name: 'headerName',
+                                value: 'headerValue'
+                            }
+                        ],
+                        convertBooleansToMetrics: true,
+                        exporter: 'grpc',
+                        useSSL: true,
+                        privateKey: {
+                            cipherText: 'myKey'
+                        },
+                        clientCertificate: {
+                            cipherText: 'myCert'
+                        },
+                        rootCertificate: {
+                            cipherText: 'myCA'
+                        }
+                    },
+                    {
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        headers: [
+                            {
+                                name: 'headerName',
+                                value: 'headerValue'
+                            }
+                        ],
+                        convertBooleansToMetrics: true,
+                        exporter: 'grpc',
+                        useSSL: true,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        rootCertificate: {
+                            cipherText: '$M$myCA',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        }
+                    }
+                ));
+
+                schemaValidationUtil.generateSchemaBasicTests(
+                    basicSchemaTestsValidator,
+                    {
+                        host: 'host',
+                        type: 'OpenTelemetry_Exporter',
+                        port: 80,
+                        exporter: 'grpc',
+                        useSSL: true,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        rootCertificate: {
+                            cipherText: '$M$myCA',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        }
+                    },
+                    [
+                        { property: 'rootCertificate', optionalPropTests: true },
+                        { property: 'privateKey', dependenciesTests: 'clientCertificate', ignoreOther: true },
+                        { property: 'clientCertificate', dependenciesTests: 'privateKey', ignoreOther: true }
+                    ]
+                );
+
+                it('should fail when gRPC options used for non-gRPC exporter', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        exporter: 'json',
+                        useSSL: true,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        }
+                    }),
+                    /should NOT be valid/
+                ));
+
+                it('should fail when non-gRPC options used for gRPC exporter (metricPath)', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        exporter: 'grpc',
+                        useSSL: true,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        metricsPath: '/v1/metrics'
+                    }),
+                    /should NOT be valid/
+                ));
+
+                it('should fail when non-gRPC options used for gRPC exporter (protocol)', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        exporter: 'grpc',
+                        useSSL: true,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        protocol: 'https'
+                    }),
+                    /should NOT be valid/
+                ));
+
+                it('should fail when useSSL === false and privateKey and clientCertificate specified', () => assert.isRejected(
+                    validateMinimal({
+                        type: 'OpenTelemetry_Exporter',
+                        host: 'host',
+                        port: 55681,
+                        exporter: 'grpc',
+                        useSSL: false,
+                        clientCertificate: {
+                            cipherText: '$M$myCert',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        privateKey: {
+                            cipherText: '$M$myKey',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        },
+                        rootCertificate: {
+                            cipherText: '$M$myCA',
+                            class: 'Secret',
+                            protected: 'SecureVault'
+                        }
+                    }),
+                    /should NOT be valid/
+                ));
+            });
         });
     });
 
@@ -6459,7 +6892,8 @@ describe('Declarations', () => {
                     host: '1.2.3.4',
                     protocol: 'http',
                     port: 8080,
-                    outputMode: 'processed'
+                    outputMode: 'processed',
+                    compressionType: 'none'
                 }
             };
         });

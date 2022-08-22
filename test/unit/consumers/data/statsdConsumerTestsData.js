@@ -9350,6 +9350,384 @@ module.exports = {
                     metricValue: 0
                 },
                 {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade1.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade1'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade1.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade1'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade1.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade1'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade2.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade2'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade2.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade2'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.blade2.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'blade2'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.client.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'client'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.client.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'client'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.client.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'client'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientAccepts.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientAccepts'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientAccepts.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientAccepts'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientAccepts.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientAccepts'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnects.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnects'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnects.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnects'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.clientConnects.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'clientConnects'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.connections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'connections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.connections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'connections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.connections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'connections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.httpRequests.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'httpRequests'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.httpRequests.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'httpRequests'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.httpRequests.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'httpRequests'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaClient.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaClient'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaClient.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaClient'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaClient.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaClient'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaServer.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaServer'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaServer.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaServer'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.pvaServer.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'pvaServer'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.server.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'server'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.server.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'server'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.server.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'server'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslClientConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslClientConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslClientConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslClientConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslClientConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslClientConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslClientConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslServerConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslServerConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.activeSslServerConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'activeSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslServerConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslServerConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.newSslServerConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'newSslServerConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewTcpConnections.average',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewTcpConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewTcpConnections.current',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewTcpConnections'
+                    }
+                },
+                {
+                    metricName: 'f5telemetry.telemetry-bigip-com.system.connectionsPerformance.serverNewTcpConnections.max',
+                    metricValue: 0,
+                    metricTags: {
+                        name: 'serverNewTcpConnections'
+                    }
+                },
+                {
                     metricName: 'f5telemetry.telemetry-bigip-com.system.asmAttackSignatures.ff8080817a3a4908017a3a490958000e.createDateTime',
                     metricTags: {
                         filename: 'ASM-AttackSignatures_20190716_122131.im',

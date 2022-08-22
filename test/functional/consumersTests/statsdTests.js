@@ -36,7 +36,7 @@ const STATSD_DEFAULT_HTTP_TIMEOUT = 10000;
 
 const STATSD_DOCKER_CONF = {
     detach: true,
-    image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}graphiteapp/graphite-statsd:1.1.9-1`, // change to 'latest' when the bug will be fixed
+    image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}graphiteapp/graphite-statsd:latest`,
     restart: 'always'
 };
 

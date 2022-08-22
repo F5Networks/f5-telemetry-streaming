@@ -233,7 +233,8 @@ describe('Config', () => {
                     port: 443,
                     protocol: 'https',
                     trace: false,
-                    allowSelfSignedCert: false
+                    allowSelfSignedCert: false,
+                    compressionType: 'none'
                 }
             };
             return configWorker.processDeclaration(decl)
@@ -296,7 +297,8 @@ describe('Config', () => {
                     port: 443,
                     protocol: 'https',
                     trace: false,
-                    allowSelfSignedCert: false
+                    allowSelfSignedCert: false,
+                    compressionType: 'none'
                 }
             };
             return configWorker.processDeclaration(decl)

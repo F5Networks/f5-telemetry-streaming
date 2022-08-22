@@ -31,9 +31,9 @@ function getInstanceMetadata(consumerContext) {
     const consumerType = consumerContext.config.type;
     let promise = Promise.resolve();
     if (consumerType.indexOf('Azure') > -1) {
-        promise = retryPromise(() => azureUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
+        promise = retryPromise(() => azureUtil.getInstanceMetadata(consumerContext), { maxTries: 2 });
     } else if (consumerType.indexOf('Google') > -1) {
-        promise = retryPromise(() => gcpUtil.getInstanceMetadata(consumerContext), { maxTries: 1 });
+        promise = retryPromise(() => gcpUtil.getInstanceMetadata(consumerContext), { maxTries: 2 });
     }
 
     return promise

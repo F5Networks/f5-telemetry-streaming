@@ -366,6 +366,116 @@ module.exports = {
                             name: 'sslTps'
                         }
                     },
+                    connectionsPerformance: {
+                        blade1: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'blade1'
+                        },
+                        blade2: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'blade2'
+                        },
+                        client: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'client'
+                        },
+                        clientAccepts: {
+                            average: 0,
+                            current: 0,
+                            max: 1,
+                            name: 'clientAccepts'
+                        },
+                        clientConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientConnections'
+                        },
+                        clientConnects: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'clientConnects'
+                        },
+                        connections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'connections'
+                        },
+                        httpRequests: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'httpRequests'
+                        },
+                        pvaClient: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'pvaClient'
+                        },
+                        pvaServer: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'pvaServer'
+                        },
+                        server: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'server'
+                        },
+                        serverConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverConnections'
+                        },
+                        activeSslClientConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'activeSslClientConnections'
+                        },
+                        newSslClientConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'newSslClientConnections'
+                        },
+                        activeSslServerConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'activeSslServerConnections'
+                        },
+                        newSslServerConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'newSslServerConnections'
+                        },
+                        serverNewConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverNewConnections'
+                        },
+                        serverNewTcpConnections: {
+                            average: 0,
+                            current: 0,
+                            max: 0,
+                            name: 'serverNewTcpConnections'
+                        }
+                    },
                     asmAttackSignatures: {
                         ff8080817a3a4908017a3a490958000e: {
                             filename: 'ASM-AttackSignatures_20190716_122131.im',
@@ -995,10 +1105,10 @@ module.exports = {
                     }
                 },
                 {
-                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    endpoint: '/mgmt/tm/sys/performance/throughput/stats?options=detail',
                     response: `{
                         "kind": "tm:sys:performance:throughput:throughputstats",
-                        "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput/stats?options=detail&ver=13.1.0",
+                        "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput/stats?options=detail&ver=14.1.0",
                         "entries": {
                             "https://localhost/mgmt/tm/sys/performance/throughput/Client%20Bits%20In/stats": {
                                 "nestedStats": {
@@ -1320,6 +1430,339 @@ module.exports = {
                                         },
                                         "Throughput(packets)": {
                                             "description": "Service"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }`
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/connections/stats?options=detail',
+                    response: `{
+                        "kind": "tm:sys:performance:connections:connectionsstats",
+                        "selfLink": "https://localhost/mgmt/tm/sys/performance/connections/stats?options=detail&ver=15.1.6.1",
+                        "entries": {
+                            "https://localhost/mgmt/tm/sys/performance/connections/Blade%201/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active Connections per Blade": {
+                                            "description": "Blade 1"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Blade%202/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active Connections per Blade": {
+                                            "description": "Blade 2"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Client/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active Connections": {
+                                            "description": "Client"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Client%20Accepts/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "1"
+                                        },
+                                        "New TCP Accepts/Connects": {
+                                            "description": "Client Accepts"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Client%20Connections/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "Total New Connections": {
+                                            "description": "Client Connections"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Client%20Connects/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New Connections": {
+                                            "description": "Client Connects"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Connections/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active Connections": {
+                                            "description": "Connections"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/HTTP%20Requests/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "HTTP Requests": {
+                                            "description": "HTTP Requests"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/PVA%20Client/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New PVA Connections": {
+                                            "description": "PVA Client"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/PVA%20Server/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New PVA Connections": {
+                                            "description": "PVA Server"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/SSL%20Client/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active SSL Connections": {
+                                            "description": "SSL Client"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/SSL%20Client/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New ClientSSL Profile Connections": {
+                                            "description": "SSL Client"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/SSL%20Server/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active SSL Connections": {
+                                            "description": "SSL Server"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/SSL%20Server/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New ClientSSL Profile Connections": {
+                                            "description": "SSL Server"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Server/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Active Connections": {
+                                            "description": "Server"
+                                        },
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Server%20Connections/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "Total New Connections": {
+                                            "description": "Server Connections"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Server%20Connects/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New Connections": {
+                                            "description": "Server Connects"
+                                        }
+                                    }
+                                }
+                            },
+                            "https://localhost/mgmt/tm/sys/performance/connections/Server%20Connects/stats": {
+                                "nestedStats": {
+                                    "entries": {
+                                        "Average": {
+                                            "description": "0"
+                                        },
+                                        "Current": {
+                                            "description": "0"
+                                        },
+                                        "Max(since 2022_07_08T20:28:51Z)": {
+                                            "description": "0"
+                                        },
+                                        "New TCP Accepts/Connects": {
+                                            "description": "Server Connects"
                                         }
                                     }
                                 }
@@ -1780,6 +2223,7 @@ module.exports = {
                     networkInterfaces: {},
                     provisioning: {},
                     throughputPerformance: {},
+                    connectionsPerformance: {},
                     diskLatency: {},
                     diskStorage: {}
                 }
@@ -1965,10 +2409,17 @@ module.exports = {
                     }
                 },
                 {
-                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    endpoint: '/mgmt/tm/sys/performance/throughput/stats?options=detail',
                     response: {
                         kind: 'tm:sys:performance:throughput:throughputstats',
-                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?options=detail&ver=14.1.0'
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput/stats?options=detail&ver=14.1.0'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/connections/stats?options=detail',
+                    response: {
+                        kind: 'tm:sys:performance:connections:connectionsstats',
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/connections/stats?options=detail&ver=14.1.0'
                     }
                 }
             ]
@@ -2021,6 +2472,7 @@ module.exports = {
                     networkInterfaces: {},
                     provisioning: {},
                     throughputPerformance: {},
+                    connectionsPerformance: {},
                     diskLatency: {},
                     diskStorage: {}
                 }
@@ -2203,10 +2655,17 @@ module.exports = {
                     }
                 },
                 {
-                    endpoint: '/mgmt/tm/sys/performance/throughput?options=detail',
+                    endpoint: '/mgmt/tm/sys/performance/throughput/stats?options=detail',
                     response: {
                         kind: 'tm:sys:performance:throughput:throughputstats',
-                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?options=detail&ver=14.1.0'
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput/stats?options=detail&ver=14.1.0'
+                    }
+                },
+                {
+                    endpoint: '/mgmt/tm/sys/performance/connections/stats?options=detail',
+                    response: {
+                        kind: 'tm:sys:performance:connections:connectionsstats',
+                        selfLink: 'https://localhost/mgmt/tm/sys/performance/connections/stats?options=detail&ver=14.1.0'
                     }
                 }
             ]

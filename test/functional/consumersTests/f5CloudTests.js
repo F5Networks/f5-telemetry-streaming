@@ -222,7 +222,7 @@ function test() {
         describe('Event Listener data', () => {
             harness.bigip.forEach((bigip) => LISTENER_PROTOCOLS
                 .forEach((proto) => it(
-                    `should check F5 Cloud GRCP server for event listener data (over ${proto}) for - ${bigip.name}`,
+                    `should check F5 Cloud gRPC server for event listener data (over ${proto}) for - ${bigip.name}`,
                     function () {
                         if (!isValidDut(bigip)) {
                             return this.skip();

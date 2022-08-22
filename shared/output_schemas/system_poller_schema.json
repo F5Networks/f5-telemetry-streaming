@@ -128,6 +128,9 @@
                 "throughputPerformance": {
                     "type": "object"
                 },
+                "connectionsPerformance": {
+                    "type": "object"
+                },
                 "asmAttackSignatures": {
                     "type": "object"
                 }

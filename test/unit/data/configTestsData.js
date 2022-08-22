@@ -147,7 +147,8 @@ module.exports = {
                             class: 'Secret',
                             protected: 'SecureVault',
                             cipherText: '$M$passphrase'
-                        }
+                        },
+                        compressionType: 'none'
                     },
                     My_Namespace: {
                         class: 'Telemetry_Namespace',
@@ -170,6 +171,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -204,7 +206,8 @@ module.exports = {
                             class: 'Secret',
                             protected: 'SecureVault',
                             cipherText: '$M$passphrase'
-                        }
+                        },
+                        compressionType: 'none'
                     },
                     My_Namespace: {
                         class: 'Telemetry_Namespace',
@@ -227,6 +230,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -270,7 +274,8 @@ module.exports = {
                             },
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
-                            passphrase: 'passphrase' // decrypted secret
+                            passphrase: 'passphrase', // decrypted secret
+                            compressionType: 'none'
                         },
                         {
                             name: 'Shared',
@@ -304,7 +309,8 @@ module.exports = {
                             },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
-                            passphrase: 'passphrase' // decrypted secret
+                            passphrase: 'passphrase', // decrypted secret
+                            compressionType: 'none'
                         }
                     ]
                 },
@@ -347,7 +353,8 @@ module.exports = {
                                 class: 'Secret',
                                 protected: 'SecureVault',
                                 cipherText: '$M$passphrase'
-                            }
+                            },
+                            compressionType: 'none'
                         },
                         {
                             name: 'Shared',
@@ -385,7 +392,8 @@ module.exports = {
                                 class: 'Secret',
                                 protected: 'SecureVault',
                                 cipherText: '$M$passphrase'
-                            }
+                            },
+                            compressionType: 'none'
                         }
                     ]
                 }
@@ -470,7 +478,8 @@ module.exports = {
                             class: 'Secret',
                             protected: 'SecureVault',
                             cipherText: '$M$passphrase'
-                        }
+                        },
+                        compressionType: 'none'
                     }
                 },
                 expectedFullDeclaration: {
@@ -501,7 +510,8 @@ module.exports = {
                                 class: 'Secret',
                                 protected: 'SecureVault',
                                 cipherText: '$M$passphrase'
-                            }
+                            },
+                            compressionType: 'none'
                         }
                     }
                 },
@@ -530,7 +540,8 @@ module.exports = {
                             class: 'Secret',
                             protected: 'SecureVault',
                             cipherText: '$M$passphrase'
-                        }
+                        },
+                        compressionType: 'none'
                     }
                 },
                 expectedEmittedConfiguration: {
@@ -568,6 +579,7 @@ module.exports = {
                             },
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
+                            compressionType: 'none',
                             passphrase: 'passphrase' // decrypted secret
                         }
                     ]
@@ -606,6 +618,7 @@ module.exports = {
                                 type: 'output'
                             },
                             allowSelfSignedCert: false,
+                            compressionType: 'none',
                             namespace: 'My_Namespace',
                             passphrase: {
                                 class: 'Secret',
@@ -679,6 +692,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -708,6 +722,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -735,6 +750,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -764,6 +780,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -805,6 +822,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: 'passphrase', // decrypted secret
@@ -840,6 +858,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -879,6 +898,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'f5telemetry_default',
                             passphrase: {
@@ -917,6 +937,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -993,6 +1014,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1024,6 +1046,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1052,6 +1075,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1081,6 +1105,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1122,6 +1147,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1157,6 +1183,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1196,6 +1223,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1234,6 +1262,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1298,6 +1327,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1329,6 +1359,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1350,6 +1381,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1372,6 +1404,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1413,6 +1446,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1438,6 +1472,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1477,6 +1512,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1505,6 +1541,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1585,6 +1622,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1616,6 +1654,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1637,6 +1676,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1659,6 +1699,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1700,6 +1741,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -1725,6 +1767,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -1764,6 +1807,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -1792,6 +1836,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -1887,6 +1932,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -1918,6 +1964,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1946,6 +1993,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -1975,6 +2023,7 @@ module.exports = {
                         protocol: 'https',
                         outputMode: 'processed',
                         trace: false,
+                        compressionType: 'none',
                         passphrase: {
                             class: 'Secret',
                             protected: 'SecureVault',
@@ -2016,6 +2065,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -2051,6 +2101,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: 'passphrase' // decrypted secret
@@ -2090,6 +2141,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {
@@ -2128,6 +2180,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'My_Namespace',
                             passphrase: {
@@ -2213,6 +2266,7 @@ module.exports = {
                             protocol: 'https',
                             outputMode: 'processed',
                             trace: false,
+                            compressionType: 'none',
                             passphrase: {
                                 class: 'Secret',
                                 protected: 'SecureVault',
@@ -2261,6 +2315,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: 'passphrase', // decrypted secret
@@ -2301,6 +2356,7 @@ module.exports = {
                                 path: '/var/tmp/telemetry/Telemetry_Consumer.ExistingNameSpace::My_Consumer',
                                 type: 'output'
                             },
+                            compressionType: 'none',
                             allowSelfSignedCert: false,
                             namespace: 'ExistingNameSpace',
                             passphrase: {

@@ -18,6 +18,9 @@ const sinon = require('sinon');
 const zlib = require('zlib');
 
 const dataDogIndex = require('../../../src/lib/consumers/DataDog/index');
+const dataDogData = require('./data/dataDogConsumerTestsData');
+const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
+const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
 chai.use(chaiAsPromised);
@@ -74,13 +77,13 @@ describe('DataDog', () => {
             responseData: '{}'
         },
         metrics: {
-            path: '/api/v1/series',
+            path: '/api/v2/series',
             requestHeaders: {
                 'Content-Type': 'application/json',
                 'DD-API-KEY': DATA_DOG_API_KEY
             },
             responseCode: 202,
-            responseData: '{"status":"ok"}'
+            responseData: '{"errors":[]}'
         }
     };
     const DATA_DOG_TYPES = {
@@ -88,6 +91,7 @@ describe('DataDog', () => {
         METRICS: 'metrics'
     };
     let dataDogRequestData;
+    let datadogTimestamp;
     let defaultConsumerConfig;
 
     function addGzipReqHeadersIfNeed(reqConf, compressionConfig, compressionType) {
@@ -99,11 +103,33 @@ describe('DataDog', () => {
         }
         return reqConf;
     }
+
     function addGzipConfigIfNeed(config, compressionType) {
         if (compressionType === 'gzip') {
             Object.assign(config, { compressionType: 'gzip' });
         }
         return config;
+    }
+
+    function mutateTestsData(originData, options) {
+        options = options || {};
+        originData = testUtil.deepCopy(originData);
+
+        let prefix = '';
+        if (Array.isArray(options.prefix) && options.prefix.length > 0) {
+            prefix = `${options.prefix.join('.')}.`;
+        }
+        originData.series.forEach((metric) => {
+            metric.metric = `${prefix}${metric.metric}`;
+
+            if (typeof options.timestamp !== 'undefined') {
+                metric.points[0].timestamp = options.timestamp;
+            }
+            if (Array.isArray(options.tags)) {
+                metric.tags = metric.tags.concat(options.tags);
+            }
+        });
+        return originData;
     }
 
     function checkGzipReqHeadersIfNeeded(request, compressionConfig, compressionType) {
@@ -166,16 +192,23 @@ describe('DataDog', () => {
         testUtil.deepCopy(DATA_DOG_MOCK_ENDPOINTS[type]),
         { host: DATA_DOG_GATEWAYS[region || 'US1'][type].host }
     );
+
     before(() => {
         moduleCache.restore();
     });
 
     beforeEach(() => {
+        const defaultTimestamp = Date.now();
+        datadogTimestamp = Math.floor(defaultTimestamp / 1000.0);
         dataDogRequestData = [];
         defaultConsumerConfig = testUtil.deepCopy({
             apiKey: DATA_DOG_API_KEY,
             region: 'US1',
             service: 'f5-telemetry'
+        });
+
+        stubs.clock({
+            fakeTimersOpts: defaultTimestamp
         });
     });
 
@@ -191,21 +224,15 @@ describe('DataDog', () => {
                     describe(`compressionType === "${compressionType}"`, () => {
                         const metricPrefixTests = [
                             {
-                                testName: 'no metricPrefix',
-                                isDefined: 'system.cpu',
-                                isUndefined: 'f5.bigip.system.cpu'
+                                testName: 'no metricPrefix'
                             },
                             {
                                 testName: 'custom metricPrefix, length = 1',
-                                metricPrefix: ['f5'],
-                                isDefined: 'f5.system.cpu',
-                                isUndefined: 'system.cpu'
+                                metricPrefix: ['f5']
                             },
                             {
                                 testName: 'custom metricPrefix, length = 3',
-                                metricPrefix: ['f5', 'bigip', 'device'],
-                                isDefined: 'f5.bigip.device.system.cpu',
-                                isUndefined: 'system.cpu'
+                                metricPrefix: ['f5', 'bigip', 'device']
                             }
                         ];
 
@@ -222,29 +249,62 @@ describe('DataDog', () => {
                                 setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
                                 return dataDogIndex(context)
                                     .then(() => {
-                                        const timeSeries = dataDogRequestData[0].request.series;
-                                        const systemCpu = timeSeries.find(
-                                            (series) => series.metric === metricPrefixTest.isDefined
+                                        const expectedData = mutateTestsData(
+                                            dataDogData.systemData[0].expectedData,
+                                            {
+                                                prefix: metricPrefixTest.metricPrefix,
+                                                timestamp: datadogTimestamp
+                                            }
                                         );
-
-                                        assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
-                                        assert.isNotEmpty(timeSeries, 'should have some metric data');
-                                        assert.isDefined(
-                                            timeSeries.find((series) => series.metric === metricPrefixTest.isDefined),
-                                            `should have found '${metricPrefixTest.isDefined}' metric name`
-                                        );
-                                        assert.isUndefined(
-                                            timeSeries.find((series) => series.metric === metricPrefixTest.isUndefined),
-                                            `should have found '${metricPrefixTest.isDefined}' metric name`
-                                        );
-                                        assert.includeMembers(
-                                            systemCpu.tags,
-                                            ['configSyncSucceeded:true'],
-                                            'should have configSyncSucceeded boolean tag on \'system.cpu\' metric'
+                                        assert.sameDeepMembers(
+                                            testUtil.sortAllArrays(dataDogRequestData[0].request.series),
+                                            testUtil.sortAllArrays(expectedData.series),
+                                            'should match expected output data'
                                         );
                                         checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
                                     });
                             });
+                        });
+
+                        it('should split huge payloads into smaller chunks', () => {
+                            // tune if needed
+                            const numberOfObjects = compressionType === 'gzip' ? 4 * 1000 * 10 : 5000;
+                            const context = testUtil.buildConsumerContext({
+                                eventType: 'systemInfo',
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.event.isCustom = true;
+                            context.event.data = {
+                                virtualServers: {}
+                            };
+                            for (let i = 0; i < numberOfObjects; i += 1) {
+                                context.event.data.virtualServers[`virtualServer_${i}`] = {
+                                    name: `virtualServer_${i}`,
+                                    metric: i
+                                };
+                            }
+                            context.config.region = region;
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.METRICS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    assert.isAbove(dataDogRequestData.length, 1, 'should log more than 1 request');
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
+
+                                    const tags = {};
+                                    const values = {};
+                                    dataDogRequestData.forEach((r) => {
+                                        r.request.series.forEach((metricData) => {
+                                            const nameTag = metricData.tags.find((t) => t.startsWith('name'));
+                                            tags[nameTag] = metricData.points[0].value;
+                                            values[metricData.points[0].value] = nameTag;
+                                        });
+                                    });
+
+                                    assert.lengthOf(Object.keys(tags), numberOfObjects, 'should send all generated tags');
+                                    assert.lengthOf(Object.keys(values), numberOfObjects, 'should send all generated metrics');
+                                });
                         });
 
                         it('should process systemInfo data, and append custom tags', () => {
@@ -262,13 +322,18 @@ describe('DataDog', () => {
                             setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
                             return dataDogIndex(context)
                                 .then(() => {
-                                    const timeSeriesTagsSample = dataDogRequestData[0].request.series
-                                        .filter((_, index) => index % 10 === 0); // Sample 10%
-
-                                    assert.isAbove(timeSeriesTagsSample.length, 1, 'should have multiple time series');
-                                    timeSeriesTagsSample.forEach((tagSet) => {
-                                        assert.includeMembers(tagSet.tags, ['deploymentName:best version', 'instanceId:instance1']);
-                                    });
+                                    const expectedData = mutateTestsData(
+                                        dataDogData.systemData[0].expectedData,
+                                        {
+                                            tags: ['deploymentName:best version', 'instanceId:instance1'],
+                                            timestamp: datadogTimestamp
+                                        }
+                                    );
+                                    assert.sameDeepMembers(
+                                        testUtil.sortAllArrays(dataDogRequestData[0].request.series),
+                                        testUtil.sortAllArrays(expectedData.series),
+                                        'should match expected output data'
+                                    );
                                     checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
                                 });
                         });
@@ -293,7 +358,6 @@ describe('DataDog', () => {
                                         (series) => series.metric === 'system.cpu'
                                     );
 
-                                    assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
                                     assert.isNotEmpty(timeSeries, 'should have some metric data');
                                     assert.isDefined(configSyncSucceeded, 'should include \'system.configSyncSucceeded\' as a metric');
                                     assert.notIncludeMembers(
@@ -490,7 +554,7 @@ describe('DataDog', () => {
             return dataDogIndex(context)
                 .then(() => {
                     const traceData = context.tracer.write.firstCall.args[0];
-                    assert.deepStrictEqual(traceData.data.ddsource, 'syslog');
+                    assert.deepStrictEqual(JSON.parse(traceData.data[0]).ddsource, 'syslog');
                 });
         });
 
@@ -531,6 +595,63 @@ describe('DataDog', () => {
                         /zlib.gzip expected error/,
                         'should log error message'
                     );
+                });
+        });
+    });
+
+    describe('proxy options', () => {
+        let requestUtilSpy;
+
+        beforeEach(() => {
+            requestUtilSpy = sinon.spy(httpUtil, 'sendToConsumer');
+        });
+
+        it('should pass basic proxy options', () => {
+            const context = testUtil.buildConsumerContext({
+                config: defaultConsumerConfig
+            });
+            context.config.proxy = {
+                host: 'proxyServer',
+                port: 8080
+            };
+            context.event.type = 'syslog';
+            context.event.data = {
+                data: 'plain data',
+                telemetryEventCategory: 'event'
+            };
+            setupDataDogMockEndpoint(getRequestConfig(DATA_DOG_TYPES.LOGS));
+            return dataDogIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
+                    assert.deepStrictEqual(reqOpt.proxy, { host: 'proxyServer', port: 8080 });
+                    assert.deepStrictEqual(reqOpt.allowSelfSignedCert, false);
+                });
+        });
+
+        it('should pass proxy options with allowSelfSignedCert', () => {
+            const context = testUtil.buildConsumerContext({
+                config: defaultConsumerConfig
+            });
+            context.config.proxy = {
+                host: 'proxyServer',
+                port: 8080,
+                username: 'test',
+                passphrase: 'test',
+                allowSelfSignedCert: true
+            };
+            context.event.type = 'syslog';
+            context.event.data = {
+                data: 'plain data',
+                telemetryEventCategory: 'event'
+            };
+            setupDataDogMockEndpoint(getRequestConfig(DATA_DOG_TYPES.LOGS));
+            return dataDogIndex(context)
+                .then(() => {
+                    const reqOpt = requestUtilSpy.firstCall.args[0];
+                    assert.deepStrictEqual(reqOpt.proxy, {
+                        host: 'proxyServer', port: 8080, username: 'test', passphrase: 'test', allowSelfSignedCert: true
+                    });
+                    assert.deepStrictEqual(reqOpt.allowSelfSignedCert, true);
                 });
         });
     });

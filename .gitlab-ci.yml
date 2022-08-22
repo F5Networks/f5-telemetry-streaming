@@ -161,7 +161,7 @@ lint:
 test_node4:
     extends:
         - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:4
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:4.8.0
 
 # just in case, unittests only (without coverage check)
 test_node6:
@@ -229,6 +229,7 @@ npm_audit:
 
 # run tests and check code coverage
 coverage:
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:8.11.1
     extends:
         - .test_job_definition
     script:

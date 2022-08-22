@@ -39,6 +39,30 @@ const iterateMemberReferenceEntries = (data, entryFunc) => {
     return data;
 };
 
+/**
+ * Name mapping for data from system/performance/*.
+ * Issue is following: REST API returns JSON output with duplicated keys
+ * that forces us to:
+ * - apply additional parsing
+ * - generate new unique keys for those entries
+ *
+ * So, this mapping for duplicated keys only!
+ */
+const SYS_PERFORMANCE_MAP = {
+    'In Throughput(bits)': 'In Bits',
+    'In Throughput(packets)': 'In Packets',
+    'Out Throughput(bits)': 'Out Bits',
+    'Out Throughput(packets)': 'Out Packets',
+    'Server Connects New Connections': 'serverNewConnections',
+    'Server Connects New TCP Accepts/Connects': 'serverNewTCPConnections',
+    'Service Throughput(bits)': 'Service Bits',
+    'Service Throughput(packets)': 'Service Packets',
+    'SSL Client Active SSL Connections': 'activeSSLClientConnections',
+    'SSL Client New ClientSSL Profile Connections': 'newSSLClientConnections',
+    'SSL Server Active SSL Connections': 'activeSSLServerConnections',
+    'SSL Server New ClientSSL Profile Connections': 'newSSLServerConnections'
+};
+
 module.exports = {
     /**
      * Format MAC address
@@ -777,7 +801,7 @@ module.exports = {
     },
 
     /**
-     * Pre-process Throughput Performance stats
+     * Pre-process System Performance stats - Throughput, Connections
      *
      * - Converts array data into mapping based on 'description' field or assigns unique key
      *
@@ -787,31 +811,32 @@ module.exports = {
      *
      * @returns {Object} Returns updated data
      */
-    throughputPerformancePreProcessing(args) {
-        const throughput = args.data;
-        Object.keys(throughput).forEach((key) => {
-            const val = throughput[key];
+    sysPerformancePreProcessing(args) {
+        const statsData = args.data;
+        Object.keys(statsData).forEach((key) => {
+            const val = statsData[key];
             if (Array.isArray(val)) {
                 // duplicated keys were put in array
-                delete throughput[key];
+                delete statsData[key];
                 val.forEach((subData) => {
                     let newKey;
-                    if (subData['Throughput(packets)']) {
-                        newKey = util.generateUniquePropName(throughput, `${key} Packets`);
-                    } else if (subData['Throughput(bits)']) {
-                        newKey = util.generateUniquePropName(throughput, `${key} Bits`);
-                    } else {
-                        newKey = util.generateUniquePropName(throughput, key);
-                    }
-                    throughput[newKey] = subData;
+                    const renamed = Object.keys(subData).some((subKey) => {
+                        newKey = SYS_PERFORMANCE_MAP[`${key} ${subKey}`];
+                        if (typeof newKey !== 'undefined') {
+                            return true;
+                        }
+                        return false;
+                    });
+                    newKey = util.generateUniquePropName(statsData, renamed ? newKey : key);
+                    statsData[newKey] = subData;
                 });
             }
         });
-        return throughput;
+        return statsData;
     },
 
     /**
-     * Post-process Throughput Performance stats
+     * Post-process System Performance stats
      *
      * - Converts keys to camelCase
      * - Excludes all keys except metric keys
@@ -822,12 +847,12 @@ module.exports = {
      *
      * @returns {Object} Returns updated data
      */
-    throughputPerformancePostProcessing(args) {
+    sysPerformancePostProcessing(args) {
         const allowedKeys = ['average', 'current', 'max'];
-        const throughput = args.data;
+        const statsData = args.data;
         const formatted = {};
-        Object.keys(throughput).forEach((key) => {
-            const val = throughput[key];
+        Object.keys(statsData).forEach((key) => {
+            const val = statsData[key];
             const newVal = {};
             Object.keys(val).forEach((vkey) => {
                 const lcKey = vkey.toLowerCase();

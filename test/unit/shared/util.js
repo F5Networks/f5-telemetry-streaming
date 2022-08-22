@@ -79,7 +79,8 @@ function MockTracer() {
     this.write = sinon.stub();
 }
 
-module.exports = {
+// eslint-disable-next-line no-multi-assign
+const _module = module.exports = {
     MockRestOperation,
     MockLogger,
     MockTracer,
@@ -282,6 +283,40 @@ module.exports = {
     }()),
 
     /**
+     * Cartesian product of input iterables
+     *
+     * @returns {Array<Array>}
+     */
+    product() {
+        const results = [];
+        // ignore empty arrays
+        const args = Array.from(arguments);
+        // even 1 empty array results in empty output
+        if (args.length === 0 || !args.every((arr) => arr.length)) {
+            return results;
+        }
+        // list of indexes for each input iterable
+        const indexes = args.map(() => 0);
+        const firstArrLength = args[0].length;
+        // when index for first array exceed its length then we are done
+        while (indexes[0] < firstArrLength) {
+            // create 'product' based on index for each iterable
+            results.push(indexes.map((idx, argIdx) => args[argIdx][idx]));
+            // calculate next index for each iterable
+            for (let i = indexes.length - 1; i >= 0; i -= 1) {
+                indexes[i] += 1;
+                if (indexes[i] < args[i].length) {
+                    break;
+                }
+                if (i !== 0) { // ignore index for first iterable - see 'while' above
+                    indexes[i] = 0;
+                }
+            }
+        }
+        return results;
+    },
+
+    /**
      * Load modules from folder (or file)
      *
      * @param {String | Array<String>} paths - path(s) to load
@@ -333,5 +368,20 @@ module.exports = {
      */
     sleep(sleepTime) {
         return new Promise((resolve) => { setTimeout(resolve, sleepTime); });
+    },
+
+    /**
+     * Sort all arrays in data
+     *
+     * @param {any} data
+     */
+    sortAllArrays(data) {
+        if (typeof data === 'object') {
+            if (Array.isArray(data)) {
+                data.sort();
+            }
+            Object.keys(data).forEach((k) => _module.sortAllArrays(data[k]));
+        }
+        return data;
     }
 };
