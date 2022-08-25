@@ -371,7 +371,7 @@
             ]
         },
         "clientCertificate": {
-            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP, OpenTelemetry_Exporter",
             "title": "Client Certificate",
             "description": "Certificate(s) to use when connecting to a secured endpoint.",
             "type": "object",
@@ -383,7 +383,7 @@
             ]
         },
         "rootCertificate": {
-            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP, OpenTelemetry_Exporter",
             "title": "Root Certificate",
             "description": "Certificate Authority root certificate, used to validate certificate chains.",
             "type": "object",
@@ -458,7 +458,7 @@
             "f5expand": true
         },
         "privateKey": {
-            "$comment": "Required for certain consumers: Kafka, Generic HTTP",
+            "$comment": "Required for certain consumers: Kafka, Generic HTTP, OpenTelemetry_Exporter",
             "title": "Private Key",
             "description": "Private Key",
             "type": "object",
@@ -610,7 +610,8 @@
                         ]
                     },
                     "else": {}
-                }]
+                }
+            ]
         },
         "targetAudience": {
             "$comment": "Required for certain consumers: F5_Cloud",
@@ -621,7 +622,7 @@
             "f5expand": true
         },
         "useSSL": {
-            "$comment": "Required for certain consumers: F5_Cloud",
+            "$comment": "Required for certain consumers: F5_Cloud, OpenTelemetry_Exporter",
             "title": "useSSL",
             "description": "To decide if GRPC connection should use SSL and then it is secured" ,
             "type": "boolean",
@@ -686,6 +687,35 @@
                 },
                 "additionalProperties": false
             }
+        },
+        "customHttpOpts": {
+            "items": {
+                "allOf": [
+                    {
+                        "if": { "properties": { "name": { "const": "keepAlive" } } },
+                        "then": { "properties": { "value": { "type": "boolean" } } } 
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "keepAliveMsecs" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "maxSockets" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "maxFreeSockets" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
+                    }
+                ]
+            }
+        },
+        "otelExporter": {
+            "$comment": "Required for certain consumers: OpenTelemetry_Exporter",
+            "title": "Open Telemetry Exporter",
+            "description": "" ,
+            "type": "string",
+            "enum": ["grpc", "json", "protobuf" ]
         }
     },
     "allOf": [
@@ -823,7 +853,8 @@
                             "reportInstanceMetadata": {},
                             "metricsPath": {},
                             "service": {},
-                            "convertBooleansToMetrics": {}
+                            "convertBooleansToMetrics": {},
+                            "exporter": {}
                         },
                         "additionalProperties": false,
                         "dependencies": {
@@ -873,7 +904,14 @@
                                 "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
                                 "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
                                 "outputMode": { "$ref": "#/definitions/outputMode", "default": "processed" },
-                                "actions": { "$ref": "#/definitions/genericHttpActions" }
+                                "actions": { "$ref": "#/definitions/genericHttpActions" },
+                                "compressionType": { "$ref": "#/definitions/compressionType", "default": "none" },
+                                "customOpts": { 
+                                    "allOf": [
+                                        { "$ref": "#/definitions/customOpts" },
+                                        { "$ref": "#/definitions/customHttpOpts" }
+                                    ]
+                                }
                             },
                             "allOf": [
                                 {
@@ -1355,7 +1393,14 @@
                                 "service": { "$ref": "#/definitions/service", "default": "f5-telemetry" },
                                 "metricPrefix": { "$ref": "#/definitions/metricPrefix" },
                                 "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" },
-                                "customTags": { "$ref": "#/definitions/customTags" }
+                                "customTags": { "$ref": "#/definitions/customTags" },
+                                "customOpts": { 
+                                    "allOf": [
+                                        { "$ref": "#/definitions/customOpts" },
+                                        { "$ref": "#/definitions/customHttpOpts" }
+                                    ]
+                                },
+                                "proxy": { "$ref": "base_schema.json#/definitions/proxy" }
                             }
                         },
                         "else": {}
@@ -1372,9 +1417,63 @@
                                 "port": { "$ref": "#/definitions/port" },
                                 "headers": { "$ref": "#/definitions/headers" },
                                 "metricsPath": { "$ref": "#/definitions/path" },
-                                "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" }
+                                "convertBooleansToMetrics": { "$ref": "#/definitions/convertBooleansToMetrics", "default": "false" },
+                                "exporter": { "$ref": "#/definitions/otelExporter", "default": "protobuf" },
+                                "privateKey": { "$ref": "#/definitions/privateKey" },
+                                "clientCertificate": { "$ref": "#/definitions/clientCertificate" },
+                                "rootCertificate": { "$ref": "#/definitions/rootCertificate" }
                             },
-                            "nodeSupportVersion": "8.11.1"
+                            "dependencies": {
+                                "clientCertificate": ["privateKey"],
+                                "privateKey": ["clientCertificate"]
+                            },
+                            "nodeSupportVersion": "8.11.1",
+                            "allOf": [
+                                {
+                                    "if": { "properties": { "exporter": { "const": "grpc" } } } ,
+                                    "then": {
+                                        "properties": {
+                                            "useSSL": { "$ref": "#/definitions/useSSL", "default": true }
+                                        },
+                                        "allOf": [
+                                            {
+                                                "if": { "properties": { "useSSL": { "const": false } } },
+                                                "then": {
+                                                    "allOf": [
+                                                        { "not": { "required": ["privateKey"] } },
+                                                        { "not": { "required": ["clientCertificate"] } },
+                                                        { "not": { "required": ["rootCertificate"] } }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "allOf": [
+                                                    { "not": { "required": ["metricsPath"] } },
+                                                    { "not": { "required": ["protocol"] } }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "else": {
+                                        "properties": {
+                                            "protocol": { "$ref": "#/definitions/protocols", "default": "http", "enum": ["http", "https"] }
+                                        },
+                                        "allOf": [
+                                            { "not": { "required": ["useSSL"] } },
+                                            {
+                                                "if": { "properties": { "protocol": { "const": "http" } } },
+                                                "then": {
+                                                    "allOf": [
+                                                        { "not": { "required": ["privateKey"] } },
+                                                        { "not": { "required": ["clientCertificate"] } },
+                                                        { "not": { "required": ["rootCertificate"] } }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
                         },
                         "else": {}
                     }

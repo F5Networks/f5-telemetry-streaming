@@ -392,7 +392,7 @@ describe('Tracer', () => {
                         validateTracerData(writtenData);
                         testAssert.includeMatch(
                             coreStub.logger.messages.debug,
-                            new RegExp(`Writing.*out of.*messages \\(limit = ${maxRecords} messages\\)`),
+                            new RegExp(`Writing last ${maxRecords}.*out of.*messages \\(limit = ${maxRecords} messages\\)`),
                             'should write debug message'
                         );
                     });

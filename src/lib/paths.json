@@ -224,12 +224,17 @@
         },
         {
             "name": "throughputPerformance",
-            "path": "/mgmt/tm/sys/performance/throughput?options=detail",
+            "path": "/mgmt/tm/sys/performance/throughput/stats?options=detail",
             "parseDuplicateKeys": true
         },
         {
             "name": "bashDisabled",
             "path": "/mgmt/tm/sys/db/systemauth.disablebash"
+        },
+        {
+            "name": "connectionsPerformance",
+            "path": "/mgmt/tm/sys/performance/connections/stats?options=detail",
+            "parseDuplicateKeys": true
         }
     ]
 }

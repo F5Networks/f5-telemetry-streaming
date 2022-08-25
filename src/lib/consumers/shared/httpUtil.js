@@ -10,6 +10,7 @@
 
 const util = require('../../utils/misc');
 const requestsUtil = require('../../utils/requests');
+
 /**
  * Process request headers
  *

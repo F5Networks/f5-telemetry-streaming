@@ -15,6 +15,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
+const zlib = require('zlib');
 
 const genericHttpIndex = require('../../../src/lib/consumers/Generic_HTTP/index');
 const testUtil = require('../shared/util');
@@ -188,6 +189,55 @@ describe('Generic_HTTP', () => {
                 });
 
             return genericHttpIndex(context);
+        });
+
+        it('should compress data', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: {
+                    port: 80,
+                    host: 'localhost',
+                    compressionType: 'gzip',
+                    headers: [
+                        { name: 'Content-Type', value: 'application/json' }
+                    ]
+                }
+            });
+            nock('https://localhost:80', {
+                reqheaders: {
+                    'Content-Encoding': 'gzip',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .post('/')
+                .reply(200, (_, requestBody) => {
+                    assert.isObject(requestBody);
+                    assert.deepStrictEqual(requestBody.Entity, 'SystemMonitor');
+                });
+
+            return genericHttpIndex(context);
+        });
+
+        it('should not fail when unable to compress data (gzip)', () => {
+            const context = testUtil.buildConsumerContext({
+                eventType: 'AVR',
+                config: {
+                    port: 80,
+                    host: 'localhost',
+                    compressionType: 'gzip'
+                }
+            });
+            sinon.stub(zlib, 'gzip').onFirstCall().callsFake((data, cb) => {
+                cb(new Error('zlib.gzip expected error'));
+            });
+            return genericHttpIndex(context)
+                .then(() => {
+                    assert.match(
+                        context.logger.exception.firstCall.args[0],
+                        /zlib.gzip expected error/,
+                        'should log error message'
+                    );
+                });
         });
     });
 

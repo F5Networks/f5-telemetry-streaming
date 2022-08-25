@@ -392,6 +392,123 @@
                         "name": "sslTps"
                     }
                 },
+                "connectionsPerformance": {
+                    "blade1": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "blade1"
+                    },
+                    "blade2": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "blade2"
+                    },
+                    "client": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "client"
+                    },
+                    "clientAccepts": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientAccepts"
+                    },
+                    "clientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientConnections"
+                    },
+                    "clientConnects": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientConnects"
+                    },
+                    "connections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "connections"
+                    },
+                    "httpRequests": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "httpRequests"
+                    },
+                    "pvaClient": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "pvaClient"
+                    },
+                    "pvaServer": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "pvaServer"
+                    },
+                    "server": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "server"
+                    },
+                    "serverConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverConnections"
+                    },
+                    "activeSslClientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "activeSslClientConnections"
+                    },
+                    "newSslClientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "newSslClientConnections"
+                    },
+                    "activeSslServerConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "activeSslServerConnections"
+                    },
+                    "newSslServerConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "newSslServerConnections"
+                    },
+                    "serverNewConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverNewConnections"
+                    },
+                    "serverNewTcpConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverNewTcpConnections"
+                    }
+                },
+                "asmAttackSignatures": {
+                    "ff8080817a3a4908017a3a490958000e": {
+                        "filename": "ASM-AttackSignatures_20190716_122131.im",
+                        "createDateTime": 1563279691000,
+                        "name": "ff8080817a3a4908017a3a490958000e"
+                    }
+                },
                 "asmState": "Policies Consistent",
                 "afmState": "quiescent",
                 "lastAfmDeploy": "2020-03-12T16:27:58.000Z",
@@ -1069,6 +1186,123 @@
                         "current": 7100,
                         "max": 7700,
                         "name": "sslTps"
+                    }
+                },
+                "connectionsPerformance": {
+                    "blade1": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "blade1"
+                    },
+                    "blade2": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "blade2"
+                    },
+                    "client": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "client"
+                    },
+                    "clientAccepts": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientAccepts"
+                    },
+                    "clientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientConnections"
+                    },
+                    "clientConnects": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "clientConnects"
+                    },
+                    "connections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "connections"
+                    },
+                    "httpRequests": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "httpRequests"
+                    },
+                    "pvaClient": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "pvaClient"
+                    },
+                    "pvaServer": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "pvaServer"
+                    },
+                    "server": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "server"
+                    },
+                    "serverConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverConnections"
+                    },
+                    "activeSslClientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "activeSslClientConnections"
+                    },
+                    "newSslClientConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "newSslClientConnections"
+                    },
+                    "activeSslServerConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "activeSslServerConnections"
+                    },
+                    "newSslServerConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "newSslServerConnections"
+                    },
+                    "serverNewConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverNewConnections"
+                    },
+                    "serverNewTcpConnections": {
+                        "average": 0,
+                        "current": 0,
+                        "max": 0,
+                        "name": "serverNewTcpConnections"
+                    }
+                },
+                "asmAttackSignatures": {
+                    "ff8080817a3a4908017a3a490958000e": {
+                        "filename": "ASM-AttackSignatures_20190716_122131.im",
+                        "createDateTime": 1563279691000,
+                        "name": "ff8080817a3a4908017a3a490958000e"
                     }
                 },
                 "asmState": "Policies Consistent",

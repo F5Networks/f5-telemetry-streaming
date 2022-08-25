@@ -17,9 +17,10 @@ Currently supported versions:
 
 | Software Version | Release Type  | First Customer Ship | End of Support  |
 |------------------|---------------|---------------------|-----------------|
-| TS 1.28.0        | Feature       |  19-Apr-2022        | 19-Jul-2022     |
+| TS 1.27.1        | LTS           |  19-Apr-2022        | 19-Apr-2023     |
 | TS 1.29.0        | Feature       |  31-May-2022        | 31-Aug-2022     |
 | TS 1.30.0        | Feature       |  15-Jul-2022        | 15-Oct-2022     |
+| TS 1.31.0        | Feature       |  23-Aug-2022        | 23-Nov-2022     |
 
 Versions no longer supported:
 
@@ -53,6 +54,6 @@ Versions no longer supported:
 | TS 1.25.0        | Feature       |  14-Dec-2021        | 14-Mar-2022     |
 | TS 1.26.0        | Feature       |  25-Jan-2022        | 25-Apr-2022     |
 | TS 1.27.0        | Feature       |  08-Mar-2022        | 08-Jun-2022     |
-| TS 1.27.1        | LTS           |  19-Apr-2022        | 19-Apr-2023     |
+| TS 1.28.0        | Feature       |  19-Apr-2022        | 19-Jul-2022     |
 
 See the [Release notes](https://github.com/F5Networks/f5-telemetry-streaming/releases) and [Telemetry Streaming documentation](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html) for new features and issues resolved for each release.

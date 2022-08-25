@@ -316,13 +316,31 @@
                     "renameKeys": { "patterns": { "sys/performance/throughput": { "pattern": "sys/performance/throughput\/(.*)/stats", "group": 1 } } }
                 },
                 {
-                    "runFunctions": [ { "name": "throughputPerformancePreProcessing" } ]
+                    "runFunctions": [ { "name": "sysPerformancePreProcessing" } ]
                 },
                 {
                     "renameKeys": { "patterns": { "Max(": { "constant": "Max" } } }
                 },
                 {
-                    "runFunctions": [ { "name": "throughputPerformancePostProcessing" } ]
+                    "runFunctions": [ { "name": "sysPerformancePostProcessing" } ]
+                }
+            ]
+        },
+        "connectionsPerformance": {
+            "structure": { "parentKey": "system" },
+            "key": "connectionsPerformance",
+            "normalization": [
+                {
+                    "renameKeys": { "patterns": { "sys/performance/connections": { "pattern": "sys/performance/connections\/(.*)/stats", "group": 1 } } }
+                },
+                {
+                    "runFunctions": [ { "name": "sysPerformancePreProcessing" } ]
+                },
+                {
+                    "renameKeys": { "patterns": { "Max(": { "constant": "Max" } } }
+                },
+                {
+                    "runFunctions": [ { "name": "sysPerformancePostProcessing" } ]
                 }
             ]
         },

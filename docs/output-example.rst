@@ -52,6 +52,9 @@ The following properties were introduced in recent Telemetry Streaming versions.
         - System
         - **asmAttackSignatures**, which shows ASM attack signature information.
 
+      * - 1.31
+        - System
+        - **system.connectionsPerformance**, shows performance stats.
 
 
 .. literalinclude:: ../examples/output/system_poller/output.json

@@ -15,123 +15,286 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
-const protobufjs = require('protobufjs');
 const path = require('path');
 
-let openTelemetryExporter; // later on: require('../../../src/lib/consumers/OpenTelemetry_Exporter/index');
 const openTelemetryExpectedData = require('./data/openTelemetryExporterConsumerTestsData');
 const testUtil = require('../shared/util');
 const util = require('../../../src/lib/utils/misc');
 
-const F5_CLOUD_NODE_SUPPORTED_VERSION = '8.11.1';
+// min supported version for OpenTelemetry_Exporter
+const IS_8_11_1_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.11.1');
+// on 8.11.1 gRPC server returns "Received RST_STREAM with code 0" - http2 bug on 8.11.1
+const IS_8_13_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.13.0');
+
+const OTLP_PROTOS_PATH = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/otlp-grpc-exporter-base/build/protos/');
+const METRICS_SERVICE_PROTO_PATH = path.resolve(OTLP_PROTOS_PATH, 'opentelemetry/proto/collector/metrics/v1/metrics_service.proto');
+const OTLP_PROTO_GEN_PATH = path.resolve(
+    __dirname, '../../../', 'node_modules/@opentelemetry/otlp-proto-exporter-base/build/src/generated/root'
+);
+
+let grpc;
+let openTelemetryExporter;
+let openTelemetryProtoGen;
+let protoLoader;
+
+if (IS_8_11_1_PLUS) {
+    // eslint-disable-next-line global-require
+    grpc = require('@grpc/grpc-js');
+    // eslint-disable-next-line global-require
+    openTelemetryExporter = require('../../../src/lib/consumers/OpenTelemetry_Exporter/index');
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    openTelemetryProtoGen = require(OTLP_PROTO_GEN_PATH);
+    // eslint-disable-next-line global-require
+    protoLoader = require('@grpc/proto-loader');
+}
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 moduleCache.remember();
 
-describe('OpenTelemetry_Exporter', () => {
-    if (util.compareVersionStrings(process.version.substring(1), '<', F5_CLOUD_NODE_SUPPORTED_VERSION)) {
+(IS_8_11_1_PLUS ? describe : describe.skip)('OpenTelemetry_Exporter', () => {
+    if (!IS_8_11_1_PLUS) {
         return;
     }
-    // eslint-disable-next-line global-require
-    openTelemetryExporter = require('../../../src/lib/consumers/OpenTelemetry_Exporter/index');
 
-    // Note: if a test has no explicit assertions then it relies on 'checkNockActiveMocks' in 'afterEach'
-    let defaultConsumerConfig;
-    let ExportRequestProto;
+    function getNanoSecTime() {
+        return Date.now() / 0.000001; // to nano
+    }
+
+    function verifyMetricTimestamps(timestampsToVerify, currentTimestamp) {
+        timestampsToVerify.forEach((metric) => {
+            assert.isTrue(
+                metric.timestamps.every((tarr) => tarr.every((t) => t >= currentTimestamp)),
+                `should have correct timestamps for '${metric.name}'. got '${JSON.stringify(metric.timestamps)}' (time in nano before test started - ${currentTimestamp})`
+            );
+        });
+    }
 
     before(() => {
         moduleCache.restore();
-        const dir = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/exporter-metrics-otlp-proto/build/protos');
-        const root = new protobufjs.Root();
-        root.resolvePath = function (_, target) {
-            return `${dir}/${target}`;
-        };
-
-        const proto = root.loadSync([
-            'opentelemetry/proto/common/v1/common.proto',
-            'opentelemetry/proto/resource/v1/resource.proto',
-            'opentelemetry/proto/metrics/v1/metrics.proto',
-            'opentelemetry/proto/collector/metrics/v1/metrics_service.proto'
-        ]);
-        ExportRequestProto = proto.lookupType('ExportMetricsServiceRequest');
     });
 
-    beforeEach(() => {
-        defaultConsumerConfig = {
-            port: 80,
-            host: 'localhost',
-            metricsPath: '/v1/metrics'
-        };
-    });
+    function generateTests(testConf) {
+        let currentTimestampUnixNano;
+        let defaultConsumerConfig;
+        let ExportRequestProto;
+        let fetchLabelValue;
+        let grpcServer;
+        let mockHost;
+        let mockPath;
+        let mockPort;
+        let mockProtocol;
+        let nockMock;
+        let onDataReceivedCallback;
+        let requestHeaders;
+        let requestMetrics;
+        let requestTimestamps;
 
-    afterEach(() => {
-        testUtil.checkNockActiveMocks(nock);
-        sinon.restore();
-        nock.cleanAll();
-    });
+        function convertExportedMetrics(requestBody) {
+            const metrics = [];
+            const timestamps = [];
 
-    describe('process', () => {
-        it('should process event', () => assert.isFulfilled(openTelemetryExporter(testUtil.buildConsumerContext({
-            eventType: 'event'
-        }))));
+            if (testConf.exporter === 'protobuf') {
+                requestBody = ExportRequestProto.decode(Buffer.from(requestBody, 'hex'));
+            }
 
-        it('should log an error if error encountered', () => {
-            const context = testUtil.buildConsumerContext({
-                eventType: 'systemInfo',
-                config: defaultConsumerConfig
-            });
-
-            nock('http://localhost:80')
-                .post('/v1/metrics')
-                .replyWithError('error sending!');
-
-            return openTelemetryExporter(context)
-                .then(() => {
-                    assert.deepStrictEqual(context.logger.error.firstCall.args, ['error: error sending!'], 'should log an error');
-                    assert.isFalse(context.logger.debug.called, 'should not have logged a debug message');
+            requestBody.resourceMetrics[0]
+                .scopeMetrics[0]
+                .metrics.forEach((metric) => {
+                    metrics.push({
+                        name: metric.name,
+                        description: metric.description,
+                        dataPoints: metric.sum.dataPoints.map((p) => ({
+                            labels: p.attributes.map((l) => ({ key: l.key, value: fetchLabelValue(l) })),
+                            value: p.asDouble
+                        }))
+                    });
+                    timestamps.push({
+                        name: metric.name,
+                        timestamps: metric.sum.dataPoints.map((p) => [
+                            Number(p.startTimeUnixNano),
+                            Number(p.timeUnixNano)
+                        ])
+                    });
                 });
+            return {
+                metrics,
+                timestamps
+            };
+        }
+
+        function getMockNock(options) {
+            if (!nockMock) {
+                nockMock = nock(`${mockProtocol}://${mockHost}:${mockPort}`, options).post(mockPath);
+            }
+            return nockMock;
+        }
+
+        function initDefaultNockMock(options) {
+            getMockNock(options).reply(function (_, requestBody) {
+                if (onDataReceivedCallback) {
+                    onDataReceivedCallback(requestBody);
+                }
+                requestHeaders = this.req.headers;
+                return 200;
+            });
+        }
+
+        function isGRPCExporter() {
+            return testConf.exporter === 'grpc';
+        }
+
+        function isProtobufExporter() {
+            return testConf.exporter === 'protobuf';
+        }
+
+        function resetNockMock() {
+            if (nockMock) {
+                nock.removeInterceptor(nockMock);
+            }
+        }
+
+        function verifyTimestamps() {
+            verifyMetricTimestamps(requestTimestamps, currentTimestampUnixNano);
+        }
+
+        before((done) => {
+            grpcServer = null;
+            mockHost = 'localhost';
+            mockPath = '/v1/metrics';
+            mockPort = 55681;
+            mockProtocol = testConf.secure ? 'https' : 'http';
+
+            if (isGRPCExporter()) {
+                const protoDescriptor = grpc.loadPackageDefinition(protoLoader.loadSync(METRICS_SERVICE_PROTO_PATH, {
+                    keepCase: false,
+                    longs: String,
+                    enums: String,
+                    defaults: true,
+                    oneofs: true,
+                    includeDirs: [OTLP_PROTOS_PATH]
+                }));
+
+                grpcServer = new grpc.Server();
+                grpcServer.addService(protoDescriptor.opentelemetry.proto.collector.metrics.v1.MetricsService.service, {
+                    Export: (call, callback) => {
+                        const metadata = new grpc.Metadata();
+                        metadata.merge(call.metadata);
+                        requestHeaders = metadata.toHttp2Headers();
+
+                        let error = null;
+                        if (onDataReceivedCallback) {
+                            error = onDataReceivedCallback(call.request);
+                        }
+                        callback(error);
+                    }
+                });
+            } else {
+                ExportRequestProto = openTelemetryProtoGen
+                    .opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
+            }
+
+            if (isProtobufExporter()) {
+                fetchLabelValue = (label) => label.value[label.value.value];
+            } else {
+                fetchLabelValue = (label) => {
+                    if (typeof label.value.boolValue !== 'undefined') {
+                        return label.value.boolValue;
+                    }
+                    return label.value.stringValue;
+                };
+            }
+
+            if (isGRPCExporter()) {
+                grpcServer.bindAsync(`${mockHost}:${mockPort}`, grpc.ServerCredentials.createInsecure(), (err) => {
+                    if (err) {
+                        done(err);
+                    } else {
+                        grpcServer.start();
+                        done();
+                    }
+                });
+            } else {
+                done();
+            }
+        });
+
+        after((done) => {
+            if (grpcServer) {
+                grpcServer.tryShutdown(done);
+            } else {
+                done();
+            }
+        });
+
+        beforeEach(() => {
+            currentTimestampUnixNano = getNanoSecTime();
+            defaultConsumerConfig = {
+                exporter: testConf.exporter,
+                host: mockHost,
+                metricsPath: mockPath,
+                port: mockPort,
+                protocol: mockProtocol,
+                useSSL: testConf.secure
+            };
+            nockMock = null;
+            onDataReceivedCallback = (requestBody) => {
+                const parsed = convertExportedMetrics(requestBody);
+                requestMetrics = parsed.metrics;
+                requestTimestamps = parsed.timestamps;
+                return null;
+            };
+            requestHeaders = null;
+            requestMetrics = null;
+            requestTimestamps = null;
+
+            if (!isGRPCExporter()) {
+                initDefaultNockMock();
+            }
+        });
+
+        afterEach(() => {
+            testUtil.checkNockActiveMocks(nock);
+            sinon.restore();
+            nock.cleanAll();
         });
 
         describe('OpenTelemetry metrics', () => {
-            const convertExportedMetrics = (requestBody) => {
-                const results = [];
-                const ExportMetricsServiceRequest = ExportRequestProto.decode(Buffer.from(requestBody, 'hex'));
-                const exportedMetrics = ExportMetricsServiceRequest
-                    .resourceMetrics[0]
-                    .instrumentationLibraryMetrics[0]
-                    .metrics;
-
-                exportedMetrics.forEach((metric) => {
-                    results.push({
-                        name: metric.name,
-                        description: metric.description,
-                        dataPoints: metric.doubleSum.dataPoints.map((p) => ({
-                            labels: p.labels.map((l) => ({ key: l.key, value: l.value })),
-                            value: p.value
-                        }))
-                    });
+            it('should log an error if error encountered', () => {
+                const context = testUtil.buildConsumerContext({
+                    eventType: 'systemInfo',
+                    config: defaultConsumerConfig
                 });
-                return results;
-            };
+
+                if (isGRPCExporter()) {
+                    onDataReceivedCallback = () => new Error('error sending!');
+                } else {
+                    resetNockMock();
+                    getMockNock().replyWithError('error sending!');
+                }
+
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        assert.includeDeepMembers(context.logger.exception.firstCall.args, ['Error on attempt to send metrics:'], 'should log an error');
+                    });
+            });
 
             it('should log and trace data', () => {
                 const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
-
-                nock('http://localhost:80')
-                    .post('/v1/metrics')
-                    .reply();
                 return openTelemetryExporter(context)
                     .then(() => {
-                        assert.deepStrictEqual(context.logger.debug.args, [['success']], 'should log a success');
-                        assert.isFalse(context.logger.error.called, 'should not have logged an error');
-                        const traceData = context.tracer.write.firstCall.args[0];
+                        // on 8.11.1 server returns "Received RST_STREAM with code 0" - http2 bug on 8.11.1
+                        if (IS_8_13_PLUS) {
+                            assert.deepStrictEqual(context.logger.debug.args, [['success']], 'should log a success');
+                            assert.isFalse(context.logger.error.called, 'should not have logged an error');
+                        }
 
-                        assert.strictEqual(Object.keys(traceData).length, 406, 'should have trace record for each metric');
+                        const traceData = context.tracer.write.firstCall.args[0];
+                        assert.deepStrictEqual(Object.keys(traceData).length, 409, 'should have trace record for each metric');
                         assert.deepStrictEqual(traceData.system_diskLatency__util, {
                             description: 'system.diskLatency.%util',
                             measurements: [
@@ -148,6 +311,12 @@ describe('OpenTelemetry_Exporter', () => {
                                 { tags: { name: 'dm-8' }, value: 0.01 }
                             ]
                         }, 'should include measurements array for specific metric in trace data');
+
+                        assert.sameDeepMembers(
+                            requestMetrics,
+                            openTelemetryExpectedData.systemData[0].expectedData
+                        );
+                        verifyTimestamps();
                     });
             });
 
@@ -156,16 +325,18 @@ describe('OpenTelemetry_Exporter', () => {
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        if (!isGRPCExporter()) {
+                            const expectedHeader = isProtobufExporter()
+                                ? 'application/x-protobuf'
+                                : 'application/json';
 
-                nock('http://localhost:80')
-                    .post('/v1/metrics')
-                    .reply(function (_, requestBody) {
-                        const metrics = convertExportedMetrics(requestBody);
-
-                        assert.strictEqual(this.req.headers['content-type'], 'application/x-protobuf', 'should send protobuf data');
-                        assert.strictEqual(metrics.length, 727, 'should export correct number of metrics');
+                            assert.deepStrictEqual(requestHeaders['content-type'], expectedHeader, 'should use correct Content-Type header');
+                        }
+                        assert.deepStrictEqual(requestMetrics.length, 409, 'should export correct number of metrics');
+                        verifyTimestamps();
                     });
-                return openTelemetryExporter(context);
             });
 
             it('should label metrics and export the correct values (systemInfo)', () => {
@@ -173,20 +344,20 @@ describe('OpenTelemetry_Exporter', () => {
                     eventType: 'systemInfo',
                     config: defaultConsumerConfig
                 });
-
-                nock('http://localhost:80')
-                    .post('/v1/metrics')
-                    .reply(200, (_, requestBody) => {
-                        const metrics = convertExportedMetrics(requestBody);
-                        const systemCpuLabels = metrics.find((metric) => metric.name === 'system_cpu').dataPoints[0].labels;
-
-                        assert.deepStrictEqual(metrics, openTelemetryExpectedData.systemData[0].expectedData);
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        const systemCpuLabels = requestMetrics.find((metric) => metric.name === 'system_cpu')
+                            .dataPoints[0].labels;
+                        assert.sameDeepMembers(
+                            requestMetrics,
+                            openTelemetryExpectedData.systemData[0].expectedData
+                        );
                         assert.isDefined(
                             systemCpuLabels.find((label) => label.key === 'configSyncSucceeded'),
                             'should find configSyncSucceeded as a label'
                         );
+                        verifyTimestamps();
                     });
-                return openTelemetryExporter(context);
             });
 
             it('should process systemInfo data, and convert booleans to metrics', () => {
@@ -194,21 +365,18 @@ describe('OpenTelemetry_Exporter', () => {
                     eventType: 'systemInfo',
                     config: Object.assign(defaultConsumerConfig, { convertBooleansToMetrics: true })
                 });
-
-                nock('http://localhost:80')
-                    .post('/v1/metrics')
-                    .reply(200, (_, requestBody) => {
-                        const metrics = convertExportedMetrics(requestBody);
-                        const systemCpuLabels = metrics.find((metric) => metric.name === 'system_cpu').dataPoints[0].labels;
-                        const configSyncSucceeded = metrics.find((metric) => metric.name === 'system_configSyncSucceeded');
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        const systemCpuLabels = requestMetrics.find((metric) => metric.name === 'system_cpu').dataPoints[0].labels;
+                        const configSyncSucceeded = requestMetrics.find((metric) => metric.name === 'system_configSyncSucceeded');
 
                         assert.isDefined(configSyncSucceeded, 'should include \'system_configSyncSucceeded\' as a metric');
                         assert.isUndefined(
                             systemCpuLabels.find((label) => label.key === 'configSyncSucceeded'),
                             'should not include configSyncSucceeded as a label'
                         );
+                        verifyTimestamps();
                     });
-                return openTelemetryExporter(context);
             });
 
             it('should process event listener event with metrics (AVR)', () => {
@@ -216,13 +384,11 @@ describe('OpenTelemetry_Exporter', () => {
                     eventType: 'AVR',
                     config: defaultConsumerConfig
                 });
-                nock('http://localhost:80')
-                    .post('/v1/metrics')
-                    .reply(200, (_, requestBody) => {
-                        const metrics = convertExportedMetrics(requestBody);
-                        assert.deepStrictEqual(metrics, openTelemetryExpectedData.avrData[0].expectedData);
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        assert.deepStrictEqual(requestMetrics, openTelemetryExpectedData.avrData[0].expectedData);
+                        verifyTimestamps();
                     });
-                return openTelemetryExporter(context);
             });
 
             it('should not send event listener event without metrics (LTM)', () => {
@@ -232,6 +398,8 @@ describe('OpenTelemetry_Exporter', () => {
                 });
                 return openTelemetryExporter(context)
                     .then(() => {
+                        resetNockMock();
+                        assert.isNull(requestMetrics, 'should not send metrics');
                         assert.deepStrictEqual(
                             context.logger.debug.args,
                             [['Event did not contain any metrics, skipping']],
@@ -249,6 +417,8 @@ describe('OpenTelemetry_Exporter', () => {
                 context.event.data = 'just some random string data';
                 return openTelemetryExporter(context)
                     .then(() => {
+                        resetNockMock();
+                        assert.isNull(requestMetrics, 'should not send metrics');
                         assert.deepStrictEqual(
                             context.logger.debug.args,
                             [['Event known to not contain metrics, skipping']],
@@ -276,16 +446,47 @@ describe('OpenTelemetry_Exporter', () => {
                     config: configWithHeaders
                 });
 
-                nock('http://localhost:80', {
-                    reqheaders: {
-                        'x-api-key': 'superSecret',
-                        'x-data-set': 'data-set-key'
-                    }
-                })
-                    .post('/v1/metrics')
-                    .reply(200);
-                return openTelemetryExporter(context);
+                if (!isGRPCExporter()) {
+                    resetNockMock();
+                    initDefaultNockMock({
+                        reqheaders: {
+                            'x-api-key': 'superSecret',
+                            'x-data-set': 'data-set-key'
+                        }
+                    });
+                }
+                return openTelemetryExporter(context)
+                    .then(() => {
+                        if (isGRPCExporter()) {
+                            assert.deepNestedInclude(requestHeaders, {
+                                'x-api-key': ['superSecret'],
+                                'x-data-set': ['data-set-key']
+                            }, 'should pass headers to gRPC metadata');
+                        }
+                    });
             });
         });
+    }
+
+    testUtil.product(
+        [ // exporter
+            'grpc',
+            'json',
+            'protobuf'
+        ],
+        [ // secure
+            true,
+            false
+        ]
+    ).forEach((row) => {
+        const testConf = {
+            exporter: row[0],
+            secure: row[1]
+        };
+        // skip tests for secure gRPC
+        if (testConf.exporter === 'grpc' && testConf.secure === true) {
+            return;
+        }
+        describe((`Exporter = ${testConf.exporter}, Secure = ${testConf.secure}`), () => generateTests(testConf));
     });
 });

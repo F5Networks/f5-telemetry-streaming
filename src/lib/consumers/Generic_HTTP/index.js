@@ -8,8 +8,87 @@
 
 'use strict';
 
+const http = require('http');
+const https = require('https');
+const zlib = require('zlib');
+
 const httpUtil = require('../shared/httpUtil');
 const util = require('../../utils/misc');
+
+/**
+ * Compress data
+ *
+ * @param {string} zlibMethod - method name from 'zlib'
+ * @param {string} data - data to compress
+ *
+ * @returns {Promise<Buffer>} resolved with compressed data
+ */
+const compressData = (zlibMethod, data) => new Promise((resolve, reject) => {
+    zlib[zlibMethod](data, (err, buffer) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(buffer);
+        }
+    });
+});
+
+/**
+ * Compress data if need
+ *
+ * @param {string} compression - compression type
+ * @param {string} data - data to compress
+ *
+ * @returns {Promise<Buffer | string>} resolved with data or compressed data
+ */
+const maybeCompress = (compression, data) => {
+    if (compression === 'none') {
+        return Promise.resolve(data);
+    }
+    data = typeof data !== 'string' ? JSON.stringify(data) : data;
+    return compressData(compression, data);
+};
+
+/**
+ * Fetch custom options for HTTP transport from config
+ *
+ * @param {Array} customOpts - options from config
+ *
+ * @returns {Object}
+ */
+const fetchHttpCustomOpts = (customOpts) => {
+    const allowedKeys = [
+        'keepAlive',
+        'keepAliveMsecs',
+        'maxSockets',
+        'maxFreeSockets'
+    ];
+    const ret = {};
+    customOpts.filter((opt) => allowedKeys.indexOf(opt.name) !== -1)
+        .forEach((opt) => {
+            ret[opt.name] = opt.value;
+        });
+    return ret;
+};
+
+const httpAgentsMap = {};
+const createHttpAgentOptsKey = (opts) => {
+    const keys = Object.keys(opts);
+    keys.sort();
+    return JSON.stringify(keys.map((k) => [k, opts[k]]));
+};
+
+const getHttpAgent = (config) => {
+    const customOpts = fetchHttpCustomOpts(config.customOpts || []);
+    const optsKey = createHttpAgentOptsKey(customOpts);
+    if (!httpAgentsMap[config.id] || httpAgentsMap[config.id].key !== optsKey) {
+        httpAgentsMap[config.id] = {
+            agent: new (config.protocol === 'https' ? https.Agent : http.Agent)(Object.assign({}, customOpts)),
+            key: optsKey
+        };
+    }
+    return httpAgentsMap[config.id].agent;
+};
 
 /**
  * See {@link ../README.md#context} for documentation
@@ -27,6 +106,7 @@ module.exports = function (context) {
     const key = context.config.privateKey || undefined;
     const cert = context.config.clientCertificate || undefined;
     const ca = context.config.rootCertificate || undefined;
+    const compressionType = context.config.compressionType || 'none';
 
     let allowSelfSignedCert = context.config.allowSelfSignedCert;
     if (!util.isObjectEmpty(context.config.proxy) && typeof context.config.proxy.allowSelfSignedCert !== 'undefined') {
@@ -58,6 +138,7 @@ module.exports = function (context) {
         context.tracer.write({
             allowSelfSignedCert,
             body,
+            compressionType,
             host,
             fallbackHosts,
             headers: tracedHeaders,
@@ -71,22 +152,32 @@ module.exports = function (context) {
             rootCertificate: util.isObjectEmpty(ca) ? undefined : redactString
         });
     }
-    return httpUtil.sendToConsumer({
-        allowSelfSignedCert,
-        body,
-        hosts: [host].concat(fallbackHosts),
-        headers,
-        json: outputMode !== 'raw', // for 'body' processing
-        logger: context.logger,
-        method,
-        port,
-        protocol,
-        proxy,
-        uri,
-        key,
-        cert,
-        ca
-    }).catch((err) => {
-        context.logger.exception(`Unexpected error: ${err}`, err);
-    });
+
+    let maybeJson = outputMode !== 'raw'; // for 'body' processing
+    if (compressionType !== 'none') {
+        headers['Content-Encoding'] = compressionType;
+        maybeJson = false;
+    }
+
+    return maybeCompress(compressionType, body)
+        .then((data) => httpUtil.sendToConsumer({
+            agent: getHttpAgent(context.config),
+            allowSelfSignedCert,
+            body: data,
+            hosts: [host].concat(fallbackHosts),
+            headers,
+            json: maybeJson,
+            logger: context.logger,
+            method,
+            port,
+            protocol,
+            proxy,
+            uri,
+            key,
+            cert,
+            ca
+        }))
+        .catch((err) => {
+            context.logger.exception(`Unexpected error: ${err}`, err);
+        });
 };

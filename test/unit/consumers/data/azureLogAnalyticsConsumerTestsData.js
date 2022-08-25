@@ -442,6 +442,116 @@ module.exports = {
                                     name: 'sslTps'
                                 }
                             },
+                            connectionsPerformance: {
+                                blade1: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'blade1'
+                                },
+                                blade2: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'blade2'
+                                },
+                                client: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'client'
+                                },
+                                clientAccepts: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientAccepts'
+                                },
+                                clientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientConnections'
+                                },
+                                clientConnects: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientConnects'
+                                },
+                                connections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'connections'
+                                },
+                                httpRequests: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'httpRequests'
+                                },
+                                pvaClient: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'pvaClient'
+                                },
+                                pvaServer: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'pvaServer'
+                                },
+                                server: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'server'
+                                },
+                                serverConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverConnections'
+                                },
+                                activeSslClientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'activeSslClientConnections'
+                                },
+                                newSslClientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'newSslClientConnections'
+                                },
+                                activeSslServerConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'activeSslServerConnections'
+                                },
+                                newSslServerConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'newSslServerConnections'
+                                },
+                                serverNewConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverNewConnections'
+                                },
+                                serverNewTcpConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverNewTcpConnections'
+                                }
+                            },
                             configSyncSucceeded: true,
                             syncColor: 'green',
                             syncMode: 'standalone',
@@ -463,7 +573,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:4hO6g0PLWeZAgWdyCllFS4NIks9QD/QGoV6R57TYotg=',
+                        Authorization: 'SharedKey myWorkspace:at7iSOWv+DZSlUxGI7Mi8sPhQ8fcU8xYZuMxbW7YExc=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2504,6 +2614,117 @@ module.exports = {
                                     name: 'sslTps'
                                 }
                             },
+
+                            connectionsPerformance: {
+                                blade1: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'blade1'
+                                },
+                                blade2: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'blade2'
+                                },
+                                client: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'client'
+                                },
+                                clientAccepts: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientAccepts'
+                                },
+                                clientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientConnections'
+                                },
+                                clientConnects: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'clientConnects'
+                                },
+                                connections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'connections'
+                                },
+                                httpRequests: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'httpRequests'
+                                },
+                                pvaClient: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'pvaClient'
+                                },
+                                pvaServer: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'pvaServer'
+                                },
+                                server: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'server'
+                                },
+                                serverConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverConnections'
+                                },
+                                activeSslClientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'activeSslClientConnections'
+                                },
+                                newSslClientConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'newSslClientConnections'
+                                },
+                                activeSslServerConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'activeSslServerConnections'
+                                },
+                                newSslServerConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'newSslServerConnections'
+                                },
+                                serverNewConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverNewConnections'
+                                },
+                                serverNewTcpConnections: {
+                                    average: 0,
+                                    current: 0,
+                                    max: 0,
+                                    name: 'serverNewTcpConnections'
+                                }
+                            },
                             configSyncSucceeded: true,
                             syncColor: 'green',
                             syncMode: 'standalone',
@@ -2525,7 +2746,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:4hO6g0PLWeZAgWdyCllFS4NIks9QD/QGoV6R57TYotg=',
+                        Authorization: 'SharedKey myWorkspace:at7iSOWv+DZSlUxGI7Mi8sPhQ8fcU8xYZuMxbW7YExc=',
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

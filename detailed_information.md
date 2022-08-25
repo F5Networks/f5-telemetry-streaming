@@ -969,6 +969,233 @@ Note: available only when `debug` is turned on.
                 "name": "urldb",
                 "level": "none"
             }
+        },
+        "throughputPerformance": {
+            "clientBitsIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientBitsIn"
+            },
+            "clientBitsOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientBitsOut"
+            },
+            "clientIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientIn"
+            },
+            "clientOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientOut"
+            },
+            "compression": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "compression"
+            },
+            "inBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "inBits"
+            },
+            "inPackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "inPackets"
+            },
+            "managementBitsIn": {
+                "average": 2969820,
+                "current": 846485,
+                "max": 36591317,
+                "name": "managementBitsIn"
+            },
+            "managementBitsOut": {
+                "average": 133,
+                "current": 0,
+                "max": 12478,
+                "name": "managementBitsOut"
+            },
+            "outBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "outBits"
+            },
+            "outPackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "outPackets"
+            },
+            "serverBitsIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverBitsIn"
+            },
+            "serverBitsOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverBitsOut"
+            },
+            "serverIn": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverIn"
+            },
+            "serverOut": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverOut"
+            },
+            "serviceBits": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serviceBits"
+            },
+            "servicePackets": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "servicePackets"
+            },
+            "sslTps": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "sslTps"
+            }
+        },
+        "connectionsPerformance": {
+            "blade1": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "blade1"
+            },
+            "blade2": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "blade2"
+            },
+            "client": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "client"
+            },
+            "clientAccepts": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientAccepts"
+            },
+            "clientConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientConnections"
+            },
+            "clientConnects": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "clientConnects"
+            },
+            "connections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "connections"
+            },
+            "httpRequests": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "httpRequests"
+            },
+            "pvaClient": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "pvaClient"
+            },
+            "pvaServer": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "pvaServer"
+            },
+            "server": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "server"
+            },
+            "serverConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverConnections"
+            },
+            "activeSslClientConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "activeSslClientConnections"
+            },
+            "newSslClientConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "newSslClientConnections"
+            },
+            "activeSslServerConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "activeSslServerConnections"
+            },
+            "newSslServerConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "newSslServerConnections"
+            },
+            "serverNewConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverNewConnections"
+            },
+            "serverNewTcpConnections": {
+                "average": 0,
+                "current": 0,
+                "max": 0,
+                "name": "serverNewTcpConnections"
+            }
+        },
+        "asmAttackSignatures": {
+            "ff8080817a3a4908017a3a490958000e": {
+                "filename": "ASM-AttackSignatures_20190716_122131.im",
+                "createDateTime": 1563279691000,
+                "name": "ff8080817a3a4908017a3a490958000e"
+            }
         }
     },
     "virtualServers": {

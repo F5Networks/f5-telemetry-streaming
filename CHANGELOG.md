@@ -1,6 +1,27 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.31.0
+### Added
+- TS-676: Add gRPC exporter to OpenTelemetry_Exporter (experimental feature)
+- TS-678: Add new performance stats - 'system.connectionsPerformance'
+- TS-681: Generic_HTTP consumer should allow to tune transport options (experimental feature)
+- TS-682: Add 'compressionType' option to Generic_HTTP consumer
+- TS-684: DataDog consumer should support proxy configuration
+- TS-686: DataDog consumer should split huge payload into smaller chunks according to API docs
+- TS-688: DataDog consumer should allow to tune transport options (experimental feature)
+- TS-690: Add OpenTelemetry_Exporter raw JSON output
+- TS-693: Add secure connection settings to OpenTelemetry_Exporter (experimental feature)
+### Fixed
+- TS-687: DataDog consumer should send correct timestamp value
+- TS-670: [GitHub #209](https://github.com/F5Networks/f5-telemetry-streaming/issues/209) OpenTelemetry_Exporter should set correct 'timestamp'
+### Changed
+- TS-669: OpenTelemetry updated to version 0.31.0
+- TS-672: Update npm packages (@grpc/proto-loader from 0.6.12 to 0.7.0, eventemitter2 from 6.4.5 to 6.4.7)
+- TS-680: 'system.throughputPerformance' in System Poller's default output should match output example in "examples" directory
+- TS-685: DataDog consumer should use API v2 for to send data
+### Removed
+
 ## 1.30.0
 ### Added
 ### Fixed

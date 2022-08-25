@@ -8,50 +8,10 @@
 
 'use strict';
 
-/**
- * Function that will attempt the promise over and over again
- *
- * @param {Function} fn              - function which returns Promise as the result of execution
- * @param {Object}   [opts]          - options object
- * @param {Array}    [opts.args]     - array of arguments to apply to the function. By default 'null'.
- * @param {Object}   [opts.context]  - context to apply to the function (.apply). By default 'null'.
- * @param {Number}   [opts.maxTries] - max number of re-try attempts. By default '1'.
- * @param {Function} [opts.callback] - callback(err) to execute when function failed.
- *      Should return 'true' to continue 'retry' process. By default 'null'.
- * @param {Number}   [opts.delay]    - a delay to apply between attempts. By default 0.
- * @param {Number}   [opts.backoff]  - a backoff factor to apply between attempts after the second try
- *      (most errors are resolved immediately by a second try without a delay). By default 0.
- *
- * @returns {Promise} resolved when 'fn' succeed
- */
-function retry(fn, opts) {
-    opts = opts || {};
-    opts.tries = opts.tries || 0;
-    opts.maxTries = opts.maxTries || 1;
+/** @module utils/promise */
 
-    return fn.apply(opts.context || null, opts.args || null)
-        .catch((err) => {
-            if (opts.tries < opts.maxTries && (!opts.callback || opts.callback(err))) {
-                opts.tries += 1;
-                let delay = opts.delay || 0;
-
-                // applying backoff after the second try only
-                if (opts.backoff && opts.tries > 1) {
-                    /* eslint-disable no-restricted-properties */
-                    delay += opts.backoff * Math.pow(2, opts.tries - 1);
-                }
-                if (delay) {
-                    return new Promise((resolve) => {
-                        setTimeout(() => resolve(retry(fn, opts)), delay);
-                    });
-                }
-                return retry(fn, opts);
-            }
-            return Promise.reject(err);
-        });
-}
-
-module.exports = {
+// eslint-disable-next-line no-multi-assign
+const promiseUtils = module.exports = {
     /**
      * Returns a promise that resolves after all of the given promises have either fulfilled or rejected,
      * with an array of objects that each describes the outcome of each promise.
@@ -62,15 +22,24 @@ module.exports = {
      * you don't want them to be in unknown state like Promise.all do when one of the
      * promises was rejected. Ideally this function should be used everywhere instead of Promise.all
      *
+     * @param {Array<Promise>}
+     *
      * @returns {Promise<Array<PromiseResolutionStatus>>} resolved once all of the
      * given promises have either fulfilled or rejected
      */
     allSettled(promises) {
-        return Promise.all(promises.map((p) => Promise.resolve(p)
-            .then(
-                (val) => ({ status: 'fulfilled', value: val }),
-                (err) => ({ status: 'rejected', reason: err })
-            )));
+        return new Promise((resolve, reject) => {
+            if (!Array.isArray(promises)) {
+                reject(new Error(`${promises} is not an array`));
+            } else {
+                Promise.all(promises.map((p) => Promise.resolve(p)
+                    .then(
+                        (val) => ({ status: 'fulfilled', value: val }),
+                        (err) => ({ status: 'rejected', reason: err })
+                    )))
+                    .then(resolve, reject);
+            }
+        });
     },
 
     /**
@@ -94,16 +63,205 @@ module.exports = {
         });
     },
 
-    /** @see retry */
-    retry
+    /**
+     * Async 'forEach'
+     *
+     * @param {Array} collection - collection of elements
+     * @param {ForLoopCb} callbackFn - function to execute on each element
+     *
+     * @return {Promise} resolved once finished
+     */
+    loopForEach(collection, callbackFn) {
+        return new Promise((resolve, reject) => {
+            if (!Array.isArray(collection)) {
+                reject(new Error(`${collection} is not an array`));
+            } else if (typeof callbackFn !== 'function') {
+                reject(new Error(`${callbackFn} is not a function`));
+            } else if (collection.length === 0) {
+                resolve();
+            } else {
+                // caching it to ignore possible mutations in collection's data that affects it's length
+                const collectionLength = collection.length;
+                let idx = 0;
+
+                promiseUtils.loopUntil((breakCb) => {
+                    if (idx >= collectionLength) {
+                        return breakCb();
+                    }
+                    return Promise.resolve()
+                        .then(() => callbackFn(collection[idx], idx, collection, breakCb))
+                        .then(() => { idx += 1; });
+                })
+                    .then(resolve, reject);
+            }
+        });
+    },
+
+    /**
+     * Async 'until' loop
+     *
+     * Note:
+     * - 'until' because `callbackFn` will be called at least once due implementation
+     *
+     * @param {ForLoopCb} callbackFn - function to execute
+     *
+     * @return {Promise<any>} resolved when stopped and with value returned by
+     *  last succeed execution of 'callbackFn'
+     */
+    loopUntil(callbackFn) {
+        return new Promise((resolve, reject) => {
+            if (typeof callbackFn !== 'function') {
+                reject(new Error(`${callbackFn} is not a function`));
+            } else {
+                let lastRet;
+                let stopRequested = false;
+                const stopLoop = () => {
+                    stopRequested = true;
+                };
+                Object.defineProperty(stopLoop, 'called', {
+                    get: () => stopRequested
+                });
+
+                (function next() {
+                    if (stopLoop.called) {
+                        resolve(lastRet);
+                    } else {
+                        Promise.resolve()
+                            .then(() => callbackFn(stopLoop))
+                            .then((ret) => {
+                                lastRet = ret;
+                                return next();
+                            })
+                            .catch(reject);
+                    }
+                }());
+            }
+        });
+    },
+
+    /**
+     * Function that will attempt the promise over and over again
+     *
+     * Note:
+     * - if no 'opts' passed to the function then 'fn' will be executed only once
+     * - if 'opts.maxTries' set to 1 then 'fn' will be executed only once
+     * - if 'opts.maxTries' set to 2+ then 'fn' will be executed 2+ times
+     * - if you want to know how many attempts were made then you can pass '{}' as 'opts'
+     * - if 'opts.callback' specified then it will be executed 'opts.maxTries - 1' times
+     *
+     * @param {function} fn - function to call
+     * @param {object} [opts] - options object
+     * @param {number} [opts.maxTries] - max number of re-try attempts. By default '1'.
+     * @param {function} [opts.callback] - callback(err) to execute when function failed.
+     *      Should return 'true' to continue 'retry' process. By default 'null'.
+     * @param {number} [opts.delay] - a delay to apply between attempts. By default 0.
+     * @param {number} [opts.backoff] - a backoff factor to apply between attempts after the second try
+     *      (most errors are resolved immediately by a second try without a delay). By default 0.
+     *
+     * @returns {Promise<any>} resolved with value returned by 'fn' when succeed
+     */
+    retry(fn, opts) {
+        return new Promise((resolve, reject) => {
+            if (typeof fn !== 'function') {
+                reject(new Error(`${fn} is not a function`));
+            } else {
+                opts = opts || {};
+                opts.tries = 0;
+                opts.maxTries = Math.abs(opts.maxTries) || 1;
+
+                promiseUtils.loopUntil((breakCb) => Promise.resolve()
+                    .then(() => {
+                        opts.tries += 1;
+                        return fn();
+                    })
+                    .then((ret) => {
+                        breakCb();
+                        return ret;
+                    })
+                    .catch((error) => {
+                        if (opts.tries < opts.maxTries && (!opts.callback || opts.callback(error))) {
+                            let delay = opts.delay || 0;
+
+                            // applying backoff after the second try only
+                            if (opts.backoff && opts.tries > 1) {
+                                /* eslint-disable no-restricted-properties */
+                                delay += opts.backoff * Math.pow(2, opts.tries - 1);
+                            }
+                            if (delay) {
+                                return promiseUtils.sleep(delay);
+                            }
+                            return Promise.resolve();
+                        }
+                        return Promise.reject(error);
+                    }))
+                    .then(resolve, reject);
+            }
+        });
+    },
+
+    /**
+     * Sleep for N ms.
+     *
+     * @returns {Promise} resolved once N .ms passed or rejected if canceled via .cancel()
+     */
+    sleep(sleepTime) {
+        /**
+         * According to http://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor
+         * executor will be called immediately (synchronously) on attempt to create Promise
+         */
+        let cancelCb;
+        const promise = new Promise((resolve, reject) => {
+            const timeoutID = setTimeout(() => {
+                cancelCb = null;
+                resolve();
+            }, sleepTime);
+            cancelCb = (reason) => {
+                cancelCb = null;
+                clearTimeout(timeoutID);
+                reject(reason || new Error('canceled'));
+            };
+        });
+        /**
+         * @param {Error} [reason] - cancellation reason
+         *
+         * @returns {Boolean} 'true' if cancelCb called else 'false'
+         */
+        promise.cancel = (reason) => {
+            if (cancelCb) {
+                cancelCb(reason);
+                return true;
+            }
+            return false;
+        };
+        return promise;
+    }
 };
 
+/**
+ * "break" callback
+ *
+ * @callback BreakCb
+ * @property {boolean} called - returns true if loop stop was requested
+ *
+ * @returns {void}
+ */
+/**
+ * "forLoop" callback
+ *
+ * @callback ForLoopCb
+ * @param {any} item - the current element being processed in the array
+ * @param {number} [index] - the index of element in the array
+ * @param {Array} [array] - the array forLoop() was called upon
+ * @param {BreakCb} [breakCb] - callback to stop a loop
+ *
+ * @returns {void|Promise}
+ */
 /**
  * Promise status
  *
  * @typedef PromiseResolutionStatus
- * @type {Object}
- * @property {String} status - fulfilled or rejected
- * @property {Any} value - value returned by fulfilled promise
+ * @type {object}
+ * @property {string} status - fulfilled or rejected
+ * @property {any} value - value returned by fulfilled promise
  * @property {Error} reason - rejection reason (error object)
  */
