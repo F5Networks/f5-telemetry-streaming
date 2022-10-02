@@ -388,6 +388,54 @@ describe('DataDog', () => {
                                 });
                         });
 
+                        it('should verify that AVR with metric sends data to the metrics endpoint', () => {
+                            // there is another test with the same input that checks the logs endpoint
+                            const context = testUtil.buildConsumerContext({
+                                eventType: 'AVR',
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.config.region = region;
+                            context.event.data = {
+                                someMetric: 777
+                            };
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.METRICS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'deflate'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    const timeSeries = dataDogRequestData[0].request.series;
+                                    assert.strictEqual(timeSeries[0].metric, 'someMetric');
+                                    assert.strictEqual(timeSeries[0].points[0].value, 777);
+                                    assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
+                                    assert.isNotEmpty(timeSeries, 'should have some metric data');
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'deflate');
+                                });
+                        });
+
+                        it('should verify that AVR with metric sends data to the logs endpoint', () => {
+                            // there is another test with the same input that checks the metrics endpoint
+                            const context = testUtil.buildConsumerContext({
+                                eventType: 'AVR',
+                                config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
+                            });
+                            context.config.region = region;
+                            context.event.data = {
+                                someMetric: 777
+                            };
+                            const reqConfig = getRequestConfig(DATA_DOG_TYPES.LOGS, region);
+
+                            setupDataDogMockEndpoint(addGzipReqHeadersIfNeed(reqConfig, compressionType, 'gzip'));
+                            return dataDogIndex(context)
+                                .then(() => {
+                                    assert.lengthOf(dataDogRequestData, 1, 'should log 1 request');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.message, '{"someMetric":777}', 'should get the message');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.ddsource, 'AVR', 'should set source type to AVR');
+                                    assert.deepStrictEqual(dataDogRequestData[0].request.service, 'f5-telemetry', 'should set service to default');
+                                    assert.strictEqual(dataDogRequestData[0].request.ddtags, 'telemetryEventCategory:AVR', 'should set tags from event data');
+                                    checkGzipReqHeadersIfNeeded(dataDogRequestData[0], compressionType, 'gzip');
+                                });
+                        });
+
                         it('should process event listener event without metrics (LTM)', () => {
                             const context = testUtil.buildConsumerContext({
                                 config: addGzipConfigIfNeed(defaultConsumerConfig, compressionType)
@@ -541,7 +589,7 @@ describe('DataDog', () => {
             });
         });
 
-        it('should trace data', () => {
+        it('should trace data to logs', () => {
             const context = testUtil.buildConsumerContext({
                 config: defaultConsumerConfig
             });
@@ -555,6 +603,30 @@ describe('DataDog', () => {
                 .then(() => {
                     const traceData = context.tracer.write.firstCall.args[0];
                     assert.deepStrictEqual(JSON.parse(traceData.data[0]).ddsource, 'syslog');
+                    assert.deepStrictEqual(JSON.parse(traceData.data[0]).message, 'plain data');
+                });
+        });
+
+        it('should trace data to metrics and logs', () => {
+            const context = testUtil.buildConsumerContext({
+                config: defaultConsumerConfig
+            });
+            context.event.type = 'systemInfo';
+            context.event.data = {
+                system: {
+                    cpu: 5
+                }
+            };
+            return dataDogIndex(context)
+                .then(() => {
+                    // tracing for metrics
+                    const traceData = context.tracer.write.firstCall.args[0];
+                    assert.strictEqual(JSON.parse(traceData.data[0]).series[0].metric, 'cpu');
+                    assert.strictEqual(JSON.parse(traceData.data[0]).series[0].points[0].value, 5);
+
+                    // tracing for logs
+                    const traceDataLogs = context.tracer.write.secondCall.args[0];
+                    assert.strictEqual(JSON.parse(JSON.parse(traceDataLogs.data[0]).message).system.cpu, 5);
                 });
         });
 
@@ -588,6 +660,28 @@ describe('DataDog', () => {
             sinon.stub(zlib, 'gzip').onFirstCall().callsFake((data, cb) => {
                 cb(new Error('zlib.gzip expected error'));
             });
+            return dataDogIndex(context)
+                .then(() => {
+                    assert.match(
+                        context.logger.error.firstCall.args[0],
+                        /zlib.gzip expected error/,
+                        'should log error message'
+                    );
+                });
+        });
+
+        it('confirm that logs endpoint is also called when the metrics endpoint is primary)', () => {
+            /* systemInfo goes to metrics endpoints, but also is duplicated to the log endpoint.
+               gzip is exclusively associated with the log endpoint.
+               By catching gzip error wee verify that the data was duplicated to the log endpoint. */
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: addGzipConfigIfNeed(defaultConsumerConfig, 'gzip')
+            });
+            sinon.stub(zlib, 'gzip').onFirstCall().callsFake((data, cb) => {
+                cb(new Error('zlib.gzip expected error'));
+            });
+
             return dataDogIndex(context)
                 .then(() => {
                     assert.match(

@@ -22,6 +22,10 @@ const metricsUtil = require('../shared/metricsUtil');
 const miscUtil = require('../../utils/misc');
 const promiseUtil = require('../../utils/promise');
 
+const DATA_DOG_TYPES = {
+    LOGS: 'logs',
+    METRICS: 'metrics'
+};
 const DATA_DOG_API_ENDPOINTS = {
     LOGS: '/api/v2/logs',
     METRICS: '/api/v2/series'
@@ -71,31 +75,31 @@ const compressData = (zlibMethod, data) => new Promise((resolve, reject) => {
 /**
  * Get function to compress data
  *
- * @param {string} type - DataDog data type
+ * @param {string} ddType - DataDog data type
  *
  * @returns {function(data):Promise<Buffer>} function
  */
-const getCompressionFunc = (type) => compressData.bind(null, type === 'log' ? 'gzip' : 'deflate');
+const getCompressionFunc = (ddType) => compressData.bind(null, ddType === DATA_DOG_TYPES.LOGS ? 'gzip' : 'deflate');
 
 /**
  * Get the correct DataDog Gateway host for the provided DataDog region and  telemetry type
  *
  * @param {string} region - DataDog region
- * @param {string} type - Telemetry type (metrics or log)
+ * @param {string} ddType - Telemetry type (metrics or logs)
  *
  * @returns {string} the correct DataDog Gateway host to send telemetry to
  */
-const getDataDogHost = (region, ddType) => DATA_DOG_REGIONAL_GATEWAYS[region][ddType === 'log' ? 'LOGS' : 'METRICS'];
+const getDataDogHost = (region, ddType) => DATA_DOG_REGIONAL_GATEWAYS[region][ddType === DATA_DOG_TYPES.LOGS ? 'LOGS' : 'METRICS'];
 
 /**
  * Get the correct DataDog API endpoint for the provided telemetry type
  *
- * @param {string} type - Telemetry type (metrics or log)
+ * @param {string} ddType - Telemetry type (metrics or logs)
  *
  * @returns {string} rhe correct DataDog API endpoint to send telemetry to
  */
-const getDataDogEndpoint = (type) => (
-    type === 'log'
+const getDataDogEndpoint = (ddType) => (
+    ddType === DATA_DOG_TYPES.LOGS
         ? DATA_DOG_API_ENDPOINTS.LOGS
         : DATA_DOG_API_ENDPOINTS.METRICS
 );
@@ -110,7 +114,7 @@ const getDataDogEndpoint = (type) => (
  */
 const wrapChunks = (chunks, ddType) => {
     chunks = chunks.getAll();
-    if (ddType === 'log') {
+    if (ddType === DATA_DOG_TYPES.LOGS) {
         return chunks[0];
     }
     return chunks.map((c) => `{"series":[${c.join('')}]}`);
@@ -184,7 +188,16 @@ module.exports = function (context) {
     // for now use current time, ideally should try to fetch it from event data
     const timestamp = Math.floor(Date.now() / 1000);
     const maxChunkSize = needGzip ? DATA_DOG_MAX_GZIP_CHUNK_SIZE : DATA_DOG_MAX_CHUNK_SIZE;
+    // chunks contains data either for metrics or logs
     const chunks = new miscUtil.Chunks({
+        maxChunkSize,
+        serializer(d) {
+            d = JSON.stringify(d);
+            return `${this.currentChunkSize && (this.currentChunkSize + d.length <= maxChunkSize) ? ',' : ''}${d}`;
+        }
+    });
+    // auxChunks (auxiliary chunks) contains data for logs only, and only if Chunks contains data for metrics
+    const auxChunks = new miscUtil.Chunks({
         maxChunkSize,
         serializer(d) {
             d = JSON.stringify(d);
@@ -197,9 +210,10 @@ module.exports = function (context) {
     }
 
     let ddType;
-
+    let needAuxData;
     if (eventType === EVENT_TYPES.EVENT_LISTENER || eventType === EVENT_TYPES.SYSLOG_EVENT) {
-        ddType = 'log';
+        ddType = DATA_DOG_TYPES.LOGS;
+        needAuxData = false;
         chunks.add({
             ddsource: context.event.type,
             // usually there is nothing along this data that can be used as a tag
@@ -212,7 +226,8 @@ module.exports = function (context) {
         const defaultTags = Object.assign({}, customTags, {
             host: hostname
         });
-        ddType = 'metrics';
+        ddType = DATA_DOG_TYPES.METRICS;
+        needAuxData = true;
         metricsUtil.findMetricsAndTags(data, {
             collectTags: true,
             excludeNameFromPath: true,
@@ -236,10 +251,11 @@ module.exports = function (context) {
             }
         });
     }
-    if (chunks.totalSize === 0) {
+
+    if (chunks.totalSize === 0 || needAuxData) {
         /**
          * Looks like no metrics were found, then let's
-         * transform this event into log message and attach
+         * transform this event into logs message and attach
          * all possible tags to it
          * Ex: LTM data
          */
@@ -252,66 +268,132 @@ module.exports = function (context) {
             }
         });
 
-        ddType = 'log';
-        chunks.add({
-            ddsource: context.event.type,
-            ddtags: buildTags(Object.assign(ddtags, customTags), true),
-            hostname,
-            message: JSON.stringify(data),
-            service: ddService
-        });
+        if (chunks.totalSize === 0) {
+            ddType = DATA_DOG_TYPES.LOGS;
+            needAuxData = false;
+            chunks.add({
+                ddsource: context.event.type,
+                ddtags: buildTags(Object.assign(ddtags, customTags), true),
+                hostname,
+                message: JSON.stringify(data),
+                service: ddService
+            });
+        } else {
+            auxChunks.add({
+                ddsource: context.event.type,
+                ddtags: buildTags(Object.assign(ddtags, customTags), true),
+                hostname,
+                message: JSON.stringify(data),
+                service: ddService
+            });
+        }
     }
 
     const ddData = wrapChunks(chunks, ddType);
+    let ddAuxData = [];
+    if (needAuxData) {
+        // auxiliary is always DATA_DOG_TYPES.LOGS
+        ddAuxData = wrapChunks(auxChunks, DATA_DOG_TYPES.LOGS);
+    }
 
     if (context.tracer) {
         context.tracer.write({
             data: ddData,
-            host: getDataDogHost(ddRegion),
+            host: getDataDogHost(ddRegion, ddType),
             httpAgentOpts,
             type: ddType,
             uri: getDataDogEndpoint(ddType)
         });
+        if (needAuxData) {
+            context.tracer.write({
+                data: ddAuxData,
+                host: getDataDogHost(ddRegion, DATA_DOG_TYPES.LOGS),
+                httpAgentOpts,
+                type: DATA_DOG_TYPES.LOGS,
+                uri: getDataDogEndpoint(DATA_DOG_TYPES.LOGS)
+            });
+        }
     }
 
     const headers = {
         'Content-Type': 'application/json',
         'DD-API-KEY': context.config.apiKey
     };
+    const auxHeaders = JSON.parse(JSON.stringify(headers));
     let compressDataFn;
+    let compressAuxDataFn;
     if (needGzip) {
-        const encoding = ddType === 'log' ? 'gzip' : 'deflate';
+        const encoding = ddType === DATA_DOG_TYPES.LOGS ? 'gzip' : 'deflate';
         compressDataFn = getCompressionFunc(ddType);
+        compressAuxDataFn = getCompressionFunc(DATA_DOG_TYPES.LOGS);
         Object.assign(headers, {
             'Accept-Encoding': encoding,
             'Content-Encoding': encoding
         });
+        Object.assign(auxHeaders, {
+            'Accept-Encoding': 'gzip',
+            'Content-Encoding': 'gzip'
+        });
     } else {
         compressDataFn = (d) => Promise.resolve(d);
+        compressAuxDataFn = (d) => Promise.resolve(d);
     }
 
-    return promiseUtil.loopForEach(ddData, (dataChunk) => compressDataFn(dataChunk)
-        .then((compressedData) => httpUtil.sendToConsumer({
-            agent: getHttpAgent(context.config),
-            allowSelfSignedCert,
-            body: compressedData,
-            expectedResponseCode: [200, 202],
-            headers: Object.assign({}, headers),
-            hosts: [getDataDogHost(ddRegion, ddType)],
-            json: false,
-            logger: context.logger,
-            method: 'POST',
-            port: DATA_DOG_PORT,
-            protocol: DATA_DOG_PROTOCOL,
-            proxy: context.config.proxy,
-            uri: getDataDogEndpoint(ddType)
-        }))
-        .then(() => {
-            context.logger.debug(`successfully sent ${dataChunk.length} bytes of data`);
+    return promiseUtil.allSettled([
+        promiseUtil.loopForEach(ddData, (dataChunk) => compressDataFn(dataChunk)
+            .then((compressedData) => httpUtil.sendToConsumer({
+                agent: getHttpAgent(context.config),
+                allowSelfSignedCert,
+                body: compressedData,
+                expectedResponseCode: [200, 202],
+                headers: Object.assign({}, headers),
+                hosts: [getDataDogHost(ddRegion, ddType)],
+                json: false,
+                logger: context.logger,
+                method: 'POST',
+                port: DATA_DOG_PORT,
+                protocol: DATA_DOG_PROTOCOL,
+                proxy: context.config.proxy,
+                uri: getDataDogEndpoint(ddType)
+            }))
+            .then(() => {
+                context.logger.debug(`successfully sent ${dataChunk.length} bytes of data`);
+            })
+            .catch((err) => {
+                context.logger.error(`Unable to send ${dataChunk.length} bytes of data. Error: ${err.message ? err.message : err}`);
+                throw err;
+            })),
+        promiseUtil.loopForEach(ddAuxData, (dataChunk) => compressAuxDataFn(dataChunk)
+            .then((compressedData) => httpUtil.sendToConsumer({
+                agent: getHttpAgent(context.config),
+                allowSelfSignedCert,
+                body: compressedData,
+                expectedResponseCode: [200, 202],
+                headers: Object.assign({}, auxHeaders),
+                hosts: [getDataDogHost(ddRegion, DATA_DOG_TYPES.LOGS)],
+                json: false,
+                logger: context.logger,
+                method: 'POST',
+                port: DATA_DOG_PORT,
+                protocol: DATA_DOG_PROTOCOL,
+                proxy: context.config.proxy,
+                uri: getDataDogEndpoint(DATA_DOG_TYPES.LOGS)
+            }))
+            .then(() => {
+                context.logger.debug(`successfully sent ${dataChunk.length} bytes of data`);
+            })
+            .catch((err) => {
+                context.logger.error(`Unable to send ${dataChunk.length} bytes of data. Error: ${err.message ? err.message : err}`);
+                throw err;
+            }))
+    ])
+        .then((results) => {
+            promiseUtil.getValues(results); // throws error if found it
+            context.logger.debug('success');
         })
         .catch((err) => {
-            context.logger.error(`Unable to send ${dataChunk.length} bytes of data. Error: ${err.message ? err.message : err}`);
-        }));
+            context.logger.error(`Unable to forward to DataDog consumer. Error: ${err.message ? err.message : err}`);
+        });
 };
 
 /**

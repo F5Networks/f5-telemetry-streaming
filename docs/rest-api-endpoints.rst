@@ -4,7 +4,7 @@ REST API Endpoints
 Base Endpoint
 `````````````
 
-Telemetry Streaming's base URI is **mgmt/shared/telemetry**. The allowed **Content-Type** for POST requests is **application/json**, otherwise HTTP code 415 **Unsupported Media Type** will be returned.
+F5 BIG-IP Telemetry Streaming's base URI is **mgmt/shared/telemetry**. The allowed **Content-Type** for POST requests is **application/json**, otherwise HTTP code 415 **Unsupported Media Type** will be returned.
 
 Request example:
 

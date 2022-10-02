@@ -2,10 +2,10 @@ Troubleshooting
 ===============
 Use this section to read about known issues and for common troubleshooting steps.
 
-Telemetry Streaming general troubleshooting tips
-------------------------------------------------
+F5 BIG-IP Telemetry Streaming general troubleshooting tips
+----------------------------------------------------------
 
-- Examine the restnoded failure log at **/var/log/restnoded/restnoded.log** (this is where Telemetry Streaming records error messages).
+- Examine the restnoded failure log at **/var/log/restnoded/restnoded.log** (this is where BIG-IP Telemetry Streaming records error messages).
 
 - Examine the REST response:
 
@@ -16,8 +16,8 @@ Telemetry Streaming general troubleshooting tips
 
 Logging
 -------
-Telemetry Streaming writes log output to the file **/var/log/restnoded/restnoded.log** on the BIG-IP.
-The verbosity of the log output can be adjusted by submitting a Telemetry Streaming declaration with a Controls class.
+F5 BIG-IP Telemetry Streaming writes log output to the file **/var/log/restnoded/restnoded.log** on the BIG-IP.
+The verbosity of the log output can be adjusted by submitting a BIG-IP Telemetry Streaming declaration with a Controls class.
 The allowed log levels (in increasing order of verbosity) are **error**, **info**, and **debug**.
 The following is an example declaration containing a Controls class that sets the logging level to debug.
 
@@ -54,7 +54,7 @@ The following is an example declaration containing a Controls class that sets th
 
 Tracing
 -------
-While Telemetry Streaming is processing data, you can configure it to write the current state of the data at key points to files for further inspection.
+While BIG-IP Telemetry Streaming is processing data, you can configure it to write the current state of the data at key points to files for further inspection.
 These files are known as trace files, and can be enabled for the Telemetry_System, Telemetry_System_Poller, Telemetry_Listener, and Telemetry_Consumer classes.
 The trace files are written to the BIG-IP file system in the **/var/tmp/telemetry** directory using a filename based on the class and the name it was given.
 
@@ -63,11 +63,11 @@ To enable tracing, set the trace property to **true**. To override the default f
 The **Telemetry_Listener** trace setting is a little more complex, see :ref:`trace` for more information.
 
 The most common use for trace files is to determine how far data progresses through the path from the BIG-IP to the third party tool.
-**Telemetry_System**, **Telemetry_System_Poller**, and **Telemetry_Listener** trace files are useful for determining if data is making it from the BIG-IP to Telemetry Streaming.
-If these trace files are not being generated, or are empty, check the BIG-IP configuration that sets up the sending of data to Telemetry streaming.
+**Telemetry_System**, **Telemetry_System_Poller**, and **Telemetry_Listener** trace files are useful for determining if data is making it from the BIG-IP to BIG-IP Telemetry Streaming.
+If these trace files are not being generated, or are empty, check the BIG-IP configuration that sets up the sending of data to BIG-IP Telemetry Streaming.
 
-**Telemetry_Consumer** trace files are useful for determining if the data is being sent from Telemetry Streaming to the desired third party tool.
-If these trace files are not being generated, or are empty, then check your **Telemetry_Consumer** settings in the Telemetry Streaming declaration.
+**Telemetry_Consumer** trace files are useful for determining if the data is being sent from BIG-IP Telemetry Streaming to the desired third party tool.
+If these trace files are not being generated, or are empty, then check your **Telemetry_Consumer** settings in the BIG-IP Telemetry Streaming declaration.
 Also, check the logs for any issues sending the data to the third party tool.
 If all trace files look correct, then check any settings, queries, and logs in the third party tool.
 
@@ -106,11 +106,11 @@ Specific troubleshooting entries
 
 .. _save:
 
-I need to access declarations I previously sent to Telemetry Streaming
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-In Telemetry Streaming 1.27, TS stored up to 30 recent declarations at **/shared/tmp/telemetry/declarationHistory**. 
+I need to access declarations I previously sent to F5 BIG-IP Telemetry Streaming
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In F5 BIG-IP Telemetry Streaming 1.27, BIG-IP TS stored up to 30 recent declarations at **/shared/tmp/telemetry/declarationHistory**. 
 
-In Telemetry Streaming 1.28 and later, TS stores up to 30 recent declarations at **/var/log/restnoded/telemetryDeclarationHistory**.  These stored declarations are now accessible by F5's **qkview** utility for use by F5 Technical Support if necessary.  For more information on the qkview utility, see |qkv|.
+In F5 BIG-IP Telemetry Streaming 1.28 and later, BIG-IP TS stores up to 30 recent declarations at **/var/log/restnoded/telemetryDeclarationHistory**.  These stored declarations are now accessible by F5's **qkview** utility for use by F5 Technical Support if necessary.  For more information on the qkview utility, see |qkv|.
 
 This includes declarations submitted upon following events:
 
@@ -125,7 +125,7 @@ This includes declarations submitted upon following events:
 I'm receiving a path not registered error when I try to post a declaration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
 
-If you are receiving this error, it means either you did not install Telemetry Streaming, or it did not install properly. The error contains the following message:  
+If you are receiving this error, it means either you did not install BIG-IP Telemetry Streaming, or it did not install properly. The error contains the following message:  
 
 .. code-block:: shell
 
@@ -136,16 +136,16 @@ If you are receiving this error, it means either you did not install Telemetry S
     }
 
 
-If you receive this error, see :doc:`installation` to install or re-install Telemetry Streaming.
+If you receive this error, see :doc:`installation` to install or re-install BIG-IP Telemetry Streaming.
 
 |
 
 .. _elkerror:
 
-I'm receiving a limit of total fields exceeded error when Telemetry Streaming forwards statistics to ElasticSearch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+I'm receiving a limit of total fields exceeded error when BIG-IP TS forwards statistics to ElasticSearch
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you are receiving this error, it means that Telemetry Streaming is exceeding the maximum allowed number of fields in the ElasticSearch index to which it is forwarding. The error contains the following message: |br|
+If you are receiving this error, it means F5 BIG-IP Telemetry Streaming is exceeding the maximum allowed number of fields in the ElasticSearch index to which it is forwarding. The error contains the following message: |br|
 
 .. code-block:: bash
 
@@ -155,7 +155,7 @@ If you are receiving this error, it means that Telemetry Streaming is exceeding 
 If you receive this error, use **one** of the following methods to correct the issue:
 
 
-- Increase the ``index.mapping.total_fields.limit`` setting of the failing index to a larger value to compensate for the amount of data that Telemetry Streaming is sending. This can be accomplished using a **PUT** request to the URI **http(s)://<ElasticSearch>/<index_name>/_settings** with the following JSON body: |br| |br|
+- Increase the ``index.mapping.total_fields.limit`` setting of the failing index to a larger value to compensate for the amount of data that BIG-IP Telemetry Streaming is sending. This can be accomplished using a **PUT** request to the URI **http(s)://<ElasticSearch>/<index_name>/_settings** with the following JSON body: |br| |br|
 
    .. code-block:: json
 
@@ -164,7 +164,7 @@ If you receive this error, use **one** of the following methods to correct the i
         }
 
 
-- Create the ElasticSearch index with an increased ``index.mapping.total_fields.limit`` value before Telemetry Streaming begins sending data to it. This can be done using a **PUT** request to the URI **http(s)://<ElasticSearch>/<index_name>** with the following JSON body: |br| |br|
+- Create the ElasticSearch index with an increased ``index.mapping.total_fields.limit`` value before BIG-IP Telemetry Streaming begins sending data to it. This can be done using a **PUT** request to the URI **http(s)://<ElasticSearch>/<index_name>** with the following JSON body: |br| |br|
 
    .. code-block:: json
 
@@ -190,10 +190,10 @@ If you are receiving this error, you are using a self-signed certificate in a de
 
 .. _nodist:
 
-I can no longer find the TS source RPM on GitHub
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+I can no longer find the BIG-IP TS source RPM on GitHub
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Beginning with TS 1.7.0, the RPM and checksum files are no longer located in the **/dist** directory in the Telemetry Streaming repository on GitHub.  These files can be found on the |release|, as **Assets**. 
+Beginning with BIG-IP TS 1.7.0, the RPM and checksum files are no longer located in the **/dist** directory in the BIG-IP Telemetry Streaming repository on GitHub.  These files can be found on the |release|, as **Assets**. 
 
 You can find historical files on GitHub by using the **Branch** drop-down, clicking the **Tags** tab, and then selecting the appropriate release.
 
@@ -203,24 +203,24 @@ You can find historical files on GitHub by using the **Branch** drop-down, click
 
 Why is data not showing up in my consumer?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If data is not appearing in your consumer, use the following troubleshooting advice appropriate for your Telemetry Streaming configuration.
+If data is not appearing in your consumer, use the following troubleshooting advice appropriate for your BIG-IP Telemetry Streaming configuration.
 
 **If you are using the Event Listener** |br|
 
 If you are using the :ref:`Event Listener<eventlistener-ref>` to publish events and/or logs to a Consumer, first check the configuration required for the Event Listener to function successfully. There are three individual configuration tasks that need to occur:
 
-#. Ensure the Telemetry Streaming declaration has a **Telemetry_Listener** class defined, and that when you submit the declaration, it succeeds.
-#. Ensure you have completed the base configuration of the BIG-IP, which enables logs and/or events to be published to Telemetry Streaming. See :ref:`logsrc-ref`. |br|    
+#. Ensure the BIG-IP Telemetry Streaming declaration has a **Telemetry_Listener** class defined, and that when you submit the declaration, it succeeds.
+#. Ensure you have completed the base configuration of the BIG-IP, which enables logs and/or events to be published to BIG-IP Telemetry Streaming. See :ref:`logsrc-ref`. |br|    
 
-   .. IMPORTANT:: The BIG-IP documentation references a port number used as a part of publishing logs. The port number you use in this configuration must be the same as the port number in the **port** property of the Telemetry_Listener class in your Telemetry Streaming declaration. The BIG-IP publishes events and/or logs to the IP:PORT defined in the configuration, and Telemetry Streaming listens for events on this port.
+   .. IMPORTANT:: The BIG-IP documentation references a port number used as a part of publishing logs. The port number you use in this configuration must be the same as the port number in the **port** property of the Telemetry_Listener class in your BIG-IP Telemetry Streaming declaration. The BIG-IP publishes events and/or logs to the IP:PORT defined in the configuration, and BIG-IP Telemetry Streaming listens for events on this port.
 
-#.	Ensure the profiles (AFM/ASM Security Log profiles, or the LTM Request profiles) are attached to the Virtual Servers that should be monitored. Only Virtual Servers that have logging profiles attached publish logs to Telemetry Streaming. See :ref:`loggingprofiles`.
+#.	Ensure the profiles (AFM/ASM Security Log profiles, or the LTM Request profiles) are attached to the Virtual Servers that should be monitored. Only Virtual Servers that have logging profiles attached publish logs to BIG-IP Telemetry Streaming. See :ref:`loggingprofiles`.
  
 |
 
 **If you are attempting to use the System Poller** |br|
 
-If you are using the System Poller to get metrics from your BIG-IP, ensure that your Telemetry Streaming declaration has a :ref:`Telemetry_System class<tssystem-ref>`, and this class has the **systemPoller** property defined.
+If you are using the System Poller to get metrics from your BIG-IP, ensure that your BIG-IP Telemetry Streaming declaration has a :ref:`Telemetry_System class<tssystem-ref>`, and this class has the **systemPoller** property defined.
 
 |
 
@@ -230,9 +230,9 @@ Once you have verified your Event Listener and/or System Poller, check the confi
 
 |
 
-**Check the Telemetry Streaming logs** |br|
+**Check the BIG-IP Telemetry Streaming logs** |br|
 
-By default, Telemetry Streaming logs to **restnoded.log** (stored on the BIG-IP at **/var/log/restnoded/restnoded.log**), at the *info* level. At the *info* log level, you can see any errors that Telemetry Streaming encounters. The consumers within Telemetry Streaming also log an error if they are not able to connect to the external system.
+By default, BIG-IP Telemetry Streaming logs to **restnoded.log** (stored on the BIG-IP at **/var/log/restnoded/restnoded.log**), at the *info* level. At the *info* log level, you can see any errors that BIG-IP Telemetry Streaming encounters. The consumers within BIG-IP Telemetry Streaming also log an error if they are not able to connect to the external system.
 
 For example, the following log line shows that the Fluent_Consumer cannot connect to the external system at 10.10.1.1:343:
 
@@ -240,7 +240,7 @@ For example, the following log line shows that the Fluent_Consumer cannot connec
  
 |
 
-Additionally, you can adjust the log level of Telemetry Streaming by changing the **logLevel** property in the **Controls** object (see |controls| in the schema reference). 
+Additionally, you can adjust the log level of BIG-IP Telemetry Streaming by changing the **logLevel** property in the **Controls** object (see |controls| in the schema reference). 
 
 When the log level is set to **debug**, many more events are logged to the restnoded log. For example, you can see:
 
@@ -252,7 +252,7 @@ When the log level is set to **debug**, many more events are logged to the restn
      Wed, 01 Jul 2020 21:46:59 GMT - finest: [telemetry] System poller cycle finished
      Wed, 01 Jul 2020 21:46:59 GMT - finest: [telemetry.Generic_HTTP.Fluent_Consumer] success
 
-- When the Event Listener publishes events, the type of that event, and whether the Consumer successfully published the event. The following example shows both an ASM and LTM event being successfully processed by Telemetry Streaming, and published by the Fluent_Consumer:  
+- When the Event Listener publishes events, the type of that event, and whether the Consumer successfully published the event. The following example shows both an ASM and LTM event being successfully processed by BIG-IP Telemetry Streaming, and published by the Fluent_Consumer:  
 
   .. code-block:: bash
 
@@ -266,9 +266,9 @@ When the log level is set to **debug**, many more events are logged to the restn
 
 .. _eventlistenerdata:
 
-How can I check if my Telemetry Streaming Event Listener is sending data to my consumer?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Telemetry Streaming v1.19 introduced a new feature that allows you to send arbitrary data to a Telemetry Streaming Event Listener instead of waiting for the BIG-IP to send a message(s) to the Event Listener.  This allows you to test that your Telemetry Streaming Consumers are properly configured.
+How can I check if my BIG-IP TS Event Listener is sending data to my consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+F5 BIG-IP Telemetry Streaming v1.19 introduced a new feature that allows you to send arbitrary data to an F5 BIG-IP Telemetry Streaming Event Listener instead of waiting for the BIG-IP to send a message(s) to the Event Listener.  This allows you to test that your BIG-IP Telemetry Streaming Consumers are properly configured.
 
 You must have already submitted a declaration that includes the following:
     - An Event Listener
@@ -292,7 +292,7 @@ You can send any valid (but also arbitrary) JSON body, such as:
     }
 
 
-Telemetry Streaming sends this JSON payload to the Event Listener you specified, and the Event Listener processes and sends this debugging payload through Telemetry Streaming to any/all of the your configured Consumers.
+BIG-IP Telemetry Streaming sends this JSON payload to the Event Listener you specified, and the Event Listener processes and sends this debugging payload through BIG-IP Telemetry Streaming to any/all of the your configured Consumers.
 
 |
 
@@ -303,9 +303,9 @@ How can I write an Event Listener's incoming raw data to a trace file?
 ----------------------------------------------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for writing an Event Listener's incoming raw data to a trace file is available in TS v1.20 and later
+   Support for writing an Event Listener's incoming raw data to a trace file is available in BIG-IP TS v1.20 and later
 
-In Telemetry Streaming 1.20 and later you can configure TS to write an Event Listener's incoming raw data to a trace file. This is useful when troubleshooting, as it allows you to reproduce the exact issue instead of relying on the BIG-IP configuration, profiles, and traffic generation.
+In F5 BIG-IP Telemetry Streaming 1.20 and later you can configure BIG-IP TS to write an Event Listener's incoming raw data to a trace file. This is useful when troubleshooting, as it allows you to reproduce the exact issue instead of relying on the BIG-IP configuration, profiles, and traffic generation.
 
 This feature is enabled using the **trace** property with values of **input** and/or **output**. All data is written to the ``/var/tmp/telemetry`` directory (or check logs for the exact file path).
 
@@ -352,7 +352,7 @@ If you want to enable both input and output tracing, use the following syntax in
 
 Why is my BIG-IP experiencing occasional high CPU usage and slower performance?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If your BIG-IP system seems to be using a relatively high amount of CPU and degraded performance, you may be experiencing a known issue with the **restjavad** daemon. This is an issue with the underlying BIG-IP framework, and not an issue with Telemetry Streaming.
+If your BIG-IP system seems to be using a relatively high amount of CPU and degraded performance, you may be experiencing a known issue with the **restjavad** daemon. This is an issue with the underlying BIG-IP framework, and not an issue with BIG-IP Telemetry Streaming.
 
 **More information** |br|
 Restjavad may become unstable if the amount of memory required by the daemon exceeds the value allocated for its use. The memory required by the restjavad daemon may grow significantly in system configurations with either a high volume of device statistics collection (AVR provisioning), or a with relatively large number of LTM objects managed by the REST framework (SSL Orchestrator provisioning). The overall system performance is degraded during the continuous restart of the restjavad daemon due to high CPU usage. 
@@ -372,11 +372,11 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 
 .. _memory: 
 
-Where can I find Telemetry Streaming memory threshold information?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This section contains guidance how to configure the Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the Telemetry Streaming consumer is unavailable.
+Where can I find the BIG-IP TS memory threshold information?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This section contains guidance how to configure the F5 BIG-IP Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the BIG-IP Telemetry Streaming consumer is unavailable.
 
-Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
+F5 BIG-IP Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
 
 You can configure your memory threshold using the new **memoryThresholdPercent** property in the **Controls** class.  For example, to set the memory threshold to 65%, you use:
 
@@ -423,11 +423,11 @@ Monitor checks run by default on intervals depending on %memory usage:
 
 .. _splunkmem:
 
-Why do I see memory usage spikes when TS is configured to send data to a Splunk consumer?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-By default, Telemetry Streaming compresses data before sending it to Splunk. Depending on the events per second rate (events from the Event Listener and System Poller), you may see spikes in memory usage. 
+Why do I see memory usage spikes when BIG-IP TS is configured to send data to a Splunk consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+By default, BIG-IP Telemetry Streaming compresses data before sending it to Splunk. Depending on the events per second rate (events from the Event Listener and System Poller), you may see spikes in memory usage. 
 
-Telemetry Streaming 1.19 and later includes the **compressionType** property in the |telemetryconsumer| class.  You can set this property to **none** (**gzip** is the default) to help reduce memory usage.
+F5 BIG-IP Telemetry Streaming 1.19 and later includes the **compressionType** property in the |telemetryconsumer| class.  You can set this property to **none** (**gzip** is the default) to help reduce memory usage.
 
 
 

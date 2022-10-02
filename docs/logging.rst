@@ -3,7 +3,7 @@
 Logging
 =======
 
-Telemetry Streaming logs to **/var/log/restnoded.log**.
+F5 BIG-IP Telemetry Streaming logs to **/var/log/restnoded.log**.
 The logging level is set in the "controls" class with possible values of "debug", "info", and "error". The default value is **info**. To change the logging level, submit the declaration with logLevel set to the preferred value.
 
 .. code-block:: json

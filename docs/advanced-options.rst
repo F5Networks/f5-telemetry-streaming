@@ -1,7 +1,7 @@
 Advanced Options
 ----------------
 
-This section describes additional options that you may want to configure once you comfortable to using Telemetry Streaming.
+This section describes additional options you may want to use for configuring, once you are comfortable using F5 BIG-IP Telemetry Streaming.
 
 
 +-----------------------------+--------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

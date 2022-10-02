@@ -1,9 +1,9 @@
-Using Telemetry Streaming
-=========================
-This section of the document describes how to use Telemetry Streaming.
+Using F5 BIG-IP Telemetry Streaming
+===================================
+This section of the document describes how to use F5 BIG-IP Telemetry Streaming.
 
-Using Telemetry Streaming Index
--------------------------------
+Using F5 BIG-IP Telemetry Streaming Index
+-----------------------------------------
 
 .. toctree::
    :maxdepth: 2

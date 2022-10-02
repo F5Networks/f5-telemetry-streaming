@@ -3,7 +3,7 @@ Quick Start
 
 If you are familiar with the BIG-IP system, and generally familiar with REST and
 using APIs, this section contains the minimum amount of information to get you
-up and running with Telemetry Streaming.
+up and running with F5 BIG-IP Telemetry Streaming.
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
@@ -25,7 +25,7 @@ up and running with Telemetry Streaming.
    - If using cURL, see :ref:`installcurl-ref`.
 
 #. Using a RESTful API client like Postman, send a GET request to the URI
-   ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure Telemetry Streaming is running
+   ``https://{{host}}/mgmt/shared/telemetry/info`` to ensure F5 BIG-IP Telemetry Streaming is running
    properly.
 
 #. Copy one of the :ref:`examples` which best matches the configuration you want
@@ -56,7 +56,7 @@ Components of the declaration
 -----------------------------
 This section provides more information about the options in the Quick Start example, and breaks down the example declaration into each class so you can understand the options when composing your declaration. The tables below the examples contain descriptions and options for the parameters included in this example only. 
 
-For a list of all the Telemetry Streaming classes and options, see :doc:`using-ts`.
+For a list of all the F5 BIG-IP Telemetry Streaming classes and options, see :doc:`using-ts`.
 
 If there is a default value, it is shown in bold in the Options column.
 
@@ -83,9 +83,9 @@ The first few lines of your declaration are a part of the base components and de
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        | Description/Notes                                                                                                                                                            |
 +====================+================================+==============================================================================================================================================================================+
-| class              | Controls                       | Describes top-level Telemetry Streaming options. The optional class for controls must always be Controls, do not change this value. Controls are for logging and debugging.  |
+| class              | Controls                       | Describes top-level TS options. The optional class for controls must always be Controls, do not change this value. Controls are for logging and debugging.                   |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| logLevel           | **info**, debug, error         | This value determines how much information you want Telemetry Streaming to log. See the :ref:`logging-ref` section for more information.                                     |
+| logLevel           | **info**, debug, error         | This value determines how much information you want TS to log. See the :ref:`logging-ref` section for more information.                                                      |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -93,8 +93,8 @@ The first few lines of your declaration are a part of the base components and de
 
 .. _system-poller-class:
 
-Telemetry System class
-``````````````````````
+F5 BIG-IP Telemetry System class
+````````````````````````````````
 The next lines of the declaration define the target system. You can define and configure the system poller inside of the System declaration to collect and normalize statistics. These statistics include device statistics, virtual server statistics, pool statistics, individual pool member statistics, and more. For more information, including an optional iHealth poller, see :ref:`tssystem-ref`. 
 
 .. code-block:: javascript
@@ -115,7 +115,7 @@ The next lines of the declaration define the target system. You can define and c
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        |  Description/Notes                                                                                                                                               |
 +====================+================================+==================================================================================================================================================================+
-| class              | Telemetry_System               |  The class for Telemetry System must always be Telemetry_System, do not change this value.                                                                       |
+| class              | Telemetry_System               |  The class for BIG-IP Telemetry System must always be Telemetry_System, do not change this value.                                                                |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | systemPoller       | systemPoller                   |  This value Polls a system on a defined interval for information such as device statistics, virtual server statistics, pool statistics and much more.            |
 +--------------------+--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -124,9 +124,9 @@ The next lines of the declaration define the target system. You can define and c
 
 .. _event-listener-class:
 
-Telemetry Listener class
-````````````````````````
-The next lines of the declaration sets the Event Listener, on both TCP and UDP protocols, that can accept events in a specific format and process them. Currently, the TS Listener sends all logging telemetry data.
+F5 BIG-IP Telemetry Listener class
+``````````````````````````````````
+The next lines of the declaration sets the Event Listener, on both TCP and UDP protocols, that can accept events in a specific format and process them. Currently, the BIG-IP TS Listener sends all logging telemetry data.
 To see the type of information that the event listener processes, see :ref:`outputexample-ref`.
 Event Format: ``key1="value",key2="value"``
 
@@ -156,8 +156,8 @@ Event Format: ``key1="value",key2="value"``
 
 .. _consumer-class:
 
-Telemetry Consumer class
-````````````````````````
+F5 BIG-IP Telemetry Consumer class
+``````````````````````````````````
 The next lines of the declaration sets the Consumer, which accepts all telemetry information from whatever systems you configure it to. The consumer provides the tools to process that information. To see examples of configurations for consumers like Splunk, Azure Log Analytics, AWS CloudWatch, AWS S3, Graphite, and others, see the :ref:`settingupconsumer-ref` section of this guide.
 
 .. NOTE:: TS 1.11 adds support for the Pull Consumer class.  See :doc:`pull-consumers`. 

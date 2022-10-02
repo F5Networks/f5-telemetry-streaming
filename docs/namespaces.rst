@@ -1,8 +1,8 @@
-Telemetry Streaming Namespaces
-==============================
-.. NOTE:: Using Telemetry Streaming Namespaces is supported as of TS 1.23 (was experimental in 1.16-1.22). 
+F5 BIG-IP Telemetry Streaming Namespaces
+========================================
+.. NOTE:: Using F5 BIG-IP Telemetry Streaming Namespaces is supported as of BIG-IP TS 1.23 (was experimental in 1.16-1.22). 
 
-Telemetry Streaming v1.16 introduced the concept of *namespaces*, which is a grouping of Telemetry components.  With namespaces, you can declare separate configurations to allow better control of data forwarding. Any System Pollers or Event Listeners defined within a namespace will only forward data to the Consumers within that same Namespace.
+F5 BIG-IP Telemetry Streaming v1.16 introduced the concept of *namespaces*, which is a grouping of Telemetry components.  With namespaces, you can declare separate configurations to allow better control of data forwarding. Any System Pollers or Event Listeners defined within a namespace will only forward data to the Consumers within that same Namespace.
 
 Namespaces are declared in the new **Telemetry_Namespace** class, which acts as the container for the namespace.
 
@@ -15,11 +15,11 @@ The following are important notes about namespaces.
 - You must send a full declaration to **/telemetry/declare**. If there are multiple namespaces, you must declare them all in the POST body, otherwise, they are omitted. To configure a single namespace, see :ref:`namespaceEP`.
 - All namespaces inherit the top level **controls** object. 
 - For pull consumers: If you declare a pull consumer under a namespace, the URI to get the data should specify the namespace in path, for example **/mgmt/shared/telemetry/namespace/${namespaceName}/pullconsumer/${pullConsumerName}**
-- In Telemetry Streaming v1.19 and later, you cannot have a namespace name that is the same as the name of any other Telemetry class type in the default namespace, if you do, Telemetry Streaming returns an error. However, you can have a namespace name that is the same as the name of another Telemetry class type in another (non-default) namespace.
+- In F5 BIG-IP Telemetry Streaming v1.19 and later, you cannot have a namespace name that is the same as the name of any other Telemetry class type in the default namespace, if you do, BIG-IP Telemetry Streaming returns an error. However, you can have a namespace name that is the same as the name of another Telemetry class type in another (non-default) namespace.
 
 |
 
-The following examples show how you can use namespaces in your Telemetry Streaming declarations.
+The following examples show how you can use namespaces in your F5 BIG-IP Telemetry Streaming declarations.
 
 Basic declaration with namespace only
 -------------------------------------
@@ -62,7 +62,7 @@ The lines that are not highlighted in the example are all part of the default na
 
 Namespace-specific endpoints
 ----------------------------
-Telemetry Streaming 1.18 and later introduced new endpoints specific to individual namespaces. Using this endpoint allows you to configure a specific namespace without needing to know about other namespaces. 
+F5 BIG-IP Telemetry Streaming 1.18 and later introduced new endpoints specific to individual namespaces. Using this endpoint allows you to configure a specific namespace without needing to know about other namespaces. 
 
 The following table describes the endpoint and request types you can use.
 

@@ -2,11 +2,11 @@
 
 Exporting data from AVR
 =======================
-This section shows how you can export data from the Application Visibility and Reporting (AVR) module to Telemetry Streaming.  To see more information on AVR, see the |analytics|.
+This section shows how you can export data from the Application Visibility and Reporting (AVR) module to BIG-IP Telemetry Streaming.  To see more information on AVR, see the |analytics|.
 
-.. NOTE:: The configuration on this page was modified to use an existing Telemetry Streaming *Log Publisher* as opposed to a static IP address. There is also a new, optional section for TS and AVR in a fanout configuration. This documentation change was made in Telemetry Streaming 1.16, but the configuration can be used with any TS version.
+.. NOTE:: The configuration on this page was modified to use an existing BIG-IP Telemetry Streaming *Log Publisher* as opposed to a static IP address. There is also a new, optional section for BIG-IP TS and AVR in a fanout configuration. This documentation change was made in BIG-IP Telemetry Streaming 1.16, but the configuration can be used with any BIG-IP TS version.
 
-The prerequisites for using TS with AVR include:
+The prerequisites for using BIG-IP TS with AVR include:
  
 - The AVR module must be provisioned 
 - You must have an Event Listener, including an existing Log Publisher (see :ref:`eventlistener-ref` for instructions)
@@ -14,13 +14,13 @@ The prerequisites for using TS with AVR include:
 
 .. _avr-note:
 
-.. IMPORTANT:: It is currently not possible to configure AVR to publish data to both Telemetry Streaming and BIG-IQ concurrently. Additionally, if a BIG-IP is managed by a BIG-IQ, and has Statistics Collection enabled, the entire AVR configuration of the BIG-IP will be overwritten to publish only to the BIG-IQ.
+.. IMPORTANT:: It is currently not possible to configure AVR to publish data to both BIG-IP Telemetry Streaming and BIG-IQ concurrently. Additionally, if a BIG-IP is managed by a BIG-IQ, and has Statistics Collection enabled, the entire AVR configuration of the BIG-IP will be overwritten to publish only to the BIG-IQ.
 
 |
 
 Modifying AVR configuration to use the Log Publisher
 ----------------------------------------------------
-To use AVR with Telemetry Streaming, you must modify the AVR logging configuration to point to the existing Log Publisher. If you do not have an existing log publisher, see :ref:`logsrc-ref` for guidance on creating one.
+To use AVR with BIG-IP Telemetry Streaming, you must modify the AVR logging configuration to point to the existing Log Publisher. If you do not have an existing log publisher, see :ref:`logsrc-ref` for guidance on creating one.
 
 Use the following TMSH command, but be sure to change **telemetry_publisher** to the name of your Log Publisher if your publisher has a different name.
 
@@ -40,11 +40,11 @@ Example output of AVR basic data:
 
 | 
 
-Optional: Configuring AVR and Telemetry Streaming in a fanout scenario
-``````````````````````````````````````````````````````````````````````
-If you want to configure AVR and Telemetry Streaming in a fanout configuration (where AVR can send to multiple destinations using the TS Log Publisher), you can add new Log Destinations to the existing Log Publisher.  For more information, see |hsldocs| in the AVR documentation. This includes configuration instructions using the BIG-IP Configuration utility. Note the Log Destination type must be **Remote High-Speed Log**.  The TS :ref:`Event Listener page<eventlistener-ref>` shows how to configure Log Destinations with AS3 and TMSH.
+Optional: Configuring AVR and BIG-IP Telemetry Streaming in a fanout scenario
+`````````````````````````````````````````````````````````````````````````````
+If you want to configure AVR and BIG-IP Telemetry Streaming in a fanout configuration (where AVR can send to multiple destinations using the BIG-IP TS Log Publisher), you can add new Log Destinations to the existing Log Publisher.  For more information, see |hsldocs| in the AVR documentation. This includes configuration instructions using the BIG-IP Configuration utility. Note the Log Destination type must be **Remote High-Speed Log**.  The BIG-IP TS :ref:`Event Listener page<eventlistener-ref>` shows how to configure Log Destinations with BIG-IP AS3 and TMSH.
 
-If you need to add a Log Destination to an existing AS3 declaration (see :ref:`as3logging-ref`), you can simply add the new destination to the existing Log Publisher's **Destination** array (named **telemetry_publisher** in our example), and the AS3 declaration.
+If you need to add a Log Destination to an existing BIG-IP AS3 declaration (see :ref:`as3logging-ref`), you can simply add the new destination to the existing Log Publisher's **Destination** array (named **telemetry_publisher** in our example), and the BIG-IP AS3 declaration.
 
 |
 

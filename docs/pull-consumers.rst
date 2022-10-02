@@ -8,10 +8,10 @@ Use this section to find example declarations and notes for pull-based monitorin
 
 About Pull Consumers
 --------------------
-Telemetry Streaming 1.11 introduced a *pull* consumer to support pull-based monitoring systems using a new class called **Telemetry_Pull_Consumer**.  External systems can use this Pull API to pull/scrape for metrics.
+F5 BIG-IP Telemetry Streaming 1.11 introduced a *pull* consumer to support pull-based monitoring systems using a new class called **Telemetry_Pull_Consumer**.  External systems can use this Pull API to pull/scrape for metrics.
 
-- Telemetry Streaming Pull Consumers expose a new HTTP API, which can be scraped for metrics.
-- You can only pull data from Systems and/or System Pollers that are already defined through a Telemetry Streaming declaration.
+- F5 BIG-IP Telemetry Streaming Pull Consumers expose a new HTTP API, which can be scraped for metrics.
+- You can only pull data from Systems and/or System Pollers that are already defined through an F5 BIG-IP Telemetry Streaming declaration.
 - With TS 1.11, you can set a Telemetry_System_Poller **interval=0**. This disables the background polling process, but keeps the Poller enabled. Using interval=0 on a Poller allows for the Poller to only collect data from a BIG-IP when the Pull Consumer API endpoint is scraped, so that the Poller doesn't collect data from a BIG-IP when it is not needed.
 - If a Poller is used for both a Pull Consumer and a Push Consumer, the interval will need to be set to a non-zero number of seconds, so that the background polling process will collect data and push it to the configured Push Consumers.
 - Each Pull Consumer must reference, via the systemPoller property, which Telemetry_System_Poller the Pull Consumer will collect data from when the Pull Consumer HTTP API is called. This can be configured as a single systemPoller, or as an array of systemPollers, using the name of the configured System Poller.
@@ -33,7 +33,7 @@ See |pullref| in the Schema Reference for usage information.
 
 Using Pull Consumers and Push Consumers
 ---------------------------------------
-A Telemetry Streaming declaration may contain multiple System Pollers, as well as both Push Consumer(s) and Pull Consumer(s).
+An F5 BIG-IP Telemetry Streaming declaration may contain multiple System Pollers, as well as both Push Consumer(s) and Pull Consumer(s).
 
 The following example contains:
 
@@ -66,7 +66,7 @@ Default Pull Consumer
 ---------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for the default pull consumer is available in TS 1.11.0 and later. 
+   Support for the default pull consumer is available in BIG-IP TS 1.11.0 and later. 
 
 This example shows how to use the default pull consumer.  For the default pull consumer, the type must be **default** in the Pull Consumer class as shown.
 
@@ -83,7 +83,7 @@ Prometheus Pull Consumer
 ------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for the Prometheus pull consumer is available in TS 1.12.0 and later. 
+   Support for the Prometheus pull consumer is available in BIG-IP TS 1.12.0 and later. 
 
 |prometheus_img|
 
