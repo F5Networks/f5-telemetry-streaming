@@ -1,8 +1,8 @@
 .. _delete-ts:
 
-Deleting the Telemetry Streaming configuration
-----------------------------------------------
-If you want to delete the TS configuration, simply send a POST request to **/telemetry/declare** with the following in the Body of the request:
+Deleting the F5 BIG-IP Telemetry Streaming configuration
+--------------------------------------------------------
+If you want to delete the BIG-IP TS configuration, simply send a POST request to **/telemetry/declare** with the following in the Body of the request:
 
 .. code-block:: json
 
@@ -11,4 +11,4 @@ If you want to delete the TS configuration, simply send a POST request to **/tel
   }
 
 
-The configuration produced by Telemetry Streaming will be deleted.
+The configuration produced by BIG-IP Telemetry Streaming will be deleted.

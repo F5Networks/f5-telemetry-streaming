@@ -2,7 +2,7 @@
 
 Validating a declaration
 ------------------------
-In this section, we show you how to validate a Telemetry Streaming declaration against the schema using Microsoft |vsc|. Using this type of validation is useful when composing a declaration manually, or to check the accuracy of a declaration before deployment.
+In this section, we show you how to validate a F5 BIG-IP Telemetry Streaming declaration against the schema using Microsoft |vsc|. Using this type of validation is useful when composing a declaration manually, or to check the accuracy of a declaration before deployment.
 
 For more information on editing JSON with Visual Studio Code, see |json|. 
 
@@ -12,9 +12,9 @@ To validate a declaration
 Use the following procedure to validate a declaration.
 
 1.  Download and install |vsc|.
-2.  Go to the |schema| directory of the AS3 repo on GitHub.
+2.  Go to the |schema| directory of the BIG-IP AS3 repo on GitHub.
 
-    - Click either **latest** or the specific AS3 version you are using.
+    - Click either **latest** or the specific BIG-IP AS3 version you are using.
     - Click the **as3-schema.json** file (both files in each directory are the same), and then click the **Raw** tab.
     - Copy the URL of the raw schema file.
 

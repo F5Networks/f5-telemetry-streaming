@@ -1,22 +1,22 @@
-F5 Telemetry Streaming
-======================
+F5 BIG-IP Telemetry Streaming
+=============================
 
-Welcome to the F5 Telemetry Streaming User Guide. To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com. |br|
+Welcome to the F5 BIG-IP Telemetry Streaming User Guide. To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com. |br|
 
 .. IMPORTANT:: This the documentation for the **latest** version of Telemetry Streaming, if you want to see the documentation for a long term support (LTS) version, use the version selector on the top left (for details, see |supportmd|). 
 
 Introduction
 ------------
 
-Telemetry Streaming (TS) enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application. Telemetry Streaming is an iControl LX Extension delivered as a TMOS-independent RPM file, and uses a declarative model, meaning you provide a JSON declaration rather than a set of imperative commands.  To use Telemetry Streaming, you POST a single JSON declaration to Telemetry Streaming's declarative REST API endpoint. 
+F5 BIG-IP Telemetry Streaming (BIG-IP TS) enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application. BIG-IP Telemetry Streaming is an iControl LX Extension delivered as a TMOS-independent RPM file, and uses a declarative model, meaning you provide a JSON declaration rather than a set of imperative commands.  To use BIG-IP TS, you POST a single JSON declaration to BIG-IP TS's declarative REST API endpoint. 
 
-See our Telemetry Streaming overview video:
+See our BIG-IP Telemetry Streaming overview video:
 
 |video|
 
 |
 
-This guide contains information on downloading, installing, and using the Telemetry Streaming Extension.  Use the navigation panes, and/or the Next and
+This guide contains information on downloading, installing, and using the BIG-IP Telemetry Streaming Extension.  Use the navigation panes, and/or the Next and
 Previous buttons to explore the documentation.  
 
 You can click the following links to go directly to a specific :doc:`setting-up-consumer` or :doc:`pull-consumers`:
@@ -72,10 +72,6 @@ You can click the following links to go directly to a specific :doc:`setting-up-
         - yes
         - yes
 
-      * - :ref:`F5 Beacon<beacon-ref>`
-        - yes
-        - yes
-
       * - :ref:`fluentd-ref`
         - yes
         - yes
@@ -115,7 +111,7 @@ You can click the following links to go directly to a specific :doc:`setting-up-
 
 
 .. toctree::
-   :caption: Telemetry Streaming:
+   :caption: F5 BIG-IP Telemetry Streaming:
    :hidden:
    :glob:
    :maxdepth: 1

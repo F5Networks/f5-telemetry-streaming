@@ -1,6 +1,14 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.32.0
+### Added
+### Fixed
+### Changed
+- TS-691: DataDog: forward metric data additionally to the logs endpoint
+- TS-699: Removed Beacon from documentation
+### Removed
+
 ## 1.31.0
 ### Added
 - TS-676: Add gRPC exporter to OpenTelemetry_Exporter (experimental feature)

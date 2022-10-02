@@ -10,7 +10,19 @@ Document Revision History
       * - Doc Rev
         - Description
         - Date
-  
+
+      * - 1.32.0
+        - Updated the documentation for Telemetry Streaming v1.32.0. This release contains the following changes: |br| * DataDog: forward metric data additionally to the logs endpoint |br| * Removed Beacon from documentation
+        - 10-04-22
+
+      * - 1.31.0
+        - Updated the documentation for Telemetry Streaming v1.31.0. This release contains the following changes: |br| * Added gRPC exporter to OpenTelemetry_Exporter (experimental feature) |br| * Added new performance stats - system.connectionsPerformance. |br| * Generic_HTTP consumer should allow to tune transport options (experimental feature) |br| * Added compressionType option to Generic_HTTP consumer. |br| * DataDog consumer should support proxy configuration. |br| * DataDog consumer should split huge payload into smaller chunks according to API docs. |br| * DataDog consumer should allow to tune transport options (experimental feature). |br| * Added OpenTelemetry_Exporter raw JSON output. |br| * Added secure connection settings to OpenTelemetry_Exporter (experimental feature). |br| |br| Issues Resolved: |br| * DataDog consumer should send correct timestamp value. |br| * OpenTelemetry_Exporter should set correct timestamp. |br| |br| Changed: |br| * system.throughputPerformance in System Poller's default output should match output example in "examples" directory. |br| * DataDog consumer should use API v2 for to send data.
+        - 8-23-22
+
+      * - 1.30.0
+        - Updated the documentation for Telemetry Streaming v1.30.0. This release contains the following resolved issues: |br| * Add support for numerical enums, enhance SNMP metrics processing `GitHub #207 <https://github.com/F5Networks/f5-telemetry-streaming/issues/207>`_ |br| * Created separate Azure Logs tables for pool members and  removed that data from the pool tables.
+        - 7-15-22        
+    
       * - 1.29.0
         - Updated the documentation for Telemetry Streaming v1.29.0. This release contains the following changes: |br| * Added support for querying SNMP using a custom endpoint (see :ref:`SNMP example<snmpep>`) |br| * Added outputMode parameter to Generic HTTP consumer to support raw data output (see :ref:`Generic HTTP<http-ref>`) |br| |br| Issues Resolved: |br| * Metric Consumers should not fail when 'null' found in data |br| * Prometheus consumer should ignore NaN values
         - 5-31-22
@@ -85,7 +97,7 @@ Document Revision History
         - 10-13-20
 
       * - 1.14.0
-        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added F5 Beacon as a Generic HTTP consumer (see :ref:`beacon-ref`)  |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`) |br| * Added a troubleshooting entry for a restjavad issue (see :ref:`restjavad`) |br| * Added a note to the :doc:`avr` page about AVR caveats with TS and BIG-IQ (see the :ref:`AVR note<avr-note>`) |br| * Updated the introduction for the experimental :doc:`custom-endpoints` |br| * Added support for BIG-IP 16.0  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
+        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added F5 Beacon as a Generic HTTP consumer |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`) |br| * Added a troubleshooting entry for a restjavad issue (see :ref:`restjavad`) |br| * Added a note to the :doc:`avr` page about AVR caveats with TS and BIG-IQ (see the :ref:`AVR note<avr-note>`) |br| * Updated the introduction for the experimental :doc:`custom-endpoints` |br| * Added support for BIG-IP 16.0  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
         - 09-01-20
 
       * - 1.13.0

@@ -1,6 +1,6 @@
 Data Modification
 =================
-This section details how you can manipulate the data to better meet your Telemetry goals.  This includes the new :ref:`Actions Chain<actions>`, which can contain the :ref:`includeData<include>` and :ref:`excludeData<exclude>` options introduced in Telemetry Streaming 1.8.0, and the previously introduced :ref:`setTag<tagproperty>` property.
+This section details how you can manipulate the data to better meet your Telemetry goals.  This includes the new :ref:`Actions Chain<actions>`, which can contain the :ref:`includeData<include>` and :ref:`excludeData<exclude>` options introduced in F5 BIG-IP Telemetry Streaming 1.8.0, and the previously introduced :ref:`setTag<tagproperty>` property.
 
 .. _actions: 
 
@@ -8,9 +8,9 @@ Actions chain
 -------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for **Actions chain** is available in TS 1.8.0 and later.  
+   Support for **Actions chain** is available in BIG-IP TS 1.8.0 and later.  
 
-This section describes Telemetry Streaming Action chains, and how to use them.  Action chains can be thought of as a pipeline of actions for data post-processing (and :ref:`pre-processing<preactions>` for System Poller only).  
+This section describes BIG-IP Telemetry Streaming Action chains, and how to use them.  Action chains can be thought of as a pipeline of actions for data post-processing (and :ref:`pre-processing<preactions>` for System Poller only).  
 
 These actions use the :ref:`setTag<tagproperty>`, :ref:`includeData<include>`, and :ref:`excludeData<exclude>` options described in detail later on this page.  See each section for details on the individual properties.
 
@@ -52,9 +52,9 @@ The following is an example of an Action chain with a description after the exam
 
 
 
-1. First Telemetry Streaming will exclude **system**.
-2. Next Telemetry Streaming will apply **vsInfo** tag to known locations (if the **locations** property is not specified, then the tag is applied to **virtualServers**, **pools** etc.)
-3. Finally Telemetry Streaming keeps all **virtualServers** data with properties defined in **locations** only.
+1. First BIG-IP Telemetry Streaming will exclude **system**.
+2. Next BIG-IP Telemetry Streaming will apply **vsInfo** tag to known locations (if the **locations** property is not specified, then the tag is applied to **virtualServers**, **pools** etc.)
+3. Finally BIG-IP Telemetry Streaming keeps all **virtualServers** data with properties defined in **locations** only.
  
 As result of execution output will look like:
 
@@ -117,7 +117,7 @@ This is because
  
 1. First action **includeData** will keep only **system**.
 2. Second action **setTag** will try to assign tag to known locations (if the 'locations' property is not specified, then the tag is applied to 'virtualServers', 'pools' etc.)
-3. Third action **includeData** should keep only **virtualServers**, but after execution of action #1 only the **system** property was left in the output - so, Telemetry Streaming removed from the output everything that not matched **virtualServers** and as result the output is empty object.
+3. Third action **includeData** should keep only **virtualServers**, but after execution of action #1 only the **system** property was left in the output - so, BIG-IP Telemetry Streaming removed from the output everything that not matched **virtualServers** and as result the output is empty object.
 
 |
 
@@ -126,7 +126,7 @@ This is because
 Pre-optimization (System Poller only)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  
-Telemetry System tries to analyze the actions chain before fetching data from the BIG-IP in order to reduce number of requests to BIG-IP.
+BIG-IP Telemetry System tries to analyze the actions chain before fetching data from the BIG-IP in order to reduce number of requests to BIG-IP.
  
 Example 1:
 
@@ -163,7 +163,7 @@ Example 1:
     }
 
 
-The Telemetry System sees that first action is **includeData** and it should include only **system**. So, as result of the Actions chain analysis, the Telemetry System will fetch only **system** data and not **virtualServers**.
+The BIG-IP Telemetry System sees that first action is **includeData** and it should include only **system**. So, as result of the Actions chain analysis, the BIG-IP Telemetry System will fetch only **system** data and not **virtualServers**.
 
  
 Example 2:
@@ -223,9 +223,9 @@ Value-based matching
 --------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for value-based matching is available in TS v1.10.0 and later
+   Support for value-based matching is available in BIG-IP TS v1.10.0 and later
 
-Telemetry Streaming v1.10 adds the **ifAnyMatch** functionality to the existing value-based matching logic.  Value-based matching means that TS can filter based on the value of **ifAnyMatch** instead of just the presence of the field. You can provide multiple values, and the *Action* (**includeData, excludeData or setTag**, described in detail in the section starting with :ref:`include`) is triggered if any of the blocks in the array evaluate to true.
+F5 BIG-IP BIG-IP Telemetry Streaming v1.10 adds the **ifAnyMatch** functionality to the existing value-based matching logic.  Value-based matching means that BIG-IP TS can filter based on the value of **ifAnyMatch** instead of just the presence of the field. You can provide multiple values, and the *Action* (**includeData, excludeData or setTag**, described in detail in the section starting with :ref:`include`) is triggered if any of the blocks in the array evaluate to true.
 
 The following example snippet uses the **includeData** action, so if any of the virtual servers in the **test** tenant are either enabled or disabled (and have a state of **available**), then *only* the virtualServer data is included. And because it uses **includeData**, the action must evaluate to true to occur, so if none of the virtualServers have a state of available, then ALL data is included.
 
@@ -269,7 +269,7 @@ For a complete declaration with value-based matching, see :ref:`value`.
 
 Tag property
 ------------
-Beginning in Telemetry Streaming 1.6.0, tagging is an actions array (the :ref:`old Tag property<oldtagproperty>` is still available).  Inside this actions array, you can add tagging objects.  
+Beginning in F5 BIG-IP Telemetry Streaming 1.6.0, tagging is an actions array (the :ref:`old Tag property<oldtagproperty>` is still available).  Inside this actions array, you can add tagging objects.  
 
 This table shows the parameters available for the Tag property.
 
@@ -281,7 +281,7 @@ This table shows the parameters available for the Tag property.
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | enable               | false    | Boolean          |  This value is used to enable an action.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ifAllMatch           | false    | Object           |  This property contains conditions you specify for the tag.  If you use this property, Telemetry Streaming verifies the conditions inside ifAllMatch and checks against the data.  All conditions inside this property must match the data for tagging to be performed. If you do not use this property, then the system tags everything in the **locations** property.                                                                                                                                                                 |
+| ifAllMatch           | false    | Object           |  This property contains conditions you specify for the tag.  If you use this property, TS verifies the conditions inside ifAllMatch and checks against the data.  All conditions inside this property must match the data for tagging to be performed. If you do not use this property, then the system tags everything in the **locations** property.                                                                                                                                                                                  |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | locations            | false    | Object           |  This property is used to specify where the tags should be applied.  If you used ifAllMatch, and all of the conditions inside ifAllMatch pass, then the locations are where the tags are applied (or to default objects if no locations are provided). If you do not use this property, the following locations are used by default: virtualServers, pools, ltmPolicies, httpProfiles, clientSslProfiles, serverSslProfiles, networkTunnels, deviceGroups, and iRules. If you use this property with an empty array, no tagging occurs. |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -325,7 +325,7 @@ Example declaration using setTag
 
 The following is an example declaration using the tagging action.  In this example:
 
-- Telemetry Streaming tags all **virtualServers** with the two tags in **setTag** if the conditions in **ifAllMatch** pass. 
+- BIG-IP Telemetry Streaming tags all **virtualServers** with the two tags in **setTag** if the conditions in **ifAllMatch** pass. 
 - For the conditions in **ifAllMatch** to match, all **virtualServers** that match the regular expression ``.*``, must have the property that matches ``serverside.bits.*``.
 - If all the conditions pass, the two tags are applied. 
 
@@ -390,10 +390,10 @@ Note that you can still use ```A``` and ```T``` as tag values.  For example:
 
 .. _oldtagproperty:
   
-Tag property for TS versions prior to 1.6.0
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Tag property for BIG-IP TS versions prior to 1.6.0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For Telemetry streaming versions 1.5.0 and earlier, the **tag** property provides a way to add additional properties (key:value) to the output. If not provided, the property will default to:
+For F5 BIG-IP Telemetry Streaming versions 1.5.0 and earlier, the **tag** property provides a way to add additional properties (key:value) to the output. If not provided, the property will default to:
 
 .. code-block:: json
 
@@ -412,7 +412,7 @@ Using the includeData property
 ------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for **includeData** is available in TS 1.8.0 and later.  
+   Support for **includeData** is available in BIG-IP TS 1.8.0 and later.  
 
 You can use the **includeData** property to output only the data you specify, and exclude everything else.  
 
@@ -426,7 +426,7 @@ The following table shows the possible parameters for includeData.  After the ta
 +======================+==========+==================+=========================================================================================================================================================================================================================================================================================+
 | enable               | false    | Boolean          |  This value is used to enable an action.                                                                                                                                                                                                                                                |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ifAllMatch           | false    | Object           |  This property contains the conditions you specify for the includeData. If you use this property, Telemetry Streaming verifies the conditions inside ifAllMatch and checks against the data. All conditions inside this property must match the data for includeData to be performed.   |
+| ifAllMatch           | false    | Object           |  This property contains the conditions you specify for the includeData. If you use this property, TS verifies the conditions inside ifAllMatch and checks against the data. All conditions inside this property must match the data for includeData to be performed.                    |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | locations            | false    | Object           |  This property is used to specify what data should be included. If you used ifAllMatch, and all of the conditions inside ifAllMatch pass, then the locations will be included.                                                                                                          |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -579,7 +579,7 @@ Using the excludeData property
 ------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for **excludeData** is available in TS 1.8.0 and later.  
+   Support for **excludeData** is available in BIG-IP TS 1.8.0 and later.  
 
 You can use the **excludeData** property to exclude only the data you specify, and include everything else. 
 
@@ -593,7 +593,7 @@ The following table shows the possible parameters for excludeData.  After the ta
 +======================+==========+==================+=========================================================================================================================================================================================================================================================================================+
 | enable               | false    | Boolean          |  This value is used to enable an action.                                                                                                                                                                                                                                                |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ifAllMatch           | false    | Object           |  This property contains the conditions you specify for the excludeData. If you use this property, Telemetry Streaming verifies the conditions inside ifAllMatch and checks against the data. All conditions inside this property must match the data for excludeData to be performed.   |
+| ifAllMatch           | false    | Object           |  This property contains the conditions you specify for the excludeData. If you use this property, TS verifies the conditions inside ifAllMatch and checks against the data. All conditions inside this property must match the data for excludeData to be performed.                    |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | locations            | false    | Object           |  This property is used to specify what data should be excluded. If you used ifAllMatch, and all of the conditions inside ifAllMatch pass, then the locations will be excluded.                                                                                                          |
 +----------------------+----------+------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -690,7 +690,7 @@ And this is an example of the output from the Action definition.
 
 Example 2b
 ^^^^^^^^^^
-This example highlights how Telemetry Streaming treats a non-exact match as a regular expression (this example uses the same example without using excludeData).
+This example highlights how BIG-IP Telemetry Streaming treats a non-exact match as a regular expression (this example uses the same example without using excludeData).
 
 
 This is an example of an excludeData Action definition:

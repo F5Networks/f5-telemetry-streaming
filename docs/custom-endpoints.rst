@@ -1,6 +1,6 @@
 Configuring Custom Endpoints
 ----------------------------
-Telemetry Streaming v1.10 and later allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
+F5 BIG-IP Telemetry Streaming v1.10 and later allows you to define a list of Custom Endpoints that reference iControlRequest paths in a new **Telemetry_Endpoints** class.
 The Custom Endpoints defined within a Telemetry Streaming declaration must then be attached to a Telemetry Streaming System Poller, where the System Poller will query the defined endpoints.
 
 .. NOTE:: Custom Endpoints *replace* the endpoints that a Telemetry Streaming System Poller queries by default - once a System Poller references a collection of Custom Endpoints, that System Poller will *only* query the Custom Endpoints.
@@ -152,7 +152,7 @@ The following snippet demonstrates how Custom Endpoint(s) can be attached to Sys
 
 Example declaration for using custom Endpoints with specific pollers
 --------------------------------------------------------------------
-The following example contains an example declaration for Telemetry Streaming, which includes the snippets in the examples above.
+The following example contains an example declaration for F5 BIG-IP Telemetry Streaming, which includes the snippets in the examples above.
 **Note:** The example below does not define a Telemetry Consumer, and a consumer of your choice must be added to the example declaration in order to receive the Telemetry Streaming data.
 
 .. literalinclude:: ../examples/declarations/system_custom_endpoints.json

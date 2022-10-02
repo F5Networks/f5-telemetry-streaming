@@ -3,7 +3,7 @@
 Example Output
 ==============
 
-Use this page to see the type of information that Telemetry Streaming collects. Use the links in the right pane to find a particular example.
+Use this page to see the type of information that F5 BIG-IP Telemetry Streaming collects. Use the links in the right pane to find a particular example.
 
 .. IMPORTANT::  The following are just examples; the actual fields will vary depending on factors such as how the log/event source is configured, BIG-IP versions, and so on. 
 
@@ -13,18 +13,18 @@ Use this page to see the type of information that Telemetry Streaming collects. 
 
 System Information
 ------------------
-The following shows the system information that Telemetry Streaming collects. 
+The following shows the system information that F5 BIG-IP Telemetry Streaming collects. 
 
-.. NOTE:: In Telemetry Streaming 1.24 and later, properties that require the bash endpoint are skipped if bash is not available on the target BIG-IP: system.diskStorage, system.diskLatency, system.apmState, and all tmstats properties (used with “Splunk legacy” format).
+.. NOTE:: In F5 BIG-IP Telemetry Streaming 1.24 and later, properties that require the bash endpoint are skipped if bash is not available on the target BIG-IP: system.diskStorage, system.diskLatency, system.apmState, and all tmstats properties (used with “Splunk legacy” format).
 
 **Additional properties** |br|
-The following properties were introduced in recent Telemetry Streaming versions.  These properties do not appear in the output in previous versions.  The following table shows the TS version the property was introduced, the type of output, and property (with description if applicable).
+The following properties were introduced in recent F5 BIG-IP Telemetry Streaming versions.  These properties do not appear in the output in previous versions.  The following table shows the BIG-IP TS version the property was introduced, the type of output, and property (with description if applicable).
 
 .. list-table::
       :widths: 20 20 200 
       :header-rows: 1
 
-      * - TS Version
+      * - Version
         - Type
         - Property
 
@@ -75,7 +75,7 @@ iHealth Information Request
 
 LTM Request Log
 ---------------
-.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by BIG-IP Telemetry Streaming, they must be configured with BIG-IP AS3 or another method.
 
 .. literalinclude:: ../examples/output/request_logs/ltm_request_log.json
     :language: json
@@ -86,7 +86,7 @@ LTM Request Log
 
 AFM Request Log
 ---------------
-.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by BIG-IP Telemetry Streaming, they must be configured with BIG-IP AS3 or another method.
 
 .. literalinclude:: ../examples/output/request_logs/afm_request_log.json
     :language: json
@@ -98,7 +98,7 @@ AFM Request Log
 
 ASM Request Log
 ---------------
-.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by BIG-IP Telemetry Streaming, they must be configured with BIG-IP AS3 or another method.
 
 .. literalinclude:: ../examples/output/request_logs/asm_request_log.json
     :language: json
@@ -110,9 +110,9 @@ ASM Request Log
 
 APM Request Log
 ---------------
-.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by Telemetry Streaming, they must be configured with AS3 or another method.
+.. NOTE:: Log streams from LTM, AFM, ASM, and APM are not configured by BIG-IP Telemetry Streaming, they must be configured with BIG-IP AS3 or another method.
 
-**New**: Telemetry Streaming 1.17 adds a timestamp, highlighted in yellow.  You will not see this output in versions prior to 1.17.
+**New**: F5 BIG-IP Telemetry Streaming 1.17 adds a timestamp, highlighted in yellow.  You will not see this output in versions prior to 1.17.
 
 .. literalinclude:: ../examples/output/request_logs/apm_request_log.json
     :language: json

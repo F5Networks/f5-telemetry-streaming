@@ -2,7 +2,7 @@
 
 Example Declarations
 ====================
-This section contains example Telemetry Streaming declarations.  Use the index on the right to go directly to a specific declaration.
+This section contains example F5 BIG-IP Telemetry Streaming declarations.  Use the index on the right to go directly to a specific declaration.
 
 
 Base Declaration
@@ -111,7 +111,7 @@ See :ref:`valuebased` for more information on this feature.
 
 Generic HTTP with multiple passphrases
 --------------------------------------
-If you require multiple secrets for the Generic HTTP consumer, TS supports defining an additional secret within ``Shared`` and referencing it using pointers as shown in this example. 
+If you require multiple secrets for the Generic HTTP consumer, BIG-IP TS supports defining an additional secret within ``Shared`` and referencing it using pointers as shown in this example. 
 
 For more details about pointers see the section on :ref:`pointersyntax`.
 
@@ -124,7 +124,7 @@ For more details about pointers see the section on :ref:`pointersyntax`.
 
 Specifying fallback hosts for Generic HTTP consumers
 ----------------------------------------------------
-Configuring fallback hosts for Generic HTTP consumers is supported as of TS 1.23 (was experimental in 1.14-1.22). 
+Configuring fallback hosts for Generic HTTP consumers is supported as of BIG-IP TS 1.23 (was experimental in 1.14-1.22). 
 
 This example shows how you can use the **fallbackHosts** property to specify fallback IP address(es) for a consumer.
 
@@ -139,13 +139,13 @@ Specifying proxy settings for Generic HTTP consumers
 ----------------------------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for configuring proxy settings is available in TS v1.17 and later
+   Support for configuring proxy settings is available in BIG-IP TS v1.17 and later
 
-This example shows how you can configure proxy settings for Generic HTTP consumers (including :ref:`F5 Beacon<beacon-ref>`) in TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
+This example shows how you can configure proxy settings for Generic HTTP consumers in BIG-IP TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
 
 For usage options, see |proxy| in the Schema Reference.
 
-The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
+The following example also uses :doc:`BIG-IP Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
 
 
 .. literalinclude:: ../examples/declarations/generic_http_proxy.json
@@ -163,11 +163,11 @@ Specifying proxy settings for Splunk consumers
 
    Support for configuring Splunk proxy settings is available in TS v1.17 and later
 
-This example shows how you can configure proxy settings for :ref:`Splunk consumers<splunk-ref>` in TS 1.17 and later. This allows you to send Telemetry Streaming data through a proxy.
+This example shows how you can configure proxy settings for :ref:`Splunk consumers<splunk-ref>` in BIG-IP TS 1.17 and later. This allows you to send BIG-IP Telemetry Streaming data through a proxy.
 
 For usage options, see |proxy| in the Schema Reference.
 
-The following example also uses :doc:`Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
+The following example also uses :doc:`BIG-IP Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
 
 
 .. literalinclude:: ../examples/declarations/splunk_proxy.json
@@ -184,9 +184,9 @@ Generic HTTP consumer with TLS Client Authentication
 ----------------------------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for TLS client authentication with the Generic HTTP consumer is available in TS v1.18 and later
+   Support for TLS client authentication with the Generic HTTP consumer is available in BIG-IP TS v1.18 and later
 
-This example shows how you can configure TLS client authentication for :ref:`Generic HTTP consumers<http-ref>` in a Telemetry Streaming declaration using version 1.18 and later. 
+This example shows how you can configure TLS client authentication for :ref:`Generic HTTP consumers<http-ref>` in a BIG-IP Telemetry Streaming declaration using version 1.18 and later. 
 
 
 .. literalinclude:: ../examples/declarations/generic_http_tls_client_auth.json
@@ -237,7 +237,7 @@ Customizing the Generic HTTP consumer payload
 
 Using the addTags property for the StatsD consumer
 --------------------------------------------------
-.. IMPORTANT:: The addTags property is available in TS v1.21.0 and later. See :ref:`StatsD addTags<addtags>` for more information on this feature.
+.. IMPORTANT:: The addTags property is available in BIG-IP TS v1.21.0 and later. See :ref:`StatsD addTags<addtags>` for more information on this feature.
 
 The following example shows a declaration with a systemPoller, a Listener, and a StatsD consumer with **addTags** using the **sibling** method.
 
@@ -353,10 +353,10 @@ Querying SNMP using a custom endpoint
 -------------------------------------
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for SNMP for custom endpoints is available in TS v1.29 and later
+   Support for SNMP for custom endpoints is available in BIG-IP TS v1.29 and later
 
 
-This example shows how you can query SNMP using a custom endpoint in a Telemetry Streaming declaration using version 1.29 and later. 
+This example shows how you can query SNMP using a custom endpoint in a BIG-IP Telemetry Streaming declaration using version 1.29 and later. 
 See :doc:`custom-endpoints` for more information on this feature.
 
 

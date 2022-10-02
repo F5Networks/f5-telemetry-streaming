@@ -23,9 +23,9 @@ Required information:
  - Port: Default is 8088, this can be configured within the Global Settings section of the Splunk HEC.
  - API Key: An API key must be created and provided in the passphrase object of the declaration, refer to Splunk documentation for the correct way to create an HEC token.
 
-If you want to specify proxy settings for Splunk consumers in TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
+If you want to specify proxy settings for Splunk consumers in BIG-IP TS 1.17 and later, see the :ref:`Splunk Proxy<splunkproxy>` example.
 
-.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
+.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for BIG-IP Telemetry Streaming to be able to find the hostname.
 
 Additions to the Splunk consumer
 ````````````````````````````````
@@ -35,13 +35,13 @@ The following items have been added to the Splunk consumer since it was introduc
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - Version
         - Property
         - Description
   
       * - 1.19
         - **compressionType**
-        - Sets the type of compression.  Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property. When set to **none**, this property stops TS from compressing data before sending it to Splunk, which can help reduce memory usage.
+        - Sets the type of compression.  Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property. When set to **none**, this property stops BIG-IP TS from compressing data before sending it to Splunk, which can help reduce memory usage.
 
 
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
@@ -59,13 +59,13 @@ Example Declaration:
 
 Splunk Legacy format (Deprecated)
 `````````````````````````````````
-.. IMPORTANT:: The Splunk Legacy format has been deprecated as of Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric`.
+.. IMPORTANT:: The Splunk Legacy format has been deprecated as of BIG-IP Telemetry Streaming 1.17, and has entered maintenance mode. This means there will be no further BIG-IP TS development for the Splunk Legacy format. |br| We recommend using the :ref:`Splunk default format<splunk-ref>`, or :ref:`multi-metric`.
 
 The **format** property can be set to **legacy** for Splunk users who wish to convert the stats output similar to the |splunk app|. To see more information, see |Analytics|. To see more information about using the HEC, see |HEC|.  See the following example.
 
-To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
+To poll for any data involving **tmstats** you must have a Splunk consumer with the legacy format as described in this section.  This includes GET requests to the SystemPoller API because the data is not pulled unless it is a legacy Splunk consumer. |br| |br| BIG-IP Telemetry Streaming 1.7.0 and later gathers additional data from tmstats tables to improve compatibility with Splunk Legacy consumers.
 
-In Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
+In BIG-IP Telemetry Streaming v1.6.0 and later, you must use the **facility** parameter with the legacy format to specify a Splunk facility in your declarations.  The facility parameter is for identification of location/facility in which the BIG-IP is located (such as 'Main Data Center', 'AWS', or 'NYC'). 
 
 If a Splunk Consumer is configured with the legacy format, then it ignores events from Event Listener.
 
@@ -88,11 +88,11 @@ Splunk multi-metric format
 ``````````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Splunk multi-metric format is available in TS v1.17 and later, and requires Splunk 8.0.0 or later.
+   Splunk multi-metric format is available in BIG-IP TS v1.17 and later, and requires Splunk 8.0.0 or later.
 
 .. IMPORTANT:: Splunk multi-metric format requires Splunk version 8.0.0 or later.
 
-Telemetry Streaming 1.17 introduced the ability to use Splunk multi-metric format (experimental in TS 1.17-1.24) for Splunk 8.0.0 and later.  Splunk multi-metric format allows each JSON object to contain measurements for multiple metrics, which generate multiple-measurement metric data points, taking up less space on disk and improving search performance.
+BIG-IP Telemetry Streaming 1.17 introduced the ability to use Splunk multi-metric format (experimental in BIG-IP TS 1.17-1.24) for Splunk 8.0.0 and later.  Splunk multi-metric format allows each JSON object to contain measurements for multiple metrics, which generate multiple-measurement metric data points, taking up less space on disk and improving search performance.
 
 See the |splunkmm| for more information.
 
@@ -127,7 +127,7 @@ The following items have been added to the Azure Log Analytics consumer since it
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -137,15 +137,15 @@ The following items have been added to the Azure Log Analytics consumer since it
 
       * - 
         - 
-        - **default**: This is the default value, and does not change the behavior from previous versions. In this mode, each unique item gets a set of columns.  With some properties such as Client and Server SSL profiles, the number of columns exceeds the maximum allowed by Azure.  |br| For example, with a CA bundle certificate, there may be fields for expirationDate, expirationString, issuer, name, and subject.  TS creates a column named **ca-bundle_crt_expirationDate** and four additional columns for the other four properties.  The **name** value is a prefix for every column.
+        - **default**: This is the default value, and does not change the behavior from previous versions. In this mode, each unique item gets a set of columns.  With some properties such as Client and Server SSL profiles, the number of columns exceeds the maximum allowed by Azure.  |br| For example, with a CA bundle certificate, there may be fields for expirationDate, expirationString, issuer, name, and subject.  BIG-IP TS creates a column named **ca-bundle_crt_expirationDate** and four additional columns for the other four properties.  The **name** value is a prefix for every column.
 
       * - 
         - 
-        - **propertyBased** - This value causes Telemetry Streaming to create fewer columns by using the property name for the column.  In the example above, the column (property) name is just **expirationDate**, and all certificates use this column for the expiration dates.  |br| Note this happens only if the property **name** exists, and it matches the declared object name at the top. Otherwise, the naming mode goes back to default.
+        - **propertyBased** - This value causes BIG-IP Telemetry Streaming to create fewer columns by using the property name for the column.  In the example above, the column (property) name is just **expirationDate**, and all certificates use this column for the expiration dates.  |br| Note this happens only if the property **name** exists, and it matches the declared object name at the top. Otherwise, the naming mode goes back to default.
 
       * - 1.24
         - **region**
-        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, BIG-IP Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, BIG-IP TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
 
 
 
@@ -153,7 +153,7 @@ To see more information about sending data to Log Analytics, see |HTTP Data Coll
 
 |
 
-.. IMPORTANT:: The following example has been updated with the **useManagedIdentity**, **region**, and **format** properties. You must be using a TS version that supports these properties (TS 1.24 for **format**) |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and Telemetry Streaming. 
+.. IMPORTANT:: The following example has been updated with the **useManagedIdentity**, **region**, and **format** properties. You must be using a BIG-IP TS version that supports these properties (BIG-IP TS 1.24 for **format**) |br| See :ref:`Using Managed Identities<mi>` following the example for information about using Azure Managed Identities and BIG-IP Telemetry Streaming. 
 
 
 Example Declaration:
@@ -164,7 +164,7 @@ Example Declaration:
 
 Example Dashboard:
 
-The following is an example of the Azure dashboard with Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
+The following is an example of the Azure dashboard with BIG-IP Telemetry Streaming data. To create a similar dashboard, see |azure_dashboard|. To create custom views using View Designer, see |Azure_custom_views|.
 
 |azure_log_analytics_dashboard|
 
@@ -174,7 +174,7 @@ The following is an example of the Azure dashboard with Telemetry Streaming data
 
 Using Microsoft Managed Identities for Log Analytics
 ````````````````````````````````````````````````````
-Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+F5 BIG-IP Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
 **Important:** The managed identity assigned to the VM must have at the minimum, the following permissions (see the Azure documentation for detailed information):
 
@@ -182,7 +182,7 @@ Telemetry Streaming v1.11 adds support for sending data to Azure Log Analytics w
 - List workspaces for the subscription(s)
 - Log Analytics Contributor for the workspace (either at the Workspace resource level or inherited via resource group)
 
-Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, Telemetry Streaming behaves as though the value is false.
+F5 BIG-IP Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify a passphrase when this property is set to true.  You must specify passphrase when this property is omitted or when value is **false**.  If you do not include this property at all, BIG-IP Telemetry Streaming behaves as though the value is false.
 
 Example Declaration:
 
@@ -207,7 +207,7 @@ Optional Properties:
 
 - **MaxBatch Size**: The maximum number of telemetry items to include in a payload to the ingestion endpoint (default: 250)
 - **Max Batch Interval Ms**: The maximum amount of time to wait in milliseconds to for payload to reach maxBatchSize (default: 5000)
-- **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
+- **App Insights Resource Name**: Name filter used to determine to which App Insights resource to send metrics. If not provided, BIG-IP TS will send metrics to App Insights in the subscription in which the managed identity has permissions. Note: To be used only when useManagedIdentity is true.
 - **customOpts**: Additional options for use by consumer client library. These are passthrough options (key value pair) to send to the Microsoft node client. 
    
 .. WARNING:: The **customOpts** options are not guaranteed to work and may change according to the client library API; you must use these options with caution. Refer to corresponding consumer library documentation for acceptable keys and values.
@@ -224,13 +224,13 @@ The following items have been added to the Azure Application Insights consumer s
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
 
       * - 1.24
         - **region**
-        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
+        - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, BIG-IP Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, BIG-IP TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
 
 |
 
@@ -248,14 +248,14 @@ Example Declaration:
 
 Using Microsoft Managed Identities for Application Insights
 ```````````````````````````````````````````````````````````
-Telemetry Streaming v1.11 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
+F5 BIG-IP Telemetry Streaming v1.11 also adds support for sending data to Azure Application Insights with an Azure Managed Identity. For specific information on Managed Identities, see |managedid|.
 
 **Important:** The managed identity assigned to the VM must have at the minimum, the following permissions  (see the Azure documentation for detailed information):
 
 - List Microsoft.Insight components for subscription(s), for example the Monitoring Reader role
 - Push metrics to the App Insights resource, for example the Monitoring Metrics Publisher role
 
-Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify an instrumentationKey when this property is set to true. You must specify instrumentationKey when this property is omitted or when the value is false. If you do not include this property at all, Telemetry Streaming behaves as though the value is false. You can optionally provide an appInsightsResourceName to limit which App Insights resource(s) to send metrics to. Without the filter, metrics will be sent to all App Insights resources to which the managed identity has permissions. 
+F5 BIG-IP Telemetry Streaming supports Managed Identities using a new **useManagedIdentity** property, set to **true**.  You cannot specify an instrumentationKey when this property is set to true. You must specify instrumentationKey when this property is omitted or when the value is false. If you do not include this property at all, BIG-IP Telemetry Streaming behaves as though the value is false. You can optionally provide an appInsightsResourceName to limit which App Insights resource(s) to send metrics to. Without the filter, metrics will be sent to all App Insights resources to which the managed identity has permissions. 
 
 Example Declaration:
 
@@ -272,9 +272,9 @@ AWS CloudWatch
 
 AWS CloudWatch has two consumers: CloudWatch Logs, and :ref:`CloudWatch Metrics<cw-metrics>`.  If you do not use the new **dataType** property, the system defaults to CloudWatch Logs.
 
-.. IMPORTANT:: In TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
+.. IMPORTANT:: In BIG-IP TS 1.9.0 and later, the **username** and **passphrase** for CloudWatch are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS CloudWatch without a username and passphrase.
 
-In TS 1.18 and later, the root certificates for AWS services are now embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+In BIG-IP TS 1.18 and later, the root certificates for AWS services are now embedded within F5 BIG-IP Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
 
 Additions to the AWS CloudWatch consumer
 ````````````````````````````````````````
@@ -285,7 +285,7 @@ The following items have been added to the CloudWatch consumer since it was intr
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -323,7 +323,7 @@ Example Declaration:
 
 AWS CloudWatch Metrics
 ``````````````````````
-Telemetry Streaming 1.14 introduced support for AWS CloudWatch Metrics.  To specify CloudWatch Metrics, use the new **dataType** property with a value of **metrics** as shown in the example.
+F5 BIG-IP Telemetry Streaming 1.14 introduced support for AWS CloudWatch Metrics.  To specify CloudWatch Metrics, use the new **dataType** property with a value of **metrics** as shown in the example.
 
 Notes for CloudWatch Metrics:
  - It can take up to 15 minutes for metrics to appear if they do not exist and AWS has to create them.
@@ -364,9 +364,9 @@ Required Information:
 
 To see more information about creating and using IAM roles, see the |IAM roles|.
 
-.. IMPORTANT:: Rhe **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
+.. IMPORTANT:: The **username** and **passphrase** for S3 are optional.  This is because a user can send data from a BIG-IP that has an appropriate IAM role in AWS to AWS S3 without a username and passphrase.
 
-The root certificates for AWS services are embedded within Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
+The root certificates for AWS services are embedded within F5 BIG-IP Telemetry Streaming and are the only root certificates used in requests made to AWS services per AWS's move to its own Certificate Authority, noted in https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/.
 
 Additions to the AWS S3 consumer
 ````````````````````````````````
@@ -377,7 +377,7 @@ The following items have been added to the S3 consumer since it was introduced.
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -442,13 +442,13 @@ The following items have been added to the Kafka consumer since it was introduce
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
       * - 1.17
         - **privateKey**
-        - This and the following properties provide the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication.  You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html. |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+        - This and the following properties provide the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures BIG-IP Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication.  You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html. |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
 
       * - 
         - **clientCertificate**
@@ -477,7 +477,7 @@ ElasticSearch
 -------------
 |ElasticSearch|
 
-.. NOTE:: TS 1.24 added support for sending data to ElasticSearch 7 and ElasticSearch 8.
+.. NOTE:: BIG-IP TS 1.24 added support for sending data to ElasticSearch 7 and ElasticSearch 8.
 
 Required Information:
  - Host: The address of the ElasticSearch system.
@@ -486,14 +486,14 @@ Required Information:
 Optional Parameters:
  - Port: The port of the ElasticSearch system. Default is 9200.
  - Protocol: The protocol of the ElasticSearch system. Options: http or https. Default is http.
- - Allow Self Signed Cert: allow TS to skip Cert validation. Options: true or false. Default is false.
+ - Allow Self Signed Cert: allow BIG-IP TS to skip Cert validation. Options: true or false. Default is false.
  - Path: The path to use when sending data to the ElasticSearch system.
  - Data Type: The type of data posted to the ElasticSearch system. 
  - API Version: The API version of the ElasticSearch system. Options: Any version string matching the ElasticSearch node(s) version.  The default is 6.0.
  - Username: The username to use when sending data to the ElasticSearch system.
  - Passphrase: The secret/password to use when sending data to the ElasticSearch system.
 
-.. IMPORTANT:: Telemetry Streaming 1.24 and later use the API Version value to determine the appropriate defaults to use for the Data Type parameter. |br| When the API Version is 6.X or earlier, **f5.telemetry** is used as the default Data Type. |br| When the API Version is 7.0 until the last 7.X version, **_doc** is used as the default Data Type. |br| In API Version 8.0 and later, the Data Type value is not supported, and will not be accepted in the Telemetry Streaming declaration.
+.. IMPORTANT:: BIG-IP Telemetry Streaming 1.24 and later use the API Version value to determine the appropriate defaults to use for the Data Type parameter. |br| When the API Version is 6.X or earlier, **f5.telemetry** is used as the default Data Type. |br| When the API Version is 7.0 until the last 7.X version, **_doc** is used as the default Data Type. |br| In API Version 8.0 and later, the Data Type value is not supported, and will not be accepted in the BIG-IP Telemetry Streaming declaration.
 
 |
 
@@ -536,12 +536,12 @@ StatsD
 
 Required Information:
     - Host: The address of the StatsD instance.
-    - Protocol: The protocol of the StatsD instance. Options: TCP (TS 1.12+) or UDP. The default is UDP.
+    - Protocol: The protocol of the StatsD instance. Options: TCP (BIG-IP TS 1.12+) or UDP. The default is UDP.
     - Port: The port of the StatsD instance
 
-.. IMPORTANT:: In TS v1.15 and later, if Telemetry Streaming is unable to locate the hostname in the systemPoller data, it sends the metric with hostname value **host.unknown**. This gets transformed to **hostname-unknown** as required by StatsD. This is because StatsD uses a **.** as a delimiter, and TS automatically replaces it with a **-**. For example: |br| |bold| { |br| |sp| |sp| |sp| metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn', |br| |sp| |sp| |sp| metricValue: 111111030 |br| } |boldclose| 
+.. IMPORTANT:: In BIG-IP TS v1.15 and later, if BIG-IP Telemetry Streaming is unable to locate the hostname in the systemPoller data, it sends the metric with hostname value **host.unknown**. This gets transformed to **hostname-unknown** as required by StatsD. This is because StatsD uses a **.** as a delimiter, and BIG-IP TS automatically replaces it with a **-**. For example: |br| |bold| { |br| |sp| |sp| |sp| metricName: 'f5telemetry.hostname-unknown.customStats.clientSideTraffic-bitsIn', |br| |sp| |sp| |sp| metricValue: 111111030 |br| } |boldclose| 
 
-.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for Telemetry Streaming to be able to find the hostname.
+.. NOTE:: When using the :doc:`custom endpoints feature<custom-endpoints>`, be sure to include **/mgmt/tm/sys/global-settings** in your endpoints for BIG-IP Telemetry Streaming to be able to find the hostname.
 
 For more information about installing StatsD, see |StatsDWiki|.
 
@@ -555,17 +555,17 @@ The following items have been added to the StatsD consumer since it was introduc
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
 
       * - 1.21
         - **addTags**
-        - This feature (experimental in TS 1.21-1.24) causes Telemetry Streaming to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported. To see an example and the output from **addTags**, see :ref:`addTags example<addtagex>`.
+        - This feature (experimental in BIG-IP TS 1.21-1.24) causes BIG-IP Telemetry Streaming to parse the incoming payload for values to automatically add as tags. Currently only the **sibling** method is supported. To see an example and the output from **addTags**, see :ref:`addTags example<addtagex>`.
 
       * - 1.25
         - **convertBooleansToMetrics**
-        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, BIG-IP Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: BIG-IP Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
         
         
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
@@ -596,7 +596,7 @@ Optional Properties:
  - proxy: Proxy server configuration
 
 
-.. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
+.. NOTE:: Since this consumer is designed to be generic and flexible, how authentication is performed is left up to the web service. To ensure the secrets are encrypted within BIG-IP Telemetry Streaming please note the use of JSON pointers. The secret to protect should be stored inside ``passphrase`` and referenced in the desired destination property, such as an API token in a header as shown in this example. 
 
 Additions to the Generic HTTP consumer
 ``````````````````````````````````````
@@ -607,13 +607,13 @@ The following items have been added to the Generic HTTP consumer since it was in
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
       * - 1.18
         - **privateKey**
-        - This and the following properties provide the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the Generic HTTP consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+        - This and the following properties provide the ability to add TLS client authentication to the Generic HTTP consumer using the **TLS** authentication protocol.  This protocol configures BIG-IP Telemetry Streaming to provide the required private key and certificate(s) when the Generic HTTP consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
 
       * - 
         - **clientCertificate**
@@ -650,39 +650,12 @@ Example Declaration:
 **Additional examples for Generic HTTP consumers:**
 
 - Generic HTTP with multiple passphrases, see :ref:`multiple`.
-- Generic HTTP with proxy settings in TS 1.17 and later, see :ref:`proxy`.
+- Generic HTTP with proxy settings in BIG-IP TS 1.17 and later, see :ref:`proxy`.
 - An EXPERIMENTAL feature where you can specify fallback IP address(es) for the Generic HTTP consumer, see :ref:`fallback`.
 - Generic HTTP with TLS authentication, see :ref:`httptls`.
   
 |
 
-.. _beacon-ref:
-
-F5 Beacon
----------
-|beaconlogo|
-
-F5 Beacon, a SaaS offering, provides visibility and actionable insights into the health and performance of applications. 
-
-F5 Beacon uses the generic HTTP consumer.  To see an example of Generic HTTP with proxy settings, see :ref:`proxy`.
-
-Required Information:
- - See |beacon| for information on how to add Telemetry Streaming as a source to Beacon.
- - Host: The address of the system.
- - Protocol: The protocol of the system. Options: ``https`` or ``http``. Default is ``https``.
- - Port: The port of the system. Default is ``443``.
- - Path: The path of the system. Default is ``/``.
- - Method: The method of the system. Options: ``POST``, ``PUT``, ``GET``. Default is ``POST``.
- - Headers: The headers of the system.
- - Passphrase: The secret to use when sending data to the system, for example an API key to be used in an HTTP header.
-
-Example Declaration:
-
-.. literalinclude:: ../examples/declarations/f5_beacon.json
-    :language: json
-
-
-|
 
 .. _fluentd-ref:
 
@@ -722,9 +695,9 @@ Required Information:
 For complete information on deploying Google Cloud Operations Suite, see |sddocs|.
 
 **Finding the Data**  |br|
-Once you have configured the Google Cloud Monitoring consumer and sent a Telemetry Streaming declaration, Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
+Once you have configured the Google Cloud Monitoring consumer and sent an F5 BIG-IP Telemetry Streaming declaration, F5 BIG-IP Telemetry Streaming creates custom MetricDescriptors to which it sends metrics.  These metrics can be found under a path such as **custom/system/cpu**. To make it easier to find data that is relevant to a specific device, BIG-IP TS uses the **Generic Node** resource type, and assigns machine ID to the **node_id** label to identify which device the data is from.
 
-.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
+.. IMPORTANT:: There is a quota of 500 custom MetricDescriptors for Google Cloud Monitoring. BIG-IP Telemetry Streaming creates these MetricDescriptors, and if this quota is ever reached, you must delete some of these MetricDescriptors.
 
 Additions to the Cloud Monitoring consumer
 ``````````````````````````````````````````
@@ -735,7 +708,7 @@ The following items have been added to the Google Cloud Operations Suite's Cloud
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -760,9 +733,9 @@ Using IAM roles for Google Cloud Monitoring
 ```````````````````````````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for GCP IAM roles is available in TS v1.25 and later
+   Support for GCP IAM roles is available in BIG-IP TS v1.25 and later
 
-Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Monitoring.  This means the Cloud Monitoring consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
+F5 BIG-IP Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Monitoring.  This means the Cloud Monitoring consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
 
 IAM roles are enabled by using the new **useServiceAccountToken** property set to **true** (the default is **false**).  When set to true, the **privateKey** and **privateKeyId** properties are not used. 
 
@@ -783,7 +756,7 @@ Google Cloud Logging
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for Google Cloud Logging is available in TS 1.22 and later.  
+   Support for Google Cloud Logging is available in BIG-IP TS 1.22 and later.  
 
 Required Information:
  - serviceEmail: The email for the Google Service Account. To check if you have an existing Service Account, from the GCP left menu, select **IAM & admin**, and then click **Service Accounts**. If you do not have a Service Account, you must create one.
@@ -796,7 +769,7 @@ Required Information:
 For complete information, see the |gcldocs|.
 
 **Finding the Data**  |br|
-Once you have configured the Google Cloud Logging consumer and sent a Telemetry Streaming declaration, Telemetry Streaming sends log entries directly to Google Cloud Logging. Log entries are written to a *logName* in Google Cloud Logging, where the logName is generated from the properties in the Telemetry Streaming declaration, using the following format: ``[logScope]/[logScopeId/logs/[logId] (example: “projects/yourProjectId/logs/yourLogId”)``.
+Once you have configured the Google Cloud Logging consumer and sent a BIG-IP Telemetry Streaming declaration, BIG-IP Telemetry Streaming sends log entries directly to Google Cloud Logging. Log entries are written to a *logName* in Google Cloud Logging, where the logName is generated from the properties in the BIG-IP Telemetry Streaming declaration, using the following format: ``[logScope]/[logScopeId/logs/[logId] (example: “projects/yourProjectId/logs/yourLogId”)``.
 
 Example Declaration:
 
@@ -811,9 +784,9 @@ Using IAM roles for Google Cloud Logging
 ````````````````````````````````````````
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-   Support for GCP IAM roles is available in TS v1.25 and later
+   Support for GCP IAM roles is available in BIG-IP TS v1.25 and later
 
-Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Logging.  This means the Cloud Logging consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
+F5 BIG-IP Telemetry Streaming 1.25 added support for using IAM roles for Google Cloud Logging.  This means the Cloud Logging consumer can send data without specifying credentials if IAM roles are properly configured for the BIG-IP instance in GCP.
 
 IAM roles are enabled by using the new **useServiceAccountToken** property set to **true** (the default is **false**).  When set to true, the **privateKey** and **privateKeyId** properties are not used. 
 
@@ -832,7 +805,7 @@ F5 Cloud Consumer (F5 Internal)
 -------------------------------
 The F5 Cloud Consumer is a part of F5's internal, digital experience operating system, a cloud-based analytics platform that helps organizations monitor, operate, and protect digital workflows and optimize their customer's digital experiences.  
 
-.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a Telemetry Streaming declaration.
+.. IMPORTANT:: This F5 Cloud consumer is for **F5 internal use only**, and its API is subject to change. We are including it on this page of Push consumers because you may see it in a BIG-IP Telemetry Streaming declaration.
 
 Additions to the F5 Cloud consumer
 ``````````````````````````````````
@@ -843,7 +816,7 @@ The following items have been added to the F5 Cloud consumer since it was introd
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -872,7 +845,7 @@ DataDog
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The DataDog consumer was introduced as an experimental consumer in TS 1.22. |br| The **compressionType** property was added in 1.23. |br| The **region** and **service** properties were added in TS 1.24 |br| The **metricPrefix** property was added in 1.25.
+    The DataDog consumer was introduced as an experimental consumer in BIG-IP TS 1.22. |br| The **compressionType** property was added in 1.23. |br| The **region** and **service** properties were added in BIG-IP TS 1.24 |br| The **metricPrefix** property was added in 1.25.
 
 Required Information:
  - apiKey: The DataDog API key required to submit metrics and events to DataDog
@@ -881,18 +854,21 @@ Optional Properties:
  - proxy: Proxy server configuration
 
 Additional examples for HTTP consumers:
- - DataDog with proxy settings in TS 1.31 and later, see :ref:`proxy`.
+ - DataDog with proxy settings in BIG-IPTS 1.31 and later, see :ref:`proxy`.
 
 
 Additions to the DataDog consumer
 `````````````````````````````````
 The following items have been added to the DataDog consumer since it was introduced.
 
+Beginning with BIG-IP TS version 1.32, events with metrics will be also sent to the DataDog logging endpoints. 
+The DataDog metrics endpoints will continue to receive metrics as before.
+
 .. list-table::
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
   
@@ -914,7 +890,7 @@ The following items have been added to the DataDog consumer since it was introdu
 
       * - 
         - **convertBooleansToMetrics**
-        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, BIG-IP Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: BIG-IP Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
 
       * - 
         - **customTags**
@@ -943,7 +919,7 @@ OpenTelemetry Exporter
 
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
-    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in TS 1.23, and is supported in TS 1.27 and later.
+    The OpenTelemetry Exporter consumer was introduced as an EXPERIMENTAL consumer in BIG-IP TS 1.23, and is supported in BIG-IP TS 1.27 and later.
 
 The OpenTelemetry Exporter Consumer exports telemetry data to an OpenTelemetry Collector, or OpenTelemetry Protocol compatible API.
 
@@ -959,7 +935,7 @@ Optional Properties:
    **privateKey**, **clientCertificate**, **rootCertificate** allowed for any **exporter** but only when **protocol** is **https** or **useSSL** set to ``true``.
 
 
-Note: As of Telemetry Streaming 1.23, this consumer:
+Note: As of BIG-IP Telemetry Streaming 1.23, this consumer:
  - Only exports OpenTelemetry metrics (logs and traces are not supported)
  - Exports telemetry data using protobufs over HTTP
  - Extracts metrics from Event Listener log messages. Any integer or float values in Event Listener log messages will be converted to an OpenTelemetry metric, and exported as a metric.
@@ -973,13 +949,13 @@ The following items have been added to the OpenTelemetry consumer since it was i
       :widths: 25 25 200
       :header-rows: 1
 
-      * - TS Version
+      * - BIG-IP TS Version
         - Property
         - Description
 
       * - 1.25
         - **convertBooleansToMetrics**
-        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
+        - This property allows you to choose whether or not to convert boolean values to metrics (true becomes 1, false (default0) becomes 0). |br| By default, BIG-IP Telemetry Streaming uses Boolean values as tag values that are attached to individual metrics. If **convertBooleansToMetrics** is set to **true**, any Boolean values are instead converted to numeric values, which are then sent to the consumer(s) as a metric. |br| Note: BIG-IP Telemetry Streaming does not send a Boolean as both a tag and a metric; a Boolean value is sent to the consumer(s) as either a tag or as a metric.
 
       * - 1.31
         - **exporter**
@@ -987,7 +963,7 @@ The following items have been added to the OpenTelemetry consumer since it was i
 
       * - 
         - **privateKey**
-        - This and the following properties provide the ability to add TLS client authentication using the **TLS** authentication protocol.  This protocol configures Telemetry Streaming to provide the required private key and certificate(s) when the consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+        - This and the following properties provide the ability to add TLS client authentication using the **TLS** authentication protocol.  This protocol configures BIG-IP Telemetry Streaming to provide the required private key and certificate(s) when the consumer is configured to use SSL/TLS Client authentication.  |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
 
       * - 
         - **clientCertificate**
@@ -1023,7 +999,7 @@ Azure Regions
 -------------
 The following table shows an example table when listing regions from the Azure CLI using the command ``az account list-locations -o table``.  Note to list Azure Government Regions, you must use ``az cloud set --name AzureUsGovernment`` before running the list-locations command.
 
-.. IMPORTANT:: This list is just a static example, we strongly recommend running the commands yourself to retrieve the current list. |br| The **Name** column on the right is the value to use in your Telemetry Streaming declaration
+.. IMPORTANT:: This list is just a static example, we strongly recommend running the commands yourself to retrieve the current list. |br| The **Name** column on the right is the value to use in your BIG-IP Telemetry Streaming declaration
 
 
 ``az account list-locations -o table``
@@ -1189,10 +1165,6 @@ In the following table, we list the Azure Government regions.
    :target: https://cloud.google.com/products/operations
    :alt: Google Cloud
 
-.. |beaconlogo| image:: /images/beacon-logo.png
-   :target: https://www.f5.com/products/beacon-visibility-and-analytics
-   :alt: F5 Beacon
-
 .. |datadog| image:: /images/dd_logo.png
    :target: https://www.datadoghq.com/
    :alt: DataDog
@@ -1295,9 +1267,6 @@ In the following table, we list the Azure Government regions.
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
 
-.. |beacon| raw:: html
-
-   <a href="https://clouddocs.f5.com/cloud-services/latest/f5-cloud-services-Beacon-WorkWith.html#adding-a-new-source" target="_blank">Beacon documentation</a>
 
 .. |splunkmm| raw:: html
 

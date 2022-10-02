@@ -3,14 +3,14 @@
 Event Listener class
 ====================
 
-The Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
+The BIG-IP Telemetry Streaming Event Listener collects event logs it receives on the specified port from configured BIG-IP sources, including LTM, ASM, AFM, APM, and AVR.
 
 .. NOTE:: Each **Telemetry_Event_Listener** opens 3 ports: TCP (dual stack - IPv4 and IPv6), UDPv4, and UDPv6 |br| If two or more Event Listeners use same port, all of them receive same events, but you can still use filters for each listener individually.
 
 
 To use the Event Listener, you must:
 
-1. Configure the sources of log/event data. You can do this by either POSTing a single AS3 declaration or you can use TMSH or the GUI to configure individual modules.
+1. Configure the sources of log/event data. You can do this by either POSTing a single BIG-IP AS3 declaration or you can use TMSH or the GUI to configure individual modules.
 
 2. Post a telemetry declaration with the Telemetry_Listener class, as shown in the following minimal example of an Event Listener:
 
@@ -23,12 +23,13 @@ To use the Event Listener, you must:
    }
 
 
-Tracing can also can be optionally enabled for each Telemetry Streaming Listener, using the **trace** property. By default, tracing is disabled (the **trace** property defaults to **false**), but can be enabled by setting the property to **true**, or to a string value representing a valid operating system path (for example: ``/var/telemetry/myTraceFile.json``). When tracing is enabled, the Listener will write the data it receives (after Telemetry Streaming has processed and normalized the data) to disk. Telemetry Streaming 1.20.0 and later also includes the ability to trace the raw input data (before Telemetry Streaming has processed the data). For more information and instructions, see :ref:`Trace<trace>`.
+Tracing can also can be optionally enabled for each BIG-IP Telemetry Streaming Listener, using the **trace** property. 
+By default, tracing is disabled (the **trace** property defaults to **false**), but can be enabled by setting the property to **true**, or to a string value representing a valid operating system path (for example: ``/var/telemetry/myTraceFile.json``). When tracing is enabled, the Listener will write the data it receives (after BIG-IP Telemetry Streaming has processed and normalized the data) to disk. BIG-IP Telemetry Streaming 1.20.0 and later also includes the ability to trace the raw input data (before BIG-IP Telemetry Streaming has processed the data). For more information and instructions, see :ref:`Trace<trace>`.
 
 IMPORTANT:
 
-- The following configuration examples assume that TS is running on the same BIG-IP that is being monitored, and that the listener is using default port 6514.
-- When TS is not a local listener, the corresponding configurations should be adjusted to reflect remote addresses.
+- The following configuration examples assume that BIG-IP TS is running on the same BIG-IP that is being monitored, and that the listener is using default port 6514.
+- When BIG-IP TS is not a local listener, the corresponding configurations should be adjusted to reflect remote addresses.
   
 
 .. NOTE:: See :ref:`this troubleshooting entry<trace>` for information on how to write an Event Listener's incoming raw data to a trace file to assist with troubleshooting.
@@ -41,7 +42,7 @@ Configuring Logging Sources
 ---------------------------
 General workflow to configure a logging source:
 
-- Define a local virtual address and specify the Event Listener port (this enables TS to act as a local, on-box listener)
+- Define a local virtual address and specify the Event Listener port (this enables BIG-IP TS to act as a local, on-box listener)
 - Define a pool of logging servers
 - Create an unformatted high speed logging destination that references the pool
 - Create a formatted destination
@@ -56,16 +57,16 @@ The following diagram shows the relationship of the objects that are configured:
 
 .. _as3logging-ref:
 
-Configure Logging Using AS3
-```````````````````````````
+Configure Logging Using BIG-IP AS3
+``````````````````````````````````
 
-You can use the following declaration with Application Services Extension (AS3) 3.10.0 or later for a standard BIG-IP system. For more information, see |as3docs|.
+You can use the following declaration with F5 BIG-IP Application Services Extension (BIG-IP AS3) 3.10.0 or later for a standard BIG-IP system. For more information, see |as3docs|.
 
 You can also configure logging using TMSH, see :ref:`configuretmsh`. 
 
-.. NOTE:: Some profiles are not supported in AS3 and therefore must be configured using TMSH.
+.. NOTE:: Some profiles are not supported in BIG-IP AS3 and therefore must be configured using TMSH.
 
-**IMPORTANT**: This declaration has been updated with the TS 1.18 release to include LTM response logging (highlighted in yellow).
+**IMPORTANT**: This declaration has been updated with the BIG-IP TS 1.18 release to include LTM response logging (highlighted in yellow).
 
 .. literalinclude:: ../examples/misc/application_services_3/all_log_profile.json
     :language: json
@@ -231,7 +232,7 @@ To configure an LTM request profile, use the following TMSH commands:
 
 |
 
-Example Output from Telemetry Streaming:
+Example Output from BIG-IP Telemetry Streaming:
 
 .. literalinclude:: ../examples/output/request_logs/ltm_request_log.json
     :language: json
@@ -248,7 +249,7 @@ To configure carrier-grade network address translation (CGNAT), use the followin
 
 1. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdocs|.  Make sure of the following:
 
-   - The Large Scale NAT (LSN) Pool must use the Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the AS3 example to configure TS logging).  |br| If you have an existing pool, update the pool to use the TS Log Publisher:
+   - The Large Scale NAT (LSN) Pool must use the BIG-IP Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the BIG-IP AS3 example to configure BIG-IP TS logging).  |br| If you have an existing pool, update the pool to use the BIG-IP TS Log Publisher:
 
      - TMSH:|br| ``modify ltm lsn-pool cgnat_lsn_pool log-publisher telemetry_publisher``
      - GUI:|br| **Carrier Grade NAT > LSN Pools > LSN Pools List**  |br| |br|
@@ -298,7 +299,7 @@ AFM Request Log profile
 
 |
 
-Example output from Telemetry Streaming:
+Example output from BIG-IP Telemetry Streaming:
 
 .. literalinclude:: ../examples/output/request_logs/afm_request_log.json
     :language: json
@@ -325,7 +326,7 @@ ASM Log
 
 |
 
-Example Output from Telemetry Streaming:
+Example Output from BIG-IP Telemetry Streaming:
 
 .. literalinclude:: ../examples/output/request_logs/asm_request_log.json
     :language: json
@@ -354,7 +355,7 @@ APM Log
 
 |
 
-Example Output from Telemetry Streaming:
+Example Output from BIG-IP Telemetry Streaming:
 
 .. literalinclude:: ../examples/output/request_logs/apm_request_log.json
     :language: json
@@ -407,7 +408,7 @@ Example output:
 
 Character Encoding information
 ------------------------------
-F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding, or invalid UTF-8 strings. Telemetry Streaming does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding. 
+F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding, or invalid UTF-8 strings. BIG-IP TS does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding. 
 
 .. NOTE:: Varying character encodings and illegal characters in the byte streams are very common in BIG-IP ASM logs.
 
