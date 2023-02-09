@@ -133,5 +133,35 @@ module.exports = {
                 expected: 'https://public-cloud-workspace-id.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
             }
         ]
+    },
+    getApiUrlCustomOpts: {
+        name: '.getApiUrl - URLs set in customOpts should override the default',
+        tests: [
+            {
+                name: 'should return customOpts value for managementUrl',
+                metadata: {},
+                config: {
+                    customOpts: [{
+                        name: 'managementUrl',
+                        value: 'https://management.azure.de'
+                    }]
+                },
+                apiType: 'management',
+                expected: 'https://management.azure.de'
+            },
+            {
+                name: 'should return customOpts value for opinsightsUrl, even if workspace ID is set to something else',
+                config: {
+                    workspaceId: 'not-used',
+                    customOpts: [{
+                        name: 'opinsightsUrl',
+                        value: 'https://german-cloud-workspace-id.ods.opinsights.azure.de/api/logs?api-version=2016-04-01'
+                    }]
+                },
+                metadata: {},
+                apiType: 'opinsights',
+                expected: 'https://german-cloud-workspace-id.ods.opinsights.azure.de/api/logs?api-version=2016-04-01'
+            }
+        ]
     }
 };

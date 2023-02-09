@@ -955,6 +955,7 @@
                                 "workspaceId": { "$ref": "#/definitions/workspaceId" },
                                 "format": { "$ref": "#/definitions/format", "enum": [ "default", "propertyBased" ], "default": "default" },
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
+                                "customOpts": { "$ref": "#/definitions/customOpts" },
                                 "useManagedIdentity": { "$ref": "#/definitions/useManagedIdentity", "default": false },
                                 "region": { "$ref": "#/definitions/region" }
                             },
