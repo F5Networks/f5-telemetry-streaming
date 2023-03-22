@@ -11,15 +11,13 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const logger = require('../../src/lib/logger');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const logger = sourceCode('src/lib/logger');
 
 moduleCache.remember();
 
@@ -39,8 +37,8 @@ describe('Logger', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            logger
+        coreStub = stubs.default.coreStub({
+            logger: true
         }, {
             logger: {
                 setToDebug: false,
@@ -202,8 +200,8 @@ describe('Logger', () => {
         const expected = 'this contains secrets: {'
             + `"someSecretData":{"cipherText":"${mask}"},`
             + `"someSecretData_2":{"passphrase":"${mask}"},`
-            + `"someSecretData_3":{"nestedData":{"passphrase":{"cipherText":"${mask}"}}},`
-            + `"someSecretData_4":{"nestedData":{"passphrase":"${mask}"}},`
+            + `"someSecretData_3":{"nestedData":{"passphrase":{"cipherText":"${mask}"}}},` // #gitleaks:allow
+            + `"someSecretData_4":{"nestedData":{"passphrase":"${mask}"}},` // #gitleaks:allow
             + '"jsonData":"{\\n \\"someSecretData\\": {\\n  \\"cipherText\\": \\"*********\\"\\n },\\n \\"someSecretData_2\\": {\\n  \\"passphrase\\": \\"*********\\"\\n }\\n}"'
             + '}';
         logger.info(`this contains secrets: ${JSON.stringify(decl)}`);
@@ -246,8 +244,8 @@ describe('Logger', () => {
         const expected = '{'
             + `"someSecretData":{"cipherText":"${mask}"},`
             + `"someSecretData_2":{"passphrase":"${mask}"},`
-            + `"someSecretData_3":{"nestedData":{"passphrase":"${mask}"}},`
-            + `"someSecretData_4":{"nestedData":{"passphrase":"${mask}"}},`
+            + `"someSecretData_3":{"nestedData":{"passphrase":"${mask}"}},` // #gitleaks:allow
+            + `"someSecretData_4":{"nestedData":{"passphrase":"${mask}"}},` // #gitleaks:allow
             + '"jsonData":"{\\n \\"someSecretData\\": {\\n  \\"cipherText\\": \\"*********\\"\\n },\\n \\"someSecretData_2\\": {\\n  \\"passphrase\\": \\"*********\\"\\n }\\n}"'
             + '}';
         logger.info(decl);

@@ -12,15 +12,13 @@
 const moduleCache = require('../shared/restoreCache')();
 
 const AWS = require('aws-sdk');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const awsS3Index = require('../../../src/lib/consumers/AWS_S3/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const awsS3Index = sourceCode('src/lib/consumers/AWS_S3/index');
 
 moduleCache.remember();
 

@@ -12,16 +12,14 @@
 const moduleCache = require('../shared/restoreCache')();
 
 const AWS = require('aws-sdk');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const awsCloudWatchIndex = require('../../../src/lib/consumers/AWS_CloudWatch/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const awsCloudWatchIndex = sourceCode('src/lib/consumers/AWS_CloudWatch/index');
+const awsUtil = sourceCode('src/lib/consumers/shared/awsUtil');
 
 moduleCache.remember();
 
@@ -430,7 +428,7 @@ describe('AWS_CloudWatch', () => {
                 context.event.data = {
                     system: {
                         hostname: 'host.bigip.test',
-                        version: '14.0.0.0.1',
+                        version: '14.0.0',
                         cpu: 20
                     },
                     pools: {
@@ -451,7 +449,7 @@ describe('AWS_CloudWatch', () => {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.bigip.test' },
-                            { Name: 'version', Value: '14.0.0.0.1' }
+                            { Name: 'version', Value: '14.0.0' }
                         ],
                         MetricName: 'F5_system_cpu',
                         Timestamp: '2020-08-04T22:23:33.692Z',
@@ -460,7 +458,7 @@ describe('AWS_CloudWatch', () => {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.bigip.test' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/testpool' }
                         ],
                         MetricName: 'F5_pools_serverside.curConns',
@@ -470,7 +468,7 @@ describe('AWS_CloudWatch', () => {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.bigip.test' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/devpool' }
                         ],
                         MetricName: 'F5_pools_serverside.curConns',

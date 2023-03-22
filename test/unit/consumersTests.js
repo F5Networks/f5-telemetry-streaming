@@ -11,21 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/utils/config');
-const consumers = require('../../src/lib/consumers');
-const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
-const utilMisc = require('../../src/lib/utils/misc');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const configUtil = sourceCode('src/lib/utils/config');
+const consumers = sourceCode('src/lib/consumers');
+const moduleLoader = sourceCode('src/lib/utils/moduleLoader').ModuleLoader;
 
 moduleCache.remember();
 
@@ -35,12 +30,7 @@ describe('Consumers', () => {
     });
 
     beforeEach(() => {
-        const coreStub = stubs.coreStub({
-            configWorker,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        const coreStub = stubs.default.coreStub();
         coreStub.utilMisc.generateUuid.numbersOnly = false;
         return configWorker.processDeclaration({ class: 'Telemetry' });
     });

@@ -581,7 +581,7 @@ module.exports = {
                                 monitor: 'default'
                             }
                         },
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         limitMaxBps: 0,
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnections: 0,
@@ -649,7 +649,7 @@ module.exports = {
                                 monitor: 'default'
                             }
                         },
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         limitMaxBps: 0,
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnections: 0,
@@ -1054,7 +1054,7 @@ module.exports = {
                         };
                         if (recType === 'a' || recType === 'aaaa') {
                             Object.assign(ret.items[0], {
-                                fallbackIp: '8.8.8.8',
+                                fallbackIp: '192.168.0.1',
                                 fallbackMode: 'return-to-dns',
                                 limitMaxBps: 0,
                                 limitMaxBpsStatus: 'disabled',
@@ -1297,7 +1297,7 @@ module.exports = {
                         ttl: 30,
                         verifyMemberAvailability: 'enabled',
                         members: {},
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         limitMaxBps: 0,
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnections: 0,
@@ -1341,7 +1341,7 @@ module.exports = {
                         ttl: 30,
                         verifyMemberAvailability: 'enabled',
                         members: {},
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         limitMaxBps: 0,
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnections: 0,
@@ -1566,7 +1566,7 @@ module.exports = {
                         };
                         if (recType === 'a' || recType === 'aaaa') {
                             Object.assign(ret.items[0], {
-                                fallbackIp: '8.8.8.8',
+                                fallbackIp: '192.168.0.1',
                                 fallbackMode: 'return-to-dns',
                                 limitMaxBps: 0,
                                 limitMaxBpsStatus: 'disabled',

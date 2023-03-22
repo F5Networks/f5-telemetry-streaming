@@ -14,10 +14,12 @@ const pathUtil = require('path');
 const sinon = require('sinon');
 
 const assignDefaults = require('./util').assignDefaults;
-const constants = require('../../../src/lib/constants');
 const deepCopy = require('./util').deepCopy;
-const promisifyNodeFsModule = require('../../../src/lib/utils/misc').promisifyNodeFsModule;
 const tsLogsForwarder = require('../../winstonLogger').tsLogger;
+const sourceCode = require('./sourceCode');
+
+const constants = sourceCode('src/lib/constants');
+const promisifyNodeFsModule = sourceCode('src/lib/utils/misc').promisifyNodeFsModule;
 
 let SINON_FAKE_CLOCK = null;
 
@@ -619,6 +621,54 @@ const _module = module.exports = {
         ctx.getRuntimeInfo.callsFake(() => ({ nodeVersion: ctx.getRuntimeInfo.nodeVersion }));
         ctx.networkCheck.resolves();
         return ctx;
+    }
+};
+
+/**
+ * Default stubs - modules from 'src' dir only
+ */
+_module.default = {
+    /**
+     * Load default modules for 'core' stub
+     *
+     * @param {Object.<string, boolean>} [modules] - modules to load
+     * @param {object} [options] - options for stubs
+     *
+     * @returns {CoreStubCtx}
+     */
+    coreStub(modules, options) {
+        modules = Object.assign({}, modules);
+        const srcMap = {
+            configWorker: 'src/lib/config',
+            deviceUtil: 'src/lib/utils/device',
+            logger: 'src/lib/logger',
+            persistentStorage: 'src/lib/persistentStorage',
+            teemReporter: 'src/lib/teemReporter',
+            tracer: 'src/lib/utils/tracer',
+            utilMisc: 'src/lib/utils/misc'
+        };
+        const keys = Object.keys(modules);
+        let toLoad = srcMap;
+
+        if (keys.length > 0) {
+            toLoad = {};
+            if (keys.every((k) => modules[k] === false)) {
+                Object.keys(srcMap)
+                    .forEach((k) => {
+                        modules[k] = modules[k] !== false;
+                    });
+            }
+            toLoad = {};
+            Object.keys(modules).forEach((key) => {
+                if (modules[key] === true && typeof srcMap[key] !== 'undefined') {
+                    toLoad[key] = srcMap[key];
+                }
+            });
+        }
+        Object.keys(toLoad).forEach((key) => {
+            toLoad[key] = sourceCode(toLoad[key]);
+        });
+        return _module.coreStub(toLoad, options);
     }
 };
 

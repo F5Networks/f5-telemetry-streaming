@@ -11,18 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
 
-const cloudLoggingIndex = require('../../../src/lib/consumers/Google_Cloud_Logging/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const cloudLoggingIndex = sourceCode('src/lib/consumers/Google_Cloud_Logging/index');
 
 moduleCache.remember();
 

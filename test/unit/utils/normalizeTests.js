@@ -11,14 +11,11 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-
-const normalizeUtil = require('../../../src/lib/utils/normalize');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const util = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const normalizeUtil = sourceCode('src/lib/utils/normalize');
 
 moduleCache.remember();
 
@@ -138,7 +135,7 @@ describe('Normalize Util', () => {
     });
 
     describe('restructureHostCpuInfo', () => {
-        const cpuInfoPattern = '^sys/host-info/\\d+::^sys/hostInfo/\\d+/cpuInfo';
+        const cpuInfoPattern = '^(sys/host-info/\\d+)::^(sys/hostInfo/\\d+/cpuInfo)';
 
         it('should get cpuInfo properties via regex', () => {
             const data = {
@@ -379,11 +376,11 @@ describe('Normalize Util', () => {
         });
 
         it('should format as json when mapKey is an array (compound key)', () => {
-            const data = 'pool_name,addr,port\nthePool,1.2.3.4,8080';
+            const data = 'pool_name,addr,port\nthePool,192.168.0.1,8080';
             const expectedResult = {
-                'thePool_1.2.3.4_8080': {
+                'thePool_192.168.0.1_8080': {
                     pool_name: 'thePool',
-                    addr: '1.2.3.4',
+                    addr: '192.168.0.1',
                     port: '8080'
                 }
             };
@@ -694,7 +691,7 @@ describe('Normalize Util', () => {
                         entries: {
                             'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats': {
                                 nestedStats: {
-                                    selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats?ver=13.1.1.4',
+                                    selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats?ver=13.1.1',
                                     entries: {
                                         alternate: { value: 20 },
                                         'status.availabilityState': { description: 'offline' }
@@ -706,7 +703,7 @@ describe('Normalize Util', () => {
                             {
                                 fullPath: '/Common/server:vs1',
                                 name: 'server1:vs1',
-                                selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/~Common~server1:vs1?ver=13.1.1.4',
+                                selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/~Common~server1:vs1?ver=13.1.1',
                                 memberOrder: 100,
                                 monitor: 'default'
                             }
@@ -717,13 +714,13 @@ describe('Normalize Util', () => {
             const expected = {
                 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats': {
                     nestedStats: {
-                        selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats?ver=13.1.1.4',
+                        selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/vs1:~Common~server1/stats?ver=13.1.1',
                         entries: {
                             alternate: { value: 20 },
                             'status.availabilityState': { description: 'offline' },
                             fullPath: '/Common/server:vs1',
                             name: 'server1:vs1',
-                            selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/~Common~server1:vs1?ver=13.1.1.4',
+                            selfLink: 'https://localhost/mgmt/tm/gtm/pool/a/~Common~ts_a_pool/members/~Common~server1:vs1?ver=13.1.1',
                             memberOrder: 100,
                             monitor: 'default'
                         }
@@ -770,7 +767,7 @@ describe('Normalize Util', () => {
                     name: 'test_pool_0',
                     membersReference: {
                         kind: 'tm:ltm:pool:members:memberscollectionstate',
-                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                         entries: {
                             'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
                                 nestedStats: {
@@ -786,10 +783,10 @@ describe('Normalize Util', () => {
                                     entries: {}
                                 }
                             },
-                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats': {
                                 nestedStats: {
                                     kind: 'tm:ltm:pool:members:membersstats',
-                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats?ver=14.1.0',
                                     entries: {}
                                 }
                             },
@@ -803,26 +800,26 @@ describe('Normalize Util', () => {
                         },
                         items: [
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'disabled'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'disabled'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'enabled',
                                     tmName: 'www.thebestwebsite.com'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'enabled',
                                     tmName: 'www.thebestwebsite.com'
@@ -838,7 +835,7 @@ describe('Normalize Util', () => {
                 name: 'test_pool_0',
                 membersReference: {
                     kind: 'tm:ltm:pool:members:memberscollectionstate',
-                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                     entries: {
                         'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
                             nestedStats: {
@@ -854,10 +851,10 @@ describe('Normalize Util', () => {
                                 entries: {}
                             }
                         },
-                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                        'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats': {
                             nestedStats: {
                                 kind: 'tm:ltm:pool:members:membersstats',
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats?ver=14.1.0',
                                 entries: {
                                     fqdn: 'www.thebestwebsite.com'
                                 }
@@ -875,26 +872,26 @@ describe('Normalize Util', () => {
                     },
                     items: [
                         {
-                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4',
                             fqdn: {
                                 autopopulate: 'disabled'
                             }
                         },
                         {
-                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4',
                             fqdn: {
                                 autopopulate: 'disabled'
                             }
                         },
                         {
-                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80?ver=14.1.4',
                             fqdn: {
                                 autopopulate: 'enabled',
                                 tmName: 'www.thebestwebsite.com'
                             }
                         },
                         {
-                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4',
                             fqdn: {
                                 autopopulate: 'enabled',
                                 tmName: 'www.thebestwebsite.com'
@@ -914,7 +911,7 @@ describe('Normalize Util', () => {
                     name: 'test_pool_0',
                     membersReference: {
                         kind: 'tm:ltm:pool:members:memberscollectionstate',
-                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                         entries: {
                             'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
                                 nestedStats: {
@@ -933,10 +930,10 @@ describe('Normalize Util', () => {
                         },
                         items: [
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2'
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4'
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2'
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4'
                             }
                         ]
                     }
@@ -953,7 +950,7 @@ describe('Normalize Util', () => {
                     name: 'test_pool_0',
                     membersReference: {
                         kind: 'tm:ltm:pool:members:memberscollectionstate',
-                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                         items: []
                     }
                 }
@@ -964,7 +961,7 @@ describe('Normalize Util', () => {
                 name: 'test_pool_0',
                 membersReference: {
                     kind: 'tm:ltm:pool:members:memberscollectionstate',
-                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2'
+                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4'
                 }
             };
             assert.deepStrictEqual(normalizeUtil.addFqdnToLtmPool(args), expected, 'should add fqdn property when pool member is fqdn node');
@@ -978,7 +975,7 @@ describe('Normalize Util', () => {
                     name: 'test_pool_0',
                     membersReference: {
                         kind: 'tm:ltm:pool:members:memberscollectionstate',
-                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                         entries: {
                             'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80/stats': {
                                 nestedStats: {

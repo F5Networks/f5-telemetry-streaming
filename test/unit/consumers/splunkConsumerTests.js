@@ -11,20 +11,18 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const request = require('request');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
-const constants = require('../../../src/lib/constants');
-const splunkIndex = require('../../../src/lib/consumers/Splunk/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const splunkData = require('./data/splunkConsumerTestsData');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const splunkIndex = sourceCode('src/lib/consumers/Splunk/index');
 
 moduleCache.remember();
 
@@ -431,13 +429,13 @@ describe('Splunk', () => {
                     tmstats: {
                         monitorInstanceStat: [
                             {
-                                ip_address: '::FFFF:192.0.0.1'
+                                ip_address: '::FFFF:192.168.0.1'
                             },
                             {
-                                'ip.address': '::ffff:192.0.0.2'
+                                'ip.address': '::ffff:192.168.0.2'
                             },
                             {
-                                'ip.address': '192.0.0.3'
+                                'ip.address': '192.168.0.3'
                             }
                         ]
                     },
@@ -448,9 +446,9 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(output.indexOf('"192.0.0.1"'), -1, 'output should remove ::FFFF from ::FFFF:192.0.0.1');
-                        assert.notStrictEqual(output.indexOf('"192.0.0.2"'), -1, 'output should remove ::FFFF from ::ffff:192.0.0.2');
-                        assert.notStrictEqual(output.indexOf('"192.0.0.3"'), -1, 'output should include 192.0.0.3');
+                        assert.notStrictEqual(output.indexOf('"192.168.0.1"'), -1, 'output should remove IPv6 prefiz');
+                        assert.notStrictEqual(output.indexOf('"192.168.0.2"'), -1, 'output should remove IPv6 prefiz');
+                        assert.notStrictEqual(output.indexOf('"192.168.0.3"'), -1, 'output should include 192.168.0.3');
                     });
             });
 
@@ -530,13 +528,13 @@ describe('Splunk', () => {
                     tmstats: {
                         virtualServerStat: [
                             {
-                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:00:00:01:00:00:00:00'
+                                source: '00:00:00:00:00:00:00:00:00:00:FF:FF:C0:A8:00:01:00:00:00:00'
                             },
                             {
                                 addr: '10:00:00:00:00:00:00:00:00:00:FF:F8:C0:00:00:01:00:00:00:00'
                             },
                             {
-                                destination: '192.0.0.3'
+                                destination: '192.168.0.3'
                             }
                         ]
                     },
@@ -547,9 +545,9 @@ describe('Splunk', () => {
                 return splunkIndex(context)
                     .then(() => {
                         const output = splunkRequestData[0].request;
-                        assert.notStrictEqual(output.indexOf('"source":"192.0.0.1"'), -1, 'output should include 192.0.0.1');
+                        assert.notStrictEqual(output.indexOf('"source":"192.168.0.1"'), -1, 'output should include 192.168.0.1');
                         assert.notStrictEqual(output.indexOf('"addr":"1000:0000:0000:0000:0000:FFF8:C000:0001"'), -1, 'output should include 1000:0000:0000:0000:0000:FFF8:C000:0001');
-                        assert.notStrictEqual(output.indexOf('"destination":"192.0.0.3"'), -1, 'output should include 192.0.0.3');
+                        assert.notStrictEqual(output.indexOf('"destination":"192.168.0.3"'), -1, 'output should include 192.168.0.3');
                     });
             });
 

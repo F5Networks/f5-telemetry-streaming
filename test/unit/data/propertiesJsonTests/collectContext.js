@@ -75,7 +75,7 @@ module.exports = {
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
                         baseMac: '00:01:2:a:B:d0',
                         hostname: 'bigip1',
-                        version: '12.1.5.1',
+                        version: '12.1.5',
                         machineId: '00000000-0000-0000-0000-000000000000'
                     }
                 },
@@ -86,7 +86,7 @@ module.exports = {
                         name: 'systemauth.disablebash',
                         fullPath: 'systemauth.disablebash',
                         generation: 1,
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2',
                         defaultValue: 'false',
                         scfConfig: 'true',
                         value: 'false',
@@ -98,7 +98,7 @@ module.exports = {
                 HOSTNAME: 'bigip1',
                 BASE_MAC_ADDR: '00:01:02:0A:0B:D0',
                 bashDisabled: false,
-                deviceVersion: '12.1.5.1',
+                deviceVersion: '12.1.5',
                 provisioning: {
                     afm: {
                         name: 'afm',
@@ -146,7 +146,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
                     response: {
                         kind: 'tm:sys:db:dbstate',
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2'
                     }
                 }
             ],
@@ -188,7 +188,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
                     response: {
                         kind: 'tm:sys:db:dbstate',
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2'
                     }
                 }
             ],

@@ -11,19 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const lodash = require('lodash');
 
-const prometheusConsumer = require('../../../src/lib/pullConsumers/Prometheus');
+const assert = require('../shared/assert');
+const EXPECTED_DATA = require('./data/prometheusPullConsumerTestsData').expectedData;
+const sourceCode = require('../shared/sourceCode');
+const SYSTEM_POLLER_DATA = require('./data/system_poller_datasets.json');
 const testUtil = require('../shared/util');
 
-const EXPECTED_DATA = require('./data/prometheusPullConsumerTestsData').expectedData;
-const SYSTEM_POLLER_DATA = require('./data/system_poller_datasets.json');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const prometheusConsumer = sourceCode('src/lib/pullConsumers/Prometheus');
 
 moduleCache.remember();
 

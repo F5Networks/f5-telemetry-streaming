@@ -11,20 +11,18 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const appInsights = require('applicationinsights');
 // eslint-disable-next-line import/no-dynamic-require
 const appInsightsLogging = require(require.resolve('applicationinsights/out/Library/Logging'));
 
-const requestsUtil = require('../../../src/lib/utils/requests');
-const azureAppInsightsIndex = require('../../../src/lib/consumers/Azure_Application_Insights/index');
-const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const azureAppInsightsIndex = sourceCode('src/lib/consumers/Azure_Application_Insights/index');
+const azureUtil = sourceCode('src/lib/consumers/shared/azureUtil');
+const requestsUtil = sourceCode('src/lib/utils/requests');
 
 moduleCache.remember();
 

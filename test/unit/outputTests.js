@@ -12,12 +12,9 @@
 const moduleCache = require('./shared/restoreCache')();
 
 const Ajv = require('ajv');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const assert = require('./shared/assert');
 
 moduleCache.remember();
 
@@ -37,8 +34,8 @@ describe('Example Output', () => {
     }
 
     // baseDir contains 1+ folders, each of which contain a schema.json and output.json file
-    const baseDir = `${__dirname}/../../examples/output`;
-    const schemaDir = `${__dirname}/../../shared/output_schemas`;
+    const baseDir = 'examples/output';
+    const schemaDir = 'shared/output_schemas';
     const disabledFolders = ['request_logs', 'avr', 'consumers'];
 
     fs.readdirSync(baseDir).forEach((dir) => {

@@ -16,7 +16,7 @@ const winston = require('winston');
 
 const LOG_FILE = `${__dirname}/artifacts/testoutput.log`;
 const LOG_DST = ['console', 'file'].find((item) => item === (process.env.LOG_DST || 'file').trim());
-const LOG_SECRETS_ENABLED = !!['1', 'true'].find((item) => item === process.env.LOG_SECRETS);
+const LOG_SENSETIVE_INFO = !!['1', 'true'].find((item) => item === process.env.LOG_SECRETS);
 
 const SECRETS_MASK = '*********';
 const KEYWORDS_TO_MASK = [
@@ -77,7 +77,7 @@ winston.setLevels(winston.config.syslog.levels);
  * @returns {String} Masked message
  */
 function maskSecrets(msg) {
-    if (LOG_SECRETS_ENABLED) {
+    if (LOG_SENSETIVE_INFO) {
         return msg;
     }
     let ret = msg;
@@ -157,7 +157,7 @@ hookStream(process.stderr, (string) => {
 
 console.info(`Writing logs to ${LOG_FILE}`);
 console.info('Hooks to STDOUT and STDERR were applied');
-console.info(`Secrets logging - ${LOG_SECRETS_ENABLED ? 'ENABLED' : 'DISABLED'}`);
+console.info(`Secrets logging - ${LOG_SENSETIVE_INFO ? 'ENABLED' : 'DISABLED'}`);
 
 if (LOG_DST === 'file') {
     console.info(`TS logs will be written to ${LOG_FILE}`);

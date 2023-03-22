@@ -1188,7 +1188,7 @@ module.exports = {
                                     path: 'endpoint1'
                                 },
                                 snmpEndpoint: {
-                                    path: '1.2.3.4',
+                                    path: '1.2.3',
                                     protocol: 'snmp'
                                 }
                             }
@@ -1459,7 +1459,7 @@ module.exports = {
                                 protocol: 'http'
                             },
                             snmpEndpoint: {
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp',

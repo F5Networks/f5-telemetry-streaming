@@ -3,7 +3,11 @@ F5 BIG-IP Telemetry Streaming
 
 Welcome to the F5 BIG-IP Telemetry Streaming User Guide. To provide feedback on this documentation, you can file a GitHub Issue, or email us at solutionsfeedback@f5.com. |br|
 
-.. IMPORTANT:: This the documentation for the **latest** version of Telemetry Streaming, if you want to see the documentation for a long term support (LTS) version, use the version selector on the top left (for details, see |supportmd|). 
+
+.. IMPORTANT:: F5 BIG-IP Telemetry Streaming is entering a phase of ongoing maintenance and support. A product in maintenance mode continues to receive support and ensures its stability with regular critical fixes and security updates. This maintenance approach helps maintain the longevity and reliability of the product for the long term. Enhancement requests for this product will be evaluated on an individual basis, taking into consideration their overall impact and alignment with our business objectives. Only those with a strong case for improvement will be considered for implementation. **There is no plan to deprecate this product.**
+
+
+**PLEASE NOTE:** This the documentation for the **latest** version of Telemetry Streaming, if you want to see the documentation for a long term support (LTS) version, use the version selector on the top left (for details, see |supportmd|). 
 
 Introduction
 ------------

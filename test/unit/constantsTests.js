@@ -11,15 +11,12 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 
-const constants = require('../../src/lib/constants');
-const packageInfo = require('../../package.json');
-const schemaInfo = require('../../src/schema/latest/base_schema.json').properties.schemaVersion.enum;
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const packageInfo = sourceCode('package.json');
+const schemaInfo = sourceCode('src/schema/latest/base_schema.json').properties.schemaVersion.enum;
 
 moduleCache.remember();
 

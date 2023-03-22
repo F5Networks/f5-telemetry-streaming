@@ -11,14 +11,13 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const net = require('net');
 const sinon = require('sinon');
-const util = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
+
+const util = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 
@@ -295,7 +294,7 @@ describe('Misc Util', () => {
         it('should parse JSON string with duplicate keys in iControlRest output (endpoint = mgmt/tm/sys/performance/throughput)', () => {
             const input = `{
                 "kind": "tm:sys:performance:throughput:throughputstats",
-                "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4.2",
+                "selfLink": "https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4",
                 "entries": {
                     "https://localhost/mgmt/tm/sys/performance/throughput/In": {
                         "nestedStats": {
@@ -361,7 +360,7 @@ describe('Misc Util', () => {
             }`;
             assert.deepStrictEqual(util.parseJsonWithDuplicateKeys(input), {
                 kind: 'tm:sys:performance:throughput:throughputstats',
-                selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4.2',
+                selfLink: 'https://localhost/mgmt/tm/sys/performance/throughput?ver=14.1.4',
                 entries: {
                     'https://localhost/mgmt/tm/sys/performance/throughput/In': [
                         {
@@ -1305,7 +1304,9 @@ describe('Misc Util', () => {
         };
 
         it('should do nothing when data is not array/object', () => {
-            const maskFn = util.createJSONObjectSecretsMaskFunc(['prop']);
+            const maskFn = util.createJSONObjectSecretsMaskFunc([
+                'prop'
+            ]);
             assert.deepStrictEqual(maskFn({ prop: 'value' }), { prop: mask }, 'should mask data');
             assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
 
@@ -1326,23 +1327,26 @@ describe('Misc Util', () => {
         });
 
         it('should accept all 3 params', () => {
-            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], {
-                mask: 'mask',
-                maxDepth: 2
-            });
+            const maskFn = util.createJSONObjectSecretsMaskFunc(
+                ['dataToMask'],
+                {
+                    mask: 'mask',
+                    maxDepth: 2
+                }
+            );
             const ret = maskFn({
-                secretData: 'someValue',
+                dataToMask: 'someValue',
                 nestedData: {
                     nestedData: {
-                        secretData: 'someValue'
+                        dataToMask: 'someValue'
                     }
                 }
             });
             assert.deepStrictEqual(ret, {
-                secretData: 'mask',
+                dataToMask: 'mask',
                 nestedData: {
                     nestedData: {
-                        secretData: 'someValue'
+                        dataToMask: 'someValue'
                     }
                 }
             }, 'should replace data with custom mask');
@@ -1350,9 +1354,12 @@ describe('Misc Util', () => {
         });
 
         it('should mask secrets using custom mask', () => {
-            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], { mask: 'mask' });
-            const ret = maskFn({ secretData: 'someValue' });
-            assert.deepStrictEqual(ret, { secretData: 'mask' }, 'should replace data with custom mask');
+            const maskFn = util.createJSONObjectSecretsMaskFunc(
+                ['dataToMask'],
+                { mask: 'mask' }
+            );
+            const ret = maskFn({ dataToMask: 'someValue' });
+            assert.deepStrictEqual(ret, { dataToMask: 'mask' }, 'should replace data with custom mask');
             assert.deepStrictEqual(maskFn.matchesFound, 1, 'should replace 1 match');
         });
 
@@ -1480,16 +1487,19 @@ describe('Misc Util', () => {
         });
 
         it('should override origin options', () => {
-            const maskFn = util.createJSONObjectSecretsMaskFunc(['secretData'], {
-                mask: 'mask',
-                maxDepth: 1,
-                breakCircularRef: false
-            });
+            const maskFn = util.createJSONObjectSecretsMaskFunc(
+                ['dataToMask'],
+                {
+                    mask: 'mask',
+                    maxDepth: 1,
+                    breakCircularRef: false
+                }
+            );
             const root = {
                 level1: {
                     level2: {
                         level3: {
-                            secretData: 'test'
+                            dataToMask: 'test'
                         }
                     }
                 }
@@ -1506,7 +1516,7 @@ describe('Misc Util', () => {
                     ref: 'circular-ref',
                     level2: {
                         level3: {
-                            secretData: 'myMask'
+                            dataToMask: 'myMask'
                         }
                     }
                 }

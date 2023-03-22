@@ -18,7 +18,7 @@ module.exports = {
                     metricTags: {
                         hostname: 'telemetry.bigip.com',
                         machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
                         description: 'Telemetry_BIG-IP',
@@ -47,7 +47,7 @@ module.exports = {
                     metricTags: {
                         hostname: 'telemetry.bigip.com',
                         machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
                         description: 'Telemetry_BIG-IP',
@@ -76,7 +76,7 @@ module.exports = {
                     metricTags: {
                         hostname: 'telemetry.bigip.com',
                         machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
                         description: 'Telemetry_BIG-IP',
@@ -105,7 +105,7 @@ module.exports = {
                     metricTags: {
                         hostname: 'telemetry.bigip.com',
                         machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
                         description: 'Telemetry_BIG-IP',
@@ -134,7 +134,7 @@ module.exports = {
                     metricTags: {
                         hostname: 'telemetry.bigip.com',
                         machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2',
                         location: 'Seattle',
                         description: 'Telemetry_BIG-IP',
@@ -841,7 +841,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -859,7 +859,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -877,7 +877,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -895,7 +895,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-evictedConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -913,7 +913,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -931,7 +931,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -949,7 +949,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -967,7 +967,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -985,7 +985,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain.clientside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.11443',
+                        destination: '192.168.2.11443',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'The_children_pool_members_either_dont_have_service_checking_enabled_or_service_check_results_are_not_available_yet',
@@ -1003,7 +1003,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1018,7 +1018,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1033,7 +1033,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1048,7 +1048,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-evictedConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1063,7 +1063,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1078,7 +1078,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1093,7 +1093,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1108,7 +1108,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-slowKilled',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1123,7 +1123,7 @@ module.exports = {
                     metricName: 'f5telemetry.telemetry-bigip-com.virtualServers.-Example_Tenant-A1-serviceMain-Redirect.clientside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        destination: '192.0.2.1180',
+                        destination: '192.168.2.1180',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         isAvailable: 'true',
@@ -1784,10 +1784,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-bitsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1797,10 +1797,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-bitsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1810,10 +1810,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-curConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1823,10 +1823,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-maxConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1836,10 +1836,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-pktsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1849,10 +1849,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-pktsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1862,10 +1862,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-12-80.serverside-totConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-12-80.serverside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1875,10 +1875,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-bitsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-bitsIn',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1888,10 +1888,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-bitsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-bitsOut',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1901,10 +1901,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-curConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-curConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1914,10 +1914,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-maxConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-maxConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1927,10 +1927,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-pktsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-pktsIn',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1940,10 +1940,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-pktsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-pktsOut',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1953,10 +1953,10 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-0-2-13-80.serverside-totConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-192-168-2-13-80.serverside-totConns',
                     metricValue: 0,
                     metricTags: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         monitorStatus: 'up',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
@@ -1966,9 +1966,9 @@ module.exports = {
                     }
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-bitsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-bitsIn',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -1980,9 +1980,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-bitsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-bitsOut',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -1994,9 +1994,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-curConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-curConns',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -2008,9 +2008,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-maxConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-maxConns',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -2022,9 +2022,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-pktsIn',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-pktsIn',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -2036,9 +2036,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-pktsOut',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-pktsOut',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -2050,9 +2050,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.serverside-totConns',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.serverside-totConns',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -2064,9 +2064,9 @@ module.exports = {
                     metricValue: 0
                 },
                 {
-                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-0-2-14-80.totRequests',
+                    metricName: 'f5telemetry.telemetry-bigip-com.pools.-Example_Tenant-A1-web_pool.members.-Example_Tenant-_auto_192-168-2-14-80.totRequests',
                     metricTags: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         availabilityState: 'unknown',
                         enabledState: 'enabled',
                         fqdn: 'bestwebsite.com',
@@ -6185,7 +6185,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6209,7 +6209,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6233,7 +6233,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6257,7 +6257,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6281,7 +6281,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6305,7 +6305,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6329,7 +6329,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6353,7 +6353,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6377,7 +6377,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6401,7 +6401,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6577,7 +6577,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6601,7 +6601,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6625,7 +6625,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6649,7 +6649,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6673,7 +6673,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6697,7 +6697,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6721,7 +6721,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6745,7 +6745,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6769,7 +6769,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',
@@ -6793,7 +6793,7 @@ module.exports = {
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'status.statusReason': 'No_enabled_pool_members_available',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxConnectionsStatus: 'disabled',
                         name: '-Common-ts_a_pool',

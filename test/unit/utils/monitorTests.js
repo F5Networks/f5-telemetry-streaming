@@ -11,22 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const APP_THRESHOLDS = require('../../../src/lib/constants').APP_THRESHOLDS;
-const config = require('../../../src/lib/config');
-const deviceUtil = require('../../../src/lib/utils/device');
-const logger = require('../../../src/lib/logger');
-const monitor = require('../../../src/lib/utils/monitor');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
-const timers = require('../../../src/lib/utils/timers');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const APP_THRESHOLDS = sourceCode('src/lib/constants').APP_THRESHOLDS;
+const config = sourceCode('src/lib/config');
+const deviceUtil = sourceCode('src/lib/utils/device');
+const logger = sourceCode('src/lib/logger');
+const monitor = sourceCode('src/lib/utils/monitor');
+const timers = sourceCode('src/lib/utils/timers');
 
 moduleCache.remember();
 
@@ -188,7 +185,7 @@ describe('Monitor Util', () => {
 
         it('should catch event handler errors', () => monitor.emitAsync('error', new Error('test error'))
             .then(() => {
-                testAssert.includeMatch(
+                assert.includeMatch(
                     loggerStub.messages.error,
                     /An unexpected error occurred in monitor check[\s\S]+test error/gm,
                     'should log error message'
@@ -199,7 +196,7 @@ describe('Monitor Util', () => {
             sinon.stub(monitor, 'start').throws(new Error('test error'));
             return config.emitAsync('change', mockConfig1)
                 .then(() => {
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         loggerStub.messages.error,
                         /An error occurred in monitor checks \(config change handler\)[\s\S]+test error/gm,
                         'should log error message'

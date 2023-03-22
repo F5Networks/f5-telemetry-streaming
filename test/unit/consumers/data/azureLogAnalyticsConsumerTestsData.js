@@ -42,7 +42,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:5AKOPxGUtNUt32E7JJKzj0gRQdtO1abqhj6LxSOgWwo=',
+                        Authorization: 'SharedKey myWorkspace:5AKOPxGUtNUt32E7JJKzj0gRQdtO1abqhj6LxSOgWwo=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_AVR',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -567,13 +567,13 @@ module.exports = {
                                 'serverSideTraffic.bitsIn': 0,
                                 'serverSideTraffic.bitsOut': 0
                             },
-                            version: '14.0.0.1',
+                            version: '14.0.0',
                             versionBuild: '0.0.2'
                         }
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:at7iSOWv+DZSlUxGI7Mi8sPhQ8fcU8xYZuMxbW7YExc=',
+                        Authorization: 'SharedKey myWorkspace:JauapqFdfQn6Mbyw6W2MNAftbLu83HogjFGZcX1cyms=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -631,7 +631,7 @@ module.exports = {
                                 'clientside.pktsOut': 0,
                                 'clientside.slowKilled': 0,
                                 'clientside.totConns': 0,
-                                destination: '192.0.2.11:443',
+                                destination: '192.168.2.11:443',
                                 enabledState: 'enabled',
                                 isAvailable: false,
                                 isEnabled: true,
@@ -655,7 +655,7 @@ module.exports = {
                                 'clientside.pktsOut': 0,
                                 'clientside.slowKilled': 0,
                                 'clientside.totConns': 0,
-                                destination: '192.0.2.11:80',
+                                destination: '192.168.2.11:80',
                                 isAvailable: true,
                                 isEnabled: true,
                                 enabledState: 'enabled',
@@ -678,7 +678,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Ljrkg5HfQ5gH5GFUZz+lBrJngdOxnqD4cIqkY+CQvsQ=',
+                        Authorization: 'SharedKey myWorkspace:ZEGU1fx2yUsS7007Tat/qZIaA9zsCBnfKkiz4OM/hvA=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_virtualServers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -797,8 +797,8 @@ module.exports = {
                                 availabilityState: 'offline',
                                 enabledState: 'enabled',
                                 members: {
-                                    '/Example_Tenant/192.0.2.12:80': {
-                                        addr: '192.0.2.12',
+                                    '/Example_Tenant/192.168.2.12:80': {
+                                        addr: '192.168.2.12',
                                         availabilityState: 'offline',
                                         enabledState: 'enabled',
                                         monitorStatus: 'up',
@@ -813,8 +813,8 @@ module.exports = {
                                         'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     },
-                                    '/Example_Tenant/192.0.2.13:80': {
-                                        addr: '192.0.2.13',
+                                    '/Example_Tenant/192.168.2.13:80': {
+                                        addr: '192.168.2.13',
                                         availabilityState: 'offline',
                                         enabledState: 'enabled',
                                         monitorStatus: 'up',
@@ -829,8 +829,8 @@ module.exports = {
                                         'serverside.totConns': 0,
                                         'status.statusReason': 'Pool member is available'
                                     },
-                                    '/Example_Tenant/_auto_192.0.2.14:80': {
-                                        addr: '192.0.2.14',
+                                    '/Example_Tenant/_auto_192.168.2.14:80': {
+                                        addr: '192.168.2.14',
                                         availabilityState: 'unknown',
                                         enabledState: 'enabled',
                                         fqdn: 'bestwebsite.com',
@@ -881,7 +881,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:nsGbMAv3YKQuRjBxZfkbgyutbfe0WUF0XXz7HU2EamA=',
+                        Authorization: 'SharedKey myWorkspace:5HXF5l6ZBJUgzK2y0Qm5fmdGaudBA2MMHwVV/x9Hb/Q=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_pools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -922,7 +922,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:E0MFCzLc6Z3ZDof9nhYp8/ldmp+L0SivJMxKIUQLX7k=',
+                        Authorization: 'SharedKey myWorkspace:E0MFCzLc6Z3ZDof9nhYp8/ldmp+L0SivJMxKIUQLX7k=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_ltmPolicies',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1003,7 +1003,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:IkF4hrWwU+QsuqJQ5RuUD+tiMfOHP8aJvpESMv+vAXA=',
+                        Authorization: 'SharedKey myWorkspace:IkF4hrWwU+QsuqJQ5RuUD+tiMfOHP8aJvpESMv+vAXA=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_httpProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1122,7 +1122,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3bKXfVgHp75WNYpskuw06OGi59rQmJcibOdute3ysSY=',
+                        Authorization: 'SharedKey myWorkspace:3bKXfVgHp75WNYpskuw06OGi59rQmJcibOdute3ysSY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_clientSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1188,7 +1188,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:EJXLWlrW18LS9xrmeCdEC05Z8tTN3mUvm6RAzMi6Cg4=',
+                        Authorization: 'SharedKey myWorkspace:EJXLWlrW18LS9xrmeCdEC05Z8tTN3mUvm6RAzMi6Cg4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_serverSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1233,7 +1233,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:EzEJLzxg7dkhDVSrwISns1SoLpl9fMoW2MKQCnvdG9A=',
+                        Authorization: 'SharedKey myWorkspace:EzEJLzxg7dkhDVSrwISns1SoLpl9fMoW2MKQCnvdG9A=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_sslCerts',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1284,7 +1284,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:qdPsT7QrVBBRPZGG8/VWayuOonbwMrH6cinD43R7jZI=',
+                        Authorization: 'SharedKey myWorkspace:qdPsT7QrVBBRPZGG8/VWayuOonbwMrH6cinD43R7jZI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_networkTunnels',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1315,7 +1315,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:uY0dzcxY1UIXSVSBHpvdTPjOZjswUHsLHyBU0oVAfrc=',
+                        Authorization: 'SharedKey myWorkspace:uY0dzcxY1UIXSVSBHpvdTPjOZjswUHsLHyBU0oVAfrc=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_deviceGroups',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1371,7 +1371,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:RWPxN+yDuFgMUqK9tzE+P8oixQC4uZcZDcmhZbTPbr8=',
+                        Authorization: 'SharedKey myWorkspace:RWPxN+yDuFgMUqK9tzE+P8oixQC4uZcZDcmhZbTPbr8=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_iRules',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1429,7 +1429,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:udje+RB8j6HnkFUGbmBN7XrNu8p5Hr+1p2FDpyZPVZI=',
+                        Authorization: 'SharedKey myWorkspace:udje+RB8j6HnkFUGbmBN7XrNu8p5Hr+1p2FDpyZPVZI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1485,7 +1485,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Cvzdih7SN7aLM0kpbyZrHC5wGWX1AoRfeaWwqz7LrjY=',
+                        Authorization: 'SharedKey myWorkspace:Cvzdih7SN7aLM0kpbyZrHC5wGWX1AoRfeaWwqz7LrjY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aaaaWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1579,7 +1579,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:SyBlvtHOAcr0DOu249kbsP0QdWM7d9oduaEgZOgAIZU=',
+                        Authorization: 'SharedKey myWorkspace:SyBlvtHOAcr0DOu249kbsP0QdWM7d9oduaEgZOgAIZU=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_cnameWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1635,7 +1635,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:IKqsEtlTQJSiP3isA2SpXTu25WVIoqdzkYH11LQTD58=',
+                        Authorization: 'SharedKey myWorkspace:IKqsEtlTQJSiP3isA2SpXTu25WVIoqdzkYH11LQTD58=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_mxWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1690,7 +1690,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:krkZ04SWCAbeIkl+ndEQ2dCZyC2IE9GlnlP33IQPsCA=',
+                        Authorization: 'SharedKey myWorkspace:krkZ04SWCAbeIkl+ndEQ2dCZyC2IE9GlnlP33IQPsCA=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_naptrWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1741,7 +1741,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:rRXLu1ZA+3bohKoRitrCr0iYNT/mRbLTSDqMQtGGOT4=',
+                        Authorization: 'SharedKey myWorkspace:rRXLu1ZA+3bohKoRitrCr0iYNT/mRbLTSDqMQtGGOT4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_srvWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1761,7 +1761,7 @@ module.exports = {
                                 enabled: true,
                                 enabledState: 'enabled',
                                 fallback: 0,
-                                fallbackIp: '8.8.8.8',
+                                fallbackIp: '192.168.0.1',
                                 fallbackMode: 'return-to-dns',
                                 limitMaxBps: 0,
                                 limitMaxBpsStatus: 'disabled',
@@ -1821,7 +1821,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:K8iUcxXTe33O7oIAwHYPBr4uXpAqd8qcqIhN3g9QXfM=',
+                        Authorization: 'SharedKey myWorkspace:j8J7RoNfw1+LQUfpHraSJqdVgPykLYuL0gwQ7N+zE0M=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1901,7 +1901,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:qNp8TYYbrMiUyCojy1nvJQBTZ5Q9Ob1Vux7Yqt2WQcE=',
+                        Authorization: 'SharedKey myWorkspace:qNp8TYYbrMiUyCojy1nvJQBTZ5Q9Ob1Vux7Yqt2WQcE=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aaaaPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -1961,7 +1961,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3jFR/uLKBlik5kLw1lSgn3ItjdLiqd6hwm01NxdKRqk=',
+                        Authorization: 'SharedKey myWorkspace:3jFR/uLKBlik5kLw1lSgn3ItjdLiqd6hwm01NxdKRqk=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_cnamePools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2034,7 +2034,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:2GmsgLsTGTjFMdNS5ZYVix3mep8UPblSX+onw8TJs74=',
+                        Authorization: 'SharedKey myWorkspace:2GmsgLsTGTjFMdNS5ZYVix3mep8UPblSX+onw8TJs74=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_mxPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2107,7 +2107,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:mQ+T3zVMUr4ySC2dQsbbgJweNbtIwxRKTfqENpMw7Rg=',
+                        Authorization: 'SharedKey myWorkspace:mQ+T3zVMUr4ySC2dQsbbgJweNbtIwxRKTfqENpMw7Rg=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_naptrPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2180,7 +2180,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:YcESvoNtGff8bL31OG0psCRglnxQzwMG3dCUNPE5B2s=',
+                        Authorization: 'SharedKey myWorkspace:YcESvoNtGff8bL31OG0psCRglnxQzwMG3dCUNPE5B2s=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_srvPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2198,7 +2198,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Ao/vYptJv0TI5TnHcmSLiGdIwSbCTM0L5xW9Gh4OFbw=',
+                        Authorization: 'SharedKey myWorkspace:Ao/vYptJv0TI5TnHcmSLiGdIwSbCTM0L5xW9Gh4OFbw=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_telemetryServiceInfo',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2214,7 +2214,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:HTlS6jtEi0oPBWJtKIlQOpx/IaXTjG4RxnFXr7aE0DY=',
+                        Authorization: 'SharedKey myWorkspace:HTlS6jtEi0oPBWJtKIlQOpx/IaXTjG4RxnFXr7aE0DY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_telemetryEventCategory',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2740,13 +2740,13 @@ module.exports = {
                                 'serverSideTraffic.bitsIn': 0,
                                 'serverSideTraffic.bitsOut': 0
                             },
-                            version: '14.0.0.1',
+                            version: '14.0.0',
                             versionBuild: '0.0.2'
                         }
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:at7iSOWv+DZSlUxGI7Mi8sPhQ8fcU8xYZuMxbW7YExc=',
+                        Authorization: 'SharedKey myWorkspace:JauapqFdfQn6Mbyw6W2MNAftbLu83HogjFGZcX1cyms=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_system',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2804,7 +2804,7 @@ module.exports = {
                                 'clientside.pktsOut': 0,
                                 'clientside.slowKilled': 0,
                                 'clientside.totConns': 0,
-                                destination: '192.0.2.11:443',
+                                destination: '192.168.2.11:443',
                                 enabledState: 'enabled',
                                 isAvailable: false,
                                 isEnabled: true,
@@ -2828,7 +2828,7 @@ module.exports = {
                                 'clientside.pktsOut': 0,
                                 'clientside.slowKilled': 0,
                                 'clientside.totConns': 0,
-                                destination: '192.0.2.11:80',
+                                destination: '192.168.2.11:80',
                                 isAvailable: true,
                                 isEnabled: true,
                                 enabledState: 'enabled',
@@ -2851,7 +2851,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Ljrkg5HfQ5gH5GFUZz+lBrJngdOxnqD4cIqkY+CQvsQ=',
+                        Authorization: 'SharedKey myWorkspace:ZEGU1fx2yUsS7007Tat/qZIaA9zsCBnfKkiz4OM/hvA=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_virtualServers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2928,7 +2928,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:nMxWCUFvHmH1EZ2zAHc6l6rKvU0HBvAtxmbkqYIUBcs=',
+                        Authorization: 'SharedKey myWorkspace:nMxWCUFvHmH1EZ2zAHc6l6rKvU0HBvAtxmbkqYIUBcs=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_pools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -2967,7 +2967,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:XlNavOTwpub7izF1+BX486oqJP5Tihz7i6YVGGrSM1o=',
+                        Authorization: 'SharedKey myWorkspace:XlNavOTwpub7izF1+BX486oqJP5Tihz7i6YVGGrSM1o=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_ltmPolicies',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3046,7 +3046,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:ZIjqZDzom4nenrvipHj3DBdSZW1NnDKZelEkHoleGsA=',
+                        Authorization: 'SharedKey myWorkspace:ZIjqZDzom4nenrvipHj3DBdSZW1NnDKZelEkHoleGsA=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_httpProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3163,7 +3163,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:MbQoFG3klStE7rn0IOCGn/DOiZo21L85LCapDmF7MI4=',
+                        Authorization: 'SharedKey myWorkspace:MbQoFG3klStE7rn0IOCGn/DOiZo21L85LCapDmF7MI4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_clientSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3227,7 +3227,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Y0yPeK/E0D0CKfF6TwuOmgM+lXxLjIVmcGo8THkLiY4=',
+                        Authorization: 'SharedKey myWorkspace:Y0yPeK/E0D0CKfF6TwuOmgM+lXxLjIVmcGo8THkLiY4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_serverSslProfiles',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3270,7 +3270,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:C6ocqhVZvMvXBSs8s2ViFzUg/OUvPfGPFxMO8HbFwq8=',
+                        Authorization: 'SharedKey myWorkspace:C6ocqhVZvMvXBSs8s2ViFzUg/OUvPfGPFxMO8HbFwq8=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_sslCerts',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3319,7 +3319,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:9RL/uf4VRIIOiH/0bjDJgoLRrwEgS+FES0OZNfAVjAY=',
+                        Authorization: 'SharedKey myWorkspace:9RL/uf4VRIIOiH/0bjDJgoLRrwEgS+FES0OZNfAVjAY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_networkTunnels',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3348,7 +3348,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:c/P55mrDOlkKftfjBdTqnLedZXK92rfynjs0r9mRuYI=',
+                        Authorization: 'SharedKey myWorkspace:c/P55mrDOlkKftfjBdTqnLedZXK92rfynjs0r9mRuYI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_deviceGroups',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3402,7 +3402,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:LcWIT+/Ue6Fif8sFPt011GJ1yKsGydoyO+WlpowB5RQ=',
+                        Authorization: 'SharedKey myWorkspace:LcWIT+/Ue6Fif8sFPt011GJ1yKsGydoyO+WlpowB5RQ=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_iRules',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3458,7 +3458,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:zIo9RssfV/hIdtcNLBNpaoI58zGmw7LILt5aR9VViu8=',
+                        Authorization: 'SharedKey myWorkspace:zIo9RssfV/hIdtcNLBNpaoI58zGmw7LILt5aR9VViu8=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3512,7 +3512,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3/rIJRb8E9CeVGRLfc4kyUbw8Us6Ygi7wjQ7VvISdxI=',
+                        Authorization: 'SharedKey myWorkspace:3/rIJRb8E9CeVGRLfc4kyUbw8Us6Ygi7wjQ7VvISdxI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aaaaWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3606,7 +3606,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:SyBlvtHOAcr0DOu249kbsP0QdWM7d9oduaEgZOgAIZU=',
+                        Authorization: 'SharedKey myWorkspace:SyBlvtHOAcr0DOu249kbsP0QdWM7d9oduaEgZOgAIZU=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_cnameWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3660,7 +3660,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:2bpZKcgxzt1r9ImL/vDEkrCUj7ZYKyjhu2fZRkh29V4=',
+                        Authorization: 'SharedKey myWorkspace:2bpZKcgxzt1r9ImL/vDEkrCUj7ZYKyjhu2fZRkh29V4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_mxWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3713,7 +3713,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:KsTZ0SbN/FUFq59QvSbc3LV+DAiJi4oa751gf5KKxls=',
+                        Authorization: 'SharedKey myWorkspace:KsTZ0SbN/FUFq59QvSbc3LV+DAiJi4oa751gf5KKxls=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_naptrWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3762,7 +3762,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:w5uZEhdapCNKyKI7Gmqc5b7wavnEQohHpPWlRw/G85s=',
+                        Authorization: 'SharedKey myWorkspace:w5uZEhdapCNKyKI7Gmqc5b7wavnEQohHpPWlRw/G85s=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_srvWideIps',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3781,7 +3781,7 @@ module.exports = {
                             enabled: true,
                             enabledState: 'enabled',
                             fallback: 0,
-                            fallbackIp: '8.8.8.8',
+                            fallbackIp: '192.168.0.1',
                             fallbackMode: 'return-to-dns',
                             limitMaxBps: 0,
                             limitMaxBpsStatus: 'disabled',
@@ -3815,7 +3815,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:XuY92KZOtXYHDIwwINEEP8IYRJc7/YDzdhttWoc9BcU=',
+                        Authorization: 'SharedKey myWorkspace:m5xUCD68icNe/hRSffVGTTORBY+0EMhN+yjHnCkF/ww=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3868,7 +3868,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:szYFmlNFadGlABngNl6HH4RR2ieCPQOCckt23fbfdnI=',
+                        Authorization: 'SharedKey myWorkspace:szYFmlNFadGlABngNl6HH4RR2ieCPQOCckt23fbfdnI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aaaaPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3928,7 +3928,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:3jFR/uLKBlik5kLw1lSgn3ItjdLiqd6hwm01NxdKRqk=',
+                        Authorization: 'SharedKey myWorkspace:3jFR/uLKBlik5kLw1lSgn3ItjdLiqd6hwm01NxdKRqk=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_cnamePools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -3973,7 +3973,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:CptcEmN+61YvhN0Hv4XMWF/+7OMP5Jx6iTOyxSBgyN4=',
+                        Authorization: 'SharedKey myWorkspace:CptcEmN+61YvhN0Hv4XMWF/+7OMP5Jx6iTOyxSBgyN4=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_mxPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4018,7 +4018,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Po5bMZ2n7Xgku1ZC2hJ/omlcC+SdZ0Yq0UwflYs7OWw=',
+                        Authorization: 'SharedKey myWorkspace:Po5bMZ2n7Xgku1ZC2hJ/omlcC+SdZ0Yq0UwflYs7OWw=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_naptrPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4063,7 +4063,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:5WSda2dQy2lNzg5nUWLM43BQjDoDADbdZ2mJYln+oeI=',
+                        Authorization: 'SharedKey myWorkspace:5WSda2dQy2lNzg5nUWLM43BQjDoDADbdZ2mJYln+oeI=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_srvPools',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4081,7 +4081,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Ao/vYptJv0TI5TnHcmSLiGdIwSbCTM0L5xW9Gh4OFbw=',
+                        Authorization: 'SharedKey myWorkspace:Ao/vYptJv0TI5TnHcmSLiGdIwSbCTM0L5xW9Gh4OFbw=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_telemetryServiceInfo',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4097,7 +4097,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:HTlS6jtEi0oPBWJtKIlQOpx/IaXTjG4RxnFXr7aE0DY=',
+                        Authorization: 'SharedKey myWorkspace:HTlS6jtEi0oPBWJtKIlQOpx/IaXTjG4RxnFXr7aE0DY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_telemetryEventCategory',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4159,11 +4159,11 @@ module.exports = {
                             'status.statusReason': 'Pool member is available'
                         },
                         {
-                            addr: '192.0.2.12',
+                            addr: '192.168.2.12',
                             availabilityState: 'offline',
                             enabledState: 'enabled',
                             monitorStatus: 'up',
-                            name: '/Example_Tenant/192.0.2.12:80',
+                            name: '/Example_Tenant/192.168.2.12:80',
                             poolName: '/Example_Tenant/A1/web_pool',
                             port: 0,
                             'serverside.bitsIn': 0,
@@ -4176,11 +4176,11 @@ module.exports = {
                             'status.statusReason': 'Pool member is available'
                         },
                         {
-                            addr: '192.0.2.13',
+                            addr: '192.168.2.13',
                             availabilityState: 'offline',
                             enabledState: 'enabled',
                             monitorStatus: 'up',
-                            name: '/Example_Tenant/192.0.2.13:80',
+                            name: '/Example_Tenant/192.168.2.13:80',
                             poolName: '/Example_Tenant/A1/web_pool',
                             port: 0,
                             'serverside.bitsIn': 0,
@@ -4193,12 +4193,12 @@ module.exports = {
                             'status.statusReason': 'Pool member is available'
                         },
                         {
-                            addr: '192.0.2.14',
+                            addr: '192.168.2.14',
                             availabilityState: 'unknown',
                             enabledState: 'enabled',
                             fqdn: 'bestwebsite.com',
                             monitorStatus: 'unchecked',
-                            name: '/Example_Tenant/_auto_192.0.2.14:80',
+                            name: '/Example_Tenant/_auto_192.168.2.14:80',
                             poolName: '/Example_Tenant/A1/web_pool',
                             port: 80,
                             'serverside.bitsIn': 0,
@@ -4233,7 +4233,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:oC2q1memHI4sQeTv8r4Xh0Vtwp5cz2EjmYJT1HECxcc=',
+                        Authorization: 'SharedKey myWorkspace:H5lnJDjVCF4KlBG50s6KwnRKZKHlLtgiJH5GShSNNg8=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_poolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4269,7 +4269,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:XQjsc8aaTedOndVCezRcgYkmf0ZU8QwS8R0zjuF+nr8=',
+                        Authorization: 'SharedKey myWorkspace:XQjsc8aaTedOndVCezRcgYkmf0ZU8QwS8R0zjuF+nr8=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aPoolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4305,7 +4305,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Smrp8PDn8iDs1SecPRU6OLv7+hM99G73RXTjrnnIcNk=',
+                        Authorization: 'SharedKey myWorkspace:Smrp8PDn8iDs1SecPRU6OLv7+hM99G73RXTjrnnIcNk=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_aaaaPoolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4344,7 +4344,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:EBesHlQhpWMq3g+1TAh54a7EdT9ZlAHJpdkvxnhz9uY=',
+                        Authorization: 'SharedKey myWorkspace:EBesHlQhpWMq3g+1TAh54a7EdT9ZlAHJpdkvxnhz9uY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_mxPoolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4383,7 +4383,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:31eauq04DzrryK91A3Hj92rPJURzuu2MSHLB8Ok/8vY=',
+                        Authorization: 'SharedKey myWorkspace:31eauq04DzrryK91A3Hj92rPJURzuu2MSHLB8Ok/8vY=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_naptrPoolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'
@@ -4422,7 +4422,7 @@ module.exports = {
                     ],
                     fullURI: 'https://myWorkspace.ods.opinsights.azure.com/api/logs?api-version=2016-04-01',
                     headers: {
-                        Authorization: 'SharedKey myWorkspace:Z5z3V74HAR5YbEwDUmLj/VLi5kNTDZlfp3d5vWhxybQ=',
+                        Authorization: 'SharedKey myWorkspace:Z5z3V74HAR5YbEwDUmLj/VLi5kNTDZlfp3d5vWhxybQ=', // #gitleaks:allow
                         'Content-Type': 'application/json',
                         'Log-Type': 'F5Telemetry_srvPoolMembers',
                         'x-ms-date': 'Thu, 01 Jan 1970 00:00:00 GMT'

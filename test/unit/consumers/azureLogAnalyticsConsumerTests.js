@@ -11,19 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const util = require('../../../src/lib/utils/misc');
-const requestsUtil = require('../../../src/lib/utils/requests');
 
-const azureAnalyticsIndex = require('../../../src/lib/consumers/Azure_Log_Analytics/index');
+const assert = require('../shared/assert');
 const azureLogData = require('./data/azureLogAnalyticsConsumerTestsData');
-const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const azureAnalyticsIndex = sourceCode('src/lib/consumers/Azure_Log_Analytics/index');
+const azureUtil = sourceCode('src/lib/consumers/shared/azureUtil');
+const requestsUtil = sourceCode('src/lib/utils/requests');
+const util = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 

@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
-
-const gcpUtil = require('../../../src/lib/consumers/shared/gcpUtil');
 const nock = require('nock');
+const sinon = require('sinon');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
+
+const gcpUtil = sourceCode('src/lib/consumers/shared/gcpUtil');
 
 moduleCache.remember();
 

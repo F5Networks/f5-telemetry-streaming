@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 
-const testUtil = require('./shared/util');
-const SystemStats = require('../../src/lib/systemStats');
+const assert = require('./shared/assert');
 const customEndpointsTestsData = require('./data/customEndpointsTestsData');
+const sourceCode = require('./shared/sourceCode');
+const testUtil = require('./shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const SystemStats = sourceCode('src/lib/systemStats');
 
 moduleCache.remember();
 

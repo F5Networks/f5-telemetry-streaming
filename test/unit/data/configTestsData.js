@@ -8,7 +8,9 @@
 
 'use strict';
 
-const constants = require('../../../src/lib/constants');
+const sourceCode = require('../shared/sourceCode');
+
+const constants = sourceCode('src/lib/constants');
 
 module.exports = {
     processDeclaration: {
@@ -50,7 +52,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -95,7 +97,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -113,7 +115,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -134,7 +136,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/foo',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -162,7 +164,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -193,7 +195,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -221,7 +223,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -260,7 +262,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -295,7 +297,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -335,7 +337,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -374,7 +376,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -446,7 +448,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -465,7 +467,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/bar',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -497,7 +499,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -527,7 +529,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -565,7 +567,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -605,7 +607,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -645,7 +647,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -664,7 +666,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -683,7 +685,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/bar',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -713,7 +715,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -741,7 +743,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -771,7 +773,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -810,7 +812,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -846,7 +848,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -886,7 +888,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -925,7 +927,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -966,7 +968,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -986,7 +988,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1005,7 +1007,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/bar',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -1037,7 +1039,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -1066,7 +1068,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -1096,7 +1098,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -1135,7 +1137,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1171,7 +1173,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -1211,7 +1213,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1250,7 +1252,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -1291,7 +1293,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1307,7 +1309,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
                         }
@@ -1318,7 +1320,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         path: '/',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -1350,7 +1352,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -1372,7 +1374,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             allowSelfSignedCert: false,
                             enable: true,
                             path: '/',
@@ -1395,7 +1397,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         allowSelfSignedCert: false,
                         enable: true,
                         method: 'POST',
@@ -1434,7 +1436,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1461,7 +1463,7 @@ module.exports = {
                             enable: true,
                             method: 'POST',
                             path: '/',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             port: 443,
                             protocol: 'https',
                             outputMode: 'processed',
@@ -1500,7 +1502,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1530,7 +1532,7 @@ module.exports = {
                             enable: true,
                             method: 'POST',
                             path: '/',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             port: 443,
                             protocol: 'https',
                             outputMode: 'processed',
@@ -1570,7 +1572,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1589,7 +1591,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1602,7 +1604,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
                         }
@@ -1613,7 +1615,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         path: '/',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -1645,7 +1647,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -1667,7 +1669,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             allowSelfSignedCert: false,
                             enable: true,
                             path: '/',
@@ -1690,7 +1692,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.10',
+                        host: '192.168.2.10',
                         allowSelfSignedCert: false,
                         enable: true,
                         method: 'POST',
@@ -1729,7 +1731,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1756,7 +1758,7 @@ module.exports = {
                             enable: true,
                             method: 'POST',
                             path: '/',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             port: 443,
                             protocol: 'https',
                             outputMode: 'processed',
@@ -1795,7 +1797,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -1825,7 +1827,7 @@ module.exports = {
                             enable: true,
                             method: 'POST',
                             path: '/',
-                            host: '192.0.2.10',
+                            host: '192.168.2.10',
                             port: 443,
                             protocol: 'https',
                             outputMode: 'processed',
@@ -1865,7 +1867,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1884,7 +1886,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1904,7 +1906,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -1923,7 +1925,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/bar',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -1955,7 +1957,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -1984,7 +1986,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -2014,7 +2016,7 @@ module.exports = {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -2053,7 +2055,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -2089,7 +2091,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -2129,7 +2131,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -2168,7 +2170,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/bar',
                             port: 443,
                             protocol: 'https',
@@ -2209,7 +2211,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -2228,7 +2230,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             passphrase: {
                                 cipherText: 'passphrase' // check that configUtil.decryptSecrets called
@@ -2257,7 +2259,7 @@ module.exports = {
                         My_Consumer: {
                             class: 'Telemetry_Consumer',
                             type: 'Generic_HTTP',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '`=/Shared/constants/path`',
                             allowSelfSignedCert: false,
                             enable: true,
@@ -2303,7 +2305,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',
@@ -2344,7 +2346,7 @@ module.exports = {
                             type: 'Generic_HTTP',
                             enable: true,
                             method: 'POST',
-                            host: '192.0.2.1',
+                            host: '192.168.2.1',
                             path: '/foo',
                             port: 443,
                             protocol: 'https',

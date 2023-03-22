@@ -1,6 +1,14 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.33.0
+### Added
+- TS-697: [GitHub #213](https://github.com/F5Networks/f5-telemetry-streaming/issues/213) Allow user provided endpoints for the Azure consumers
+### Fixed
+### Changed
+- TS-705: Update npm packages (@grpc/grpc-js from 1.6.9 to 1.7.1, @grpc/proto-loader from 0.7.0 to 0.7.3, @opentelemetry/api from 1.0.4 to 1.2.0, @opentelemetry/exporter-metrics-otlp-grpc from 0.31.0 to 0.33.0, @opentelemetry/exporter-metrics-otlp-http from 0.31.0 to 0.33.0, @opentelemetry/exporter-metrics-otlp-proto from 0.31.0 to 0.33.0, @opentelemetry/sdk-metrics from 0.31.0 to 0.33.0, eventemitter2 from 6.4.7 to 6.4.9)
+### Removed
+
 ## 1.32.0
 ### Added
 ### Fixed

@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
 const sinon = require('sinon');
 
-const sumoLogicIndex = require('../../../src/lib/consumers/Sumo_Logic/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const sumoLogicIndex = sourceCode('src/lib/consumers/Sumo_Logic/index');
 
 moduleCache.remember();
 

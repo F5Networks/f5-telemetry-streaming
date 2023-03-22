@@ -52,7 +52,7 @@ const mockLogger = {
 
 const mockContext = {
     config: {
-        host: '192.0.2.1',
+        host: '192.168.2.1',
         protocol: 'https',
         path: '/'
     },

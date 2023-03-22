@@ -11,13 +11,10 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 
-const dataTagging = require('../../src/lib/dataTagging');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const dataTagging = sourceCode('src/lib/dataTagging');
 
 moduleCache.remember();
 
@@ -42,7 +39,7 @@ describe('Data Tagging', () => {
                 }
             };
             const deviceCtx = {
-                deviceVersion: '13.0.0.0',
+                deviceVersion: '13.0.0',
                 provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
             };
             const expectedCtx = {
@@ -82,7 +79,7 @@ describe('Data Tagging', () => {
                 }
             };
             const deviceCtx = {
-                deviceVersion: '13.0.0.0',
+                deviceVersion: '13.0.0',
                 provisioning: { ltm: { name: 'ltm', level: 'nominal' } }
             };
             const expectedCtx = {

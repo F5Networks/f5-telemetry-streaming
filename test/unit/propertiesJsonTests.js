@@ -11,21 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 
-const defaultPaths = require('../../src/lib/paths.json');
-const defaultProperties = require('../../src/lib/properties.json');
-const SystemStats = require('../../src/lib/systemStats');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const defaultPaths = sourceCode('src/lib/paths.json');
+const defaultProperties = sourceCode('src/lib/properties.json');
+const SystemStats = sourceCode('src/lib/systemStats');
 
 const pathsStateValidator = testUtil.getSpoiledDataValidator(defaultPaths);
 const propertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
-const testsDataPath = './data/propertiesJsonTests';
+const testsDataPath = 'test/unit/data/propertiesJsonTests';
 
 moduleCache.remember();
 
@@ -63,7 +61,7 @@ describe('properties.json', () => {
         return ret;
     };
 
-    const loadedTestsData = testUtil.loadModules(testsDataPath, __dirname);
+    const loadedTestsData = testUtil.loadModules(testsDataPath);
     Object.keys(loadedTestsData).forEach((fileName) => {
         const testSet = loadedTestsData[fileName];
         testUtil.getCallableDescribe(testSet)(testSet.name, () => {

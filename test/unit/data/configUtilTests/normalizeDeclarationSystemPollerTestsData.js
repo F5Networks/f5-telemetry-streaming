@@ -579,12 +579,12 @@ module.exports = {
                                 path: 'endpoint1'
                             },
                             snmpEndpoint: {
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 protocol: 'snmp'
                             },
                             snmpEndpointWithOptions: {
                                 numericalEnums: true,
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 protocol: 'snmp'
                             }
                         }
@@ -625,7 +625,7 @@ module.exports = {
                                     path: 'endpoint1'
                                 },
                                 snmpEndpoint: {
-                                    path: '1.2.3.4',
+                                    path: '1.2.3',
                                     protocol: 'snmp'
                                 }
                             }
@@ -660,14 +660,14 @@ module.exports = {
                             },
                             snmpEndpoint: {
                                 numericalEnums: false,
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp'
                             },
                             snmpEndpointWithOptions: {
                                 numericalEnums: true,
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 protocol: 'snmp',
                                 enable: true,
                                 name: 'snmpEndpointWithOptions'
@@ -744,7 +744,7 @@ module.exports = {
                             },
                             snmpEndpoint: {
                                 numericalEnums: false,
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp'
@@ -843,7 +843,7 @@ module.exports = {
                                 path: 'endpoint1'
                             },
                             snmpEndpoint: {
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 protocol: 'snmp'
                             }
                         }
@@ -890,7 +890,7 @@ module.exports = {
                                     path: 'endpoint1'
                                 },
                                 snmpEndpoint: {
-                                    path: '1.2.3.4',
+                                    path: '1.2.3',
                                     protocol: 'snmp'
                                 }
                             }
@@ -924,7 +924,7 @@ module.exports = {
                                 protocol: 'http'
                             },
                             snmpEndpoint: {
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp',
@@ -997,7 +997,7 @@ module.exports = {
                                 protocol: 'http'
                             },
                             snmpEndpoint: {
-                                path: '1.2.3.4',
+                                path: '1.2.3',
                                 enable: true,
                                 name: 'snmpEndpoint',
                                 protocol: 'snmp',

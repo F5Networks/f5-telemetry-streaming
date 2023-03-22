@@ -11,29 +11,21 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const dataPipeline = require('../../src/lib/dataPipeline');
-const deviceUtil = require('../../src/lib/utils/device');
+const assert = require('./shared/assert');
 const dummies = require('./shared/dummies');
-const ihealth = require('../../src/lib/ihealth');
-const IHealthPoller = require('../../src/lib/ihealthPoller');
-const ihealthUtil = require('../../src/lib/utils/ihealth');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
-const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
-const tracer = require('../../src/lib/utils/tracer');
-const tracerMgr = require('../../src/lib/tracerManager');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const dataPipeline = sourceCode('src/lib/dataPipeline');
+const ihealth = sourceCode('src/lib/ihealth');
+const IHealthPoller = sourceCode('src/lib/ihealthPoller');
+const ihealthUtil = sourceCode('src/lib/utils/ihealth');
+const persistentStorage = sourceCode('src/lib/persistentStorage');
+const tracerMgr = sourceCode('src/lib/tracerManager');
 
 moduleCache.remember();
 
@@ -138,15 +130,7 @@ describe('iHealth', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            tracer,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         coreStub.utilMisc.generateUuid.numbersOnly = false;
         ihealthStub = stubs.iHealthPoller({
             ihealthUtil
@@ -244,7 +228,7 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
@@ -302,7 +286,7 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
@@ -359,7 +343,7 @@ describe('iHealth', () => {
                         'should create instances with expected IDs'
                     );
                     // using pre-existing list of IDs because 'demo' using same Tracer instance
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
@@ -429,7 +413,7 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
@@ -454,7 +438,7 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
@@ -480,7 +464,7 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
@@ -508,7 +492,7 @@ describe('iHealth', () => {
                         newInstances[0],
                         'should not create new instance when only namespace was updated'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(['Namespace::System::iHealthPoller_1']),
                         'should create tracers with expected IDs'
@@ -534,7 +518,7 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
@@ -554,12 +538,12 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'
                     );
-                    testAssert.includeMatch(coreStub.logger.messages.error, /expected error/, 'should log error');
+                    assert.includeMatch(coreStub.logger.messages.error, /expected error/, 'should log error');
                     coreStub.logger.messages.error = [];
                 });
         });
@@ -725,7 +709,7 @@ describe('iHealth', () => {
                         preExistingConfigIDs,
                         'should create instances with expected IDs'
                     );
-                    testAssert.sameOrderedMatches(
+                    assert.sameOrderedMatches(
                         registeredTracerPaths(),
                         toTracerPaths(preExistingConfigIDs),
                         'should create tracers with expected IDs'

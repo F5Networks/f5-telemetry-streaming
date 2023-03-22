@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const constants = require('../../../src/lib/constants');
-const datetimeUtil = require('../../../src/lib/utils/datetime');
+const assert = require('../shared/assert');
 const fileLogger = require('../../winstonLogger').logger;
+const sourceCode = require('../shared/sourceCode');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const datetimeUtil = sourceCode('src/lib/utils/datetime');
 
 moduleCache.remember();
 

@@ -254,7 +254,7 @@ class UDPDataReceiver extends TcpUdpBaseDataReceiver {
                 this._socket = dgram.createSocket({
                     type: this.family,
                     ipv6Only: this.family === 'udp6', // available starting from node 11+ only
-                    reuseAddr: true // allows UDPv6 and UDPv4 be bound to 0.0.0.0 and ::0 at the same time
+                    reuseAddr: true // allows to use UDPv6 'any' and UDPv4 'any' at the same time
                 });
                 this._socket.on('error', (err) => {
                     this.logger.exception('unexpected error', err);

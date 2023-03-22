@@ -195,7 +195,7 @@ module.exports = {
                         endpoint: '/mgmt/tm/ltm/virtual?$select=name,kind,partition,fullPath,destination',
                         response: {
                             kind: 'tm:ltm:virtual:virtualcollectionstate',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?$select=name%2Ckind%2Cpartition%2CfullPath%2Cdestination&ver=13.1.1.4',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?$select=name%2Ckind%2Cpartition%2CfullPath%2Cdestination&ver=13.1.1',
                             items: [
                                 {
                                     kind: 'tm:ltm:virtual:virtualstate',
@@ -218,12 +218,12 @@ module.exports = {
                         endpoint: '/mgmt/tm/ltm/virtual/stats',
                         response: {
                             kind: 'tm:ltm:virtual:virtualcollectionstats',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/stats?ver=13.1.1.4',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual/stats?ver=13.1.1',
                             entries: {
                                 'https://localhost/mgmt/tm/ltm/virtual/~Common~default/stats': {
                                     nestedStats: {
                                         kind: 'tm:ltm:virtual:virtualstats',
-                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~default/stats?ver=13.1.1.4',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~default/stats?ver=13.1.1',
                                         entries: {
                                             'clientside.bitsIn': {
                                                 value: 0
@@ -357,7 +357,7 @@ module.exports = {
                                 'https://localhost/mgmt/tm/ltm/virtual/~Common~vs_with_pool/stats': {
                                     nestedStats: {
                                         kind: 'tm:ltm:virtual:virtualstats',
-                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~vs_with_pool/stats?ver=13.1.1.4',
+                                        selfLink: 'https://localhost/mgmt/tm/ltm/virtual/~Common~vs_with_pool/stats?ver=13.1.1',
                                         entries: {
                                             'clientside.bitsIn': {
                                                 value: 0
@@ -552,7 +552,7 @@ module.exports = {
                         endpoint: '/mgmt/tm/ltm/virtual',
                         response: {
                             kind: 'tm:ltm:virtual:virtualcollectionstate',
-                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=13.1.1.4',
+                            selfLink: 'https://localhost/mgmt/tm/ltm/virtual?ver=13.1.1',
                             items: [
                                 {
                                     kind: 'tm:ltm:virtual:virtualstate',

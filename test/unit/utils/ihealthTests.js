@@ -11,19 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const nock = require('nock');
 const path = require('path');
 const sinon = require('sinon');
 
-const deviceUtil = require('../../../src/lib/utils/device');
-const ihealthUtil = require('../../../src/lib/utils/ihealth');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const deviceUtil = sourceCode('src/lib/utils/device');
+const ihealthUtil = sourceCode('src/lib/utils/ihealth');
 
 moduleCache.remember();
 

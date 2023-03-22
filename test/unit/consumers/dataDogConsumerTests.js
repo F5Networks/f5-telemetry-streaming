@@ -11,20 +11,18 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
-const dataDogIndex = require('../../../src/lib/consumers/DataDog/index');
+const assert = require('../shared/assert');
 const dataDogData = require('./data/dataDogConsumerTestsData');
-const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const dataDogIndex = sourceCode('src/lib/consumers/DataDog/index');
+const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
 
 moduleCache.remember();
 
@@ -493,8 +491,8 @@ describe('DataDog', () => {
                             });
                             context.event.type = 'syslog';
                             context.event.data = {
-                                data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
-                                hostname: 'bigip14.1.2.3.test',
+                                data: '<134>Jul  6 22:37:49 bigip14.1.2.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                                hostname: 'bigip14.1.2.test',
                                 telemetryEventCategory: 'syslog'
                             };
                             context.config.region = region;
@@ -517,8 +515,8 @@ describe('DataDog', () => {
                             });
                             context.event.type = 'syslog';
                             context.event.data = {
-                                data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
-                                hostname: 'bigip14.1.2.3.test',
+                                data: '<134>Jul  6 22:37:49 bigip14.1.2.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                                hostname: 'bigip14.1.2.test',
                                 telemetryEventCategory: 'syslog'
                             };
                             context.config.region = region;

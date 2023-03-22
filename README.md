@@ -1,14 +1,16 @@
-# f5-telemetry-streaming
+# F5 BIG-IP Telemetry Streaming
 
-[![Slack Status](https://f5cloudsolutions.herokuapp.com/badge.svg)](https://f5cloudsolutions.herokuapp.com)
 [![Releases](https://img.shields.io/github/release/f5networks/f5-telemetry-streaming.svg)](https://github.com/f5networks/f5-telemetry-streaming/releases)
 [![Issues](https://img.shields.io/github/issues/f5networks/f5-telemetry-streaming.svg)](https://github.com/f5networks/f5-telemetry-streaming/issues)
+
+**PLEASE NOTE:** F5 BIG-IP Telemetry Streaming is no longer in active development.  We are moving this technology into maintenance mode, focusing on the next generation of Telemetry innovations. We will continue to update BIG-IP TS with critical security updates.
 
 ## Introduction
 
 F5 BIG-IP Telemetry Streaming (BIG-IP TS) is an iControl LX Extension delivered as a TMOS-independent RPM file. Installing the BIG-IP TS Extension on BIG-IP enables you to declaratively aggregate, normalize, and forward statistics and events from the BIG-IP to a consumer application by POSTing a single BIG-IP TS JSON declaration to BIG-IP TS’s declarative REST API endpoint.
 
 **IMPORTANT** Beginning with BIG-IP TS 1.7.0, the RPM and checksum files will no longer be located in the **/dist** directory in this repository.  These files can be found on the [Release page](https://github.com/F5Networks/f5-telemetry-streaming/releases), as **Assets**.  You can find historical files on GitHub by using the **Branch** drop-down, clicking the **Tags** tab, and then selecting the appropriate release.
+
 
 ## Documentation
 
@@ -27,9 +29,6 @@ If you come across a bug or other issue when using BIG-IP Telemetry Streaming, u
 Because BIG-IP Telemetry Streaming has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K25327565).
 
 Be sure to see the [Support page](SUPPORT.md) in this repo for more details and supported versions of BIG-IP Telemetry Streaming.
-
-### Community Help
-We encourage you to use our [Slack channel](https://f5cloudsolutions.herokuapp.com) for discussion and assistance on BIG-IP Telemetry Streaming (click the **telemetry-streaming** channel). There are F5 employees who are members of this community who typically monitor the channel Monday-Friday 9-5 PST and will offer best-effort assistance. See the [Slack Channel Statement](slack-channel-statement.md) for guidelines on using this channel.
 
 ## Copyright
 

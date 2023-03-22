@@ -11,29 +11,21 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../../src/lib/config');
-const deviceUtil = require('../../../src/lib/utils/device');
+const assert = require('../shared/assert');
 const dummies = require('../shared/dummies');
-const ihealth = require('../../../src/lib/ihealth');
-const IHealthPoller = require('../../../src/lib/ihealthPoller');
-// eslint-disable-next-line no-unused-vars
-const IHealthPollerHandler = require('../../../src/lib/requestHandlers/ihealthPollerHandler');
-const ihealthUtil = require('../../../src/lib/utils/ihealth');
-const logger = require('../../../src/lib/logger');
-const persistentStorage = require('../../../src/lib/persistentStorage');
-const router = require('../../../src/lib/requestHandlers/router');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
-const tracer = require('../../../src/lib/utils/tracer');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const ihealth = sourceCode('src/lib/ihealth');
+const IHealthPoller = sourceCode('src/lib/ihealthPoller');
+// eslint-disable-next-line no-unused-vars
+const IHealthPollerHandler = sourceCode('src/lib/requestHandlers/ihealthPollerHandler');
+const ihealthUtil = sourceCode('src/lib/utils/ihealth');
+const router = sourceCode('src/lib/requestHandlers/router');
 
 moduleCache.remember();
 
@@ -45,15 +37,7 @@ describe('IHealthPollerHandler', () => {
     });
 
     beforeEach(() => {
-        const coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            tracer,
-            utilMisc
-        });
+        const coreStub = stubs.default.coreStub();
         coreStub.utilMisc.generateUuid.numbersOnly = false;
 
         const ihealthStub = stubs.iHealthPoller({

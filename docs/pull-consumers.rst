@@ -72,7 +72,7 @@ This example shows how to use the default pull consumer.  For the default pull c
 
 Example declaration:
 
-.. literalinclude:: ../examples/declarations/default_pull_consumer.json
+.. literalinclude:: ../examples/declarations/consumers/Pull_Consumer/default_pull_consumer.json
     :language: json
 
 |
@@ -109,7 +109,7 @@ The Prometheus Pull Consumer outputs the telemetry data according to the Prometh
 
 Example declaration:
 
-.. literalinclude:: ../examples/declarations/prometheus_pull_consumer.json
+.. literalinclude:: ../examples/declarations/consumers/Prometheus/prometheus_pull_consumer.json
     :language: json
 
 

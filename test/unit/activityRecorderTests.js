@@ -11,24 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const ActivityRecorder = require('../../src/lib/activityRecorder');
-const configWorker = require('../../src/lib/config');
-const deviceUtil = require('../../src/lib/utils/device');
+const assert = require('./shared/assert');
 const dummies = require('./shared/dummies');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
-const testAssert = require('./shared/assert');
-const tracer = require('../../src/lib/utils/tracer');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const ActivityRecorder = sourceCode('src/lib/activityRecorder');
+const configWorker = sourceCode('src/lib/config');
+const persistentStorage = sourceCode('src/lib/persistentStorage');
 
 moduleCache.remember();
 
@@ -43,15 +35,7 @@ describe('Activity Recorder', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            tracer,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         coreStub.persistentStorage.loadData = { config: { } };
         coreStub.utilMisc.generateUuid.numbersOnly = false;
 
@@ -104,11 +88,11 @@ describe('Activity Recorder', () => {
     describe('.stop()', () => {
         it('should stop', () => recorder.stop()
             .then(() => {
-                testAssert.includeMatch(
+                assert.includeMatch(
                     coreStub.logger.messages.debug,
                     /Terminating\.\.\./
                 );
-                testAssert.includeMatch(
+                assert.includeMatch(
                     coreStub.logger.messages.debug,
                     /Stopped!/
                 );
@@ -131,7 +115,7 @@ describe('Activity Recorder', () => {
                     const data = coreStub.tracer.data[declarationTracerFile];
                     assert.lengthOf(data, 4, 'should not write new events once stopped');
 
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         /Terminating declaration tracer/
                     );

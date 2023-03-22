@@ -11,18 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const logger = require('../../../src/lib/logger');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
-const timers = require('../../../src/lib/utils/timers');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const logger = sourceCode('src/lib/logger');
+const timers = sourceCode('src/lib/utils/timers');
 
 moduleCache.remember();
 
@@ -458,7 +455,7 @@ describe('Timer Tests', () => {
                     })
                         .then(() => {
                             assert.isAbove(callCount, 3, 'should call function more than 3 times');
-                            testAssert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
+                            assert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
                         }));
                 });
 
@@ -483,8 +480,8 @@ describe('Timer Tests', () => {
                         .then(() => {
                             assert.strictEqual(callCount, 1, 'should call function just once and stop it');
                             assert.isFalse(timerInst.isActive(), 'should stop timer');
-                            testAssert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
-                            testAssert.includeMatch(loggerStub.messages.warning, /aborting on failure/, 'should log warning message');
+                            assert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
+                            assert.includeMatch(loggerStub.messages.warning, /aborting on failure/, 'should log warning message');
                         }));
                 });
 
@@ -861,7 +858,7 @@ describe('Timer Tests', () => {
                     })
                         .then(() => {
                             assert.isAbove(callCount, 3, 'should call function more than 3 times');
-                            testAssert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
+                            assert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
                         }));
                 });
 
@@ -886,8 +883,8 @@ describe('Timer Tests', () => {
                         .then(() => {
                             assert.strictEqual(callCount, 1, 'should call function just once and stop it');
                             assert.isFalse(timerInst.isActive(), 'should stop timer');
-                            testAssert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
-                            testAssert.includeMatch(loggerStub.messages.warning, /aborting on failure/, 'should log warning message');
+                            assert.includeMatch(loggerStub.messages.error, /execution error[\s\S]+test/gm, 'should log error message');
+                            assert.includeMatch(loggerStub.messages.warning, /aborting on failure/, 'should log warning message');
                         }));
                 });
 
@@ -1064,7 +1061,7 @@ describe('Timer Tests', () => {
         })
             .then(() => testUtil.sleep(2000))
             .then(() => {
-                testAssert.includeMatch(loggerStub.messages.warning, /configured interval of/, 'should log warning message');
+                assert.includeMatch(loggerStub.messages.warning, /configured interval of/, 'should log warning message');
             }));
 
         it('should adjust interval', () => {

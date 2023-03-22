@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const request = require('request');
 const sinon = require('sinon');
 
-const graphiteIndex = require('../../../src/lib/consumers/Graphite/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const graphiteIndex = sourceCode('src/lib/consumers/Graphite/index');
 
 moduleCache.remember();
 

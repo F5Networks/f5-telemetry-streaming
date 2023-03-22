@@ -47,9 +47,9 @@ iHealth Poller minimal declaration:
     "My_System_Minimal": {
         "class": "Telemetry_System",
         "iHealthPoller": {
-            "username": "IHEALTH_ACCOUNT_USERNAME",
+            "username": "username",
             "passphrase": {
-                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
+                "cipherText": "passphrase"
             },
             "interval": {
                 "timeWindow": {
@@ -68,9 +68,9 @@ iHealth Poller full declaration:
    "My_System_Minimal": {
         "class": "Telemetry_System",
         "iHealthPoller": {
-            "username": "IHEALTH_ACCOUNT_USERNAME",
+            "username": "username",
             "passphrase": {
-                "cipherText": "IHEALTH_ACCOUNT_PASSPHRASE"
+                "cipherText": "passphrase"
             },
             "proxy": {
                 "host": "127.0.0.1",

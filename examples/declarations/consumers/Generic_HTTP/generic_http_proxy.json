@@ -1,0 +1,51 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": true
+    },
+    "With_Proxy_HTTPS_target": {
+        "class": "Telemetry_Namespace",
+        "Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60
+        },
+        "HTTP": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.168.1.100",
+            "protocol": "https",
+            "port": "443",
+            "proxy": {
+                "host": "10.10.14.14",
+                "port": 5053,
+                "protocol": "http",
+                "username": "test_username",
+                "passphrase": {
+                    "cipherText": "test_passphrase"
+                },
+                "allowSelfSignedCert": true
+            }
+        }
+    },
+    "With_Proxy_HTTP_Target": {
+        "class": "Telemetry_Namespace",
+        "Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 100
+        },
+        "HTTP": {
+            "class": "Telemetry_Consumer",
+            "type": "Generic_HTTP",
+            "host": "192.168.10.100",
+            "protocol": "http",
+            "port": "8080",
+            "proxy": {
+                "host": "10.10.14.15",
+                "port": 5054,
+                "protocol": "http"
+            }
+        }
+    }
+}

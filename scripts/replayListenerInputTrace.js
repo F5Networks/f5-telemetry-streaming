@@ -495,7 +495,7 @@ function parseArgs() {
                 // eslint-disable-next-line global-require
                 commander = require('commander');
             } catch (error) {
-                console.error('Unable to import "commander" package. Please, try to install it using following command:\n\nnpm install commander@~3.0.2\n');
+                console.error('Unable to import "commander" package. Please, try to install it using following command:\n\nnpm install --no-save commander@~3.0.2\n');
                 throw error;
             }
 

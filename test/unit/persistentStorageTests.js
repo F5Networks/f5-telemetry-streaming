@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const assert = require('./shared/assert');
 const deepCopy = require('./shared/util').deepCopy;
-const persistentStorage = require('../../src/lib/persistentStorage');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const persistentStorage = sourceCode('src/lib/persistentStorage');
 
 moduleCache.remember();
 

@@ -11,13 +11,10 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 
-const eventEmitter = require('../../../src/lib/utils/eventEmitter');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const eventEmitter = sourceCode('src/lib/utils/eventEmitter');
 
 moduleCache.remember();
 

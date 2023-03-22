@@ -879,7 +879,7 @@ module.exports = {
                     },
                     system: {
                         hostname: 'bigip.example.com',
-                        version: '14.0.0.4'
+                        version: '14.0.0'
                     }
                 }
             },
@@ -916,7 +916,7 @@ module.exports = {
                     ],
                     system: {
                         hostname: 'bigip.example.com',
-                        version: '14.0.0.4'
+                        version: '14.0.0'
                     }
                 }
             },
@@ -955,7 +955,7 @@ module.exports = {
                     ],
                     system: {
                         hostname: 'bigip.example.com',
-                        version: '14.0.0.4'
+                        version: '14.0.0'
                     }
                 }
             },

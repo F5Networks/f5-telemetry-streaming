@@ -49,7 +49,7 @@ The following items have been added to the Splunk consumer since it was introduc
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/splunk.json
+.. literalinclude:: ../examples/declarations/consumers/Splunk/splunk.json
     :language: json
     :emphasize-lines: 11, 12
 
@@ -77,7 +77,7 @@ Required information for **facility**:
   
 Example Declaration for Legacy (including facility):
 
-.. literalinclude:: ../examples/declarations/splunk_legacy.json
+.. literalinclude:: ../examples/declarations/consumers/Splunk/splunk_legacy.json
     :language: json
 
 |
@@ -102,7 +102,7 @@ To use this feature, the **format** of the Splunk Telemetry_Consumer must be set
 
 Example Declaration for Splunk multi-metric:
 
-.. literalinclude:: ../examples/declarations/splunk_multi_metric.json
+.. literalinclude:: ../examples/declarations/consumers/Splunk/splunk_multi_metric.json
     :language: json
 
 |
@@ -158,7 +158,7 @@ To see more information about sending data to Log Analytics, see |HTTP Data Coll
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/azure_log_analytics.json
+.. literalinclude:: ../examples/declarations/consumers/Azure_Log_Analytics/azure_log_analytics.json
     :language: json
 
 
@@ -186,7 +186,7 @@ F5 BIG-IP Telemetry Streaming supports Managed Identities using a new **useManag
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/azure_log_analytics_mi.json
+.. literalinclude:: ../examples/declarations/consumers/Azure_Log_Analytics/azure_log_analytics_mi.json
     :language: json
 
 |
@@ -238,7 +238,7 @@ The following items have been added to the Azure Application Insights consumer s
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/azure_application_insights.json
+.. literalinclude:: ../examples/declarations/consumers/Azure_Application_Insights/azure_application_insights.json
     :language: json
     :emphasize-lines: 16
 
@@ -259,7 +259,7 @@ F5 BIG-IP Telemetry Streaming supports Managed Identities using a new **useManag
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/azure_application_insights_mi.json
+.. literalinclude:: ../examples/declarations/consumers/Azure_Application_Insights/azure_application_insights_mi.json
     :language: json
 
 |
@@ -313,7 +313,7 @@ To see more information about creating and using IAM roles, see the |IAM roles|.
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/aws_cloudwatch_logs.json
+.. literalinclude:: ../examples/declarations/consumers/AWS_CloudWatch/aws_cloudwatch_logs.json
     :language: json
     :emphasize-lines: 13
 
@@ -343,7 +343,7 @@ Required Information:
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/aws_cloudwatch_metrics.json
+.. literalinclude:: ../examples/declarations/consumers/AWS_CloudWatch/aws_cloudwatch_metrics.json
     :language: json
     :emphasize-lines: 13
 
@@ -390,7 +390,7 @@ The following items have been added to the S3 consumer since it was introduced.
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/aws_s3.json
+.. literalinclude:: ../examples/declarations/consumers/AWS_S3/aws_s3.json
     :language: json
     :emphasize-lines: 12
 
@@ -411,7 +411,7 @@ Required Information:
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/graphite.json
+.. literalinclude:: ../examples/declarations/consumers/Graphite/graphite.json
     :language: json
 
 |
@@ -464,7 +464,7 @@ The following items have been added to the Kafka consumer since it was introduce
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/kafka.json
+.. literalinclude:: ../examples/declarations/consumers/Kafka/kafka.json
     :language: json
     :linenos:
     :emphasize-lines: 24-41
@@ -501,7 +501,7 @@ To see more information about installing ElasticSearch, see |Installing ElasticS
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/elasticsearch.json
+.. literalinclude:: ../examples/declarations/consumers/ElasticSearch/elasticsearch.json
     :language: json
 
 |
@@ -523,7 +523,7 @@ Required Information:
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/sumo_logic.json
+.. literalinclude:: ../examples/declarations/consumers/Sumo_Logic/sumo_logic.json
     :language: json
 
 |
@@ -571,7 +571,7 @@ The following items have been added to the StatsD consumer since it was introduc
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 
-.. literalinclude:: ../examples/declarations/statsd.json
+.. literalinclude:: ../examples/declarations/consumers/StatsD/statsd.json
     :language: json
     :emphasize-lines: 9, 10-19
 
@@ -636,11 +636,12 @@ The following items have been added to the Generic HTTP consumer since it was in
         - This experimental feature relies on Node.js for each value when the user specifies nothing in **customOpts**.  Node.js values may differ based on version used. Refer to node.js documentation for more information. 
 
 |
+
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/generic_http.json
+.. literalinclude:: ../examples/declarations/consumers/Generic_HTTP/generic_http.json
     :language: json
     :emphasize-lines: 24
 
@@ -655,7 +656,6 @@ Example Declaration:
 - Generic HTTP with TLS authentication, see :ref:`httptls`.
   
 |
-
 
 .. _fluentd-ref:
 
@@ -673,7 +673,7 @@ Required Information:
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/fluentd.json
+.. literalinclude:: ../examples/declarations/consumers/FluentD/fluentd.json
     :language: json
 
 |
@@ -722,7 +722,7 @@ The following items have been added to the Google Cloud Operations Suite's Cloud
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/google_cloud_monitoring.json
+.. literalinclude:: ../examples/declarations/consumers/Google_Cloud_Monitoring/google_cloud_monitoring.json
     :language: json
 
 |
@@ -743,7 +743,7 @@ When using this feature, the authentication token is fetched from metadata at ``
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/google_cloud_monitoring_sat.json
+.. literalinclude:: ../examples/declarations/consumers/Google_Cloud_Monitoring/google_cloud_monitoring_sat.json
     :language: json
 
 |
@@ -773,7 +773,7 @@ Once you have configured the Google Cloud Logging consumer and sent a BIG-IP Tel
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/google_cloud_logging.json
+.. literalinclude:: ../examples/declarations/consumers/Google_Cloud_Logging/google_cloud_logging.json
     :language: json
 
 |
@@ -794,7 +794,7 @@ When using this feature, the authentication token is fetched from metadata at ``
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/google_cloud_logging_sat.json
+.. literalinclude:: ../examples/declarations/consumers/Google_Cloud_Logging/google_cloud_logging_sat.json
     :language: json
 
 |
@@ -831,7 +831,7 @@ The following items have been added to the F5 Cloud consumer since it was introd
 Example Declaration:
 
 
-.. literalinclude:: ../examples/declarations/f5_cloud.json
+.. literalinclude:: ../examples/declarations/consumers/F5_Cloud/f5_cloud.json
     :language: json
     :emphasize-lines: 94
 
@@ -905,7 +905,7 @@ The DataDog metrics endpoints will continue to receive metrics as before.
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/data_dog.json
+.. literalinclude:: ../examples/declarations/consumers/DataDog/data_dog.json
     :language: json
     :emphasize-lines: 8-17
     
@@ -985,7 +985,7 @@ The following items have been added to the OpenTelemetry consumer since it was i
 
 Example Declaration:
 
-.. literalinclude:: ../examples/declarations/open_telemetry_exporter.json
+.. literalinclude:: ../examples/declarations/consumers/OpenTelemetry_Exporter/open_telemetry_exporter.json
     :language: json
     :emphasize-lines: 15
 
@@ -1266,7 +1266,6 @@ In the following table, we list the Azure Government regions.
 .. |azregion| raw:: html
 
    <a href="https://azure.microsoft.com/en-us/global-infrastructure/services/?products=monitor&regions=non-regional,usgov-non-regional,us-dod-central,us-dod-east,usgov-arizona,usgov-iowa,usgov-texas,usgov-virginia" target="_blank">Azure Products Available by Region</a>
-
 
 .. |splunkmm| raw:: html
 
