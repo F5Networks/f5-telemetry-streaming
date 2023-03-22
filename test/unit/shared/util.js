@@ -9,8 +9,6 @@
 'use strict';
 
 const assignDefaults = require('lodash/defaultsDeep');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const deepCopy = require('lodash/cloneDeep');
 const fsUtil = require('fs');
 const nock = require('nock');
@@ -18,12 +16,10 @@ const pathUtil = require('path');
 const sinon = require('sinon');
 const urllib = require('url');
 
+const assert = require('./assert');
 const systemPollerData = require('../../../examples/output/system_poller/output.json');
 const avrData = require('../consumers/data/avrData.json');
 const ltmData = require('../consumers/data/ltmData.json');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 
 function MockRestOperation(opts) {
     opts = opts || {};
@@ -143,6 +139,53 @@ const _module = module.exports = {
             metadata: opts.metadata
         };
         return context;
+    },
+
+    /**
+     * FS utils
+     */
+    fs: {
+        /**
+         * Reads the contents of a directory
+         *
+         * @param {string | Array<string>} directory - directory or list of directories
+         *  to list (absolute or relative to process.cwd())
+         * @param {object} [options] - options
+         * @param {boolean} [options.recursive] - read the directory recursively
+         *
+         * @returns {Array<string>} resolved with list of files in the directory
+         */
+        listFiles(directory, options) {
+            options = assignDefaults({}, options, {
+                recursive: true
+            });
+            const files = [];
+            const recursive = !!options.recursive;
+            const stack = [];
+
+            function scanDir(path) {
+                fsUtil.readdirSync(path).forEach((childNode) => {
+                    const nodePath = pathUtil.join(path, childNode);
+                    const stat = fsUtil.statSync(nodePath);
+                    (stat.isFile() ? files : stack).push(nodePath);
+                });
+            }
+
+            (Array.isArray(directory) ? directory : [directory]).forEach((path) => {
+                if (fsUtil.statSync(path).isFile()) {
+                    files.push(path);
+                } else {
+                    scanDir(path);
+                }
+            });
+
+            if (recursive) {
+                while (stack.length > 0) {
+                    scanDir(stack.shift());
+                }
+            }
+            return files;
+        }
     },
 
     /**
@@ -319,38 +362,40 @@ const _module = module.exports = {
     /**
      * Load modules from folder (or file)
      *
-     * @param {String | Array<String>} paths - path(s) to load
-     * @param {String} [dirname] - dirname to use to compute relative paths
+     * @param {String | Array<String>} paths - path(s) to load (absolute or relative to process.cwd())
      * @param {Object} [options] - options
-     * @param {Boolean} [options.recursive] - walk through paths recursively
+     * @param {Boolean} [options.recursive = true] - walk through paths recursively
      *
      * @returns {Object} object with loaded data where key is path to file and value is loaded module
      */
-    loadModules(paths, dirname, options) {
-        options = options || {};
+    loadModules(paths, options) {
+        options = assignDefaults({}, options, {
+            recursive: true
+        });
         const loadedFiles = {};
-        const stack = Array.isArray(paths) ? paths : [paths];
+        const stack = Array.isArray(paths) ? paths.slice(0) : [paths];
 
         while (stack.length > 0) {
             const path = stack.shift();
-            const relativePath = pathUtil.join(dirname, path);
             // - if folder then trying to load index.js
             // - if file then trying to load file itself
             try {
+                // resolve path to make it absolute otherwire 'require'
+                // will use this module's directory as relative to the path
                 // eslint-disable-next-line import/no-dynamic-require, global-require
-                loadedFiles[path] = require(relativePath);
+                loadedFiles[path] = require(pathUtil.resolve(path));
                 // eslint-disable-next-line no-continue
                 continue;
             } catch (loadError) {
-                const stat = fsUtil.statSync(relativePath);
+                const stat = fsUtil.statSync(path);
                 if (stat.isFile() || !stat.isDirectory()) {
                     throw loadError;
                 }
             }
             // it is directory, let's walk through it
-            fsUtil.readdirSync(relativePath).forEach((childPath) => {
+            fsUtil.readdirSync(path).forEach((childPath) => {
                 if (!options.recursive) {
-                    const stat = fsUtil.statSync(pathUtil.join(relativePath, childPath));
+                    const stat = fsUtil.statSync(pathUtil.join(path, childPath));
                     if (stat.isDirectory()) {
                         return;
                     }

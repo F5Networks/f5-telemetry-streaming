@@ -11,20 +11,18 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const EventEmitter = require('events').EventEmitter;
 const sinon = require('sinon');
 const net = require('net');
 const udp = require('dgram');
 
+const assert = require('../shared/assert');
 const messageStreamTestData = require('../data/messageStreamTestsData');
-const messageStream = require('../../../src/lib/eventListener/messageStream');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const messageStream = sourceCode('src/lib/eventListener/messageStream');
 
 moduleCache.remember();
 

@@ -36,17 +36,16 @@
 
 // preload popular libs here for optimization
 /* eslint-disable no-unused-vars */
-const assert = require('assert');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+const pathUtil = require('path');
 const sinon = require('sinon');
+
+const assert = require('./assert');
 const fileLogger = require('../../winstonLogger');
 
-chai.use(chaiAsPromised);
+const BASE_DIR = process.cwd();
+const SRC_DIR = pathUtil.join(BASE_DIR, 'src');
 
-let BASE_DIR = __dirname.split('/');
-BASE_DIR = BASE_DIR.slice(0, BASE_DIR.length - 3).join('/');
-const SRC_DIR = `${BASE_DIR}/src`;
+delete require.cache[require.resolve('path')];
 
 /**
  * Verify that modules from '/src' are not cached

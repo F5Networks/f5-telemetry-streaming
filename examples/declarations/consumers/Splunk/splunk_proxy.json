@@ -1,0 +1,61 @@
+{
+    "class": "Telemetry",
+    "controls": {
+        "class": "Controls",
+        "logLevel": "debug",
+        "debug": false
+    },
+    "With_Proxy_HTTPS_target": {
+        "class": "Telemetry_Namespace",
+        "Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 60
+        },
+        "Splunk": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.168.2.1",
+            "protocol": "https",
+            "port": 8088,
+            "passphrase": {
+                "cipherText": "apikey"
+            },
+            "proxy": {
+                "host": "10.10.14.14",
+                "port": 5053,
+                "protocol": "https",
+                "username": "me",
+                "passphrase": {
+                    "cipherText": "myself"
+                },
+                "allowSelfSignedCert": false
+            },
+            "trace": false,
+            "enable": true
+        }
+    },
+    "With_Proxy_HTTP_Target": {
+        "class": "Telemetry_Namespace",
+        "Poller": {
+            "class": "Telemetry_System_Poller",
+            "interval": 100
+        },
+        "Splunk": {
+            "class": "Telemetry_Consumer",
+            "type": "Splunk",
+            "host": "192.168.2.1",
+            "protocol": "https",
+            "port": 8088,
+            "passphrase": {
+                "cipherText": "apikey"
+            },
+            "proxy": {
+                "host": "10.10.14.15",
+                "port": 5053,
+                "protocol": "https"
+            },
+            "trace": false,
+            "enable": true
+        }
+    }
+}

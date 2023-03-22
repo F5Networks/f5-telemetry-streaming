@@ -10,26 +10,17 @@
 
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
-
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const deviceUtil = require('../../src/lib/utils/device');
+const assert = require('./shared/assert');
 const dummies = require('./shared/dummies');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
-const testAssert = require('./shared/assert');
 const testUtil = require('./shared/util');
-const tracer = require('../../src/lib/utils/tracer');
-const tracerMgr = require('../../src/lib/tracerManager');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const tracer = sourceCode('src/lib/utils/tracer');
+const tracerMgr = sourceCode('src/lib/tracerManager');
 
 moduleCache.remember();
 
@@ -45,15 +36,7 @@ describe('Tracer', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            tracer,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         stubs.clock({ fakeTimersOpts: fakeDate });
         coreStub.logger.removeAllMessages();
         return configWorker.processDeclaration(dummies.declaration.base.decrypted())
@@ -149,12 +132,12 @@ describe('Tracer', () => {
                     assert.deepStrictEqual(tracerInst, sameTracerInst, 'should return same instance');
                     assert.exists(sameTracerInst.fd, 'should set fd');
                     assert.strictEqual(sameTracerInst.fd, tracerInst.fd, 'fd should be the same');
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Creating new tracer instance for file '${tracerFile}'`, 'g'),
                         'should not log debug message'
                     );
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Updating tracer instance for file '${tracerFile}'`, 'g'),
                         'should not log debug message'
@@ -191,12 +174,12 @@ describe('Tracer', () => {
                     assert.deepStrictEqual(tracerInst, sameTracerInst, 'should return same instance');
                     assert.exists(sameTracerInst.fd, 'should set fd');
                     assert.strictEqual(sameTracerInst.fd, tracerInst.fd, 'fd should be the same');
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Creating new tracer instance for file '${tracerFile}'`, 'g'),
                         'should not log debug message'
                     );
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Updating tracer instance for file '${tracerFile}'`, 'g'),
                         'should not log debug message'
@@ -239,7 +222,7 @@ describe('Tracer', () => {
                     assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
                     assert.include(registered, newTracer, 'should register new tracer');
                     assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Updating tracer instance for file '${tracerFile}'`, 'g'),
                         'should log debug message'
@@ -268,7 +251,7 @@ describe('Tracer', () => {
                     assert.notInclude(registered, tracerInst, 'should unregister pre-existing tracer');
                     assert.include(registered, newTracer, 'should register new tracer');
                     assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Updating tracer instance for file '${tracerFile}'`, 'g'),
                         'should log debug message'
@@ -300,7 +283,7 @@ describe('Tracer', () => {
                     assert.deepStrictEqual(newTracer.inactivityTimeout, 10, 'should set custom inactivity timeout');
                     assert.include(registered, newTracer, 'should register new tracer');
                     assert.isTrue(tracerInst.disabled, 'should disabled old instance');
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         new RegExp(`Updating tracer instance for file '${tracerFile}'`, 'g'),
                         'should log debug message'
@@ -318,7 +301,7 @@ describe('Tracer', () => {
             assert.deepStrictEqual(tracerInst.inactivityTimeout, 0, 'should set custom inactivity timeout');
             return tracerInst.write('somethings')
                 .then(() => {
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Inactivity timeout set to/,
                         'should log debug message'
@@ -340,7 +323,7 @@ describe('Tracer', () => {
             assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');
             return tracerInst.write('somethings')
                 .then(() => {
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Inactivity timeout set to/,
                         'should log debug message'
@@ -363,7 +346,7 @@ describe('Tracer', () => {
             assert.deepStrictEqual(tracerInst.inactivityTimeout, 15, 'should set corrected inactivity timeout');
             return tracerInst.write('somethings')
                 .then(() => {
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Inactivity timeout set to/,
                         'should log debug message'
@@ -387,7 +370,7 @@ describe('Tracer', () => {
             return tracerInst.write('somethings')
                 .then(() => {
                     assert.deepStrictEqual(tracerInst.inactivityTimeout, 30, 'should set custom inactivity timeout');
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Inactivity timeout set to/,
                         'should log debug message'
@@ -446,7 +429,7 @@ describe('Tracer', () => {
             sinon.stub(tracer.Tracer.prototype, 'stop').rejects(new Error('stop error'));
             return tracerMgr.unregister(tracerInst, true)
                 .then(() => {
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         /Uncaught error on attempt to unregister tracer[\s\S]*stop error/gm,
                         'should log debug message with error'

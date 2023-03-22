@@ -11,17 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
-const elasticSearchIndex = require('../../../src/lib/consumers/ElasticSearch/index');
-const util = require('../../../src/lib/utils/misc');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const elasticSearchIndex = sourceCode('src/lib/consumers/ElasticSearch/index');
+const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
+const util = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 
@@ -381,7 +379,7 @@ describe('Rename Keys', () => {
                         enabledState: 'enabled',
                         name: '/Common/pool_test',
                         members: {
-                            '/Common/_auto_2603.1046.1.14..80.:80': {
+                            '/Common/_auto_192.168.0..80.:80': {
                                 addr: '10.10.0.14',
                                 port: 80,
                                 'serverside.bitsIn': 24624,
@@ -390,7 +388,7 @@ describe('Rename Keys', () => {
                                 availabilityState: 'unknown',
                                 enabledState: 'enabled'
                             },
-                            '/Common/_auto_2603...1046...1..14..81..:81': {
+                            '/Common/_auto_192...168..0..81..:81': {
                                 addr: '10.10.0.15',
                                 port: 81,
                                 'serverside.bitsIn': 24624,
@@ -415,7 +413,7 @@ describe('Rename Keys', () => {
 
         util.renameKeys(target, regexTest, replacement);
 
-        assert.strictEqual(target.system.pools['/Common/pool_test'].members['/Common/_auto_2603.1046.1.14.80.:80'].port, 80);
-        assert.strictEqual(target.system.pools['/Common/pool_test'].members['/Common/_auto_2603.1046.1.14.81.:81'].port, 81);
+        assert.strictEqual(target.system.pools['/Common/pool_test'].members['/Common/_auto_192.168.0.80.:80'].port, 80);
+        assert.strictEqual(target.system.pools['/Common/pool_test'].members['/Common/_auto_192.168.0.81.:81'].port, 81);
     });
 });

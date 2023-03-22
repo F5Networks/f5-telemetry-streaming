@@ -11,24 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../../src/lib/config');
-const constants = require('../../../src/lib/constants');
-const DeclareHandler = require('../../../src/lib/requestHandlers/declareHandler');
-const deviceUtil = require('../../../src/lib/utils/device');
+const assert = require('../shared/assert');
 const dummies = require('../shared/dummies');
-const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
-const persistentStorage = require('../../../src/lib/persistentStorage');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const constants = sourceCode('src/lib/constants');
+const DeclareHandler = sourceCode('src/lib/requestHandlers/declareHandler');
+const ErrorHandler = sourceCode('src/lib/requestHandlers/errorHandler');
+const persistentStorage = sourceCode('src/lib/persistentStorage');
 
 moduleCache.remember();
 
@@ -42,13 +37,7 @@ describe('DeclareHandler', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         return persistentStorage.persistentStorage.load()
             .then(() => configWorker.load());
     });

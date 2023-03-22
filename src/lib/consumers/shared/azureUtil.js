@@ -23,7 +23,7 @@ const AZURE_API_TYPES = {
 };
 
 // This ip is the standard link-local address used by cloud platforms to host info
-const METADATA_URL = 'http://169.254.169.254/metadata';
+const METADATA_URL = 'http://169.254.169.254/metadata'; // gitleaks:allow
 
 function getInstanceMetadata(context) {
     const metadataOpts = {
@@ -70,7 +70,30 @@ function getApiDomain(region, apiType) {
     }
 }
 
+/**
+ * Retrieves the custom URL if it was defined by the consumer
+ *
+ * @param {Object} context - context object including config
+ * @param {String} apiType - type of the endpoint URL
+ * @returns {String} - a custom URL for 'apiType' endpoint (if set in 'context')
+ */
+function getCustomUrl(context, apiType) {
+    switch (apiType) {
+    case AZURE_API_TYPES.MGMT:
+        return context.config.managementEndpointUrl;
+    case AZURE_API_TYPES.OPINSIGHTS:
+        return context.config.odsOpinsightsEndpointUrl;
+    default:
+        return undefined;
+    }
+}
+
 function getApiUrl(context, apiType) {
+    // custom url overrides everything
+    const customUrl = getCustomUrl(context, apiType);
+    if (customUrl !== undefined) {
+        return customUrl;
+    }
     const region = getInstanceRegion(context);
     const domain = getApiDomain(region, apiType);
     if (apiType === AZURE_API_TYPES.OPINSIGHTS) {

@@ -454,18 +454,6 @@ function hasNestedObjects(obj) {
  * @sync
  * @public
  *
- * @example
- * createSecretsMaskFunc(['prop'])
- *
- * @example
- * createSecretsMaskFunc(['prop'], 'mask')
- *
- * @example
- * createSecretsMaskFunc(['prop'], 2)
- *
- * @example
- * createSecretsMaskFunc(['prop'], 'mask', 2)
- *
  * @param {Array<string>} properties - properties to mask
  * @param {object} [options] - options
  * @param {any} [options.breakCircularRef = false] - break circular references by replacing with arg's value

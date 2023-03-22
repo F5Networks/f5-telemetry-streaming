@@ -48,7 +48,7 @@ How does the project handle a typical `POST` request?
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Splunk",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 8088,
         "passphrase": {
@@ -96,7 +96,7 @@ How does the project handle a typical `POST` request?
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Splunk",
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "protocol": "https",
             "port": 8088,
             "passphrase": {
@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.32.0"
+        "schemaVersion": "1.33.0"
     }
 }
 ```

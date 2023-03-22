@@ -11,21 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const TeemRecord = require('@f5devcentral/f5-teem').Record;
 
-const configWorker = require('../../src/lib/config');
-const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/utils/device');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const TeemReporter = require('../../src/lib/teemReporter').TeemReporter;
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const constants = sourceCode('src/lib/constants');
+const TeemReporter = sourceCode('src/lib/teemReporter').TeemReporter;
 
 moduleCache.remember();
 
@@ -35,12 +30,7 @@ describe('TeemReporter', () => {
     });
 
     beforeEach(() => {
-        stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            persistentStorage,
-            utilMisc
-        });
+        stubs.default.coreStub({ teemReporter: false });
     });
 
     afterEach(() => {
@@ -150,13 +140,13 @@ describe('TeemReporter', () => {
                     class: 'Telemetry_Consumer',
                     type: 'Splunk',
                     host: 'x.x.x.x',
-                    passphrase: { cipherText: 'text' }
+                    passphrase: { cipherText: 'passphrase' }
                 },
                 consumer3: {
                     class: 'Telemetry_Consumer',
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
-                    passphrase: { cipherText: 'text' }
+                    passphrase: { cipherText: 'passphrase' }
                 },
                 consumer4: {
                     class: 'Telemetry_Consumer',
@@ -184,13 +174,13 @@ describe('TeemReporter', () => {
                     class: 'Telemetry_Consumer',
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
-                    passphrase: { cipherText: 'text' }
+                    passphrase: { cipherText: 'passphrase' }
                 },
                 consumer9: {
                     class: 'Telemetry_Consumer',
                     type: 'Azure_Log_Analytics',
                     workspaceId: 'workspaceId',
-                    passphrase: { cipherText: 'text' }
+                    passphrase: { cipherText: 'passphrase' }
                 },
                 system1: {
                     class: 'Telemetry_System',

@@ -3,6 +3,16 @@
 Document Revision History
 =========================
 
+**PLEASE NOTE:** F5 BIG-IP Telemetry Streaming is no longer in active development.  
+We are moving this technology into maintenance mode.
+
+A product in maintenance mode continues to receive support and ensures its stability with regular critical fixes and security updates. 
+This maintenance approach helps maintain the longevity and reliability of the product for the long term. 
+Enhancement requests for this product will be evaluated on an individual basis, taking into consideration their overall impact and alignment with our business objectives. 
+Only those with a strong case for improvement will be considered for implementation
+There is no plan to deprecate this product.
+
+
 .. list-table::
       :widths: 15 100 15
       :header-rows: 1
@@ -10,6 +20,10 @@ Document Revision History
       * - Doc Rev
         - Description
         - Date
+
+      * - 1.33.0
+        - Updated the documentation for Telemetry Streaming v1.33.0. This release contains the following changes: |br| * Added allowing user provided endpoints for the Azure consumers |br| |br| Changed: |br| * Update npm packages
+        - 03-17-23
 
       * - 1.32.0
         - Updated the documentation for Telemetry Streaming v1.32.0. This release contains the following changes: |br| * DataDog: forward metric data additionally to the logs endpoint |br| * Removed Beacon from documentation
@@ -22,7 +36,7 @@ Document Revision History
       * - 1.30.0
         - Updated the documentation for Telemetry Streaming v1.30.0. This release contains the following resolved issues: |br| * Add support for numerical enums, enhance SNMP metrics processing `GitHub #207 <https://github.com/F5Networks/f5-telemetry-streaming/issues/207>`_ |br| * Created separate Azure Logs tables for pool members and  removed that data from the pool tables.
         - 7-15-22        
-    
+  
       * - 1.29.0
         - Updated the documentation for Telemetry Streaming v1.29.0. This release contains the following changes: |br| * Added support for querying SNMP using a custom endpoint (see :ref:`SNMP example<snmpep>`) |br| * Added outputMode parameter to Generic HTTP consumer to support raw data output (see :ref:`Generic HTTP<http-ref>`) |br| |br| Issues Resolved: |br| * Metric Consumers should not fail when 'null' found in data |br| * Prometheus consumer should ignore NaN values
         - 5-31-22
@@ -97,7 +111,7 @@ Document Revision History
         - 10-13-20
 
       * - 1.14.0
-        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added F5 Beacon as a Generic HTTP consumer |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`) |br| * Added a troubleshooting entry for a restjavad issue (see :ref:`restjavad`) |br| * Added a note to the :doc:`avr` page about AVR caveats with TS and BIG-IQ (see the :ref:`AVR note<avr-note>`) |br| * Updated the introduction for the experimental :doc:`custom-endpoints` |br| * Added support for BIG-IP 16.0  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
+        - Updated the documentation for Telemetry Streaming v1.14.0. This release contains the following changes: |br| * Added support for AWS CloudWatch Metrics (see :ref:`cw-metrics`) |br| * Added an EXPERIMENTAL feature to specify fallback hosts for generic HTTP consumers (see :ref:`fallback`) |br| * Added **cipherUses** stats for Client and Server SSL profiles (see the cipherUses lines in :ref:`sysinfo`) |br| * Added a troubleshooting entry for a restjavad issue (see :ref:`restjavad`) |br| * Added a note to the :doc:`avr` page about AVR caveats with TS and BIG-IQ (see the :ref:`AVR note<avr-note>`) |br| * Updated the introduction for the experimental :doc:`custom-endpoints` |br| * Added support for BIG-IP 16.0  |br| |br| Issues Resolved: |br| * Fixed Event Listener parsing when receiving multiple events
         - 09-01-20
 
       * - 1.13.0

@@ -179,7 +179,7 @@
             "normalization": [
                 {
                     "runFunctions": [
-                        { "name": "restructureHostCpuInfo", "args": { "keyPattern": "^sys/host-info/\\d+::^sys/hostInfo/\\d+/cpuInfo" } },
+                        { "name": "restructureHostCpuInfo", "args": { "keyPattern": "^(sys/host-info/\\d+)::^(sys/hostInfo/\\d+/cpuInfo)" } },
                         { "name": "getAverage", "args": { "keyWithValue": "oneMinAvgSystem" } }
                     ]
                 }

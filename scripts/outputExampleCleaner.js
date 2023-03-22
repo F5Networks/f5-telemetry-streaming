@@ -9,7 +9,6 @@
 'use strict';
 
 const fs = require('fs');
-const options = require('commander');
 
 /** Intent: Provide a script that automates the cleaning of example output for
  *    consumption by public docs
@@ -21,8 +20,6 @@ const options = require('commander');
  *    - ?
  */
 
-
-// TODO: placeholder - should use winston
 class Logger {
     log(msg) {
         console.log(msg); // eslint-disable-line no-console
@@ -43,9 +40,14 @@ const TIMESTAMP_KEYS = ['systemTimestamp', 'expirationString', 'cycleStart', 'cy
  *
  */
 class Output {
-    constructor(logger, inputFile, outputFile) {
+    /**
+     * Constructor
+     *
+     * @param {Logger} logger - logger
+     * @param {string} inputFile - path to input file
+     */
+    constructor(logger, inputFile) {
         this.inputFile = inputFile;
-        this.outputFile = outputFile;
         this.logger = logger;
         this.inputData = {};
     }
@@ -53,8 +55,7 @@ class Output {
     /**
      * Opens file and returns contents
      *
-     * @param {String} file - file location
-     *
+     * @param {string} file - file location
      */
     openFile(file) {
         let contents = fs.readFileSync(file);
@@ -67,26 +68,23 @@ class Output {
     }
 
     /**
-     * Saves file to disk
-     *
-     * @param {String} file - file location
-     *
+     * Print output to stdout
      */
-    saveFile(file) {
+    printOutput() {
         let data;
         try {
             data = JSON.stringify(this.inputData, null, 4);
         } catch (error) {
             // well, we tried
         }
-        return fs.writeFileSync(file, data);
+        process.stdout.write(data);
+        process.stdout.write('\n');
     }
 
     /**
      * Reset integers
      *
      * @param {Object} data - data
-     *
      */
     resetIntegers(data) {
         if (typeof data === 'object' && !Array.isArray(data)) {
@@ -105,12 +103,11 @@ class Output {
      * Reset timestamps
      *
      * @param {Object} data - data
-     *
      */
     resetTimestamps(data) {
         if (typeof data === 'object' && !Array.isArray(data)) {
             Object.keys(data).forEach((k) => {
-                if (TIMESTAMP_KEYS.includes(k) && Date.parse(data[k])) {
+                if (TIMESTAMP_KEYS.indexOf(k) !== -1 && Date.parse(data[k])) {
                     data[k] = DEFAULT_TIMESTAMP;
                 } else {
                     data[k] = this.resetTimestamps(data[k]);
@@ -122,7 +119,6 @@ class Output {
 
     /**
      * Main function to perform cleaning
-     *
      */
     clean() {
         this.logger.info(`Opening input file: ${this.inputFile}`);
@@ -133,7 +129,7 @@ class Output {
         this.resetTimestamps(this.inputData);
 
         this.logger.info(`Saving output file: ${this.outputFile}`);
-        this.saveFile(this.outputFile);
+        this.printOutput();
     }
 }
 
@@ -143,21 +139,12 @@ if (require.main === module) {
     /**
      * Grab command line arguments
      */
-    options
-        .version('1.0.0', '-v, --version')
-        .option('--log-level [value]', 'Specify the log level', 'info')
-        .option('--input-file [value]', 'Specify the input file', '../examples/output/system_poller/output.json')
-        .option('--output-file [value]', 'Specify the output file', '../examples/output/system_poller/output.json')
-        .parse(process.argv);
-
-    const inputFile = `${__dirname}/${options.inputFile}`;
-    const outputFile = `${__dirname}/${options.outputFile}`;
-
-    const logger = new Logger();
-    const output = new Output(logger, inputFile, outputFile);
-    output.clean();
-} else {
-    module.exports = {
-        Output
-    };
+    if (process.argv.length < 3) {
+        throw new Error(`${__filename} inputFile`);
+    }
+    new Output(new Logger(), process.argv[2]).clean();
 }
+
+module.exports = {
+    Output
+};

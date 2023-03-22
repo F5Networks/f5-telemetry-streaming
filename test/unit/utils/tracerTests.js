@@ -11,23 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const sinon = require('sinon');
 
-const logger = require('../../../src/lib/logger');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
-const timers = require('../../../src/lib/utils/timers');
-const tracer = require('../../../src/lib/utils/tracer');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const timers = sourceCode('src/lib/utils/timers');
+const tracer = sourceCode('src/lib/utils/tracer');
+const utilMisc = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 
@@ -65,9 +61,7 @@ describe('Tracer', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            logger
-        });
+        coreStub = stubs.default.coreStub({ logger: true });
         stubs.clock({ fakeTimersOpts: fakeDate });
 
         if (fs.existsSync(tracerDir)) {
@@ -221,7 +215,7 @@ describe('Tracer', () => {
                 assert.deepStrictEqual(tracerInst.inactivityTimeout, 0, 'should set custom inactivity timeout');
                 return tracerInst.write('somethings')
                     .then(() => {
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timeout set to/,
                             'should log debug message'
@@ -241,7 +235,7 @@ describe('Tracer', () => {
                 assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');
                 return tracerInst.write('somethings')
                     .then(() => {
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timeout set to/,
                             'should log debug message'
@@ -263,7 +257,7 @@ describe('Tracer', () => {
                 assert.deepStrictEqual(tracerInst.inactivityTimeout, 15, 'should set corrected inactivity timeout');
                 return tracerInst.write('somethings')
                     .then(() => {
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timeout set to/,
                             'should log debug message'
@@ -286,7 +280,7 @@ describe('Tracer', () => {
                 return tracerInst.write('somethings')
                     .then(() => {
                         assert.deepStrictEqual(tracerInst.inactivityTimeout, 30, 'should set custom inactivity timeout');
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timeout set to/,
                             'should log debug message'
@@ -309,7 +303,7 @@ describe('Tracer', () => {
                     .then(() => {
                         assert.isAbove(utilMisc.fs.mkdir.callCount, 0, 'should call utilMisc.fs.mkdir');
                         assert.strictEqual(utilMisc.fs.mkdir.args[0][0], '/test/inaccessible/directory');
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Creating dir '\/test\/inaccessible\/directory'/,
                             'should log debug message'
@@ -328,7 +322,7 @@ describe('Tracer', () => {
                 return tracerInst.write('foobar')
                     .then((err) => {
                         assert.isUndefined(err, 'should return no error');
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to write data[\s\S]*folder exists/gm,
                             'should ignore mkdir EEXIST error'
@@ -342,7 +336,7 @@ describe('Tracer', () => {
                 return tracerInst.write('foobar')
                     .then((err) => {
                         assert.isUndefined(err, 'should return no error');
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to write data[\s\S]*mkdir error/gm,
                             'should log mkdir error'
@@ -390,7 +384,7 @@ describe('Tracer', () => {
                     })
                     .then((writtenData) => {
                         validateTracerData(writtenData);
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             new RegExp(`Writing last ${maxRecords}.*out of.*messages \\(limit = ${maxRecords} messages\\)`),
                             'should write debug message'
@@ -416,7 +410,7 @@ describe('Tracer', () => {
                 return tracerInst.write(data)
                     .then((err) => {
                         assert.isUndefined(err, 'should return no error');
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to make copy of data[\s\S]*expected copy error/gm,
                             'should log debug message with error'
@@ -674,12 +668,12 @@ describe('Tracer', () => {
                     .then(() => tracerInst.stop())
                     .then((err) => {
                         assert.isUndefined(err, 'should return no error');
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Closing stream to file/gm,
                             'should log debug message on file closing'
                         );
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to close file[\s\S]*close error/gm,
                             'should log debug message with error'
@@ -698,12 +692,12 @@ describe('Tracer', () => {
                     return tracerInst.stop();
                 })
                 .then(() => {
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         /Closing stream to file/gm,
                         'should log debug message on file closing'
                     );
-                    testAssert.includeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
                         /Stopping stream to file/g,
                         'should log debug message when stopped'
@@ -726,12 +720,12 @@ describe('Tracer', () => {
                     return tracerInst.stop();
                 })
                 .then(() => {
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Stopping stream to file/g,
                         'should not log debug message when stopped already'
                     );
-                    testAssert.notIncludeMatch(
+                    assert.notIncludeMatch(
                         coreStub.logger.messages.debug,
                         /Closing stream to file/gm,
                         'should not log debug message when closed already'
@@ -750,17 +744,17 @@ describe('Tracer', () => {
                         return tracerInst.stop();
                     })
                     .then(() => {
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timer deactivated/gm,
                             'should log debug message on timer deactivation'
                         );
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Closing stream to file/gm,
                             'should log debug message on file closing'
                         );
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Stopping stream to file/g,
                             'should log debug message when stopped'
@@ -769,7 +763,7 @@ describe('Tracer', () => {
                         return testUtil.sleep(31 * 1000);
                     })
                     .then(() => {
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Suspending stream to file/gm,
                             'should not log debug message when stopped already'
@@ -802,7 +796,7 @@ describe('Tracer', () => {
                         return tracerInst.suspend();
                     })
                     .then(() => {
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Suspending stream to file.*suspend\(\)/gm,
                             'should log debug message on attempt to suspend tracer'
@@ -960,7 +954,7 @@ describe('Tracer', () => {
                             ['test-1'],
                             'should write new data'
                         );
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to start inactivity timer[\s\S]*expected error/g,
                             'should log debug message when failed'
@@ -974,7 +968,7 @@ describe('Tracer', () => {
                             ['test-1', 'test-2'],
                             'should write new data'
                         );
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Unable to start inactivity timer[\s\S]*expected error/g,
                             'should not log debug message'
@@ -1009,7 +1003,7 @@ describe('Tracer', () => {
                         return testUtil.sleep(16 * 60 * 1000);
                     })
                     .then(() => {
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Error on attempt to deactivate the inactivity timer[\s\S]*expected error/g,
                             'should log debug message when failed'
@@ -1019,12 +1013,12 @@ describe('Tracer', () => {
                         return testUtil.sleep(16 * 60 * 1000);
                     })
                     .then(() => {
-                        testAssert.notIncludeMatch(
+                        assert.notIncludeMatch(
                             coreStub.logger.messages.debug,
                             /Error on attempt to deactivate the inactivity timer[\s\S]*expected error/g,
                             'should have no error message'
                         );
-                        testAssert.includeMatch(
+                        assert.includeMatch(
                             coreStub.logger.messages.debug,
                             /Inactivity timer deactivated/g,
                             'should log debug message'

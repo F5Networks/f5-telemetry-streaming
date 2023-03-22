@@ -155,7 +155,7 @@ Example declaration for using custom Endpoints with specific pollers
 The following example contains an example declaration for F5 BIG-IP Telemetry Streaming, which includes the snippets in the examples above.
 **Note:** The example below does not define a Telemetry Consumer, and a consumer of your choice must be added to the example declaration in order to receive the Telemetry Streaming data.
 
-.. literalinclude:: ../examples/declarations/system_custom_endpoints.json
+.. literalinclude:: ../examples/declarations/System/system_custom_endpoints.json
     :language: json
 
 |

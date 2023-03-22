@@ -11,17 +11,13 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const net = require('net');
 
+const assert = require('../shared/assert');
 const statsdExpectedData = require('./data/statsdConsumerTestsData');
 const testUtil = require('../shared/util');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 
 moduleCache.remember();
 

@@ -10,7 +10,7 @@
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Generic_HTTP",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443,
         "path": "`>/Shared/secretPath`",

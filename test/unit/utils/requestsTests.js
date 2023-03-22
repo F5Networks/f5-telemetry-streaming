@@ -11,17 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const nock = require('nock');
 const request = require('request');
 
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const requestsUtil = require('../../../src/lib/utils/requests');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const requestsUtil = sourceCode('src/lib/utils/requests');
 
 moduleCache.remember();
 

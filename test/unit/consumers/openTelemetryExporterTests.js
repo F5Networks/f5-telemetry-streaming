@@ -11,26 +11,25 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 const path = require('path');
 
+const assert = require('../shared/assert');
 const openTelemetryExpectedData = require('./data/openTelemetryExporterConsumerTestsData');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/utils/misc');
+
+const util = sourceCode('src/lib/utils/misc');
 
 // min supported version for OpenTelemetry_Exporter
 const IS_8_11_1_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.11.1');
 // on 8.11.1 gRPC server returns "Received RST_STREAM with code 0" - http2 bug on 8.11.1
 const IS_8_13_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.13.0');
 
-const OTLP_PROTOS_PATH = path.resolve(__dirname, '../../../', 'node_modules/@opentelemetry/otlp-grpc-exporter-base/build/protos/');
-const METRICS_SERVICE_PROTO_PATH = path.resolve(OTLP_PROTOS_PATH, 'opentelemetry/proto/collector/metrics/v1/metrics_service.proto');
-const OTLP_PROTO_GEN_PATH = path.resolve(
-    __dirname, '../../../', 'node_modules/@opentelemetry/otlp-proto-exporter-base/build/src/generated/root'
-);
+const OTLP_PROTOS_PATH = path.resolve('./node_modules/@opentelemetry/otlp-grpc-exporter-base/build/protos/');
+const METRICS_SERVICE_PROTO_PATH = path.join(OTLP_PROTOS_PATH, 'opentelemetry/proto/collector/metrics/v1/metrics_service.proto');
+const OTLP_PROTO_GEN_PATH = path.resolve('./node_modules/@opentelemetry/otlp-proto-exporter-base/build/src/generated/root');
 
 let grpc;
 let openTelemetryExporter;
@@ -41,15 +40,12 @@ if (IS_8_11_1_PLUS) {
     // eslint-disable-next-line global-require
     grpc = require('@grpc/grpc-js');
     // eslint-disable-next-line global-require
-    openTelemetryExporter = require('../../../src/lib/consumers/OpenTelemetry_Exporter/index');
+    openTelemetryExporter = sourceCode('src/lib/consumers/OpenTelemetry_Exporter/index');
     // eslint-disable-next-line global-require, import/no-dynamic-require
     openTelemetryProtoGen = require(OTLP_PROTO_GEN_PATH);
     // eslint-disable-next-line global-require
     protoLoader = require('@grpc/proto-loader');
 }
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 
 moduleCache.remember();
 

@@ -11,22 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const net = require('net');
 const nodeUtil = require('util');
 const EventEmitter = require('events');
 
-const configWorker = require('../../../src/lib/config');
-const dataPublisher = require('../../../src/lib/eventListener/dataPublisher');
-const persistentStorage = require('../../../src/lib/persistentStorage');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const dataPublisher = sourceCode('src/lib/eventListener/dataPublisher');
 
 moduleCache.remember();
 
@@ -36,12 +31,7 @@ describe('Data Publisher', () => {
     });
 
     beforeEach(() => {
-        stubs.coreStub({
-            configWorker,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        stubs.default.coreStub();
     });
 
     afterEach(() => sinon.restore());

@@ -11,17 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
+const assert = require('../shared/assert');
 const azureUtilTestsData = require('./data/azureUtilTestsData');
-const requestsUtil = require('../../../src/lib/utils/requests');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const azureUtil = sourceCode('src/lib/consumers/shared/azureUtil');
+const requestsUtil = sourceCode('src/lib/utils/requests');
 
 moduleCache.remember();
 
@@ -125,11 +123,11 @@ describe('Azure Util Tests', () => {
                     const sub1AppInsights = {
                         value: [
                             {
-                                properties: { InstrumentationKey: 'sub1-appins1-key1', ConnectionString: 'InstrumentationKey=sub1-appins1-key1' },
+                                properties: { InstrumentationKey: 'sub1-appins1-key1', ConnectionString: 'InstrumentationKey=sub1-appins1-key1' }, // #gitleaks:allow
                                 name: 'sub1AppIns1'
                             },
                             {
-                                properties: { InstrumentationKey: 'sub1-appins2-key2', ConnectionString: 'InstrumentationKey=sub1-appins2-key2' },
+                                properties: { InstrumentationKey: 'sub1-appins2-key2', ConnectionString: 'InstrumentationKey=sub1-appins2-key2' }, // #gitleaks:allow
                                 name: 'sub1AppIns2'
                             }
                         ]
@@ -137,11 +135,11 @@ describe('Azure Util Tests', () => {
                     const sub2AppInsights = {
                         value: [
                             {
-                                properties: { InstrumentationKey: 'sub2-appins1-key1', ConnectionString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' },
+                                properties: { InstrumentationKey: 'sub2-appins1-key1', ConnectionString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' }, // #gitleaks:allow
                                 name: 'sub2AppIns1'
                             },
                             {
-                                properties: { InstrumentationKey: 'sub2-appins2-key2', ConnectionString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' },
+                                properties: { InstrumentationKey: 'sub2-appins2-key2', ConnectionString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' }, // #gitleaks:allow
                                 name: 'sub2AppIns2'
                             }
                         ]
@@ -223,10 +221,10 @@ describe('Azure Util Tests', () => {
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' },
-                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' },
-                                { instrKey: 'sub2-appins1-key1', name: 'sub2AppIns1', connString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' },
-                                { instrKey: 'sub2-appins2-key2', name: 'sub2AppIns2', connString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' }
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' }, // #gitleaks:allow
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' }, // #gitleaks:allow
+                                { instrKey: 'sub2-appins1-key1', name: 'sub2AppIns1', connString: 'InstrumentationKey=sub2-appins1-key1;EndpointSuffix=applicationinsights.us' }, // #gitleaks:allow
+                                { instrKey: 'sub2-appins2-key2', name: 'sub2AppIns2', connString: 'InstrumentationKey=sub2-appins2-key2;EndpointSuffix=applicationinsights.us' } // #gitleaks:allow
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });
@@ -243,8 +241,8 @@ describe('Azure Util Tests', () => {
                     return azureUtil.getInstrumentationKeys(context)
                         .then((keys) => {
                             const expectedData = [
-                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' },
-                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' }
+                                { instrKey: 'sub1-appins1-key1', name: 'sub1AppIns1', connString: 'InstrumentationKey=sub1-appins1-key1' }, // #gitleaks:allow
+                                { instrKey: 'sub1-appins2-key2', name: 'sub1AppIns2', connString: 'InstrumentationKey=sub1-appins2-key2' } // #gitleaks:allow
                             ];
                             return assert.deepStrictEqual(keys, expectedData);
                         });

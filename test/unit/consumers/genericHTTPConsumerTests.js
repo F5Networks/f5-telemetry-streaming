@@ -11,18 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
-const genericHttpIndex = require('../../../src/lib/consumers/Generic_HTTP/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const genericHttpIndex = sourceCode('src/lib/consumers/Generic_HTTP/index');
+const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
 
 moduleCache.remember();
 

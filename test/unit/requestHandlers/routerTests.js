@@ -11,21 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const BaseRequestHandler = require('../../../src/lib/requestHandlers/baseHandler');
-const configWorker = require('../../../src/lib/config');
-const httpErrors = require('../../../src/lib/requestHandlers/httpErrors');
-const persistentStorage = require('../../../src/lib/persistentStorage');
-const requestRouter = require('../../../src/lib/requestHandlers/router');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const BaseRequestHandler = sourceCode('src/lib/requestHandlers/baseHandler');
+const configWorker = sourceCode('src/lib/config');
+const httpErrors = sourceCode('src/lib/requestHandlers/httpErrors');
+const requestRouter = sourceCode('src/lib/requestHandlers/router');
 
 moduleCache.remember();
 
@@ -63,10 +59,10 @@ describe('Requests Router', () => {
     });
 
     beforeEach(() => {
-        stubs.coreStub({
-            configWorker,
-            persistentStorage,
-            teemReporter
+        stubs.default.coreStub({
+            configWorker: true,
+            persistentStorage: true,
+            teemReporter: true
         });
         requestRouter.removeAllHandlers();
     });

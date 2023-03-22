@@ -11,22 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 const jwt = require('jsonwebtoken');
 
-const cloudMonitoringIndex = require('../../../src/lib/consumers/Google_Cloud_Monitoring/index');
-const logger = require('../../../src/lib/logger');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
-const tracer = require('../../../src/lib/utils/tracer');
-const tracerMgr = require('../../../src/lib/tracerManager');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const cloudMonitoringIndex = sourceCode('src/lib/consumers/Google_Cloud_Monitoring/index');
+const logger = sourceCode('src/lib/logger');
+const tracer = sourceCode('src/lib/utils/tracer');
+const tracerMgr = sourceCode('src/lib/tracerManager');
 
 moduleCache.remember();
 
@@ -37,7 +34,7 @@ describe('Google_Cloud_Monitoring', () => {
                 system: {
                     hostname: 'localhost.localdomain',
                     machineId: '00000000-0000-0000-0000-000000000000',
-                    callBackUrl: 'https://1.2.3.4',
+                    callBackUrl: 'https://192.168.0.1',
                     tmmCpu: 10,
                     tmmTraffic: {
                         'clientSideTraffic.bitsIn': 123456
@@ -217,7 +214,7 @@ describe('Google_Cloud_Monitoring', () => {
             .then(() => tracerStub.waitForData())
             .then(() => {
                 assert.deepStrictEqual(tracerStub.data.gcm[0].data, getOriginTimeSeries(), 'should write data to tracer');
-                testAssert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] success', 'should log success message');
+                assert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] success', 'should log success message');
             });
     });
 
@@ -488,7 +485,7 @@ describe('Google_Cloud_Monitoring', () => {
         return cloudMonitoringIndex(context)
             .then(() => cloudMonitoringIndex(context))
             .then(() => {
-                testAssert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] error: Bad status code: 401');
+                assert.includeMatch(loggerStub.messages.all, '[telemetry.gcm] error: Bad status code: 401');
             });
     });
 });

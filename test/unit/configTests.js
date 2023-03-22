@@ -11,25 +11,20 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
+const assert = require('./shared/assert');
 const configTestsData = require('./data/configTestsData');
-const configWorker = require('../../src/lib/config');
-const constants = require('../../src/lib/constants');
-const deviceUtil = require('../../src/lib/utils/device');
 const dummies = require('./shared/dummies');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
-const testAssert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const constants = sourceCode('src/lib/constants');
+const deviceUtil = sourceCode('src/lib/utils/device');
+const persistentStorage = sourceCode('src/lib/persistentStorage');
+const teemReporter = sourceCode('src/lib/teemReporter');
 
 moduleCache.remember();
 
@@ -41,14 +36,7 @@ describe('Config', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         coreStub.persistentStorage.loadData = { config: { } };
         coreStub.utilMisc.generateUuid.numbersOnly = false;
         return configWorker.cleanup()
@@ -201,7 +189,7 @@ describe('Config', () => {
                 My_Consumer: {
                     class: 'Telemetry_Consumer',
                     type: 'Generic_HTTP',
-                    host: '192.0.2.1',
+                    host: '192.168.2.1',
                     path: '`=/Shared/constants/path`',
                     allowSelfSignedCert: false,
                     enable: true,
@@ -228,7 +216,7 @@ describe('Config', () => {
                     enable: true,
                     method: 'POST',
                     outputMode: 'processed',
-                    host: '192.0.2.1',
+                    host: '192.168.2.1',
                     path: '`=/Shared/constants/path`',
                     port: 443,
                     protocol: 'https',
@@ -265,7 +253,7 @@ describe('Config', () => {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         allowSelfSignedCert: false,
                         enable: true,
@@ -291,7 +279,7 @@ describe('Config', () => {
                     type: 'Generic_HTTP',
                     enable: true,
                     method: 'POST',
-                    host: '192.0.2.1',
+                    host: '192.168.2.1',
                     outputMode: 'processed',
                     path: '`=/Shared/constants/path`',
                     port: 443,
@@ -621,7 +609,7 @@ describe('Config', () => {
     describe('\'error\' event', () => {
         it('should log error if caught an error', () => configWorker.safeEmitAsync('error', new Error('expected error'))
             .then(() => {
-                testAssert.includeMatch(
+                assert.includeMatch(
                     coreStub.logger.messages.all,
                     /Unhandled error in ConfigWorker[\s\S]+expected error/gm,
                     'should log error message'

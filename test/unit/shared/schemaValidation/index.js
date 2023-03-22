@@ -10,13 +10,12 @@
 
 /* eslint-disable no-use-before-define */
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const fs = require('fs');
 const lodash = require('lodash');
 const mochaDescribe = require('mocha').describe;
 const path = require('path');
 
+const assert = require('../assert');
 const utils = require('./utils');
 
 const subTests = {
@@ -32,9 +31,6 @@ Object.keys(subTests)
                 subTests[parentDir][lib.name()] = lib;
             }
         }));
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 
 module.exports = {
     /**

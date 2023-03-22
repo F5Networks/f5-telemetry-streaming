@@ -18,7 +18,7 @@
             "branch": "",
             "build": "0.0.4",
             "iso_file": "",
-            "version": "13.1.1.4"
+            "version": "13.1.1"
         },
       "f5_base_conf_done": true,
       "f5_license_key": "XXXXX-ZZZZZ-AAAAA-BBBBB-FFFFFFF",
@@ -34,7 +34,7 @@
             "build": "0.0.4",
             "jobid": "1082930",
             "product": "BIG-IP",
-            "version": "13.1.1.4"
+            "version": "13.1.1"
         },
       "hostname": "ts_test_13_1-bigip",
       "vm_name": "ts_test_13_1-bigip",

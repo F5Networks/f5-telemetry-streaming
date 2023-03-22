@@ -133,5 +133,35 @@ module.exports = {
                 expected: 'https://public-cloud-workspace-id.ods.opinsights.azure.com/api/logs?api-version=2016-04-01'
             }
         ]
+    },
+    getCustomUrl: {
+        name: '.getCustomUrl via .getApiUrl',
+        tests: [
+            {
+                name: 'custom management endpoint url',
+                config: {
+                    managementEndpointUrl: 'customManagementEndpointUrl.com'
+                },
+                apiType: 'management',
+                expected: 'customManagementEndpointUrl.com'
+            },
+            {
+                name: 'custom ods opinsights endpoint url',
+                config: {
+                    odsOpinsightsEndpointUrl: 'customodsOpinsightsEndpointUrl.com'
+                },
+                apiType: 'opinsights',
+                expected: 'customodsOpinsightsEndpointUrl.com'
+            },
+            {
+                name: 'unknown apiType ignores the custom endpoints',
+                config: {
+                    managementEndpointUrl: 'customManagementEndpointUrl.com',
+                    odsOpinsightsEndpointUrl: 'customodsOpinsightsEndpointUrl.com'
+                },
+                apiType: 'somethingElse',
+                expected: 'https://management.azure.com'
+            }
+        ]
     }
 };

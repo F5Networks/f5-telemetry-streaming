@@ -27,7 +27,7 @@ In this example, all objects are in the namespace named **My_Namespace**.  Becau
 
 This example uses the **/telemetry/declare** endpoint.
 
-.. literalinclude:: ../examples/declarations/basic_namespace.json
+.. literalinclude:: ../examples/declarations/namespaces/basic_namespace.json
     :language: json
 
 |
@@ -39,7 +39,7 @@ In this example, we show how you can use multiple namespaces in a declaration.  
 Note that the Consumers in each namespace are using the same name (highlighted in the example).  This example also uses the **/telemetry/declare** endpoint.
 
 
-.. literalinclude:: ../examples/declarations/multiple_namespaces.json
+.. literalinclude:: ../examples/declarations/namespaces/multiple_namespaces.json
     :language: json
     :emphasize-lines: 15, 41
 
@@ -52,7 +52,7 @@ In this example, we show how you can use the default namespace (where you do not
 The lines that are not highlighted in the example are all part of the default namespace. The highlighted lines are a part of the custom **My_Namespace** namespace.
 
 
-.. literalinclude:: ../examples/declarations/default_and_custom_namespace.json
+.. literalinclude:: ../examples/declarations/namespaces/default_and_custom_namespace.json
     :language: json
     :emphasize-lines: 24-37
 

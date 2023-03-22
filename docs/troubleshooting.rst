@@ -42,7 +42,7 @@ The following is an example declaration containing a Controls class that sets th
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Splunk",
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "protocol": "https",
             "port": 8088,
             "passphrase": {
@@ -88,7 +88,7 @@ The following is an example that enables tracing on the Telemetry_System and Tel
             "class": "Telemetry_Consumer",
             "trace": true,
             "type": "Splunk",
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "protocol": "https",
             "port": 8088,
             "passphrase": {

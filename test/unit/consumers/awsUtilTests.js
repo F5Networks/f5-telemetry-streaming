@@ -11,18 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const sinon = require('sinon');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const aws = require('aws-sdk');
 const https = require('https');
+const sinon = require('sinon');
 
-const testUtil = require('../shared/util');
-const awsUtil = require('../../../src/lib/consumers/shared/awsUtil');
+const assert = require('../shared/assert');
 const awsUtilTestsData = require('./data/awsUtilTestsData');
+const sourceCode = require('../shared/sourceCode');
+const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const awsUtil = sourceCode('src/lib/consumers/shared/awsUtil');
 
 moduleCache.remember();
 

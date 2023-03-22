@@ -11,27 +11,20 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../../src/lib/config');
-const dataPipeline = require('../../../src/lib/dataPipeline');
-const EventListener = require('../../../src/lib/eventListener');
+const assert = require('../shared/assert');
 const eventListenerTestData = require('../data/eventListenerTestsData');
-const logger = require('../../../src/lib/logger');
-const messageStream = require('../../../src/lib/eventListener/messageStream');
-const persistentStorage = require('../../../src/lib/persistentStorage');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
-const testAssert = require('../shared/assert');
 const testUtil = require('../shared/util');
-const tracer = require('../../../src/lib/utils/tracer');
-const tracerMgr = require('../../../src/lib/tracerManager');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const dataPipeline = sourceCode('src/lib/dataPipeline');
+const EventListener = sourceCode('src/lib/eventListener');
+const messageStream = sourceCode('src/lib/eventListener/messageStream');
+const tracerMgr = sourceCode('src/lib/tracerManager');
+const utilMisc = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 
@@ -104,14 +97,7 @@ describe('Event Listener', () => {
                 }
             };
 
-            coreStub = stubs.coreStub({
-                configWorker,
-                logger,
-                persistentStorage,
-                teemReporter,
-                tracer,
-                utilMisc
-            });
+            coreStub = stubs.default.coreStub();
             coreStub.utilMisc.generateUuid.numbersOnly = false;
 
             sinon.stub(dataPipeline, 'process').callsFake(function () {
@@ -131,7 +117,7 @@ describe('Event Listener', () => {
                     assertListener(listeners['f5telemetry_default::Listener1'], {
                         tags: { tenant: '`T`', application: '`A`' }
                     });
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                    assert.sameOrderedMatches(registeredTracerPaths(), [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'Telemetry_Listener.f5telemetry_default::Listener1'
                     ]);
@@ -182,7 +168,7 @@ describe('Event Listener', () => {
 
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                    assert.sameOrderedMatches(registeredTracerPaths(), [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'Telemetry_Listener.f5telemetry_default::Listener1',
                         'Telemetry_Listener.f5telemetry_default::Listener2',
@@ -266,7 +252,7 @@ describe('Event Listener', () => {
             };
             return configWorker.processNamespaceDeclaration(testUtil.deepCopy(newDecl), 'newNamespace')
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                    assert.sameOrderedMatches(registeredTracerPaths(), [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'INPUT.Telemetry_Listener.newNamespace::Listener1',
                         'Telemetry_Listener.f5telemetry_default::Listener1',
@@ -311,7 +297,7 @@ describe('Event Listener', () => {
 
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                    assert.sameOrderedMatches(registeredTracerPaths(), [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'Telemetry_Listener.New::Listener1',
                         'Telemetry_Listener.f5telemetry_default::Listener1'
@@ -349,7 +335,7 @@ describe('Event Listener', () => {
             };
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_Listener.f5telemetry_default::Listener1']);
+                    assert.sameOrderedMatches(registeredTracerPaths(), ['Telemetry_Listener.f5telemetry_default::Listener1']);
                     assert.lengthOf(EventListener.getAll(), 1);
                     assert.lengthOf(EventListener.receiversManager.getAll(), 1);
                     assert.deepStrictEqual(gatherIds(), ['f5telemetry_default::Listener1']);
@@ -478,7 +464,7 @@ describe('Event Listener', () => {
             };
             return configWorker.processDeclaration(testUtil.deepCopy(newDecl))
                 .then(() => {
-                    testAssert.sameOrderedMatches(registeredTracerPaths(), [
+                    assert.sameOrderedMatches(registeredTracerPaths(), [
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener2',
                         'INPUT.Telemetry_Listener.f5telemetry_default::Listener3',

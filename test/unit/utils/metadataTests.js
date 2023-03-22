@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const azureUtil = require('../../../src/lib/consumers/shared/azureUtil');
-const gcpUtil = require('../../../src/lib/consumers/shared/gcpUtil');
-const metadataUtil = require('../../../src/lib/utils/metadata');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const azureUtil = sourceCode('src/lib/consumers/shared/azureUtil');
+const gcpUtil = sourceCode('src/lib/consumers/shared/gcpUtil');
+const metadataUtil = sourceCode('src/lib/utils/metadata');
 
 moduleCache.remember();
 

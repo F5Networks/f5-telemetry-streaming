@@ -17,7 +17,7 @@ The Deployment Tool specifies the AMI to use in the AWS BIG-IP deployment. That 
 ```
 plans/aws_byol/variables.tf
 ```
-**Note:** The AMI used should be a BYOL, All Modules, 1 Boot location AMI (ex: F5 `BIGIP-15.1.0.4-0.0.6 BYOL-All Modules 1Boot Loc`)
+**Note:** The AMI used should be a BYOL, All Modules, 1 Boot location AMI (ex: F5 `BIGIP-15.1.0-0.0.6 BYOL-All Modules 1Boot Loc`)
 
 ### Azure
 

@@ -11,24 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const deviceUtil = require('../../src/lib/utils/device');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
-const RestWorker = require('../../src/nodejs/restWorker');
-const requestRouter = require('../../src/lib/requestHandlers/router');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
-const tracer = require('../../src/lib/utils/tracer');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const deviceUtil = sourceCode('src/lib/utils/device');
+const RestWorker = sourceCode('src/nodejs/restWorker');
+const requestRouter = sourceCode('src/lib/requestHandlers/router');
 
 moduleCache.remember();
 
@@ -63,15 +56,7 @@ describe('restWorker', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            tracer,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         coreStub.utilMisc.generateUuid.numbersOnly = false;
 
         restWorker = new RestWorker();

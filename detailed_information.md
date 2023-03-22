@@ -94,7 +94,7 @@ Examples: [Declaration examples](examples/declarations)
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Splunk",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 8088,
         "passphrase": {
@@ -160,7 +160,7 @@ Note: More information about using the HEC can be found on the Splunk website [h
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Splunk",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 8088,
         "passphrase": {
@@ -278,7 +278,7 @@ Note: Since this consumer is designed to be generic and flexible, how authentica
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Generic_HTTP",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443,
         "path": "/",
@@ -317,7 +317,7 @@ Example with multiple passphrases:
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Generic_HTTP",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443,
         "path": "`>/Shared/secretPath`",
@@ -358,7 +358,7 @@ Note: More information about Graphite events can be found [here](https://graphit
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Graphite",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443
     }
@@ -386,7 +386,7 @@ Note: More information about installing Kafka can be found [here](https://kafka.
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Kafka",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "binaryTcpTls",
         "port": 9092,
         "topic": "f5-telemetry",
@@ -427,7 +427,7 @@ Note: More information about installing ElasticSearch can be found [here](https:
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "ElasticSearch",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "port": 9200,
         "protocol": "https",
         "allowSelfSignedCert": false,
@@ -463,7 +463,7 @@ Note: Typically the required information can be found by navigating to the HTTP 
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Sumo_Logic",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443,
         "path": "/receiver/v1/http/",
@@ -495,7 +495,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Statsd",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "udp",
         "port": 8125
     }
@@ -557,7 +557,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
     "My_Second_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Splunk",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 8088,
         "passphrase": {
@@ -573,7 +573,7 @@ Note: All metrics are stored as gauges in statsd, those can be seen within graph
 {
     "My_System": {
         "class": "Telemetry_System",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": 443,
         "allowSelfSignedCert": false,
@@ -698,7 +698,7 @@ Note: available only when `debug` is turned on.
 {
     "system": {
         "hostname": "telemetry.bigip.com",
-        "version": "14.0.0.1",
+        "version": "14.0.0",
         "versionBuild": "0.0.2",
         "location": "Seattle",
         "description": "Telemetry BIG-IP",
@@ -1214,7 +1214,7 @@ Note: available only when `debug` is turned on.
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "192.0.2.11:443",
+            "destination": "192.168.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
             "name": "/Example_Tenant/A1/serviceMain",
@@ -1225,7 +1225,7 @@ Note: available only when `debug` is turned on.
             "clientside.bitsIn": 0,
             "clientside.bitsOut": 0,
             "clientside.curConns": 0,
-            "destination": "192.0.2.11:80",
+            "destination": "192.168.2.11:80",
             "availabilityState": "unknown",
             "enabledState": "enabled",
             "name": "/Example_Tenant/A1/serviceMain-Redirect",
@@ -1309,8 +1309,8 @@ Note: available only when `debug` is turned on.
             "enabledState": "enabled",
             "name": "/Example_Tenant/A1/web_pool",
             "members": {
-                "/Example_Tenant/192.0.2.12:80": {
-                    "addr": "192.0.2.12",
+                "/Example_Tenant/192.168.2.12:80": {
+                    "addr": "192.168.2.12",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -1318,8 +1318,8 @@ Note: available only when `debug` is turned on.
                     "availabilityState": "offline",
                     "enabledState": "enabled"
                 },
-                "/Example_Tenant/192.0.2.13:80": {
-                    "addr": "192.0.2.13",
+                "/Example_Tenant/192.168.2.13:80": {
+                    "addr": "192.168.2.13",
                     "port": 0,
                     "serverside.bitsIn": 0,
                     "serverside.bitsOut": 0,
@@ -1670,7 +1670,7 @@ Configuration
         {
             "serviceMain": {
                 "class": "Service_HTTP",
-                "virtualAddresses": ["192.0.2.1"],
+                "virtualAddresses": ["192.168.2.1"],
                 "virtualPort": 80,
                 "profileTrafficLog": {
                     "bigip": "/Common/telemetry"
@@ -1686,7 +1686,7 @@ Output
     "event_source":"request_logging",
     "event_timestamp":"2019-01-01:01:01.000Z",
     "hostname":"hostname",
-    "client_ip":"177.47.192.42",
+    "client_ip":"192.168.0.1",
     "server_ip":"",
     "http_method":"GET",
     "http_uri":"/",
@@ -1711,7 +1711,7 @@ Configuration
         {
             "serviceMain": {
                 "class": "Service_HTTP",
-                "virtualAddresses": ["192.0.2.1"],
+                "virtualAddresses": ["192.168.2.1"],
                 "virtualPort": 80,
                 "securityLogProfiles": [
                     {
@@ -1741,7 +1741,7 @@ Output
     "dest_port":"80",
     "device_product":"Advanced Firewall Module",
     "device_vendor":"F5",
-    "device_version":"14.0.0.1.0.0.2",
+    "device_version":"14.0.0",
     "drop_reason":"Policy",
     "errdefs_msgno":"23003137",
     "errdefs_msg_name":"Network Event",
@@ -1753,7 +1753,7 @@ Output
     "sa_translation_pool":"",
     "sa_translation_type":"",
     "source_fqdn":"unknown",
-    "source_ip":"50.206.82.144",
+    "source_ip":"192.168.0.1",
     "src_geo":"US/Washington",
     "source_port":"62204",
     "source_user":"unknown",
@@ -1787,7 +1787,7 @@ Configuration
         {
             "serviceMain": {
                 "class": "Service_HTTP",
-                "virtualAddresses": ["192.0.2.1"],
+                "virtualAddresses": ["192.168.2.1"],
                 "virtualPort": 80,
                 "securityLogProfiles": [
                     {
@@ -1813,12 +1813,12 @@ Output
     "support_id":"1730614276869062795",
     "request_status":"blocked",
     "response_code":"0",
-    "ip_client":"50.206.82.144",
+    "ip_client":"192.168.0.1",
     "route_domain":"0",
     "method":"GET",
     "protocol":"HTTP",
     "query_string":"",
-    "x_forwarded_for_header_value":"50.206.82.144",
+    "x_forwarded_for_header_value":"192.168.0.1",
     "sig_ids":"",
     "sig_names":"",
     "date_time":"2018-11-19 22:34:40",
@@ -1866,7 +1866,7 @@ Configuration
         {
             "serviceMain": {
                 "class": "Service_HTTP",
-                "virtualAddresses": ["192.0.2.1"],
+                "virtualAddresses": ["192.168.2.1"],
                 "virtualPort": 80,
                 "policyIAM": {
                     "bigip": "/Common/my_apm_policy"
@@ -1978,7 +1978,7 @@ Output
 
 ```json
 {
-    "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=218.92.1.148  user=root",
+    "data":"<85>Feb 12 21:39:43 telemetry notice sshd[22277]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.0.1  user=root",
     "telemetryEventCategory":"syslog"
 }
 ```
@@ -1989,7 +1989,7 @@ Configuration Notes
 
   - Note: Examples assume TS listener is using port 6514.
   - Note: BIG-IP configuration pointing to a local on-box listener requires additional objects, configuration of those are included below.
-  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address (configuration note: remove any pool monitor). Example: `ip addr` -> tmm (interface) -> inet6 (entry) = fe80::298:76ff:fe54:3210
+  - Note: Per-app Virtual Edition BIG-IP limits the number of virtual servers available, to avoid creating the virtual server in the following configuration it is possible to point the pool directly at the TMM link-local IPv6 address (configuration note: remove any pool monitor). Example: `ip addr` -> tmm (interface) -> inet6 (entry) = look for link-local address starts with **FE80**
 
 Configuration
 

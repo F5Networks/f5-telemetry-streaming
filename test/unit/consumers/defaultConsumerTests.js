@@ -11,14 +11,12 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const defaultConsumer = require('../../../src/lib/consumers/default');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const defaultConsumer = sourceCode('src/lib/consumers/default');
 
 moduleCache.remember();
 

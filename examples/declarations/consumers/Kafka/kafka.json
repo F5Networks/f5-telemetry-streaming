@@ -1,0 +1,42 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "192.168.2.1",
+        "protocol": "binaryTcpTls",
+        "port": 9092,
+        "topic": "f5-telemetry"
+    },
+    "My_Consumer_SASL_PLAIN_auth": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "192.168.2.1",
+        "protocol": "binaryTcpTls",
+        "port": 9092,
+        "topic": "f5-telemetry",
+        "authenticationProtocol": "SASL-PLAIN",
+        "username": "username",
+        "passphrase": {
+        	"cipherText": "passphrase"
+        }
+    },
+    "My_Consumer_TLS_client_auth": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": "kafka.example.com",
+        "protocol": "binaryTcpTls",
+        "port": 9092,
+        "topic": "f5-telemetry",
+        "authenticationProtocol": "TLS",
+        "privateKey": {
+        	"cipherText": "-----BEGIN KEY-----\nMIIE...\n-----END KEY-----"
+        },
+        "clientCertificate": {
+            "cipherText": "-----BEGIN CERTIFICATE-----\nMIID...\n-----END CERTIFICATE-----"
+        },
+        "rootCertificate": {
+            "cipherText": "-----BEGIN CERTIFICATE-----\nMIID...\n-----END CERTIFICATE-----"
+        }
+    }
+}

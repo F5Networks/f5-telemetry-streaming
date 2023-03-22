@@ -36,7 +36,7 @@ module.exports = {
                         'sync-color': 'green',
                         'sync-status': 'Standalone',
                         'sync-summary': ' ',
-                        version: '14.0.0.1'
+                        version: '14.0.0'
                     },
                     host: 'telemetry.bigip.com',
                     source: 'bigip.tmsh.system_status',
@@ -674,9 +674,9 @@ module.exports = {
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',
                         iapp_name: 'A1',
-                        ip: '192.0.2.11:443',
+                        ip: '192.168.2.11:443',
                         mask: '255.255.255.0',
-                        port: '192.0.2.11:443',
+                        port: '192.168.2.11:443',
                         protocol: 'tcp',
                         tenant: 'Example_Tenant',
                         virtual_name: '/Example_Tenant/A1/serviceMain'
@@ -695,8 +695,8 @@ module.exports = {
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',
                         iapp_name: 'A1',
-                        ip: '192.0.2.11:80',
-                        port: '192.0.2.11:80',
+                        ip: '192.168.2.11:80',
+                        port: '192.168.2.11:80',
                         tenant: 'Example_Tenant',
                         virtual_name: '/Example_Tenant/A1/serviceMain-Redirect'
                     },
@@ -873,7 +873,7 @@ module.exports = {
                 },
                 {
                     event: {
-                        address: '192.0.2.12',
+                        address: '192.168.2.12',
                         aggr_period: 0,
                         availability_state: 'offline',
                         callbackurl: '',
@@ -881,7 +881,7 @@ module.exports = {
                         devicegroup: 'example_device_group',
                         enabled_state: 'enabled',
                         facility: 'myFacility',
-                        pool_member_name: '/Example_Tenant/192.0.2.12:80',
+                        pool_member_name: '/Example_Tenant/192.168.2.12:80',
                         pool_name: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         session_status: ''
@@ -893,7 +893,7 @@ module.exports = {
                 },
                 {
                     event: {
-                        address: '192.0.2.13',
+                        address: '192.168.2.13',
                         aggr_period: 0,
                         availability_state: 'offline',
                         callbackurl: '',
@@ -901,7 +901,7 @@ module.exports = {
                         devicegroup: 'example_device_group',
                         enabled_state: 'enabled',
                         facility: 'myFacility',
-                        pool_member_name: '/Example_Tenant/192.0.2.13:80',
+                        pool_member_name: '/Example_Tenant/192.168.2.13:80',
                         pool_name: '/Example_Tenant/A1/web_pool',
                         port: 0,
                         session_status: ''
@@ -922,9 +922,9 @@ module.exports = {
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',
                         pool_name: '/Example_Tenant/A1/web_pool',
-                        pool_member_name: '/Example_Tenant/_auto_192.0.2.14:80',
+                        pool_member_name: '/Example_Tenant/_auto_192.168.2.14:80',
                         callbackurl: '',
-                        address: '192.0.2.14',
+                        address: '192.168.2.14',
                         port: 80,
                         session_status: '',
                         availability_state: 'unknown',
@@ -954,7 +954,7 @@ module.exports = {
                 {
                     event: {
                         aggr_period: 0,
-                        bytes_transfered: 21005,
+                        bytes_transfered: 21023,
                         device_base_mac: '00:0d:3a:30:34:51',
                         devicegroup: 'example_device_group',
                         facility: 'myFacility',
@@ -1006,7 +1006,7 @@ module.exports = {
                         syncStatus: 'Standalone',
                         syncSummary: ' ',
                         telemetryStreamingStatisticSet: 'system',
-                        version: '14.0.0.1',
+                        version: '14.0.0',
                         versionBuild: '0.0.2'
                     },
                     host: 'telemetry.bigip.com',
@@ -1589,7 +1589,7 @@ module.exports = {
                     fields: {
                         application: 'A1',
                         availabilityState: 'offline',
-                        destination: '192.0.2.11:443',
+                        destination: '192.168.2.11:443',
                         enabledState: 'enabled',
                         ipProtocol: 'tcp',
                         isAvailable: false,
@@ -1619,7 +1619,7 @@ module.exports = {
                     fields: {
                         application: 'A1',
                         availabilityState: 'unknown',
-                        destination: '192.0.2.11:80',
+                        destination: '192.168.2.11:80',
                         enabledState: 'enabled',
                         isAvailable: true,
                         isEnabled: true,
@@ -1858,7 +1858,7 @@ module.exports = {
                 },
                 {
                     fields: {
-                        addr: '192.0.2.12',
+                        addr: '192.168.2.12',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'metric_name:serverside.bitsIn': 0,
@@ -1869,7 +1869,7 @@ module.exports = {
                         'metric_name:serverside.pktsOut': 0,
                         'metric_name:serverside.totConns': 0,
                         monitorStatus: 'up',
-                        name: '/Example_Tenant/192.0.2.12:80',
+                        name: '/Example_Tenant/192.168.2.12:80',
                         poolName: '/Example_Tenant/A1/web_pool',
                         port: '0',
                         'status.statusReason': 'Pool member is available',
@@ -1882,7 +1882,7 @@ module.exports = {
                 },
                 {
                     fields: {
-                        addr: '192.0.2.13',
+                        addr: '192.168.2.13',
                         availabilityState: 'offline',
                         enabledState: 'enabled',
                         'metric_name:serverside.bitsIn': 0,
@@ -1893,7 +1893,7 @@ module.exports = {
                         'metric_name:serverside.pktsOut': 0,
                         'metric_name:serverside.totConns': 0,
                         monitorStatus: 'up',
-                        name: '/Example_Tenant/192.0.2.13:80',
+                        name: '/Example_Tenant/192.168.2.13:80',
                         poolName: '/Example_Tenant/A1/web_pool',
                         port: '0',
                         'status.statusReason': 'Pool member is available',
@@ -1910,7 +1910,7 @@ module.exports = {
                     sourcetype: 'f5:telemetry',
                     host: 'telemetry.bigip.com',
                     fields: {
-                        addr: '192.0.2.14',
+                        addr: '192.168.2.14',
                         monitorStatus: 'unchecked',
                         poolName: '/Example_Tenant/A1/web_pool',
                         port: '80',
@@ -1926,7 +1926,7 @@ module.exports = {
                         'status.statusReason': 'Pool member does not have service checking enabled',
                         'metric_name:totRequests': 0,
                         fqdn: 'bestwebsite.com',
-                        name: '/Example_Tenant/_auto_192.0.2.14:80',
+                        name: '/Example_Tenant/_auto_192.168.2.14:80',
                         telemetryStreamingStatisticSet: 'pools.members'
                     }
                 },
@@ -3085,7 +3085,7 @@ module.exports = {
                         dynamicRatio: 'disabled',
                         enabled: true,
                         enabledState: 'enabled',
-                        fallbackIp: '8.8.8.8',
+                        fallbackIp: '192.168.0.1',
                         fallbackMode: 'return-to-dns',
                         limitMaxBpsStatus: 'disabled',
                         limitMaxConnectionsStatus: 'disabled',

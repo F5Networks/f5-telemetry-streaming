@@ -11,16 +11,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const kafka = require('kafka-node');
 const sinon = require('sinon');
 
-const kafkaIndex = require('../../../src/lib/consumers/Kafka/index');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const kafkaIndex = sourceCode('src/lib/consumers/Kafka/index');
 
 moduleCache.remember();
 

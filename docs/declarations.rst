@@ -39,7 +39,7 @@ This example shows a case where Telemetry Streaming on one BIG-IP can pull stati
         "My_Poller": {
             "class": "Telemetry_System_Poller",
             "interval": 60,
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "port": 443,
             "username": "myuser",
             "passphrase": {
@@ -56,7 +56,7 @@ iHealth Poller
 --------------
 This example shows the iHealth Poller.
 
-.. literalinclude:: ../examples/declarations/ihealth_basic.json
+.. literalinclude:: ../examples/declarations/iHealth_Poller/ihealth_basic.json
     :language: json
 
 :ref:`Back to top<examples>`
@@ -69,7 +69,7 @@ Referenced Pollers
 ------------------
 This example shows referenced Pollers.
 
-.. literalinclude:: ../examples/declarations/system.json
+.. literalinclude:: ../examples/declarations/System/system.json
     :language: json
 
     
@@ -85,7 +85,7 @@ See :doc:`custom-endpoints` for more information on this feature.
 
 |
 
-.. literalinclude:: ../examples/declarations/system_custom_endpoints.json
+.. literalinclude:: ../examples/declarations/System/system_custom_endpoints.json
     :language: json
 
     
@@ -128,7 +128,7 @@ Configuring fallback hosts for Generic HTTP consumers is supported as of BIG-IP 
 
 This example shows how you can use the **fallbackHosts** property to specify fallback IP address(es) for a consumer.
 
-.. literalinclude:: ../examples/declarations/generic_http_fallback.json
+.. literalinclude:: ../examples/declarations/consumers/Generic_HTTP/generic_http_fallback.json
     :language: json
 
 |
@@ -148,7 +148,7 @@ For usage options, see |proxy| in the Schema Reference.
 The following example also uses :doc:`BIG-IP Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
 
 
-.. literalinclude:: ../examples/declarations/generic_http_proxy.json
+.. literalinclude:: ../examples/declarations/consumers/Generic_HTTP/generic_http_proxy.json
     :language: json
     :emphasize-lines: 20-29, 44-48
 
@@ -170,7 +170,7 @@ For usage options, see |proxy| in the Schema Reference.
 The following example also uses :doc:`BIG-IP Telemetry Streaming Namespaces<namespaces>`.  The proxy lines are highlighted in the example.
 
 
-.. literalinclude:: ../examples/declarations/splunk_proxy.json
+.. literalinclude:: ../examples/declarations/consumers/Splunk/splunk_proxy.json
     :language: json
     :emphasize-lines: 23-32, 52-56
 
@@ -189,7 +189,7 @@ Generic HTTP consumer with TLS Client Authentication
 This example shows how you can configure TLS client authentication for :ref:`Generic HTTP consumers<http-ref>` in a BIG-IP Telemetry Streaming declaration using version 1.18 and later. 
 
 
-.. literalinclude:: ../examples/declarations/generic_http_tls_client_auth.json
+.. literalinclude:: ../examples/declarations/consumers/Generic_HTTP/generic_http_tls_client_auth.json
     :language: json
 
 
@@ -215,7 +215,7 @@ Customizing the Generic HTTP consumer payload
         "My_Consumer": {
             "class": "Telemetry_Consumer",
             "type": "Generic_HTTP",
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "protocol": "http",
             "port": 8080,
             "path": "/bigip",
@@ -254,7 +254,7 @@ The following example shows a declaration with a systemPoller, a Listener, and a
         "My_Consumer_with_AutoTagging": {
             "class": "Telemetry_Consumer",
             "type": "Statsd",
-            "host": "192.0.2.1",
+            "host": "192.168.2.1",
             "protocol": "udp",
             "port": 8125,
             "addTags": {
@@ -360,7 +360,7 @@ This example shows how you can query SNMP using a custom endpoint in a BIG-IP Te
 See :doc:`custom-endpoints` for more information on this feature.
 
 
-.. literalinclude:: ../examples/declarations/system_custom_endpoints_with_snmp.json
+.. literalinclude:: ../examples/declarations/System/system_custom_endpoints_with_snmp.json
     :language: json
 
 

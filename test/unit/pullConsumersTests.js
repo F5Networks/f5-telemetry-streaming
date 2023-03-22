@@ -11,26 +11,20 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const configUtil = require('../../src/lib/utils/config');
-const CONFIG_CLASSES = require('../../src/lib/constants').CONFIG_CLASSES;
-const deviceUtil = require('../../src/lib/utils/device');
-const moduleLoader = require('../../src/lib/utils/moduleLoader').ModuleLoader;
-const persistentStorage = require('../../src/lib/persistentStorage');
-const pullConsumers = require('../../src/lib/pullConsumers');
+const assert = require('./shared/assert');
 const pullConsumersTestsData = require('./data/pullConsumersTestsData');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const systemPoller = require('../../src/lib/systemPoller');
-const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const configUtil = sourceCode('src/lib/utils/config');
+const CONFIG_CLASSES = sourceCode('src/lib/constants').CONFIG_CLASSES;
+const moduleLoader = sourceCode('src/lib/utils/moduleLoader').ModuleLoader;
+const pullConsumers = sourceCode('src/lib/pullConsumers');
+const systemPoller = sourceCode('src/lib/systemPoller');
 
 moduleCache.remember();
 
@@ -40,13 +34,7 @@ describe('Pull Consumers', () => {
     });
 
     beforeEach(() => {
-        stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        stubs.default.coreStub();
         stubs.clock();
     });
 

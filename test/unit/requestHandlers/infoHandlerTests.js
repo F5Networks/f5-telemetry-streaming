@@ -11,18 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const constants = require('../../../src/lib/constants');
-const InfoHandler = require('../../../src/lib/requestHandlers/infoHandler');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const packageJson = require('../../../package.json');
-const schemaJson = require('../../../src/schema/latest/base_schema.json');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const InfoHandler = sourceCode('src/lib/requestHandlers/infoHandler');
+const packageJson = sourceCode('package.json');
+const schemaJson = sourceCode('src/schema/latest/base_schema.json');
 
 moduleCache.remember();
 

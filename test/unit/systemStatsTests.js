@@ -11,17 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const defaultProperties = require('../../src/lib/properties.json');
+const assert = require('./shared/assert');
 const systemStatsTestsData = require('./data/systemStatsTestsData');
-const SystemStats = require('../../src/lib/systemStats');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const defaultProperties = sourceCode('src/lib/properties.json');
+const SystemStats = sourceCode('src/lib/systemStats');
 
 const defaultPropertiesStateValidator = testUtil.getSpoiledDataValidator(defaultProperties);
 

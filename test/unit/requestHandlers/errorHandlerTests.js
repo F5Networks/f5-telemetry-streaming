@@ -11,16 +11,13 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-
-const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
-const errors = require('../../../src/lib/errors');
-const httpErrors = require('../../../src/lib/requestHandlers/httpErrors');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const ErrorHandler = sourceCode('src/lib/requestHandlers/errorHandler');
+const errors = sourceCode('src/lib/errors');
+const httpErrors = sourceCode('src/lib/requestHandlers/httpErrors');
 
 moduleCache.remember();
 

@@ -11,19 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const request = require('request');
 const sinon = require('sinon');
 
-const constants = require('../../../src/lib/constants');
-const httpUtil = require('../../../src/lib/consumers/shared/httpUtil');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
+const util = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();
 
@@ -134,11 +132,11 @@ describe('HTTP Util Tests', () => {
         it('should properly format the URL', () => {
             const config = buildDefaultConfig({
                 protocol: 'http',
-                hosts: ['192.0.0.1'],
+                hosts: ['192.168.0.1'],
                 port: '8080',
                 uri: '/path/to/resource'
             });
-            nock('http://192.0.0.1:8080')
+            nock('http://192.168.0.1:8080')
                 .post('/path/to/resource')
                 .reply(200);
             return assert.isFulfilled(httpUtil.sendToConsumer(config));

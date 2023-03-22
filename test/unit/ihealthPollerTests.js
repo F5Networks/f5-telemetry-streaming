@@ -11,25 +11,19 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const getByKey = require('lodash/get');
 const sinon = require('sinon');
 
-const configWorker = require('../../src/lib/config');
-const deviceUtil = require('../../src/lib/utils/device');
+const assert = require('./shared/assert');
 const dummies = require('./shared/dummies');
-const IHealthPoller = require('../../src/lib/ihealthPoller');
-const ihealthUtil = require('../../src/lib/utils/ihealth');
-const logger = require('../../src/lib/logger');
-const persistentStorage = require('../../src/lib/persistentStorage');
+const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
-const teemReporter = require('../../src/lib/teemReporter');
 const testUtil = require('./shared/util');
-const utilMisc = require('../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configWorker = sourceCode('src/lib/config');
+const IHealthPoller = sourceCode('src/lib/ihealthPoller');
+const ihealthUtil = sourceCode('src/lib/utils/ihealth');
+const persistentStorage = sourceCode('src/lib/persistentStorage');
 
 moduleCache.remember();
 
@@ -42,14 +36,7 @@ describe('IHealthPoller', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            logger,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         ihealthStub = stubs.iHealthPoller({
             ihealthUtil
         });

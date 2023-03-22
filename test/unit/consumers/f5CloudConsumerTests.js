@@ -12,15 +12,16 @@
 const moduleCache = require('../shared/restoreCache')();
 
 const sinon = require('sinon');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const util = require('../../../src/lib/utils/misc');
+
+const util = sourceCode('src/lib/utils/misc');
 
 // min supported version for F5_Cloud
 const IS_8_11_1_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.11.1');
-const PROTO_PATH = `${__dirname}/../../../src/lib/consumers/F5_Cloud/deos.proto`;
+const PROTO_PATH = 'src/lib/consumers/F5_Cloud/deos.proto';
 
 let f5CloudIndex;
 let grpc;
@@ -28,8 +29,7 @@ let googleAuthMock;
 let protoLoader;
 
 if (IS_8_11_1_PLUS) {
-    // eslint-disable-next-line global-require
-    f5CloudIndex = require('../../../src/lib/consumers/F5_Cloud/index');
+    f5CloudIndex = sourceCode('src/lib/consumers/F5_Cloud/index');
     // eslint-disable-next-line global-require
     grpc = require('@grpc/grpc-js');
     // eslint-disable-next-line global-require
@@ -37,9 +37,6 @@ if (IS_8_11_1_PLUS) {
     // eslint-disable-next-line global-require
     protoLoader = require('@grpc/proto-loader');
 }
-
-const assert = chai.assert;
-chai.use(chaiAsPromised);
 
 moduleCache.remember();
 

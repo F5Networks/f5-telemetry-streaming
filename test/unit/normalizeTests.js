@@ -11,19 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const properties = require('../../src/lib/properties.json');
-const normalize = require('../../src/lib/normalize');
-const normalizeUtil = require('../../src/lib/utils/normalize');
-const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
+const assert = require('./shared/assert');
 const dataExamples = require('./data/normalizeTestsData');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const EVENT_TYPES = sourceCode('src/lib/constants').EVENT_TYPES;
+const properties = sourceCode('src/lib/properties.json');
+const normalize = sourceCode('src/lib/normalize');
+const normalizeUtil = sourceCode('src/lib/utils/normalize');
 
 moduleCache.remember();
 
@@ -38,7 +36,7 @@ describe('Normalize', () => {
 
     const exampleData = {
         kind: 'tm:sys:version:versionstats',
-        selfLink: 'https://localhost/mgmt/tm/sys/version?ver=14.0.0.1',
+        selfLink: 'https://localhost/mgmt/tm/sys/version?ver=14.0.0',
         entries: {
             'https://localhost/mgmt/tm/sys/version/0': {
                 nestedStats: {

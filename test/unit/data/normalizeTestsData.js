@@ -8,7 +8,9 @@
 
 'use strict';
 
-const EVENT_TYPES = require('../../../src/lib/constants').EVENT_TYPES;
+const sourceCode = require('../shared/sourceCode');
+
+const EVENT_TYPES = sourceCode('src/lib/constants').EVENT_TYPES;
 
 /* eslint-disable no-useless-escape */
 
@@ -64,7 +66,7 @@ module.exports = {
         },
         {
             name: 'valid AFM DoS event',
-            data: 'action="Allow",hostname="bigip1.velasco",bigip_mgmt_ip="10.201.198.70",context_name="/Common/10.10.10.140",date_time="2019-12-18T03:37:19.000Z",dest_ip="10.10.10.140",dest_port="80",device_product="Advanced Firewall Module",device_vendor="F5",device_version="13.1.1.0.0.4",dos_attack_event="Attack Sampled",dos_attack_id="710253591",dos_attack_name="TCP RST flood",dos_packets_dropped="0",dos_packets_received="1",errdefs_msgno="23003138",errdefs_msg_name="Network DoS Event",flow_id="0000000000000000",severity="4",dos_mode="Enforced",dos_src="Volumetric, Aggregated across all SrcIP\'s, VS-Specific attack, metric:PPS",partition_name="Common",route_domain="0",source_ip="10.10.10.210",source_port="9607",vlan="/Common/internal",telemetryEventCategory="LTM",tenant="Common',
+            data: 'action="Allow",hostname="bigip1.velasco",bigip_mgmt_ip="10.201.198.70",context_name="/Common/10.10.10.140",date_time="2019-12-18T03:37:19.000Z",dest_ip="10.10.10.140",dest_port="80",device_product="Advanced Firewall Module",device_vendor="F5",device_version="13.1.1",dos_attack_event="Attack Sampled",dos_attack_id="710253591",dos_attack_name="TCP RST flood",dos_packets_dropped="0",dos_packets_received="1",errdefs_msgno="23003138",errdefs_msg_name="Network DoS Event",flow_id="0000000000000000",severity="4",dos_mode="Enforced",dos_src="Volumetric, Aggregated across all SrcIP\'s, VS-Specific attack, metric:PPS",partition_name="Common",route_domain="0",source_ip="10.10.10.210",source_port="9607",vlan="/Common/internal",telemetryEventCategory="LTM",tenant="Common',
             category: EVENT_TYPES.AFM_EVENT
         },
         {
@@ -161,11 +163,11 @@ module.exports = {
         },
         {
             name: 'valid syslog event with double quotes in it',
-            data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+            data: '<134>Jul  6 22:37:49 bigip14.1.2.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
             expectedData: {
-                data: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
-                hostname: 'bigip14.1.2.3.test',
-                originalRawData: '<134>Jul  6 22:37:49 bigip14.1.2.3.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                data: '<134>Jul  6 22:37:49 bigip14.1.2.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
+                hostname: 'bigip14.1.2.test',
+                originalRawData: '<134>Jul  6 22:37:49 bigip14.1.2.test info httpd(pam_audit)[13810]: 01070417:6: AUDIT - user admin - RAW: httpd(pam_audit): user=admin(admin) partition=[All] level=Administrator tty=(unknown) host=172.18.5.167 attempts=1 start="Mon Jul  6 22:37:49 2020" end="Mon Jul  6 22:37:49 2020"',
                 telemetryEventCategory: EVENT_TYPES.SYSLOG_EVENT
             }
         },

@@ -11,8 +11,8 @@
 const grpc = require('@grpc/grpc-js');
 const GrpcMetricExporter = require('@opentelemetry/exporter-metrics-otlp-grpc').OTLPMetricExporter;
 const JsonMetricExporter = require('@opentelemetry/exporter-metrics-otlp-http').OTLPMetricExporter;
-const MeterProvider = require('@opentelemetry/sdk-metrics-base').MeterProvider;
-const MetricReader = require('@opentelemetry/sdk-metrics-base').MetricReader;
+const MeterProvider = require('@opentelemetry/sdk-metrics').MeterProvider;
+const MetricReader = require('@opentelemetry/sdk-metrics').MetricReader;
 const ProtobufMetricExporter = require('@opentelemetry/exporter-metrics-otlp-proto').OTLPMetricExporter;
 const OTELApi = require('@opentelemetry/api');
 

@@ -20,7 +20,7 @@ module.exports = {
                         system: {
                             hostname: 'telemetry.bigip.com',
                             machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                            version: '14.0.0.1',
+                            version: '14.0.0',
                             versionBuild: '0.0.2',
                             location: 'Seattle',
                             description: 'Telemetry BIG-IP',
@@ -60,7 +60,7 @@ module.exports = {
                 expected: [
                     { Name: 'hostname', Value: 'telemetry.bigip.com' },
                     { Name: 'machineId', Value: 'cd5e51b8-74ef-44c8-985c-7965512c2e87' },
-                    { Name: 'version', Value: '14.0.0.1' },
+                    { Name: 'version', Value: '14.0.0' },
                     { Name: 'versionBuild', Value: '0.0.2' },
                     { Name: 'platformId', Value: 'Z100' },
                     { Name: 'chassisId', Value: '9c3abad5-513a-1c43-5bc2be62e957' },
@@ -74,7 +74,7 @@ module.exports = {
                         system: {
                             hostname: 'telemetry.bigip.com',
                             machineId: 'cd5e51b8-74ef-44c8-985c-7965512c2e87',
-                            version: '14.0.0.1',
+                            version: '14.0.0',
                             versionBuild: '0.0.2',
                             location: 'Seattle',
                             description: 'Telemetry BIG-IP',
@@ -86,7 +86,7 @@ module.exports = {
                 expected: [
                     { Name: 'hostname', Value: 'telemetry.bigip.com' },
                     { Name: 'machineId', Value: 'cd5e51b8-74ef-44c8-985c-7965512c2e87' },
-                    { Name: 'version', Value: '14.0.0.1' },
+                    { Name: 'version', Value: '14.0.0' },
                     { Name: 'versionBuild', Value: '0.0.2' }
                 ]
             }
@@ -367,14 +367,14 @@ module.exports = {
                     },
                     defDimensions: [
                         { Name: 'hostname', Value: 'host.big.ip' },
-                        { Name: 'version', Value: '14.0.0.0.1' }
+                        { Name: 'version', Value: '14.0.0' }
                     ]
                 },
                 expected: [
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/pool1' }
                         ],
                         MetricName: 'F5_pools_serverside.curConns',
@@ -384,7 +384,7 @@ module.exports = {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/192.168.19.38:443' },
                             { Name: 'poolName', Value: '/Common/pool1' }
                         ],
@@ -395,7 +395,7 @@ module.exports = {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/192.168.19.39:443' },
                             { Name: 'poolName', Value: '/Common/pool1' }
                         ],
@@ -406,7 +406,7 @@ module.exports = {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/app/poolA' }
                         ],
                         MetricName: 'F5_pools_serverside.curConns',
@@ -416,7 +416,7 @@ module.exports = {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/app/10.1.2.4:80' },
                             { Name: 'poolName', Value: '/Common/app/poolA' }
                         ],
@@ -427,7 +427,7 @@ module.exports = {
                     {
                         Dimensions: [
                             { Name: 'hostname', Value: 'host.big.ip' },
-                            { Name: 'version', Value: '14.0.0.0.1' },
+                            { Name: 'version', Value: '14.0.0' },
                             { Name: 'name', Value: '/Common/app/10.1.2.5:80' },
                             { Name: 'poolName', Value: '/Common/app/poolA' }
                         ],

@@ -8,7 +8,9 @@
 
 'use strict';
 
-const defaultProperties = require('../../../../src/lib/properties.json');
+const sourceCode = require('../../shared/sourceCode');
+
+const defaultProperties = sourceCode('src/lib/properties.json');
 
 const TMCTL_CMD_REGEXP = /'tmctl\s+-c\s+(.*)'/;
 
@@ -21,7 +23,7 @@ const ADD_DEFAULT_CONTEXT_ENDPOINTS = (testEndpoints) => testEndpoints.concat([
             name: 'systemauth.disablebash',
             fullPath: 'systemauth.disablebash',
             generation: 1,
-            selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+            selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2',
             defaultValue: 'false',
             scfConfig: 'true',
             value: 'false',
@@ -457,9 +459,9 @@ module.exports = {
                             b: '2',
                             c: 'spam',
                             pool_name: '/Tenant/app/test',
-                            addr: '1.2.3.4',
+                            addr: '192.168.0.1',
                             port: '8080',
-                            name: '/Tenant/app/test_1.2.3.4_8080',
+                            name: '/Tenant/app/test_192.168.0.1_8080',
                             tenant: 'Tenant',
                             application: 'app'
                         },
@@ -468,9 +470,9 @@ module.exports = {
                             b: '4',
                             c: 'eggs',
                             pool_name: '/Tenant/test',
-                            addr: '5.6.7.8',
+                            addr: '192.168.0.1',
                             port: '8080',
-                            name: '/Tenant/test_5.6.7.8_8080',
+                            name: '/Tenant/test_192.168.0.1_8080',
                             tenant: 'Tenant'
                         }
                     ],
@@ -880,8 +882,8 @@ module.exports = {
                                 kind: 'tm:util:bash:runstate',
                                 commandResult: [
                                     ['a', 'b', 'c', mapKey[0], mapKey[1], mapKey[2]],
-                                    [1, 2, 'spam', '/Tenant/app/test', '1.2.3.4', 8080],
-                                    [3, 4, 'eggs', '/Tenant/test', '5.6.7.8', 8080]
+                                    [1, 2, 'spam', '/Tenant/app/test', '192.168.0.1', 8080],
+                                    [3, 4, 'eggs', '/Tenant/test', '192.168.0.1', 8080]
                                 ].join('\n')
                             };
                         }

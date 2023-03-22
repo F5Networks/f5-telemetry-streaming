@@ -1,0 +1,16 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Log_Analytics",
+        "workspaceId": "workspaceid",
+        "passphrase": {
+            "cipherText": "sharedkey"
+        },
+        "useManagedIdentity": false,
+        "region": "westus",
+        "format": "propertyBased",
+        "managementEndpointUrl": "https://custom-management.azure.com",
+        "odsOpinsightsEndpointUrl": "https://custom-guid.ods.opinsights.azure.com"
+    }
+}

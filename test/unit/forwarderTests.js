@@ -11,17 +11,15 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const actionProcessor = require('../../src/lib/actionProcessor');
-const DataFilter = require('../../src/lib/dataFilter').DataFilter;
-const forwarder = require('../../src/lib/forwarder');
-const consumers = require('../../src/lib/consumers');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const actionProcessor = sourceCode('src/lib/actionProcessor');
+const DataFilter = sourceCode('src/lib/dataFilter').DataFilter;
+const forwarder = sourceCode('src/lib/forwarder');
+const consumers = sourceCode('src/lib/consumers');
 
 moduleCache.remember();
 

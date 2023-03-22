@@ -1,0 +1,17 @@
+{
+    "class": "Telemetry",
+    "My_Listener": {
+        "class": "Telemetry_Listener",
+        "enable": true,
+        "trace": [
+            { "type": "input" },
+            { "type": "output" }
+        ],
+        "port": 6514,
+        "tag": {
+            "tenant": "`T`",
+            "application": "`A`"
+        },
+        "match": ""
+    }
+}

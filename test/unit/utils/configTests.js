@@ -11,22 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const configUtil = require('../../../src/lib/utils/config');
+const assert = require('../shared/assert');
 const configUtilTestData = require('../data/configUtilTests');
-const configWorker = require('../../../src/lib/config');
-const deviceUtil = require('../../../src/lib/utils/device');
-const persistentStorage = require('../../../src/lib/persistentStorage');
+const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
-const teemReporter = require('../../../src/lib/teemReporter');
 const testUtil = require('../shared/util');
-const utilMisc = require('../../../src/lib/utils/misc');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const configUtil = sourceCode('src/lib/utils/config');
+const configWorker = sourceCode('src/lib/config');
 
 moduleCache.remember();
 
@@ -43,13 +37,7 @@ describe('Config Util', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.coreStub({
-            configWorker,
-            deviceUtil,
-            persistentStorage,
-            teemReporter,
-            utilMisc
-        });
+        coreStub = stubs.default.coreStub();
         coreStub.utilMisc.generateUuid.numbersOnly = false;
     });
 
@@ -547,7 +535,7 @@ describe('Config Util', () => {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: {
                             class: 'Secret',
@@ -564,7 +552,7 @@ describe('Config Util', () => {
                     My_Consumer: {
                         class: 'Telemetry_Consumer',
                         type: 'Generic_HTTP',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '`=/Shared/constants/path`',
                         passphrase: 'passphrase'
                     }
@@ -585,7 +573,7 @@ describe('Config Util', () => {
                         type: 'Generic_HTTP',
                         enable: true,
                         method: 'POST',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/foo',
                         port: 443,
                         protocol: 'https',
@@ -611,7 +599,7 @@ describe('Config Util', () => {
                         type: 'Generic_HTTP',
                         enable: true,
                         method: 'POST',
-                        host: '192.0.2.1',
+                        host: '192.168.2.1',
                         path: '/foo',
                         port: 443,
                         protocol: 'https',

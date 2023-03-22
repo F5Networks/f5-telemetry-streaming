@@ -15,7 +15,7 @@ const zip = require('lodash/zip');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-module.exports = {
+const additional = {
     /**
      * Asserts that haystack includes needle
      *
@@ -74,3 +74,10 @@ module.exports = {
         }
     }
 };
+
+Object.keys(additional).forEach((name) => {
+    assert.notProperty(assert, name, 'should have no assertion with such name');
+    assert[name] = additional[name];
+});
+
+module.exports = assert;

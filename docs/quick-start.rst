@@ -170,7 +170,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
     "My_Consumer": {
         "class": "Telemetry_Consumer",
         "type": "Splunk",
-        "host": "192.0.2.1",
+        "host": "192.168.2.1",
         "protocol": "https",
         "port": "8088",
         "passphrase": {
@@ -190,7 +190,7 @@ The next lines of the declaration sets the Consumer, which accepts all telemetry
 +--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | type               | Splunk, AWS_S3, etc.           |  Specifies the consumer type you would like to send Telemetry information to. See the :ref:`settingupconsumer-ref` section for more information.   |
 +--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-| host               | 192.0.2.1                      |  The address of the instance that runs the HTTP event collector                                                                                    |
+| host               | 192.168.2.1                      |  The address of the instance that runs the HTTP event collector                                                                                    |
 +--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | protocol           | **http**, https                |  The protocol of the consumer                                                                                                                      |
 +--------------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+

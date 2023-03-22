@@ -122,8 +122,8 @@ module.exports = {
                                 'status.statusReason': 'Pool member does not have service checking enabled',
                                 totRequests: 0
                             },
-                            '/Common/_auto_192.0.2.2:80': {
-                                addr: '192.0.2.2',
+                            '/Common/_auto_192.168.2.2:80': {
+                                addr: '192.168.2.2',
                                 availabilityState: 'available',
                                 enabledState: 'enabled',
                                 monitorStatus: 'up',
@@ -219,29 +219,29 @@ module.exports = {
                     endpoint: '/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn,selfLink',
                     response: {
                         kind: 'tm:ltm:pool:members:memberscollectionstate',
-                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4.2',
+                        selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members?$select=fqdn%2CselfLink&ver=14.1.4',
                         items: [
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'disabled'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~10.10.0.2%2510:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'disabled'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'enabled',
                                     tmName: 'www.thebestwebsite.com'
                                 }
                             },
                             {
-                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4.2',
+                                selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~bestwebsite:80?ver=14.1.4',
                                 fqdn: {
                                     autopopulate: 'enabled',
                                     tmName: 'www.thebestwebsite.com'
@@ -422,13 +422,13 @@ module.exports = {
                                     }
                                 }
                             },
-                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats': {
+                            'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats': {
                                 nestedStats: {
                                     kind: 'tm:ltm:pool:members:membersstats',
-                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.0.2.2:80/stats?ver=14.1.0',
+                                    selfLink: 'https://localhost/mgmt/tm/ltm/pool/~Common~test_pool_0/members/~Common~_auto_192.168.2.2:80/stats?ver=14.1.0',
                                     entries: {
                                         addr: {
-                                            description: '192.0.2.2'
+                                            description: '192.168.2.2'
                                         },
                                         'connq.ageEdm': {
                                             value: 0
@@ -458,7 +458,7 @@ module.exports = {
                                             description: 'up'
                                         },
                                         nodeName: {
-                                            description: '/Common/_auto_192.0.2.2'
+                                            description: '/Common/_auto_192.168.2.2'
                                         },
                                         poolName: {
                                             description: '/Common/test_pool_0'

@@ -11,20 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const actionProcessor = require('../../src/lib/actionProcessor');
 const actionProcessorData = require('./data/actionProcessorTestsData');
-const dataUtil = require('../../src/lib/utils/data');
-const dataTagging = require('../../src/lib/dataTagging');
+const assert = require('./shared/assert');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
-const EVENT_TYPES = require('../../src/lib/constants').EVENT_TYPES;
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const actionProcessor = sourceCode('src/lib/actionProcessor');
+const dataUtil = sourceCode('src/lib/utils/data');
+const dataTagging = sourceCode('/src/lib/dataTagging');
+const EVENT_TYPES = sourceCode('src/lib/constants').EVENT_TYPES;
 
 moduleCache.remember();
 
@@ -39,7 +36,7 @@ describe('Action Processor', () => {
                 actionProcessorData.processActions[actionType].forEach((testConf) => {
                     testUtil.getCallableIt(testConf)(testConf.name, () => {
                         const deviceCtx = testConf.deviceCtx || {
-                            deviceVersion: '13.0.0.0',
+                            deviceVersion: '13.0.0',
                             provisioning: { ltm: { name: 'ltm', level: 'nominal' } },
                             bashDisabled: false
                         };

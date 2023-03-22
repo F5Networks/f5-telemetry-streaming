@@ -1,0 +1,21 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Statsd",
+        "host": "192.168.2.1",
+        "protocol": "udp",
+        "port": 8125,
+        "convertBooleansToMetrics": false
+    },
+    "My_Consumer_with_AutoTagging": {
+        "class": "Telemetry_Consumer",
+        "type": "Statsd",
+        "host": "192.168.2.1",
+        "protocol": "udp",
+        "port": 8125,
+        "addTags": {
+            "method": "sibling"
+        }
+    }
+}

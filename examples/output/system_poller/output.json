@@ -2,7 +2,7 @@
     "system": {
         "hostname": "telemetry.bigip.com",
         "machineId": "cd5e51b8-74ef-44c8-985c-7965512c2e87",
-        "version": "14.0.0.1",
+        "version": "14.0.0",
         "versionBuild": "0.0.2",
         "location": "Seattle",
         "description": "Telemetry BIG-IP",
@@ -557,7 +557,7 @@
             "clientside.pktsOut": 0,
             "clientside.slowKilled": 0,
             "clientside.totConns": 0,
-            "destination": "192.0.2.11:443",
+            "destination": "192.168.2.11:443",
             "availabilityState": "offline",
             "enabledState": "enabled",
             "isAvailable": false,
@@ -581,7 +581,7 @@
             "clientside.pktsOut": 0,
             "clientside.slowKilled": 0,
             "clientside.totConns": 0,
-            "destination": "192.0.2.11:80",
+            "destination": "192.168.2.11:80",
             "availabilityState": "unknown",
             "enabledState": "enabled",
             "isAvailable": true,
@@ -720,8 +720,8 @@
             "status.statusReason": "The pool is available",
             "name": "/Example_Tenant/A1/web_pool",
             "members": {
-                "/Example_Tenant/192.0.2.12:80": {
-                    "addr": "192.0.2.12",
+                "/Example_Tenant/192.168.2.12:80": {
+                    "addr": "192.168.2.12",
                     "monitorStatus": "up",
                     "poolName": "/Example_Tenant/A1/web_pool",
                     "port": 0,
@@ -736,8 +736,8 @@
                     "enabledState": "enabled",
                     "status.statusReason": "Pool member is available"
                 },
-                "/Example_Tenant/192.0.2.13:80": {
-                    "addr": "192.0.2.13",
+                "/Example_Tenant/192.168.2.13:80": {
+                    "addr": "192.168.2.13",
                     "monitorStatus": "up",
                     "poolName": "/Example_Tenant/A1/web_pool",
                     "port": 0,
@@ -752,8 +752,8 @@
                     "enabledState": "enabled",
                     "status.statusReason": "Pool member is available"
                 },
-                "/Example_Tenant/_auto_192.0.2.14:80": {
-                    "addr": "192.0.2.14",
+                "/Example_Tenant/_auto_192.168.2.14:80": {
+                    "addr": "192.168.2.14",
                     "monitorStatus": "unchecked",
                     "poolName": "/Example_Tenant/A1/web_pool",
                     "port": 80,
@@ -1484,7 +1484,7 @@
             "enabledState": "enabled",
             "status.statusReason": "No enabled pool members available",
             "limitMaxConnections": 0,
-            "fallbackIp": "8.8.8.8",
+            "fallbackIp": "192.168.0.1",
             "fallbackMode": "return-to-dns",
             "limitMaxConnectionsStatus": "disabled",
             "ttl": 30,

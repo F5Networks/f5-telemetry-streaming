@@ -11,19 +11,17 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 
-const EventListenerHandler = require('../../../src/lib/requestHandlers/eventListenerHandler');
-const EventListenerPublisher = require('../../../src/lib/eventListener/dataPublisher');
-const requestRouter = require('../../../src/lib/requestHandlers/router');
+const assert = require('../shared/assert');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
-const ErrorHandler = require('../../../src/lib/requestHandlers/errorHandler');
-const errors = require('../../../src/lib/errors');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const ErrorHandler = sourceCode('src/lib/requestHandlers/errorHandler');
+const errors = sourceCode('src/lib/errors');
+const EventListenerHandler = sourceCode('src/lib/requestHandlers/eventListenerHandler');
+const EventListenerPublisher = sourceCode('src/lib/eventListener/dataPublisher');
+const requestRouter = sourceCode('src/lib/requestHandlers/router');
 
 moduleCache.remember();
 

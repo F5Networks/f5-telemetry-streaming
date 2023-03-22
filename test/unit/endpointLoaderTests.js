@@ -11,18 +11,16 @@
 /* eslint-disable import/order */
 const moduleCache = require('./shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const sinon = require('sinon');
 
-const EndpointLoader = require('../../src/lib/endpointLoader');
-const deviceUtil = require('../../src/lib/utils/device');
+const assert = require('./shared/assert');
 const endpointLoaderTestsData = require('./data/endpointLoaderTestsData');
+const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const EndpointLoader = sourceCode('src/lib/endpointLoader');
+const deviceUtil = sourceCode('src/lib/utils/device');
 
 moduleCache.remember();
 

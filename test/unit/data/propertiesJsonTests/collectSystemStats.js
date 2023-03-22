@@ -142,7 +142,7 @@ module.exports = {
                 system: {
                     hostname: 'test.local',
                     machineId: '00000000-0000-0000-0000-000000000000',
-                    version: '14.1.2.3',
+                    version: '14.1.2',
                     versionBuild: '0.0.5',
                     location: 'Location',
                     description: 'Description',
@@ -538,7 +538,7 @@ module.exports = {
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
                         machineId: '00000000-0000-0000-0000-000000000000',
                         hostname: 'test.local',
-                        version: '14.1.2.3',
+                        version: '14.1.2',
                         build: '0.0.5',
                         chassisSerialNumber: '00000000-0000-0000-0000-000000000001',
                         platformMarketingName: 'Marketing Name',
@@ -554,7 +554,7 @@ module.exports = {
                         name: 'systemauth.disablebash',
                         fullPath: 'systemauth.disablebash',
                         generation: 1,
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2',
                         defaultValue: 'false',
                         scfConfig: 'true',
                         value: 'false',
@@ -1441,7 +1441,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/performance/connections/stats?options=detail',
                     response: `{
                         "kind": "tm:sys:performance:connections:connectionsstats",
-                        "selfLink": "https://localhost/mgmt/tm/sys/performance/connections/stats?options=detail&ver=15.1.6.1",
+                        "selfLink": "https://localhost/mgmt/tm/sys/performance/connections/stats?options=detail&ver=15.1.6",
                         "entries": {
                             "https://localhost/mgmt/tm/sys/performance/connections/Blade%201/stats": {
                                 "nestedStats": {
@@ -2034,7 +2034,7 @@ module.exports = {
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
                         baseMac: '00:01:2:a:B:d0',
                         hostname: 'bigip1',
-                        version: '12.1.5.1',
+                        version: '12.1.5',
                         machineId: '00000000-0000-0000-0000-000000000000'
                     }
                 },
@@ -2055,7 +2055,7 @@ module.exports = {
                         name: 'systemauth.disablebash',
                         fullPath: 'systemauth.disablebash',
                         generation: 1,
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3',
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2',
                         defaultValue: 'false',
                         scfConfig: 'true',
                         value: 'false',
@@ -2155,7 +2155,7 @@ module.exports = {
                         selfLink: 'https://localhost/mgmt/shared/identified-devices/config/device-info',
                         baseMac: '00:01:2:a:B:d0',
                         hostname: 'bigip1',
-                        version: '12.1.5.1',
+                        version: '12.1.5',
                         machineId: '00000000-0000-0000-0000-000000000000'
                     }
                 },
@@ -2170,7 +2170,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
                     response: {
                         kind: 'tm:sys:db:dbstate',
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2'
                     }
                 }
             ]
@@ -2254,7 +2254,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
                     response: {
                         kind: 'tm:sys:db:dbstate',
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2'
                     }
                 },
                 {
@@ -2502,7 +2502,7 @@ module.exports = {
                     endpoint: '/mgmt/tm/sys/db/systemauth.disablebash',
                     response: {
                         kind: 'tm:sys:db:dbstate',
-                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2.3'
+                        selfLink: 'https://localhost/mgmt/tm/sys/db/systemauth.disablebash?ver=14.1.2'
                     }
                 },
                 {

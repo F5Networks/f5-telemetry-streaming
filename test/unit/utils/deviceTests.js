@@ -11,8 +11,6 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const childProcess = require('child_process');
 const crypto = require('crypto');
 const os = require('os');
@@ -22,13 +20,13 @@ const request = require('request');
 const sinon = require('sinon');
 const urllib = require('url');
 
-const constants = require('../../../src/lib/constants');
-const deviceUtil = require('../../../src/lib/utils/device');
+const assert = require('../shared/assert');
 const deviceUtilTestsData = require('../data/deviceUtilTestsData');
+const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-chai.use(chaiAsPromised);
-const assert = chai.assert;
+const constants = sourceCode('src/lib/constants');
+const deviceUtil = sourceCode('src/lib/utils/device');
 
 moduleCache.remember();
 
@@ -478,20 +476,20 @@ describe('Device Util', () => {
                 [{
                     endpoint: '/uri/something',
                     requestHeaders: {
-                        'x-f5-auth-token': 'authToken',
+                        'x-f5-auth-token': 'auth-token',
                         'User-Agent': constants.USER_AGENT
                     },
                     response: 'something'
                 }],
                 {
-                    host: '1.1.1.1',
+                    host: '192.168.0.1',
                     port: constants.DEVICE_REST_API.PORT,
                     proto: constants.DEVICE_REST_API.PROTOCOL
                 }
             );
             const opts = {
                 headers: {
-                    'x-f5-auth-token': 'authToken'
+                    'x-f5-auth-token': 'auth-token'
                 },
                 credentials: {
                     token: 'newToken',
@@ -499,7 +497,7 @@ describe('Device Util', () => {
                 }
             };
             return assert.becomes(
-                deviceUtil.makeDeviceRequest('1.1.1.1', '/uri/something', opts),
+                deviceUtil.makeDeviceRequest('192.168.0.1', '/uri/something', opts),
                 'something'
             );
         });

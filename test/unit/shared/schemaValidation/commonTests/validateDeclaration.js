@@ -8,14 +8,10 @@
 
 'use strict';
 
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const lodash = require('lodash');
 
+const assert = require('../../assert');
 const utils = require('../utils');
-
-chai.use(chaiAsPromised);
-const assert = chai.assert;
 
 module.exports = {
     /**
