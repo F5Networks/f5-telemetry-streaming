@@ -24,7 +24,7 @@ Currently supported versions:
 | Software Version | Release Type           | First Customer Ship | End of Support   |
 |------------------|------------------------|---------------------|------------------|
 | TS 1.27.1        | LTS                    |  19-Apr-2022        | 19-Apr-2023      |
-| TS 1.33.0        | Feature                |  22-Mar-2023        | Maintenance mode |
+| TS 1.33.0        | LTS                    |  22-Mar-2023        | Maintenance mode |
 
 Versions no longer supported:
 

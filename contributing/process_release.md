@@ -68,7 +68,7 @@
     * 1.30.0 - 16.0 MB
     * 1.31.0 - 20.5 MB (NOTE: inclusion of OpenTelemetry and grpc-js libraries)
     * 1.32.0 - 20.5 MB
-    * 1.32.0 - 22.1 MB
+    * 1.33.0 - 22.1 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
