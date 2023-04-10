@@ -50,7 +50,7 @@
         "ajv": "^6.12.6",
         "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
-        "aws-sdk": "2.1018.0",
+        "aws-sdk": "2.1354.0",
         "eventemitter2": "^6.4.9",
         "google-auth-library": "^6.1.6",
         "jmespath": "^0.16.0",
