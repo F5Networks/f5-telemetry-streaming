@@ -286,7 +286,7 @@
             "key": "networkInterfaces",
             "normalization": [
                 {
-                    "filterKeys": { "exclude": [ "counters.errorsAll", "counters.dropsAll", "counters.pktsIn", "counters.pktsOut", "mediaActive", "tmName" ] }
+                    "filterKeys": { "exclude": [ ] }
                 },
                 {
                     "renameKeys": { "patterns": { "net/interface": { "pattern": "([0-9]+\\.[0-9]+|(?!\/)mgmt(?=\/))" } } }
