@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -13,11 +21,11 @@ const configWorker = require('../config');
 const constants = require('../constants');
 const dataPipeline = require('../dataPipeline');
 const logger = require('../logger');
-const messageStream = require('./messageStream');
 const normalize = require('../normalize');
 const onApplicationExit = require('../utils/misc').onApplicationExit;
 const promiseUtil = require('../utils/promise');
 const properties = require('../properties.json');
+const StreamService = require('./streamService');
 const stringify = require('../utils/misc').stringify;
 const tracerMgr = require('../tracerManager');
 
@@ -95,11 +103,16 @@ class ReceiversManager {
      *
      * @returns {MessageStream} receiver
      */
-    getMessageStream(port) {
-        if (!this.registered[port]) {
-            this.registered[port] = new messageStream.MessageStream(port, { logger: logger.getChild(`messageStream:${port}`) });
+    getMessageStream(port, parsingMode, bufferingStrategy) {
+        const key = `${port}-${parsingMode}-${bufferingStrategy}`;
+        if (!this.registered[key]) {
+            this.registered[key] = new StreamService(port, {
+                bufferingStrategy,
+                logger: logger.getChild(`messageStream:${port}`),
+                parsingMode
+            });
         }
-        return this.registered[port];
+        return this.registered[key];
     }
 
     /**
@@ -109,12 +122,12 @@ class ReceiversManager {
      */
     start() {
         const receivers = [];
-        Object.keys(this.registered).forEach((port) => {
-            const receiver = this.registered[port];
-            if (receiver.hasListeners('messages') && !receiver.isRunning()) {
+        Object.keys(this.registered).forEach((key) => {
+            const receiver = this.registered[key];
+            if (receiver.ee.hasListeners('messages') && !receiver.isRunning()) {
                 receivers.push(receiver);
             }
-            if (receiver.hasListeners('rawData')) {
+            if (receiver.ee.hasListeners('rawData')) {
                 receiver.enableRawDataForwarding();
             } else {
                 receiver.disableRawDataForwarding();
@@ -135,10 +148,10 @@ class ReceiversManager {
      */
     stopAndRemoveInactive() {
         const receivers = [];
-        Object.keys(this.registered).forEach((port) => {
-            const receiver = this.registered[port];
-            if (!receiver.hasListeners('messages')) {
-                delete this.registered[port];
+        Object.keys(this.registered).forEach((key) => {
+            const receiver = this.registered[key];
+            if (!receiver.ee.hasListeners('messages')) {
+                delete this.registered[key];
                 if (!receiver.isDestroyed()) {
                     receivers.push(receiver);
                 }
@@ -185,7 +198,7 @@ class EventListener {
             throw new Error('Message Stream attached already!');
         }
         this.messageStream = ms;
-        this.messageStream.on('messages', this.dataCallback);
+        this.messageStream.ee.on('messages', this.dataCallback);
     }
 
     /**
@@ -193,8 +206,8 @@ class EventListener {
      */
     detachMessageStream() {
         if (this.messageStream) {
-            this.messageStream.removeListener('messages', this.dataCallback);
-            this.messageStream.removeListener('rawData', this.rawDataCallback);
+            this.messageStream.ee.removeListener('messages', this.dataCallback);
+            this.messageStream.ee.removeListener('rawData', this.rawDataCallback);
             this.messageStream = null;
         }
     }
@@ -284,15 +297,15 @@ class EventListener {
      * @returns {void} once event listener enabled/disabled raw data handling
      */
     updateRawDataHandling() {
-        const isRegistered = this.messageStream.listeners('rawData').indexOf(this.rawDataCallback) !== -1;
+        const isRegistered = this.messageStream.ee.listeners('rawData').indexOf(this.rawDataCallback) !== -1;
         if (this.inputTracer) {
             if (!isRegistered) {
                 this.logger.debug('Enabling input tracing');
-                this.messageStream.on('rawData', this.rawDataCallback);
+                this.messageStream.ee.on('rawData', this.rawDataCallback);
             }
         } else if (isRegistered) {
             this.logger.debug('Disabling input tracing');
-            this.messageStream.removeListener('rawData', this.rawDataCallback);
+            this.messageStream.ee.removeListener('rawData', this.rawDataCallback);
         }
     }
 }
@@ -314,13 +327,13 @@ EventListener.instances = {};
  *
  * @returns {EventListener} event listener instance
  */
-EventListener.get = function (name, port) {
+EventListener.get = function (name, port, parsingMode, bufferingStrategy) {
     if (!EventListener.instances[name]) {
         EventListener.instances[name] = new EventListener(name);
     }
     const listener = EventListener.instances[name];
     listener.detachMessageStream();
-    listener.attachMessageStream(EventListener.receiversManager.getMessageStream(port));
+    listener.attachMessageStream(EventListener.receiversManager.getMessageStream(port, parsingMode, bufferingStrategy));
     return listener;
 };
 
@@ -358,6 +371,7 @@ EventListener.remove = function (listener) {
 configWorker.on('change', (config) => {
     logger.debug('configWorker change event in eventListener'); // helpful debug
     const configuredListeners = configUtil.getTelemetryListeners(config);
+    const controls = configUtil.getTelemetryControls(config);
 
     // stop all removed listeners
     EventListener.getAll().forEach((listener) => {
@@ -387,7 +401,7 @@ configWorker.on('change', (config) => {
         const msgPrefix = EventListener.getByName(name) ? 'Updating event' : 'Creating new event';
         logger.debug(`${msgPrefix} listener - ${name} [port = ${port}]`);
 
-        const listener = EventListener.get(name, port);
+        const listener = EventListener.get(name, port, controls.listenerMode || 'buffer', controls.listenerStrategy || 'ring');
         listener.updateConfig({
             actions: listenerConfig.actions,
             destinationIds: configUtil.getReceivers(config, listenerConfig).map((r) => r.id),

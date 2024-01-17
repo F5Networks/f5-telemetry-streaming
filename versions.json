@@ -1,11 +1,12 @@
 {
   "versionMetaTimestamp": 1540928503,
   "latestVersion": {
-    "name": "1.33 (LTS)",
+    "name": "1.34 (non-LTS)",
     "url": "/products/extensions/f5-telemetry-streaming/latest/"
   },
   "otherVersions": [
     { "name": "1.20.1 (LTS)", "url": "/products/extensions/f5-telemetry-streaming/1.20/"},
-    { "name": "1.27.1 (LTS)", "url": "/products/extensions/f5-telemetry-streaming/1.27/"}
+    { "name": "1.27.1 (LTS)", "url": "/products/extensions/f5-telemetry-streaming/1.27/"},
+    { "name": "1.33 (LTS)", "url": "/products/extensions/f5-telemetry-streaming/1.33/"}
   ]
 }

@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -99,14 +107,14 @@ class DockerConnector {
     /**
      * List running containers
      *
-     * @param {boolean} all - list all containers
+     * @param {boolean} all - list all containers (not running too)
      *
      * @returns {Promise<Array<{id: string, name: string}>>} resolved with list of container info
      */
     containers(all) {
         this.logger.info('Request to list containers', { all });
         all = all ? ' -a' : '';
-        return this.exec(`container list --format "{{json .}}" -q${all}`)
+        return this.exec(`container list --format "{{json .}}"${all}`)
             .then((ret) => (ret.stdout
                 ? ret.stdout
                     .split('\n')
@@ -163,14 +171,20 @@ class DockerConnector {
     /**
      * List images
      *
-     * @param {boolean} all - list all images
+     * @param {boolean|string|Array<string>} allOrImage - if true then list all
+     *  images (intermediate images too) or if string/array of string then search for image
      *
      * @returns {Promise<Array<{id: string, repo: string, tag: string}>>} resolved with list of image info
      */
-    images(all) {
-        this.logger.info('Request to list images', { all });
-        all = all ? ' -a' : '';
-        return this.exec(`images --format "{{json .}}" -q${all}`)
+    images(allOrImage) {
+        this.logger.info('Request to list images', { allOrImage });
+        if (typeof allOrImage === 'boolean') {
+            allOrImage = allOrImage ? ' -a' : '';
+        } else if (allOrImage) {
+            allOrImage = Array.isArray(allOrImage) ? allOrImage : [allOrImage];
+            allOrImage = ` ${allOrImage.join(' ')}`;
+        }
+        return this.exec(`images --format "{{json .}}"${allOrImage}`)
             .then((ret) => (ret.stdout
                 ? ret.stdout
                     .split('\n')
@@ -231,25 +245,67 @@ class DockerConnector {
      * Pull image
      *
      * @param {string} image - image
+     * @param {object} [options] - options
+     * @param {boolean} [options.existing] - re-use existing image
      *
      * @returns {Promise<SSHExecResponse>} resolve once image pulled
      */
-    pull(image) {
-        this.logger.info('Request to pull an image');
-        return this.exec(`pull ${image}`);
+    pull(image, options) {
+        let p = Promise.resolve(true);
+        options = options || {};
+
+        if (options.existing) {
+            this.logger.info('Trying to find existing image');
+            p = p.then(() => this.images(image))
+                .then((response) => response.length === 0);
+        }
+        return p.then((doPull) => {
+            if (doPull) {
+                this.logger.info('Request to pull an image');
+                return this.exec(`pull ${image}`);
+            }
+            this.logger.info('Re-using existing image');
+            return Promise.resolve();
+        });
     }
 
     /**
      * Remove all systems, volumes, containers, images
      *
+     * @param {object} [options] - options
+     * @param {boolean} [options.containers = true] - remove containers
+     * @param {boolean} [options.images = true] - remove images
+     * @param {boolean} [options.systems = true] - remove systems
+     * @param {boolean} [options.volumes = true] - remove volumes
+     *
      * @returns {Promise<SSHExecResponse>} resolved once all actions done
      */
-    removeAll() {
+    removeAll(options) {
+        let p = Promise.resolve();
+        options = options || {};
+
         this.logger.info('Request to cleanup all components of docker');
-        return this.removeAllContainers()
-            .then(() => this.removeAllImages())
-            .then(() => this.pruneSystems())
-            .then(() => this.pruneVolumes());
+        if (options.containers !== false) {
+            p = p.then(() => this.removeAllContainers());
+        } else {
+            this.logger.warning('Containers preserved (options set to true)');
+        }
+        if (options.images !== false) {
+            p = p.then(() => this.removeAllImages());
+        } else {
+            this.logger.warning('Images preserved (options set to true)');
+        }
+        if (options.systems !== false) {
+            p = p.then(() => this.pruneSystems());
+        } else {
+            this.logger.warning('Systems preserved (options set to true)');
+        }
+        if (options.volumes !== false) {
+            p = p.then(() => this.pruneVolumes());
+        } else {
+            this.logger.warning('Volumes preserved (options set to true)');
+        }
+        return p;
     }
 
     /**

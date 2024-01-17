@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -537,6 +545,25 @@ describe('Date and Time utils', () => {
             assert.strictEqual(nextDate.getMonth(), 2);
             assert.strictEqual(nextDate.getDate(), 4);
             assert.strictEqual(nextDate.getHours(), 5);
+        });
+    });
+
+    describe('nanohrtime', () => {
+        it('should convert high-resolution timestamp to nanoseconds', () => {
+            const nanosec = 1e9;
+            assert.deepStrictEqual(datetimeUtil.nanohrtime([1, 0]), nanosec);
+        });
+    });
+
+    describe('hrtimestamp', () => {
+        it('should return high-resolution timestamp in nanoseconds', () => {
+            const t1 = datetimeUtil.hrtimestamp();
+            const t2 = datetimeUtil.hrtimestamp();
+            const nanosec = 1e9;
+
+            assert.isAbove(t2, t1, 'should return dynamic value');
+            assert.isAbove(t2, nanosec);
+            assert.isAbove(t1, nanosec);
         });
     });
 });

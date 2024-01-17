@@ -1,6 +1,16 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.34.0
+### Added
+- NEXTACC-387: Update Event Listener to utilize memory and CPU more efficient
+- NEXTACC-396: Add more "build" related metadata to /info endpoint
+- NEXTACC-402: Add 'verbose' logging to reduce amount of unnecessary log messages
+### Fixed
+### Changed
+- TS-752: Update npm packages (@f5devcentral/f5-teem from 1.5.0 to 1.6.1, @grpc/grpc-js from 1.7.1 to 1.8.18, @grpc/proto-loader from 0.7.3 to 0.7.8, @opentelemetry/api from 1.2.0 to 1.4.1, @opentelemetry/exporter-metrics-otlp-grpc from 0.33.0 to 0.41.0, @opentelemetry/exporter-metrics-otlp-http from 0.33.0 to 0.41.0, @opentelemetry/exporter-metrics-otlp-proto from 0.33.0 to 0.41.0, @opentelemetry/sdk-metrics from 0.33.0 to 1.15.0)
+### Removed
+
 ## 1.33.0
 ### Added
 - TS-697: [GitHub #213](https://github.com/F5Networks/f5-telemetry-streaming/issues/213) Allow user provided endpoints for the Azure consumers

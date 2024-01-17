@@ -26,7 +26,8 @@ The following is an example declaration containing a Controls class that sets th
 
     {
         "class": "Telemetry",
-        "Controls": {
+        "controls": {
+            "class":"Controls",
             "logLevel": "debug"
         },
         "My_System": {

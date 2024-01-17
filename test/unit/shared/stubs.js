@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -338,52 +346,53 @@ const _module = module.exports = {
      *
      * @param {module} logger - module
      * @param {object} [options] - options
-     * @param {boolean} [options.setToDebug = true] - set default logging level to DEBUG
+     * @param {boolean} [options.setToVerbose = true] - set default logging level to VERBOSE
      * @param {boolean} [options.ignoreLevelChange = true] - ignore logging level change
      *
      * @returns {LoggerStubCtx} stub context
      */
     logger(logger, options) {
         options = assignDefaults(options, {
-            setToDebug: true,
+            setToVerbose: true,
             ignoreLevelChange: true
         });
-        if (options.setToDebug) {
-            logger.setLogLevel('debug');
+        if (options.setToVerbose) {
+            logger.setLogLevel('verbose');
         }
         const setLogLevelOrigin = logger.setLogLevel;
         // deeply tied to current implementation
         const ctx = {
             messages: {
-                all: [],
-                debug: [],
-                error: [],
-                info: [],
-                warning: []
+                all: []
             },
             logLevelHistory: [],
             setLogLevel: sinon.stub(logger, 'setLogLevel')
         };
-        const f5Levels = [
-            ['finest', 'debug'],
+        const levels = [
+            ['verbose', 'finest'],
+            ['debug', 'finest'],
             ['info', 'info'],
-            ['severe', 'error'],
-            ['warning', 'warning']
+            ['warning', 'warning'],
+            ['error', 'severe']
         ];
-        f5Levels.forEach((pair) => {
-            const f5level = pair[0];
-            const msgLvl = pair[1];
-            ctx[f5level] = sinon.stub(logger.logger, f5level);
-            ctx[f5level].callsFake((message) => {
+        levels.forEach((pair) => {
+            const msgLevel = pair[0];
+            const f5level = pair[1];
+            const stubKey = `proxy_${msgLevel}`;
+
+            ctx.messages[msgLevel] = [];
+            ctx[stubKey] = sinon.stub(logger.logger, msgLevel);
+            ctx[stubKey].callsFake((message) => {
                 ctx.messages.all.push(message);
-                ctx.messages[msgLvl].push(message);
-                ctx[f5level].wrappedMethod.call(logger.logger, message);
+                ctx.messages[msgLevel].push(message);
+                ctx[stubKey].wrappedMethod.call(logger.logger, message);
 
                 if (tsLogsForwarder.logger) {
                     tsLogsForwarder.logger[tsLogsForwarder.levels[f5level]](message);
                 }
             });
         });
+
         ctx.setLogLevel.callsFake((level) => {
             ctx.logLevelHistory.push(level);
             if (!options.ignoreLevelChange) {
@@ -391,8 +400,9 @@ const _module = module.exports = {
             }
         });
         ctx.removeAllMessages = () => {
-            Object.keys(ctx.messages).forEach((key) => {
-                ctx.messages[key] = [];
+            ctx.messages = { all: [] };
+            levels.forEach((pair) => {
+                ctx.messages[pair[0]] = [];
             });
         };
         return ctx;
@@ -722,11 +732,11 @@ _module.default = {
  * @property {Array<string>} messages.info - info messages
  * @property {Array<string>} messages.warning - warning messages
  * @property {Array<string>} logLevelHistory - log level history
- * @property {object} finest - sinon stub for Logger.logger.finest
- * @property {object} info - sinon stub for Logger.logger.info
- * @property {object} severe - sinon stub for Logger.logger.severe
- * @property {object} warning - sinon stub for Logger.logger.warning
- * @property {object} setLogLevel - sinon stub for Logger.setLogLevel
+ * @property {object} proxy_verbose - sinon stub for Logger.logger.verbose
+ * @property {object} proxy_debug - sinon stub for Logger.logger.debug
+ * @property {object} proxy_info - sinon stub for Logger.logger.info
+ * @property {object} proxy_warning - sinon stub for Logger.logger.warning
+ * @property {object} proxy_erro - sinon stub for Logger.logger.error
  */
 /**
  * @typedef iHealthPollerStubCtx

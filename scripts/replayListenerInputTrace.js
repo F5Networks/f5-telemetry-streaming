@@ -1,9 +1,17 @@
-/*
- * Copyright 2021. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -26,7 +34,7 @@ if (require.main === module) {
             console.error('Uncaught error', error);
             return 1;
         })
-        .then(rc => process.exit(rc || 0));
+        .then((rc) => process.exit(rc || 0));
 }
 
 /**
@@ -230,7 +238,9 @@ class UdpSocketWrapper extends TcpUdpSocketWrapper {
         if (this.socket) {
             const socket = this.socket;
             this.socket = null;
-            return new Promise(resolve => socket.close(resolve));
+            return new Promise((resolve) => {
+                socket.close(resolve);
+            });
         }
         return Promise.resolve();
     }
@@ -303,7 +313,7 @@ class ConnectionsManager {
      */
     destroyAll() {
         console.log('Destroying all established connections');
-        return Promise.all(this.getAllConnections().map(conn => conn.destroy()));
+        return Promise.all(this.getAllConnections().map((conn) => conn.destroy()));
     }
 
     /**
@@ -313,7 +323,7 @@ class ConnectionsManager {
      */
     establishConnections() {
         onAppExit(this.destroyAll.bind(this));
-        return Promise.all(this.getAllConnections().map(conn => conn.connect()));
+        return Promise.all(this.getAllConnections().map((conn) => conn.connect()));
     }
 
     /**
@@ -391,18 +401,18 @@ function replay(options) {
         .then(() => {
             console.log(`Reading and parsing records from "${options.file}"`);
             let records = JSON.parse(fs.readFileSync(options.file))
-                .map(jsonData => new Record(jsonData.data));
+                .map((jsonData) => new Record(jsonData.data));
 
             console.log(`${records.length} records parsed`);
 
             if (options.senderKey.length) {
                 console.log(`Keeping records with senderKey === ${options.senderKey}`);
-                records = records.filter(record => options.senderKey.indexOf(record.senderKey) !== -1);
+                records = records.filter((record) => options.senderKey.indexOf(record.senderKey) !== -1);
                 console.log(`${records.length} records left`);
             }
             if (options.protocol.length) {
                 console.log(`Keeping records with protocol === ${options.protocol}`);
-                records = records.filter(record => options.protocol.indexOf(record.protocol) !== -1);
+                records = records.filter((record) => options.protocol.indexOf(record.protocol) !== -1);
                 console.log(`${records.length} records left`);
             }
 
@@ -433,10 +443,10 @@ function sendData(records, options) {
             });
 
             console.log('Creating connection for each data flow');
-            Array.from(new Set(records.map(record => record.protocol)))
-                .forEach(protocol => Array.from(new Set(
-                    records.filter(record => record.protocol === protocol)
-                        .map(record => record.senderKey)
+            Array.from(new Set(records.map((record) => record.protocol)))
+                .forEach((protocol) => Array.from(new Set(
+                    records.filter((record) => record.protocol === protocol)
+                        .map((record) => record.senderKey)
                 ))
                     .forEach((senderKey) => {
                         console.log(`Registering connection for "${senderKey}", protocol "${protocol}`);
@@ -492,7 +502,7 @@ function parseArgs() {
             // commander@3.0.2 to support node v4 env
             let commander;
             try {
-                // eslint-disable-next-line global-require
+                // eslint-disable-next-line global-require, import/no-extraneous-dependencies
                 commander = require('commander');
             } catch (error) {
                 console.error('Unable to import "commander" package. Please, try to install it using following command:\n\nnpm install --no-save commander@~3.0.2\n');

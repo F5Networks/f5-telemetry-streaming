@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 /**
  * THIS IS EXPERIMENTAL VERSION OF DATA DOG CONSUMER. IT MIGHT CRASH,
@@ -357,7 +365,7 @@ module.exports = function (context) {
                 uri: getDataDogEndpoint(ddType)
             }))
             .then(() => {
-                context.logger.debug(`successfully sent ${dataChunk.length} bytes of data`);
+                context.logger.verbose(`successfully sent ${dataChunk.length} bytes of data`);
             })
             .catch((err) => {
                 context.logger.error(`Unable to send ${dataChunk.length} bytes of data. Error: ${err.message ? err.message : err}`);
@@ -380,7 +388,7 @@ module.exports = function (context) {
                 uri: getDataDogEndpoint(DATA_DOG_TYPES.LOGS)
             }))
             .then(() => {
-                context.logger.debug(`successfully sent ${dataChunk.length} bytes of data`);
+                context.logger.verbose(`successfully sent ${dataChunk.length} bytes of data`);
             })
             .catch((err) => {
                 context.logger.error(`Unable to send ${dataChunk.length} bytes of data. Error: ${err.message ? err.message : err}`);
@@ -389,7 +397,7 @@ module.exports = function (context) {
     ])
         .then((results) => {
             promiseUtil.getValues(results); // throws error if found it
-            context.logger.debug('success');
+            context.logger.verbose('success');
         })
         .catch((err) => {
             context.logger.error(`Unable to forward to DataDog consumer. Error: ${err.message ? err.message : err}`);

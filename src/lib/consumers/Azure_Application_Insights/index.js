@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -17,19 +25,19 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
  */
 module.exports = function (context) {
     if (context.event.type !== EVENT_TYPES.SYSTEM_POLLER) {
-        context.logger.debug('Skipping non-systemPoller data.');
+        context.logger.verbose('Skipping non-systemPoller data.');
         return Promise.resolve();
     }
 
     const metrics = azureUtil.getMetrics(context.event.data);
     if (metrics.length === 0) {
-        context.logger.debug('No metrics found.');
+        context.logger.verbose('No metrics found.');
         return Promise.resolve();
     }
 
     const setupDefaultClient = () => {
         if (!appInsights.defaultClient) {
-            context.logger.debug('Initializing default client');
+            context.logger.verbose('Initializing default client');
 
             // these set functions configure the global SDK behavior
             // a "defaultClient" needs to be initialized
@@ -45,7 +53,7 @@ module.exports = function (context) {
         }
         // lib only supports console out for non-error level logs
         // by default these will go to /var/tmp/restnoded.out
-        const enableRestNodedOut = context.logger.getLevelName() === 'debug';
+        const enableRestNodedOut = context.logger.getLevelName() === 'verbose';
         appInsights.Configuration.setInternalLogging(enableRestNodedOut, enableRestNodedOut);
     };
 
@@ -80,7 +88,7 @@ module.exports = function (context) {
                 } catch (err) {
                     context.logger.exception(`Unable to forward to Azure App Insights consumer. ${item.name || item.instrKey}`, err);
                 }
-                context.logger.debug(`Finished sending total of ${metrics.length} metrics to Azure App Insights ${item.name || item.instrKey}`);
+                context.logger.verbose(`Finished sending total of ${metrics.length} metrics to Azure App Insights ${item.name || item.instrKey}`);
             });
             return Promise.resolve();
         })

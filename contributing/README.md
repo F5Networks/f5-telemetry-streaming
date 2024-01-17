@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.33.0"
+        "schemaVersion": "1.34.0"
     }
 }
 ```
@@ -163,7 +163,7 @@ All core modules are included inside `../src/lib/`
 - [systemPoller.js](../src/lib/systemPoller.js)
     - Purpose: Handles CRUD-like actions for any system pollers required based on client configuration
     - Related: See [iHealthPoller.js](../src/lib/iHealthPoller.js)
-- [eventListener.js](../src/lib/eventListener.js)
+- [eventListener.js](../src/lib/eventListener/index.js)
     - Purpose: Handles CRUD-like actions for any event listeners required based on client configuration.
 - [systemStats.js](../src/lib/systemStats.js)
     - Purpose: Called by system poller to create stats object based on the static JSON configuration files available in `config/` directory such as [properties.json](../src/lib/properties.json)
@@ -349,9 +349,8 @@ Additional information about the testing methodology can be found in the [test r
 ---
 ### Release methodology
 
-Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml).  Check out CI file and GitLab documentation for more details.
+Build/publish makes heavy use of GitLab and [.gitlab-ci.yml](../.gitlab-ci.yml). Check out CI file and GitLab documentation for more details.
 
-- Add *new* RPM to `dist/` directory (from build artifact on mainline development branch)
 - Publish to artifactory (automated on new tags)
 - Push to GitLab (mainline release branch)
 - Push to GitHub (mainline release branch)
@@ -375,3 +374,19 @@ The current process involves adding a `doc` label to an issue to note it require
 See the [examples](../examples/declarations) directory for curated artifacts such as declaration examples, output examples, AS3 declaration example, etc.
 
 See the [INTERNAL_README.md](../INTERNAL_README.md) for an internal explanation of most features.
+
+### Development
+
+Local environment requirements:
+- NodeJS - any version
+- npm - preferable is latest release for v7 because it uses lockfile version 2 that is backward compatible with version 1 (important for node 4.8.0 + npm@5 and node 8.11.1 + npm@6). But if you not going to add new packages while working on a task then any npm version can be used and then you should use `npm run install-test` command to install packages and prepare dev env.
+
+Note: to make everyday live easier you may start to use tools like `volta` or `nvm`.
+
+### Package updates
+
+Some packages has newer versions that dropped support for node@4 and node@8 - TS should use older version (despite the type of package - dev or prod). In this case those packages may have vulnerabilities that will be never fixed. We can try to contribute to the corresponding project/package but it is unlikle the fix will be accepted for such old version. In this case add note(s) to package.json file - see **comments** section for examples.
+
+Some `devDependencies`, e.g. **mocha**, **nyc**, intentionally pinned to older versions to avoid additional manipulations at CI/CD time or local envrionment.
+
+`devDependencies` that are unique for `functional` testing only, e.g. **ssh2**, may use the version that applicable for `functional` testing evnrionment only.

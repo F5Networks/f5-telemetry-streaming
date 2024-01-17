@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -20,8 +28,8 @@ const stubs = require('./shared/stubs');
 const sourceCode = require('./shared/sourceCode');
 const testUtil = require('./shared/util');
 
+const appInfo = sourceCode('src/lib/appInfo');
 const configWorker = sourceCode('src/lib/config');
-const constants = sourceCode('src/lib/constants');
 const deviceUtil = sourceCode('src/lib/utils/device');
 const persistentStorage = sourceCode('src/lib/persistentStorage');
 const teemReporter = sourceCode('src/lib/teemReporter');
@@ -113,7 +121,7 @@ describe('Config', () => {
             };
             const validatedObj = {
                 class: 'Telemetry',
-                schemaVersion: constants.VERSION,
+                schemaVersion: appInfo.version,
                 My_Consumer: {
                     class: 'Telemetry_Consumer',
                     type: 'default',
@@ -202,7 +210,7 @@ describe('Config', () => {
             };
             const expectedDeclaration = {
                 class: 'Telemetry',
-                schemaVersion: constants.VERSION,
+                schemaVersion: appInfo.version,
                 Shared: {
                     class: 'Shared',
                     constants: {
@@ -303,7 +311,7 @@ describe('Config', () => {
             return persistentStorage.persistentStorage.load()
                 .then(() => configWorker.load())
                 .then((declaration) => {
-                    assert.deepStrictEqual(declaration, { class: 'Telemetry', schemaVersion: constants.VERSION });
+                    assert.deepStrictEqual(declaration, { class: 'Telemetry', schemaVersion: appInfo.version });
                     assert.deepStrictEqual(coreStub.configWorker.configs[0], { components: [], mappings: {} });
                     assert.deepStrictEqual(configWorker.currentConfig, { components: [], mappings: {} });
                     return configWorker.getDeclaration();
@@ -341,8 +349,8 @@ describe('Config', () => {
             return persistentStorage.persistentStorage.load()
                 .then(() => configWorker.load())
                 .then((declaration) => {
-                    assert.deepStrictEqual(coreStub.persistentStorage.savedData.config, { raw: { class: 'Telemetry', schemaVersion: constants.VERSION } });
-                    assert.deepStrictEqual(declaration, { class: 'Telemetry', schemaVersion: constants.VERSION });
+                    assert.deepStrictEqual(coreStub.persistentStorage.savedData.config, { raw: { class: 'Telemetry', schemaVersion: appInfo.version } });
+                    assert.deepStrictEqual(declaration, { class: 'Telemetry', schemaVersion: appInfo.version });
                     assert.deepStrictEqual(coreStub.configWorker.configs[0], { components: [], mappings: {} });
                     assert.deepStrictEqual(configWorker.currentConfig, { components: [], mappings: {} });
                 });
@@ -357,7 +365,7 @@ describe('Config', () => {
             };
             const expectedDeclaration = {
                 class: 'Telemetry',
-                schemaVersion: constants.VERSION,
+                schemaVersion: appInfo.version,
                 My_Consumer: {
                     class: 'Telemetry_Consumer',
                     type: 'default',
@@ -392,7 +400,7 @@ describe('Config', () => {
                     assert.deepStrictEqual(coreStub.persistentStorage.savedData.config, {
                         raw: {
                             class: 'Telemetry',
-                            schemaVersion: constants.VERSION,
+                            schemaVersion: appInfo.version,
                             My_Consumer: {
                                 class: 'Telemetry_Consumer',
                                 type: 'default',
@@ -752,7 +760,7 @@ describe('Config', () => {
                                 logLevel: 'error',
                                 memoryThresholdPercent: 90
                             }),
-                            schemaVersion: constants.VERSION
+                            schemaVersion: appInfo.version
                         }),
                         metadata: {
                             msg: 'here'

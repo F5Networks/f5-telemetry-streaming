@@ -1,4 +1,4 @@
-image: ${ARTIFACTORY_DOCKER_HUB}/node:8
+image: ${ARTIFACTORY_DOCKER_HUB}/node:16
 
 stages:
     - lint
@@ -25,30 +25,28 @@ include:
 # Jobs and commands templates                                #
 #                                                            #
 ##############################################################
-.install_unittest_packages_cmd: &install_unittest_packages_cmd
-- nodeFullVer=$(node --version)
-- echo "Node.js version - $nodeFullVer"
-- echo "NPM origin version - $(npm --version)"
-- ver=$(echo $nodeFullVer | head -c 3)
-- if [[ "$ver" == "v4." ]]; then
--   npm install --global npm@5.10.0
--   npm run install-test
--   npm install mocha@5.2.0 --no-optional --no-save
--   echo "**** Using mocha 5.2.0 ****"
-- elif [[ "$ver" == "v6." ]] || [[ "$nodeFullVer" == "v8.11.1" ]]; then
-# workaround for npm upgrade, otherwise it missing basic modules
--   npm i -g npm3 && npm3 -g uninstall npm
--   npm3 i -g npm@5.10.0
--   npm run install-test
--   npm install mocha@6.2.2 --no-optional -- no-save
--   echo "**** Using mocha 6.2.2 ****"
-- else
--   npm run install-test
-- fi
-- echo "NPM updated version - $(npm --version)"
 
 .run_unittest_cmd: &run_unittest_cmd
 - npm run test-only
+
+.install_unittest_packages_cmd: &install_unittest_packages_cmd
+- nodeFullVer=$(node --version)
+- echo "**** Node.js version - $nodeFullVer (bundled with npm@$(npm --version)) ****"
+- ver=$(echo $nodeFullVer | cut -d. -f 1)
+- installNPM=no
+- if [ "$ver" = "v4" ]; then
+-   installNPM=5
+- elif [ "$ver" = "v8" ]; then
+-   installNPM=6
+- elif [ "$ver" = "v10" ] || [ "$ver" = "v12" ] || [ "$ver" = "v14" ]; then
+-   installNPM=7
+- fi
+- if [ "$installNPM" != "no" ]; then
+-   echo "Updating npm to '${installNPM}'"
+-   npm install --global npm@"${installNPM}"
+-   echo "**** Installed npm@$(npm --version)) ****"
+- fi
+- npm run install-test
 
 .job_definition: &job_definition
     tags:
@@ -150,58 +148,45 @@ include:
 lint:
     extends:
         - .test_job_definition
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:12
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:14
     stage: lint
     script:
         - *install_unittest_packages_cmd
         - npm run lint
 
-# BIG-IP 13.x and BIG-IP 14.0, unittests only (without coverage check)
+# BIG-IP 13.x and BIG-IP 14.0
 test_node4:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:4.8.0
 
-# just in case, unittests only (without coverage check)
-test_node6:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:6
-
-# BIG-IP 14.1+, unittests only (without coverage check)
+# BIG-IP 14.1+
 test_node8:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:8.11.1
 
-# Node 10 LTS (active, maintenance)
 test_node10:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:10
 
-# Node 12 LTS (active, maintenance)
 test_node12:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:12
 
-# Node 14 LTS (active, maintenance)
 test_node14:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:14
 
-# Node 16 LTS (active, maintenance)
-# Pinned to 16.14.0, as later versions include versions of npm that are incompatible with our package-lock.json file version
 test_node16:
     extends:
         - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:16.14.0
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
 
-# mostly for containers, unittests only (without coverage check)
-# disabled for now, npm has one issue with DNS (IPv6), probably
-# docker image issue. Node version 17.x, npm version 8.1.0
+# disabled for now, failing unit tests
 .test_node_latest:
     extends:
         - .run_unittest
@@ -209,7 +194,7 @@ test_node16:
 
 # packages audit
 npm_audit:
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:14
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
     extends:
         - .test_job_definition
     allow_failure: true
@@ -221,20 +206,20 @@ npm_audit:
         - *install_unittest_packages_cmd
         # npm list - ignore errors, interested in audit errors only
         - npm list --json || echo ""
+        - npm outdated || echo ""
         # npm audit - install includes audit, but perform specific check and fail if needed
         - audit_report=$(npm audit --production --json) || echo ""
         - echo "$audit_report"
-        - actions=$(echo $audit_report | jq .actions | jq length)
-        - if [ $actions -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
+        - vulnerabilities=$(echo $audit_report | jq .vulnerabilities | jq length)
+        - if [ $vulnerabilities -ne 0 ]; then echo 'ERROR! vulnerabilities exist'; exit 1; fi
 
-# run tests and check code coverage
 coverage:
+    # bind to 14.1+ version to test @grppc-js and OpenTelemetry
     image: ${ARTIFACTORY_DOCKER_HUB}/node:8.11.1
     extends:
         - .test_job_definition
     script:
         - *install_unittest_packages_cmd
-        # run tests with coverage report
         - npm test
     artifacts:
         name: ${CI_COMMIT_REF_NAME}_unittests_coverage
@@ -242,11 +227,9 @@ coverage:
             - coverage
 
 build_rpm:
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:12
+    image: ${ATG_ARTIFACTORY_PUBLISH_URL}/${ATG_ARTIFACTORY_DOCKER_REPO}/f5-telemetry-streaming-rpm-builder-image:v1.2
     stage: build
     script:
-        - echo 'CI BUILD'
-        - apt-get update && apt-get install -y rpm --no-install-recommends
         - npm run build
     tags:
         - cm-official-docker-executor
@@ -321,7 +304,6 @@ test_functional:
         - ls ./dist -ls
         # really only need dev dependencies
         - *install_unittest_packages_cmd
-        - npm install mocha@7.1.0 --no-save
         - npm run test-functional
 
 # should be executed manually to remove the harness
@@ -361,7 +343,6 @@ test_functional_azure:
         - echo $AZURE_VM_HOSTNAME
         - echo $AZURE_VM_IP
         - *install_unittest_packages_cmd
-        - npm install mocha@7.1.0 --no-save
         - npm run test-functional-cloud-azure
     needs:
         - build_rpm
@@ -390,7 +371,6 @@ test_functional_azure_gov:
         - echo $AZURE_VM_HOSTNAME
         - echo $AZURE_VM_IP
         - *install_unittest_packages_cmd
-        - npm install mocha@7.1.0 --no-save
         - npm run test-functional-cloud-azure
     needs:
         - build_rpm
@@ -423,7 +403,6 @@ test_functional_aws:
     script:
         - source ./env_metadata/aws.sh
         - *install_unittest_packages_cmd
-        - npm install mocha@7.1.0 --no-save
         - npm run test-functional-cloud-aws
 
 teardown_env_aws:

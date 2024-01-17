@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -24,6 +32,7 @@ moduleCache.remember();
 describe('Logger', () => {
     const logLevels = [
         'notset',
+        'verbose',
         'debug',
         'info',
         'warning',
@@ -41,7 +50,7 @@ describe('Logger', () => {
             logger: true
         }, {
             logger: {
-                setToDebug: false,
+                setToVerbose: false,
                 ignoreLevelChange: false
             }
         });
@@ -100,7 +109,7 @@ describe('Logger', () => {
     });
 
     logLevels.forEach((logLevel) => {
-        ['debug', 'error', 'info', 'warning'].forEach((logType) => {
+        ['verbose', 'debug', 'error', 'info', 'warning'].forEach((logType) => {
             it(`should log at the appropriate '${logType}' level and preserve global '${logLevel}' level`, () => {
                 // this call logs message about level change, so we already have 1 item in coreStub.logger.messages.info
                 logger.setLogLevel(logLevel);
@@ -133,6 +142,7 @@ describe('Logger', () => {
         const msgType = 'exception';
         logger.exception(`this is a ${msgType} message`, new Error('foo'));
         logger.debugException(`this is a ${msgType} message`, new Error('foo'));
+        logger.verboseException(`this is a ${msgType} message`, new Error('foo'));
 
         assert.lengthOf(coreStub.logger.messages.error, 1);
         assert.isEmpty(coreStub.logger.messages.debug);
@@ -143,6 +153,8 @@ describe('Logger', () => {
         logger.exception(`this is a ${msgType} message`);
         logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
         logger.debugException(`this is a ${msgType} message [debug]`);
+        logger.verboseException(`this is a ${msgType} message [verbose]`, new Error('foo'));
+        logger.verboseException(`this is a ${msgType} message [verbose]`);
 
         assert.lengthOf(coreStub.logger.messages.error, 3);
         assert.lengthOf(coreStub.logger.messages.debug, 2);
@@ -150,6 +162,23 @@ describe('Logger', () => {
         assert.include(coreStub.logger.messages.error[2], `this is a ${msgType} message\nTraceback:\nno traceback available`);
         assert.include(coreStub.logger.messages.debug[0], `this is a ${msgType} message [debug]`);
         assert.include(coreStub.logger.messages.debug[1], `this is a ${msgType} message [debug]\nTraceback:\nno traceback available`);
+
+        logger.setLogLevel('verbose');
+        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.exception(`this is a ${msgType} message`);
+        logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message [debug]`);
+        logger.verboseException(`this is a ${msgType} message [verbose]`, new Error('foo'));
+        logger.verboseException(`this is a ${msgType} message [verbose]`);
+
+        assert.lengthOf(coreStub.logger.messages.error, 5);
+        assert.lengthOf(coreStub.logger.messages.debug, 6);
+        assert.include(coreStub.logger.messages.error[3], `this is a ${msgType} message`);
+        assert.include(coreStub.logger.messages.error[4], `this is a ${msgType} message\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.debug[2], `this is a ${msgType} message [debug]`);
+        assert.include(coreStub.logger.messages.debug[3], `this is a ${msgType} message [debug]\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.debug[4], `this is a ${msgType} message [verbose]`);
+        assert.include(coreStub.logger.messages.debug[5], `this is a ${msgType} message [verbose]\nTraceback:\nno traceback available`);
     });
 
     it('should stringify object', () => {

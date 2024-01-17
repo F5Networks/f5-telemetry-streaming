@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -49,11 +57,11 @@ MockRestOperation.prototype.parseAndSetURI = function (uri) { this.uri = module.
  * Logger mock object
  *
  * @param {Object} [options]          - options when setting up logger mock
- * @param {String} [options.logLevel] - log level to use. Default=info.
+ * @param {String} [options.logLevel] - log level to use. Default=verbose.
  */
 function MockLogger(options) {
     const opts = options || {};
-    this.logLevel = opts.logLevel || 'info';
+    this.logLevel = opts.logLevel || 'verbose';
 
     this.setLogLevel = function (newLevel) {
         this.logLevel = newLevel;
@@ -63,6 +71,7 @@ function MockLogger(options) {
     this.debug = sinon.stub();
     this.info = sinon.stub();
     this.exception = sinon.stub();
+    this.verbose = sinon.stub();
     this.warning = sinon.stub();
     // returns() returns the value passed at initialization - callsFake() uses CURRENT value
     this.getLevelName = sinon.stub().callsFake(() => this.logLevel);
@@ -428,5 +437,64 @@ const _module = module.exports = {
             Object.keys(data).forEach((k) => _module.sortAllArrays(data[k]));
         }
         return data;
+    },
+
+    /**
+     * Wait till callback returns true or throws exception
+     *
+     * @param {function} cb - callback to call (async or sync)
+     * @param {number} [delay=0] - delay before next call
+     *
+     * @returns {Promise} resolved once `cb` returned true. Has `.cancel()` method
+     *  to cancel and reject promise
+     */
+    waitTill(cb, delay) {
+        let timeoutID;
+        let promiseReject;
+        const promise = new Promise((resolve, reject) => {
+            promiseReject = reject;
+            (function inner() {
+                timeoutID = setTimeout(
+                    () => {
+                        timeoutID = null;
+                        Promise.resolve()
+                            .then(() => cb())
+                            .then(
+                                (ret) => {
+                                    if (ret && promiseReject) {
+                                        resolve();
+                                    }
+                                    return !ret && !!promiseReject;
+                                },
+                                (err) => {
+                                    if (promiseReject) {
+                                        promiseReject(err);
+                                    }
+                                    return false;
+                                }
+                            )
+                            .then((keep) => {
+                                if (keep && promiseReject) {
+                                    inner();
+                                } else {
+                                    promiseReject = null;
+                                }
+                            });
+                    },
+                    delay || 0
+                );
+            }());
+        });
+        promise.cancel = () => {
+            if (timeoutID !== null) {
+                clearTimeout(timeoutID);
+                timeoutID = null;
+            }
+            if (promiseReject) {
+                promiseReject(new Error('canceled'));
+                promiseReject = null;
+            }
+        };
+        return promise;
     }
 };

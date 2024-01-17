@@ -2,6 +2,13 @@ Data Modification
 =================
 This section details how you can manipulate the data to better meet your Telemetry goals.  This includes the new :ref:`Actions Chain<actions>`, which can contain the :ref:`includeData<include>` and :ref:`excludeData<exclude>` options introduced in F5 BIG-IP Telemetry Streaming 1.8.0, and the previously introduced :ref:`setTag<tagproperty>` property.
 
+Filtering
+---------
+If a configuration contains multiple items, filtering is not recommended as filtering *disables* endpoints. 
+For example, if your configuration contains 250 pools, TS will take all 250 pools at the same time then applies filtering by name.
+However, filtering is useful if you want to exclude specific data such as *pools*.  
+In this case TS would not make an HTTP request to a REST API endpoint, reducing the load on BIG-IP.
+
 .. _actions: 
 
 Actions chain

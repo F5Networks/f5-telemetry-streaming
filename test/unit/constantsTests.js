@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -16,7 +24,6 @@ const sourceCode = require('./shared/sourceCode');
 
 const constants = sourceCode('src/lib/constants');
 const packageInfo = sourceCode('package.json');
-const schemaInfo = sourceCode('src/schema/latest/base_schema.json').properties.schemaVersion.enum;
 
 moduleCache.remember();
 
@@ -42,8 +49,6 @@ describe('Constants', () => {
 
         // TODO: add other constants later
         assert.deepStrictEqual(constants, {
-            RELEASE: versionInfo[1],
-            VERSION: versionInfo[0],
             ACTIVITY_RECORDER: {
                 DECLARATION_TRACER: {
                     MAX_RECORDS: 60,
@@ -110,6 +115,17 @@ describe('Constants', () => {
             DEFAULT_HOSTNAME: 'hostname.unknown',
             DEFAULT_UNNAMED_NAMESPACE: 'f5telemetry_default',
             EVENT_CUSTOM_TIMESTAMP_KEY: 'f5telemetry_timestamp',
+            EVENT_LISTENER: {
+                PARSER_MODE: 'buffer', // default parsing mode
+                PARSER_MAX_ITERS_PER_CHECK: 1000, // how often to check the time spent on data processing
+                PARSER_MAX_MSG_SIZE: 16 * 1024, // max message size in chars (string) or bytes (buffer)
+                PARSER_PREALLOC: 1000, // preallocated buffer size
+                NETWORK_SERVICE_RESTART_DELAY: 10 * 1000, // 10 sec. delay before restart (units - ms.)
+                STREAM_STRATEGY: 'ring', // ring buffer as default strategy
+                STREAM_MAX_PENDING_BYTES: 256 * 1024, // do not feed more than 256 KB to the parser
+                UDP_STALE_CONN_INTERVAL: 5 * 1000, // 5 sec. interval for UDP stale connections check (units - ms.)
+                UDP_STALE_CONN_TIMEOUT: 300 * 1e9 // 300 sec. timeout value for UDP stale connections (units - ns.)
+            },
             EVENT_TYPES: {
                 DEFAULT: 'event',
                 AVR_EVENT: 'AVR',
@@ -163,10 +179,6 @@ describe('Constants', () => {
             PROTO_TO_PORT: {
                 http: 80,
                 https: 443
-            },
-            SCHEMA_INFO: {
-                CURRENT: schemaInfo[0],
-                MINIMUM: '0.9.0'
             },
             SECRETS: {
                 PROPS: [

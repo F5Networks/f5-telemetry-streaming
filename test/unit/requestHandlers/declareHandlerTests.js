@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -19,8 +27,8 @@ const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
+const appInfo = sourceCode('src/lib/appInfo');
 const configWorker = sourceCode('src/lib/config');
-const constants = sourceCode('src/lib/constants');
 const DeclareHandler = sourceCode('src/lib/requestHandlers/declareHandler');
 const ErrorHandler = sourceCode('src/lib/requestHandlers/errorHandler');
 const persistentStorage = sourceCode('src/lib/persistentStorage');
@@ -111,7 +119,7 @@ describe('DeclareHandler', () => {
                 body: {
                     message: 'success',
                     declaration: dummies.declaration.base.decrypted({
-                        schemaVersion: constants.VERSION
+                        schemaVersion: appInfo.version
                     })
                 }
             };
@@ -125,7 +133,7 @@ describe('DeclareHandler', () => {
                 body: {
                     message: 'success',
                     declaration: dummies.declaration.base.decrypted({
-                        schemaVersion: constants.VERSION
+                        schemaVersion: appInfo.version
                     })
                 }
             };
@@ -196,7 +204,7 @@ describe('DeclareHandler', () => {
                 body: {
                     message: 'success',
                     declaration: dummies.declaration.base.decrypted({
-                        schemaVersion: constants.VERSION,
+                        schemaVersion: appInfo.version,
                         consumer: dummies.declaration.consumer.splunk.full.encrypted()
                     })
                 }
@@ -381,7 +389,7 @@ describe('DeclareHandler', () => {
                         recent,
                         {
                             declaration: dummies.declaration.base.decrypted({
-                                schemaVersion: constants.VERSION,
+                                schemaVersion: appInfo.version,
                                 otherNamespace: dummies.declaration.namespace.base.decrypted({}),
                                 testNamespace: dummies.declaration.namespace.base.decrypted({
                                     consumer: dummies.declaration.consumer.splunk.minimal.decrypted()

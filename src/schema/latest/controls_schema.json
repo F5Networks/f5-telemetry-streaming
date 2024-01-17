@@ -24,6 +24,7 @@
                         "type": "string",
                         "default": "info",
                         "enum": [ 
+                            "verbose",
                             "debug",
                             "info",
                             "error"
@@ -42,6 +43,24 @@
                         "minimum": 1,
                         "maximum": 100,
                         "default": 90
+                    },
+                    "listenerMode": {
+                        "title": "Event Listener events parsing mode",
+                        "description": "Event Listener events parsing mode. \"buffer\" is more performant but under the high memory usage events may result in OOM. \"string\" is less performant but more chance to have lower RSS",
+                        "type": "string",
+                        "enum": [
+                            "buffer",
+                            "string"
+                        ]
+                    },
+                    "listenerStrategy": {
+                        "title": "Event Listener events buffering strategy due high memory usage events",
+                        "description": "Event Listener events buffering strategy. \"drop\" drops all new chunks of data, but keeps pending data to process - less memory usage but loosing data. \"ring\" keeps buffering data by overriding peding data - higher memory usage but less chance to get data lost.",
+                        "type": "string",
+                        "enum": [
+                            "drop",
+                            "ring"
+                        ]
                     }
                 },
                 "additionalProperties": false

@@ -26,6 +26,7 @@ This describes the structure of the context object.
 * @param {function(string):void} context.logger.info           - log info message
 * @param {function(string):void} context.logger.error          - log error message
 * @param {function(string):void} context.logger.debug          - log debug message
+* @param {function(string):void} context.logger.verbose        - log verbose message
 * @param {function(string, err):void} context.logger.exception - log error message with error's traceback
 * @param {Object} context.event                                - event to process
 * @param {Object} context.event.data                           - actual data to process
