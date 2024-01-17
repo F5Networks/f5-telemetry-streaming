@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -24,7 +32,7 @@ const tracerMgr = sourceCode('src/lib/tracerManager');
 
 moduleCache.remember();
 
-describe('Tracer', () => {
+describe('Tracer Manager', () => {
     const tracerFile = 'tracerTest';
     const fakeDate = new Date();
     let coreStub;
@@ -118,6 +126,7 @@ describe('Tracer', () => {
                         coreStub.tracer.data[tracerFile],
                         addTimestamps(['foobar'])
                     );
+                    coreStub.logger.removeAllMessages();
                     sameTracerInst = tracerMgr.fromConfig({
                         path: tracerFile,
                         options: {
@@ -160,6 +169,7 @@ describe('Tracer', () => {
                         coreStub.tracer.data[tracerFile],
                         addTimestamps(['foobar'])
                     );
+                    coreStub.logger.removeAllMessages();
                     sameTracerInst = tracerMgr.fromConfig({
                         path: `${tracerFile}/../tracerTest`,
                         options: {
@@ -315,7 +325,7 @@ describe('Tracer', () => {
                 });
         });
 
-        it('should set inactivity timeout to default value (15s)', () => {
+        it('should set inactivity timeout to default value (900s)', () => {
             const fakeClock = stubs.clock();
             tracerInst = tracerMgr.fromConfig({
                 path: tracerFile
@@ -323,9 +333,9 @@ describe('Tracer', () => {
             assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');
             return tracerInst.write('somethings')
                 .then(() => {
-                    assert.notIncludeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
-                        /Inactivity timeout set to/,
+                        /Inactivity timeout set to 900 s/,
                         'should log debug message'
                     );
                     fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
@@ -346,9 +356,9 @@ describe('Tracer', () => {
             assert.deepStrictEqual(tracerInst.inactivityTimeout, 15, 'should set corrected inactivity timeout');
             return tracerInst.write('somethings')
                 .then(() => {
-                    assert.notIncludeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
-                        /Inactivity timeout set to/,
+                        /Inactivity timeout set to 15 s/,
                         'should log debug message'
                     );
                     fakeClock.clockForward(60 * 1000, { repeat: 16, promisify: true });
@@ -370,9 +380,9 @@ describe('Tracer', () => {
             return tracerInst.write('somethings')
                 .then(() => {
                     assert.deepStrictEqual(tracerInst.inactivityTimeout, 30, 'should set custom inactivity timeout');
-                    assert.notIncludeMatch(
+                    assert.includeMatch(
                         coreStub.logger.messages.debug,
-                        /Inactivity timeout set to/,
+                        /Inactivity timeout set to 30 s/,
                         'should log debug message'
                     );
                     fakeClock.clockForward(1000, { repeat: 31, promisify: true });

@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -27,9 +35,9 @@ const IS_8_11_1_PLUS = util.compareVersionStrings(process.version.substring(1), 
 // on 8.11.1 gRPC server returns "Received RST_STREAM with code 0" - http2 bug on 8.11.1
 const IS_8_13_PLUS = util.compareVersionStrings(process.version.substring(1), '>=', '8.13.0');
 
-const OTLP_PROTOS_PATH = path.resolve('./node_modules/@opentelemetry/otlp-grpc-exporter-base/build/protos/');
+const OTLP_PROTOS_PATH = path.resolve('./node_modules/@opentelemetry/opentelemetry-proto');
 const METRICS_SERVICE_PROTO_PATH = path.join(OTLP_PROTOS_PATH, 'opentelemetry/proto/collector/metrics/v1/metrics_service.proto');
-const OTLP_PROTO_GEN_PATH = path.resolve('./node_modules/@opentelemetry/otlp-proto-exporter-base/build/src/generated/root');
+const OTLP_PROTO_GEN_PATH = path.resolve('./node_modules/@opentelemetry/otlp-grpc-exporter-base/build/src/generated/root.js');
 
 let grpc;
 let openTelemetryExporter;
@@ -183,7 +191,7 @@ moduleCache.remember();
                         if (onDataReceivedCallback) {
                             error = onDataReceivedCallback(call.request);
                         }
-                        callback(error);
+                        callback(error, {});
                     }
                 });
             } else {
@@ -285,7 +293,7 @@ moduleCache.remember();
                     .then(() => {
                         // on 8.11.1 server returns "Received RST_STREAM with code 0" - http2 bug on 8.11.1
                         if (IS_8_13_PLUS) {
-                            assert.deepStrictEqual(context.logger.debug.args, [['success']], 'should log a success');
+                            assert.deepStrictEqual(context.logger.verbose.args, [['success']], 'should log a success');
                             assert.isFalse(context.logger.error.called, 'should not have logged an error');
                         }
 
@@ -397,7 +405,7 @@ moduleCache.remember();
                         resetNockMock();
                         assert.isNull(requestMetrics, 'should not send metrics');
                         assert.deepStrictEqual(
-                            context.logger.debug.args,
+                            context.logger.verbose.args,
                             [['Event did not contain any metrics, skipping']],
                             'should log that no metrics were found'
                         );
@@ -416,7 +424,7 @@ moduleCache.remember();
                         resetNockMock();
                         assert.isNull(requestMetrics, 'should not send metrics');
                         assert.deepStrictEqual(
-                            context.logger.debug.args,
+                            context.logger.verbose.args,
                             [['Event known to not contain metrics, skipping']],
                             'should log that no metrics were found'
                         );

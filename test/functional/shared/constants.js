@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -57,6 +65,7 @@ module.exports = {
         },
         TEST_CONTROLS: {
             CONSUMER: {
+                DOCKER_CLEANUP: 'CONSUMER_DOCKER_CLEANUP',
                 EXCLUDE: 'CONSUMER_EXCLUDE_REGEX',
                 INCLUDE: 'CONSUMER_INCLUDE_REGEX'
             },
@@ -68,6 +77,7 @@ module.exports = {
                 FILE: 'TEST_HARNESS_FILE'
             },
             TESTS: {
+                DEV_ENV: 'TS_DEV_ENV',
                 SKIP_CONSUMER_TESTS: 'SKIP_CONSUMER_TESTS',
                 SKIP_DUT_SETUP: 'SKIP_DUT_SETUP',
                 SKIP_DUT_TEARDOWN: 'SKIP_DUT_TEARDOWN',
@@ -81,11 +91,12 @@ module.exports = {
             CM_API_DATA: 'GCP_CM_API_DATA' // value of env var should be path to a file
         }
     },
-    ARTIFACTORY_DOCKER_HUB_PREFIX: process.env.ARTIFACTORY_DOCKER_HUB ? trailingChar(process.env.ARTIFACTORY_DOCKER_HUB, '/') : '',
+    ARTIFACTORY_DOCKER_HUB_PREFIX: process.env.ATG_IMG_REGISTRY_URL ? trailingChar(process.env.ATG_IMG_REGISTRY_URL, '/') : '',
     ARTIFACTS_DIR: `${__dirname}/../../artifacts`,
     BIGIP: {
         RESTNODED: {
-            LOGS_DIR: '/var/log/restnoded'
+            LOGS_DIR: '/var/log/restnoded',
+            TELEMETRY_DIR: '/var/config/rest/iapps/f5-telemetry'
         }
     },
     CLOUD: {
@@ -149,6 +160,16 @@ module.exports = {
         },
         NAMESPACE: {
             DEFAULT: 'f5telemetry_default'
+        },
+        SYSTEM_POLLER: {
+            POLLING_INTERVAL: {
+                DEFAULT: 60,
+                DEV: 5
+            },
+            WAIT_TIME: {
+                DEFAULT: 20000,
+                DEV: 5000
+            }
         }
     }
 };

@@ -88,6 +88,7 @@ Use only one of the following procedures for the initial configuration.
 
 Initial configuration for Per-App BIG-IP VE
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The configuration for a Per-App VE is different because it limits the number of virtual servers (one virtual IP address and three virtual servers). 
   
 If you are using a Per-App VE, to avoid creating the virtual server for the local listener, you can point the pool directly at the TMM link-local IPv6 address, using the following guidance:
@@ -129,6 +130,8 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
             node 127.0.0.1 6514
         }
 
+See `K05413010: After an upgrade, iRules using the loopback address may fail and log TCL errors <https://my.f5.com/manage/s/article/K05413010>`_ for more information.
+
 
 #. Create the virtual server for the local listener.
 
@@ -144,6 +147,37 @@ If you are using a standard BIG-IP system (one that does not have restrictions o
         create ltm pool telemetry monitor tcp members replace-all-with { 255.255.255.254:6514 }
 
 #. Continue with :ref:`restlogpub`.
+
+**Important**
+
+Post-upgrade to version 15.1.6.x or 16.1.2 and up, /var/log will start filling up with TCL errors.
+
+- TCL errors appear to indicate an invalid iRule configuration that worked in the previous code.
+- Virtual server using the iRule will fail.
+
+Example of logs:
+
+.. code-block:: none
+
+   TCL error: /Common/telemetry_local_rule <CLIENT_ACCEPTED> - disallow self or loopback connection (line 1)TCL error (line 1) (line 1) invoked from within "node 127.0.0.1 6514"
+
+
+There is a functional code change in 15.1.6.x and 16.1.2 and up:  
+
+Database variable ``tmm.tcl.rule.node.allow_loopback_addresses`` was created to toggle whether or not to allow loopback addresses for iRule node command.
+
+Workaround:
+
+The actions or steps required to address iRules using the loopback address may fail and log TCL errors.
+
+To disable this variable:
+      
+.. code-block:: none
+
+   tmsh modify sys db tmm.tcl.rule.node.allow_loopback_addresses value true
+   tmsh save sys config
+
+.. NOTE:: See `K05413010: After an upgrade, iRules using the loopback address may fail and log TCL errors <https://my.f5.com/manage/s/article/K05413010>`_ for more information.
 
 |
 
@@ -190,7 +224,7 @@ Example virtual server definition:
 .. _loggingprofiles: 
 
 Logging Profiles
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 You can use the following procedures to create different types of logging profiles.
 
 - :ref:`LTM Request Log profile<requestlog>`
@@ -206,7 +240,7 @@ You can use the following procedures to create different types of logging profil
 .. _requestlog:
 
 LTM Request Log profile
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The Request Logging profile gives you the ability to configure data within a log file for HTTP requests and responses, in accordance with specified parameters. 
 
@@ -242,12 +276,13 @@ Example Output from BIG-IP Telemetry Streaming:
 .. _cgnat:
 
 Configuring CGNAT logging
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To configure carrier-grade network address translation (CGNAT), use the following guidance.  For more information on CGNAT, see |cgnatdoc|. 
 
 .. NOTE:: You must have Carrier Grade NAT licensed and enabled to use CGNAT features.
 
-1. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdocs|.  Make sure of the following:
+1. Configure the BIG-IP to send log messages about CGNAT processes.  For instructions, see the CGNAT Implementations guide chapter on logging for your BIG-IP version.  For example, for BIG-IP 14.0, see |cgnatdoc|.  Make sure of the following:
 
    - The Large Scale NAT (LSN) Pool must use the BIG-IP Telemetry Streaming Log Publisher you created (**telemetry_publisher** if you used the BIG-IP AS3 example to configure BIG-IP TS logging).  |br| If you have an existing pool, update the pool to use the BIG-IP TS Log Publisher:
 
@@ -281,7 +316,7 @@ Example output:
 .. _afm:
 
 AFM Request Log profile
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Create a Security Log Profile.
 
@@ -309,7 +344,7 @@ Example output from BIG-IP Telemetry Streaming:
 .. _asm:
 
 ASM Log
-~~~~~~~
+^^^^^^^
 
 1. Create a Security Log Profile:
 
@@ -337,7 +372,7 @@ Example Output from BIG-IP Telemetry Streaming:
 .. _apm:
 
 APM Log
-~~~~~~~
+^^^^^^^
 
 1. Create an APM Log Profile. For example:
 
@@ -366,7 +401,8 @@ Example Output from BIG-IP Telemetry Streaming:
 .. _avrbasic-ref:
 
 AVR Log
-~~~~~~~
+^^^^^^^
+
 For information, see :ref:`avr-ref`. 
 
 |
@@ -374,7 +410,7 @@ For information, see :ref:`avr-ref`.
 .. _systemlog:
 
 System Log
-~~~~~~~~~~
+^^^^^^^^^^
 
 1. Modify the system syslog configuration by adding a destination, using the following TMSH command:
 
@@ -408,6 +444,7 @@ Example output:
 
 Character Encoding information
 ------------------------------
+
 F5 logs may contain various character encoding or byte streams that include illegal characters for a specific encoding, or invalid UTF-8 strings. BIG-IP TS does not currently enforce validation of the data that an event listener receives. It simply attempts to convert the raw input it receives into a JSON-formatted string for forwarding. 
 
 .. NOTE:: Varying character encodings and illegal characters in the byte streams are very common in BIG-IP ASM logs.
@@ -492,7 +529,7 @@ The following shows the input sent as different buffers, and the resulting outpu
 
 .. |cgnatdocs| raw:: html
 
-   <a href="https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/big-ip-cgnat-implementations-14-0-0/08.html" target="_blank">BIG-IP CGNAT: Implementations - Using CGNAT Logging and Subscriber Traceability</a>
+   <a href="https://techdocs.f5.com/en-us/bigip-14-0-0/big-ip-cgnat-implementations-14-0-0.html" target="_blank">BIG-IP CGNAT: Implementations - Using CGNAT Logging and Subscriber Traceability</a>
 
 .. |br| raw:: html
    

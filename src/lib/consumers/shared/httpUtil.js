@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -77,7 +85,7 @@ function sendToConsumer(config) {
     return requestsUtil.makeRequest(host, config.uri, requestOptions)
         .then((ret) => {
             response = ret;
-            config.logger.debug(`request to '${host}${config.uri}' returned HTTP ${response[1].statusCode}`);
+            config.logger.verbose(`request to '${host}${config.uri}' returned HTTP ${response[1].statusCode}`);
             if (response[1].statusCode >= 500) {
                 requestError = new Error(`Bad status code: ${response[1].statusCode} ${response[1].statusMessage} for '${host}'`);
             }
@@ -88,16 +96,16 @@ function sendToConsumer(config) {
         })
         .then(() => {
             if (!requestError) {
-                config.logger.debug(`response: ${response[1].statusCode} ${response[1].statusMessage}`);
+                config.logger.verbose(`response: ${response[1].statusCode} ${response[1].statusMessage}`);
                 if (response[0]) {
-                    config.logger.debug(`response body: ${typeof response[0] === 'object' ? JSON.stringify(response[0]) : response[0]}`);
+                    config.logger.verbose(`response body: ${typeof response[0] === 'object' ? JSON.stringify(response[0]) : response[0]}`);
                 }
                 return Promise.resolve(response);
             }
             const nextHostIdx = hostIdx + 1;
             if (nextHostIdx < config.hosts.length) {
                 // fallback to next host
-                config.logger.debug(`Trying next host - ${config.hosts[nextHostIdx]}`);
+                config.logger.verbose(`Trying next host - ${config.hosts[nextHostIdx]}`);
                 config.hostIdx = nextHostIdx;
                 return sendToConsumer(config);
             }

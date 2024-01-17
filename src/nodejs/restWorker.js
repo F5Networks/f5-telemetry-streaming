@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* jshint ignore: start */
@@ -13,7 +21,7 @@
 const http = require('http');
 const https = require('https');
 
-const constants = require('../lib/constants');
+const appInfo = require('../lib/appInfo');
 const logger = require('../lib/logger');
 const util = require('../lib/utils/misc');
 
@@ -106,8 +114,8 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype._initializeApplication = function (success, failure) {
     // Log system info on service start
-    logger.info(`Application version: ${constants.VERSION}`);
-    logger.debug(`Node version: ${process.version}`);
+    logger.info(`Application version: ${appInfo.fullVersion}`);
+    logger.info(`Node version: ${process.version}`);
 
     // register REST endpoints
     this.router = requestRouter;
@@ -140,7 +148,7 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     // service may be not started yet.
     retryPromise(() => deviceUtil.gatherHostDeviceInfo(), { maxTries: 100, delay: 30 })
         .then(() => {
-            logger.debug('Host Device Info gathered');
+            logger.info('Host Device Info gathered');
         })
         .catch((err) => {
             logger.exception('Unable to gather Host Device Info', err);

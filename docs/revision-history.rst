@@ -22,7 +22,11 @@ There is no plan to deprecate this product.
         - Date
 
       * - 1.33.0
+<<<<<<< HEAD
+        - Updated the documentation for Telemetry Streaming v1.33.0. This release contains the following changes: |br| * Added allowing user provided endpoints for the Azure consumers |br| |br| Changed: |br| * Update npm packages
+=======
         - Released Telemetry Streaming v1.33.0 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy. |br|Updated the documentation for Telemetry Streaming v1.33.0. This release contains the following changes: |br| * Added allowing user provided endpoints for the Azure consumers |br| |br| Changed: |br| * Update npm packages
+>>>>>>> develop
         - 03-17-23
 
       * - 1.32.0

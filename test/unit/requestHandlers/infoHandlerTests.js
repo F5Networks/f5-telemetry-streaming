@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -17,7 +25,6 @@ const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
-const constants = sourceCode('src/lib/constants');
 const InfoHandler = sourceCode('src/lib/requestHandlers/infoHandler');
 const packageJson = sourceCode('package.json');
 const schemaJson = sourceCode('src/schema/latest/base_schema.json');
@@ -42,27 +49,6 @@ describe('InfoHandler', () => {
         sinon.restore();
     });
 
-    it('should return info data on GET request', () => {
-        sinon.stub(constants, 'VERSION').value('TS_VERSION');
-        sinon.stub(constants, 'RELEASE').value('TS_RELEASE');
-        sinon.stub(constants.SCHEMA_INFO, 'CURRENT').value('TS_SCHEMA_CURRENT');
-        sinon.stub(constants.SCHEMA_INFO, 'MINIMUM').value('TS_SCHEMA_MINIMUM');
-        sinon.stub(process, 'version').value('NODE_VERSION');
-
-        return requestHandler.process()
-            .then((handler) => {
-                assert.ok(handler === requestHandler, 'should return a reference to original handler');
-                assert.strictEqual(requestHandler.getCode(), 200, 'should return expected code');
-                assert.deepStrictEqual(requestHandler.getBody(), {
-                    nodeVersion: 'NODE_VERSION',
-                    version: 'TS_VERSION',
-                    release: 'TS_RELEASE',
-                    schemaCurrent: 'TS_SCHEMA_CURRENT',
-                    schemaMinimum: 'TS_SCHEMA_MINIMUM'
-                }, 'should return expected body');
-            });
-    });
-
     it('should return info data on GET request (real data)', () => requestHandler.process()
         .then((handler) => {
             assert.ok(handler === requestHandler, 'should return a reference to original handler');
@@ -71,11 +57,15 @@ describe('InfoHandler', () => {
             const pkgInfo = packageJson.version.split('-');
             const schemaInfo = schemaJson.properties.schemaVersion.enum;
             assert.deepStrictEqual(requestHandler.getBody(), {
+                branch: 'gitbranch',
+                buildID: 'githash',
+                buildTimestamp: 'buildtimestamp',
+                fullVersion: packageJson.version,
                 nodeVersion: process.version,
-                version: pkgInfo[0],
                 release: pkgInfo[1],
                 schemaCurrent: schemaInfo[0],
-                schemaMinimum: schemaInfo[schemaInfo.length - 1]
+                schemaMinimum: schemaInfo[schemaInfo.length - 1],
+                version: pkgInfo[0]
             }, 'should return expected body');
         }));
 });

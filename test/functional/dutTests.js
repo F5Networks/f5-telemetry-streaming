@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -120,6 +128,28 @@ function setup() {
                 }
             ));
         });
+
+        if (miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.DEV_ENV, {
+            castTo: 'boolean',
+            defaultValue: false
+        })) {
+            describe(`DUT dev patches - ${bigip.name}`, () => {
+                it('should stop restnoded', () => bigip.ssh.default.exec('bigstart stop restnoded'));
+
+                it('should update minimal value for polling interval', () => {
+                    const schemaPath = pathUtil.join(
+                        constants.BIGIP.RESTNODED.TELEMETRY_DIR,
+                        'schema/latest/system_poller_schema.json'
+                    );
+                    const jqQuery = '.definitions.systemPoller.oneOf[0].allOf[0].else.properties.interval.minimum = 1';
+                    return bigip.ssh.default.exec(`echo $(jq '${jqQuery}' "${schemaPath}") > "${schemaPath}"`);
+                });
+
+                it('should start restnoded', () => bigip.ssh.default.exec('bigstart start restnoded'));
+
+                testUtils.shouldVerifyTSPackageInstallation(bigip);
+            });
+        }
     });
 }
 
@@ -483,13 +513,12 @@ function test() {
             });
 
             describe('System Poller tests', () => {
-                it('should fetch and process SNMP metrics', () => promiseUtils.sleep(500)
-                    .then(() => miscUtils.readJsonFile(constants.DECL.SNMP_METRICS, true))
+                it('should fetch and process SNMP metrics', () => miscUtils.readJsonFile(constants.DECL.SNMP_METRICS, true)
                     .then((decl) => bigip.telemetry.declare(decl))
                     .then((data) => {
                         bigip.logger.info('POST declaration:', { data });
                         assert.deepStrictEqual(data.message, 'success', 'should return successful response');
-                        // wait 5s in case if config was not applied yet
+                        // wait 0.5s in case if config was not applied yet
                         return promiseUtils.sleep(500);
                     })
                     .then(() => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
@@ -528,15 +557,14 @@ function test() {
                             let postResponses = [];
 
                             // wait 2s to buffer consecutive POSTs
-                            return promiseUtils.sleep(500)
-                                .then(() => ts.declare(getDeclToUse(testSetup)))
+                            return ts.declare(getDeclToUse(testSetup))
                                 .then((data) => {
                                     bigip.logger.info('POST request #1: Declaration response:', { data });
                                     assert.deepStrictEqual(data.message, 'success', 'should return successful response');
 
                                     checkPassphraseObject(data);
                                     postResponses.push(data);
-                                    // wait for 5 secs while declaration will be applied and saved to storage
+                                    // wait for 0.5 secs while declaration will be applied and saved to storage
                                     return promiseUtils.sleep(500);
                                 })
                                 .then(() => ts.declare(getDeclToUse(testSetup)))
@@ -546,7 +574,7 @@ function test() {
 
                                     checkPassphraseObject(data);
                                     postResponses.push(data);
-                                    // wait for 5 secs while declaration will be applied and saved to storage
+                                    // wait for 0.5 secs while declaration will be applied and saved to storage
                                     return promiseUtils.sleep(500);
                                 })
                                 .then(() => ts.getDeclaration())
@@ -597,13 +625,12 @@ function test() {
                     });
 
                     describe('advanced options', () => {
-                        ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => promiseUtils.sleep(500)
-                            .then(() => miscUtils.readJsonFile(constants.DECL.FILTER, true))
+                        ifNoNamespaceIt('should apply configuration containing system poller filtering', testSetup, () => miscUtils.readJsonFile(constants.DECL.FILTER, true)
                             .then((decl) => defaultTelemetry.declare(decl))
                             .then((data) => {
                                 bigip.logger.info('POST declaration:', { data });
                                 assert.deepStrictEqual(data.message, 'success', 'should return successful response');
-                                // wait 5s in case if config was not applied yet
+                                // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
                             .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
@@ -620,13 +647,12 @@ function test() {
                                 assert.notStrictEqual(Object.keys(data.system).indexOf('hostname'), -1);
                             }));
 
-                        ifNoNamespaceIt('should apply configuration containing chained system poller actions', testSetup, () => promiseUtils.sleep(500)
-                            .then(() => miscUtils.readJsonFile(constants.DECL.ACTION_CHAINING, true))
+                        ifNoNamespaceIt('should apply configuration containing chained system poller actions', testSetup, () => miscUtils.readJsonFile(constants.DECL.ACTION_CHAINING, true)
                             .then((decl) => defaultTelemetry.declare(decl))
                             .then((data) => {
                                 bigip.logger.info('POST declaration:', { data });
                                 assert.deepStrictEqual(data.message, 'success', 'should return successful response');
-                                // wait 5s in case if config was not applied yet
+                                // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
                             .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
@@ -643,13 +669,12 @@ function test() {
                                 assert.deepStrictEqual(data.system.diskStorage['/var/log']['1_tagA'], 'myTag');
                             }));
 
-                        ifNoNamespaceIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => promiseUtils.sleep(500)
-                            .then(() => miscUtils.readJsonFile(constants.DECL.FILTERING_WITH_MATCHING, true))
+                        ifNoNamespaceIt('should apply configuration containing filters with ifAnyMatch', testSetup, () => miscUtils.readJsonFile(constants.DECL.FILTERING_WITH_MATCHING, true)
                             .then((decl) => defaultTelemetry.declare(decl))
                             .then((data) => {
                                 bigip.logger.info('POST declaration:', { data });
                                 assert.deepStrictEqual(data.message, 'success', 'should return successful response');
-                                // wait 5s in case if config was not applied yet
+                                // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
                             .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
@@ -665,13 +690,12 @@ function test() {
                                 assert.notStrictEqual(Object.keys(data.system).indexOf('diskStorage'), -1);
                             }));
 
-                        ifNoNamespaceIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => promiseUtils.sleep(500)
-                            .then(() => miscUtils.readJsonFile(constants.DECL.ENDPOINTLIST, true))
+                        ifNoNamespaceIt('should apply configuration containing multiple system pollers and endpointList', testSetup, () => miscUtils.readJsonFile(constants.DECL.ENDPOINTLIST, true)
                             .then((decl) => defaultTelemetry.declare(decl))
                             .then((data) => {
                                 bigip.logger.info('POST declaration:', { data });
                                 assert.deepStrictEqual(data.message, 'success', 'should return successful response');
-                                // wait 2s in case if config was not applied yet
+                                // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
                             .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))

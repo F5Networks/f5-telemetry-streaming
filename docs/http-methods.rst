@@ -16,6 +16,6 @@ GET
 ~~~
 You can use the GET method to retrieve the declarations you previously sent to
 F5 BIG-IP Telemetry Streaming. Use the GET method to the URI
-``https://<BIG-IP>/mgmt/telemetry/declare``. Only declarations you create
+``https://<BIG-IP>/mgmt/shared/telemetry/declare``. Only declarations you create
 in F5 BIG-IP Telemetry Streaming return, GET does not return anything that was not created by F5 BIG-IP Telemetry Streaming.
 

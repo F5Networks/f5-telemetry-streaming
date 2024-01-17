@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -56,7 +64,7 @@ const DOCKER_CONTAINERS = {
 };
 
 // read in example config
-const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const DECLARATION = testUtils.alterPollerInterval(miscUtils.readJsonFile(constants.DECL.BASIC));
 const LISTENER_PROTOCOLS = constants.TELEMETRY.LISTENER.PROTOCOLS;
 
 let CONTAINER_STARTED;
@@ -113,9 +121,13 @@ function setup() {
                 });
         });
 
+        describe('Clean-up TS before service configuration', () => {
+            harness.bigip.forEach((bigip) => testUtils.shouldRemovePreExistingTSDeclaration(bigip));
+        });
+
         // .skip() until F5_Cloud interactions resolved
         describe('Docker container setup', () => {
-            it('should pull F5 Cloud GRPC docker image', () => cs.docker.pull(DOCKER_CONTAINERS.F5CloudGRPC.image));
+            it('should pull F5 Cloud GRPC docker image', () => cs.docker.pull(DOCKER_CONTAINERS.F5CloudGRPC.image, { existing: true }));
 
             it('should delete proto file if exist', () => cs.ssh.default.unlinkIfExists(REMOTE_PROTO_PATH));
 
@@ -256,7 +268,7 @@ function test() {
                                 );
                             })
                             .catch((err) => {
-                                bigip.logger.info('No event listener data found. Going to wait another 20sec');
+                                bigip.logger.info('No event listener data found. Going to wait another 20 sec.');
                                 return promiseUtils.sleepAndReject(20000, err);
                             });
                     }

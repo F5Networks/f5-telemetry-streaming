@@ -26,17 +26,17 @@ If you come across a bug or other issue when using BIG-IP Telemetry Streaming, u
 
 **Important**: Github Issues are consistently monitored by F5 staff, but should be considered as best effort only and you should not expect to receive the same level of response as provided by F5 Support. Please open a case as described below with F5 if this is a critical issue.
 
-Because BIG-IP Telemetry Streaming has been created and fully tested by F5 Networks, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K25327565).
+Because BIG-IP Telemetry Streaming has been created and fully tested by F5, it is fully supported by F5. This means you can get assistance if necessary from [F5 Technical Support](https://support.f5.com/csp/article/K25327565).
 
 Be sure to see the [Support page](SUPPORT.md) in this repo for more details and supported versions of BIG-IP Telemetry Streaming.
 
 ## Copyright
 
-Copyright 2014-2022 F5 Networks Inc.
+Copyright 2014-2024 F5, Inc.
 
-### F5 Networks Contributor License Agreement
+### F5 Contributor License Agreement
 
-Before you start contributing to any project sponsored by F5 Networks, Inc. (F5) on GitHub, you will need to sign a Contributor License Agreement (CLA).  
+Before you start contributing to any project sponsored by F5, Inc. (F5) on GitHub, you will need to sign a Contributor License Agreement (CLA).  
 
 If you are signing as an individual, we recommend that you talk to your employer (if applicable) before signing the CLA since some employment agreements may have restrictions on your contributions to other projects. Otherwise by submitting a CLA you represent that you are legally entitled to grant the licenses recited therein.  
 

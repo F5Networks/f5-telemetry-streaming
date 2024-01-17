@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -28,6 +36,24 @@ try {
     };
 }
 
+const proxy = {
+    debug(msg) {
+        f5logger.finest(msg);
+    },
+    error(msg) {
+        f5logger.severe(msg);
+    },
+    info(msg) {
+        f5logger.info(msg);
+    },
+    verbose(msg) {
+        f5logger.finest(msg);
+    },
+    warning(msg) {
+        f5logger.warning(msg);
+    }
+};
+
 /**
  * f5-logger module supports the following levels
  * levels: {
@@ -44,24 +70,19 @@ try {
 /**
  * Logging levels
  */
-const NOTSET = 0;
-const DEBUG = 10;
-const INFO = 20;
-const WARNING = 30;
-const ERROR = 40;
-
 const LOG_LEVELS = {
-    notset: NOTSET,
-    debug: DEBUG,
-    info: INFO,
-    warning: WARNING,
-    error: ERROR
+    NOTSET: 0,
+    VERBOSE: 10,
+    DEBUG: 20,
+    INFO: 30,
+    WARNING: 40,
+    ERROR: 50
 };
 Object.keys(LOG_LEVELS).forEach((key) => {
     LOG_LEVELS[LOG_LEVELS[key]] = key;
 });
 
-let CURRENT_LOG_LEVEL = NOTSET;
+let CURRENT_LOG_LEVEL = LOG_LEVELS.NOTSET;
 
 /**
  * Process log message
@@ -99,7 +120,7 @@ class Logger {
      */
     constructor(prefix) {
         // the f5-logger only exists on BIG-IP, so for unit tests provide a mock
-        this.logger = f5logger;
+        this.logger = proxy;
         this.prefix = prefix;
     }
 
@@ -122,7 +143,7 @@ class Logger {
      * @returns {number} log level value
      */
     getLevel(levelName) {
-        return levelName ? LOG_LEVELS[levelName] : CURRENT_LOG_LEVEL;
+        return arguments.length > 0 ? LOG_LEVELS[levelName.toUpperCase()] : CURRENT_LOG_LEVEL;
     }
 
     /**
@@ -133,12 +154,14 @@ class Logger {
      * @returns {number} log level name
      */
     getLevelName(level) {
-        if (level === undefined) {
+        if (arguments.length === 0) {
             level = CURRENT_LOG_LEVEL;
         }
         let levelName = LOG_LEVELS[level];
         if (levelName === undefined) {
             levelName = `Level ${level}`;
+        } else {
+            levelName = levelName.toLowerCase();
         }
         return levelName;
     }
@@ -147,8 +170,8 @@ class Logger {
      * @param {any} msg - debug message
      */
     debug(msg) {
-        if (DEBUG >= CURRENT_LOG_LEVEL) {
-            this.logger.finest(processMessage(this.prefix, msg));
+        if (LOG_LEVELS.DEBUG >= CURRENT_LOG_LEVEL) {
+            this.logger.debug(processMessage(this.prefix, msg));
         }
     }
 
@@ -157,8 +180,8 @@ class Logger {
      * @param {Error} err - error
      */
     debugException(msg, err) {
-        if (DEBUG >= CURRENT_LOG_LEVEL) {
-            this.logger.finest(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
+        if (LOG_LEVELS.DEBUG >= CURRENT_LOG_LEVEL) {
+            this.logger.debug(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
@@ -166,8 +189,8 @@ class Logger {
      * @param {any} msg - error message
      */
     error(msg) {
-        if (ERROR >= CURRENT_LOG_LEVEL) {
-            this.logger.severe(processMessage(this.prefix, msg));
+        if (LOG_LEVELS.ERROR >= CURRENT_LOG_LEVEL) {
+            this.logger.error(processMessage(this.prefix, msg));
         }
     }
 
@@ -176,8 +199,8 @@ class Logger {
      * @param {Error} err - error
      */
     exception(msg, err) {
-        if (ERROR >= CURRENT_LOG_LEVEL) {
-            this.logger.severe(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
+        if (LOG_LEVELS.ERROR >= CURRENT_LOG_LEVEL) {
+            this.logger.error(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
@@ -185,8 +208,27 @@ class Logger {
      * @param {any} msg - info message
      */
     info(msg) {
-        if (INFO >= CURRENT_LOG_LEVEL) {
+        if (LOG_LEVELS.INFO >= CURRENT_LOG_LEVEL) {
             this.logger.info(processMessage(this.prefix, msg));
+        }
+    }
+
+    /**
+     * @param {any} msg - verbose message
+     */
+    verbose(msg) {
+        if (LOG_LEVELS.VERBOSE >= CURRENT_LOG_LEVEL) {
+            this.logger.verbose(processMessage(this.prefix, msg));
+        }
+    }
+
+    /**
+     * @param {any} msg - verbose message
+     * @param {Error} err - error
+     */
+    verboseException(msg, err) {
+        if (LOG_LEVELS.VERBOSE >= CURRENT_LOG_LEVEL) {
+            this.logger.debug(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
         }
     }
 
@@ -194,7 +236,7 @@ class Logger {
      * @param {any} msg - warning message
      */
     warning(msg) {
-        if (WARNING >= CURRENT_LOG_LEVEL) {
+        if (LOG_LEVELS.WARNING >= CURRENT_LOG_LEVEL) {
             this.logger.warning(processMessage(this.prefix, msg));
         }
     }
@@ -223,10 +265,10 @@ mainLogger.setLogLevel = function (newLevel) {
         return;
     }
     // allow user to see this log message to help us understand what happened with logLevel
-    CURRENT_LOG_LEVEL = INFO;
+    CURRENT_LOG_LEVEL = LOG_LEVELS.INFO;
     mainLogger.info(`Global logLevel set to '${levelName}'`);
     CURRENT_LOG_LEVEL = level;
 };
-mainLogger.setLogLevel(INFO);
+mainLogger.setLogLevel(LOG_LEVELS.INFO);
 
 module.exports = mainLogger;

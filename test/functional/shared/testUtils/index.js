@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -72,6 +80,41 @@ function uninstallAllTSpackages(bigip) {
 }
 
 module.exports = {
+    /**
+     * Update System Poller's interval to run more often if
+     * TS_DEV_ENV var set
+     *
+     * @param {object} decl - declraration
+     *
+     * @returns {object} altered declaration
+     */
+    alterPollerInterval(decl) {
+        decl = miscUtils.deepCopy(decl);
+        if (miscUtils.getEnvArg(constants.ENV_VARS.TEST_CONTROLS.TESTS.DEV_ENV, {
+            castTo: 'boolean',
+            defaultValue: false
+        })) {
+            decl.My_System.systemPoller.interval = constants.TELEMETRY.SYSTEM_POLLER.POLLING_INTERVAL.DEV;
+        } else {
+            decl.My_System.systemPoller.interval = constants.TELEMETRY.SYSTEM_POLLER.POLLING_INTERVAL.DEFAULT;
+        }
+        return decl;
+    },
+
+    /**
+     * Get correct waiting time for Poller's data if TS_DEV_ENV var set
+     *
+     * @returns {number} waiting time in ms.
+     */
+    alterPollerWaitingTime() {
+        return miscUtils.getEnvArg('TS_DEV_ENV', {
+            castTo: 'boolean',
+            defaultValue: false
+        })
+            ? constants.TELEMETRY.SYSTEM_POLLER.WAIT_TIME.DEV
+            : constants.TELEMETRY.SYSTEM_POLLER.WAIT_TIME.DEFAULT;
+    },
+
     /**
      * Should configure TS using provided declaration (unit test)
      *
@@ -206,6 +249,36 @@ module.exports = {
     },
 
     /**
+     * Should restart restnoded service on BIG-IP
+     *
+     * @param {function} itFn - mocha 'it'-like function
+     * @param {Array<BigIp> | BigIp} bigips - BIG-IP(s) to configure
+     */
+    shouldRestartRestnoded(itFn, bigips, declaration) {
+        if (typeof itFn !== 'function') {
+            declaration = bigips;
+            bigips = itFn;
+            itFn = it;
+        }
+
+        declaration = typeof declaration === 'function'
+            ? declaration
+            : () => miscUtils.deepCopy(declaration);
+
+        toArray(bigips).forEach((bigip) => itFn(
+            `should configure TS - ${bigip.name}`,
+            function test() {
+                const decl = declaration(bigip);
+                if (decl === null || typeof decl === 'undefined') {
+                    this.skip('No declaration to post');
+                    return Promise.resolve();
+                }
+                return bigip.telemetry.declare(decl);
+            }
+        ));
+    },
+
+    /**
      * Send data to Event Listener (unit test)
      *
      * @param {function} itFn - mocha 'it'-like function
@@ -282,7 +355,8 @@ module.exports = {
 
         toArray(bigips).forEach((bigip) => itFn(
             `should verify TS package installation - ${bigip.name}`,
-            () => bigip.telemetry.version()
+            () => promiseUtils.sleep(350)
+                .then(() => bigip.telemetry.version())
                 .then((verInfo) => {
                     bigip.logger.info('Telemetry Streaming version info', { verInfo });
                     assert.notStrictEqual(verInfo.version, undefined, 'should have "version" property');

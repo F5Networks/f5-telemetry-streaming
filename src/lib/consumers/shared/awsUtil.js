@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -366,7 +374,7 @@ function produceSequenceToken(context, cloudWatchLogs) {
             };
             if (!getSequenceToken(consumerId)) {
                 // expected to happen for the first call of the stream only
-                context.logger.debug('there is no token, calling describeLogStreams');
+                context.logger.verbose('there is no token, calling describeLogStreams');
                 return cloudWatchLogs.describeLogStreams(describeParams).promise();
             }
             return Promise.resolve();
@@ -434,7 +442,7 @@ function sendLogsEngine(context, cloudWatchLogs) {
         })
         .then((putLogEventsResponse) => {
             if (putLogEventsWasIssued) {
-                context.logger.debug(`success ${params.logEvents.length} messages were sent`);
+                context.logger.verbose(`success ${params.logEvents.length} messages were sent`);
                 // store the sequence token for the future commands
                 setSequenceToken(consumerId, putLogEventsResponse.nextSequenceToken);
                 /* buffer might be not empty, so retry is helpful
@@ -460,7 +468,7 @@ function sendLogsEngine(context, cloudWatchLogs) {
                 if (putLogEventsWasIssued) {
                     addMultipleEventsToCache(consumerId, params.logEvents);
                 }
-                context.logger.debug('Some messages will be resent later,'
+                context.logger.verbose('Some messages will be resent later,'
                    + ' consider increasing value of "maxAwsLogBatchSize" parameter');
             } else {
                 context.logger.exception('Unable to forward to AWS CloudWatch consumer', error);

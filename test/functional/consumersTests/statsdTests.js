@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -81,7 +89,7 @@ const DOCKER_CONTAINERS = {
 };
 
 // read in example config
-const DECLARATION = miscUtils.readJsonFile(constants.DECL.BASIC);
+const DECLARATION = testUtils.alterPollerInterval(miscUtils.readJsonFile(constants.DECL.BASIC));
 
 let SERVICES_ARE_READY;
 
@@ -101,6 +109,12 @@ function setup() {
             });
         });
 
+        describe('Clean-up TS before service configuration', () => {
+            harnessUtils.getDefaultHarness()
+                .bigip
+                .forEach((bigip) => testUtils.shouldRemovePreExistingTSDeclaration(bigip));
+        });
+
         describe('Docker container setup', () => {
             before(() => {
                 CONTAINERS_STARTED = [];
@@ -110,7 +124,7 @@ function setup() {
                 CONTAINERS_STARTED = CONTAINERS_STARTED.every((v) => v);
             });
 
-            it('should pull StatsD docker image', () => cs.docker.pull(DOCKER_CONTAINERS.StatsD_TCP.image));
+            it('should pull StatsD docker image', () => cs.docker.pull(DOCKER_CONTAINERS.StatsD_TCP.image, { existing: true }));
 
             Object.keys(STATSD_CONFIGS).forEach((proto) => {
                 it(`should remove pre-existing StatsD docker container (over ${proto})`, () => harnessUtils.docker.stopAndRemoveContainer(
@@ -288,9 +302,9 @@ function test() {
                                 if (metricsFound) {
                                     return Promise.resolve();
                                 }
-                                bigip.logger.info('Waiting for data to be indexed...');
+                                bigip.logger.error('Waiting for data to be indexed...');
                                 // more sleep time for system poller data to be indexed
-                                return promiseUtils.sleepAndReject(20000, 'should have metrics indexed from system poller data');
+                                return promiseUtils.sleepAndReject(testUtils.alterPollerWaitingTime(), 'should have metrics indexed from system poller data');
                             });
                     }
                 ))

@@ -1,53 +1,22 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
 
-const packageVersionInfo = (function () {
-    let packageVersion = '0.0.0-0';
-    ['../package.json', '../../package.json'].some((fname) => {
-        try {
-            packageVersion = require(fname).version; // eslint-disable-line global-require,import/no-dynamic-require
-            delete require.cache[require.resolve(fname)];
-        } catch (err) {
-            return false;
-        }
-        return true;
-    });
-    packageVersion = packageVersion.split('-');
-    if (packageVersion.length === 1) {
-        // push RELEASE number
-        packageVersion.push('1');
-    }
-    return packageVersion;
-}());
-
-const schemaInfo = (function () {
-    const fname = `${__dirname}/../schema/latest/base_schema.json`;
-    let schemaCurrentVersion;
-    let schemaMinimumVersion;
-
-    try {
-        // eslint-disable-next-line global-require,import/no-dynamic-require
-        const schemaVersionEnum = require(fname).properties.schemaVersion.enum;
-        delete require.cache[require.resolve(fname)];
-
-        schemaCurrentVersion = schemaVersionEnum[0];
-        schemaMinimumVersion = schemaVersionEnum[schemaVersionEnum.length - 1];
-    } catch (err) {
-        schemaCurrentVersion = '0.0.0';
-        schemaMinimumVersion = '0.0.0';
-    }
-    return [schemaCurrentVersion, schemaMinimumVersion];
-}());
-
-const VERSION = packageVersionInfo[0];
-const RELEASE = packageVersionInfo[1];
+const appInfo = require('./appInfo');
 
 /**
  * Create new Object with value => key mapping from source Object
@@ -83,8 +52,6 @@ const WEEKDAY_TO_DAY_NAME = valuesToKeys(DAY_NAME_TO_WEEKDAY);
 WEEKDAY_TO_DAY_NAME[7] = 'sunday';
 
 module.exports = {
-    RELEASE,
-    VERSION,
     ACTIVITY_RECORDER: {
         DECLARATION_TRACER: {
             MAX_RECORDS: 60,
@@ -146,6 +113,17 @@ module.exports = {
     DEFAULT_HOSTNAME: 'hostname.unknown',
     DEFAULT_UNNAMED_NAMESPACE: 'f5telemetry_default',
     EVENT_CUSTOM_TIMESTAMP_KEY: 'f5telemetry_timestamp',
+    EVENT_LISTENER: {
+        PARSER_MODE: 'buffer', // default parsing mode
+        PARSER_MAX_ITERS_PER_CHECK: 1000, // how often to check the time spent on data processing
+        PARSER_MAX_MSG_SIZE: 16 * 1024, // max message size in chars (string) or bytes (buffer)
+        PARSER_PREALLOC: 1000, // preallocated buffer size
+        NETWORK_SERVICE_RESTART_DELAY: 10 * 1000, // 10 sec. delay before restart (units - ms.)
+        STREAM_STRATEGY: 'ring', // ring buffer as default strategy
+        STREAM_MAX_PENDING_BYTES: 256 * 1024, // do not feed more than 256 KB to the parser
+        UDP_STALE_CONN_INTERVAL: 5 * 1000, // 5 sec. interval for UDP stale connections check (units - ms.)
+        UDP_STALE_CONN_TIMEOUT: 300 * 1e9 // 300 sec. timeout value for UDP stale connections (units - ns.)
+    },
     EVENT_TYPES: {
         DEFAULT: 'event',
         AVR_EVENT: 'AVR',
@@ -194,10 +172,6 @@ module.exports = {
     PASSPHRASE_ENVIRONMENT_VAR: 'environmentVar',
     PORT_TO_PROTO,
     PROTO_TO_PORT,
-    SCHEMA_INFO: {
-        CURRENT: schemaInfo[0],
-        MINIMUM: schemaInfo[1]
-    },
     SECRETS: {
         PROPS: [
             // encrypted or original declaration
@@ -216,6 +190,6 @@ module.exports = {
         MAX_RECORDS_INPUT: 9999,
         MAX_RECORDS_OUTPUT: 10
     },
-    USER_AGENT: `f5-telemetry/${VERSION}`,
+    USER_AGENT: `f5-telemetry/${appInfo.version}`,
     WEEKDAY_TO_DAY_NAME
 };
