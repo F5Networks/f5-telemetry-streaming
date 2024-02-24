@@ -21,9 +21,8 @@ const moduleCache = require('../shared/restoreCache')();
 
 const sinon = require('sinon');
 
-const assert = require('../shared/assert');
 const common = require('./common');
-const declValidator = require('./common').validate;
+const schemaValidationUtil = require('../shared/schemaValidation');
 
 moduleCache.remember();
 
@@ -40,203 +39,221 @@ describe('Declarations -> Controls', () => {
         sinon.restore();
     });
 
-    describe('logLevel', () => {
+    schemaValidationUtil.generateSchemaBasicTests(
+        (decl) => validateMinimal(decl),
+        {
+            class: 'Controls'
+        },
         [
             {
-                logLevel: 'verbose',
-                expectedToPass: true
-            },
-            {
-                logLevel: 'debug',
-                expectedToPass: true
-            },
-            {
-                logLevel: 'info',
-                expectedToPass: true
-            },
-            {
-                logLevel: 'error',
-                expectedToPass: true
-            },
-            {
-                logLevel: 'invalidValue',
-                expectedToPass: false
-            }
-        ].forEach((testCase) => {
-            it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "logLevel" to "${testCase.logLevel}"`, () => {
-                const data = {
-                    class: 'Telemetry',
-                    Controls: {
-                        class: 'Controls',
-                        logLevel: testCase.logLevel
-                    }
-                };
-                if (testCase.expectedToPass) {
-                    return declValidator(data)
-                        .then((validConfig) => {
-                            assert.strictEqual(validConfig.Controls.logLevel, testCase.logLevel, `'should match "${testCase.logLevel}"`);
-                        });
+                property: 'logLevel',
+                enumTests: {
+                    allowed: ['verbose', 'debug', 'info', 'error'],
+                    notAllowed: ['my-log-level', 'warning']
+                },
+                defaultValueTests: {
+                    defaultValue: 'debug'
                 }
-                return assert.isRejected(declValidator(data), /logLevel.*should be equal to one of the allowed value/);
-            });
-        });
-    });
+            },
+            {
+                property: 'debug',
+                booleanTests: true,
+                valueTests: {
+                    invalid: 'debug'
+                },
+                defaultValueTests: {
+                    defaultValue: false
+                }
+            },
+            {
+                property: 'listenerMode',
+                enumTests: {
+                    allowed: ['buffer', 'string'],
+                    notAllowed: ['my-mode', 10]
+                }
+            },
+            {
+                property: 'listenerStrategy',
+                enumTests: {
+                    allowed: ['drop', 'ring'],
+                    notAllowed: ['my-mode', 10]
+                }
+            },
+            {
+                property: 'memoryThresholdPercent',
+                defaultValueTests: {
+                    defaultValue: 90
+                },
+                numberRangeTests: {
+                    minimum: 1,
+                    maximum: 100
+                }
+            }
+        ]
+    );
+    schemaValidationUtil.generateSchemaBasicTests(
+        (decl) => validateMinimal(decl),
+        {
+            class: 'Controls',
+            memoryMonitor: {
+                memoryThresholdPercent: 10
+            }
+        },
+        [
+            {
+                property: 'memoryMonitor',
+                optionalPropTests: true,
+                additionalPropsTests: {
+                    allowed: {
+                        interval: 'aggressive',
+                        logFrequency: 10,
+                        logLevel: 'debug',
+                        osFreeMemory: 10,
+                        provisionedMemory: 10
+                    },
+                    notAllowed: {
+                        something: 'else'
+                    }
+                },
+                defaultValueTests: {
+                    defaultValue: undefined
+                }
+            },
+            {
+                property: 'memoryMonitor.interval',
+                enumTests: {
+                    allowed: ['default', 'aggressive'],
+                    notAllowed: ['my-log-level', 'warning']
+                },
+                defaultValueTests: {
+                    defaultValue: 'default'
+                }
+            },
+            {
+                property: 'memoryMonitor.logFrequency',
+                defaultValueTests: {
+                    defaultValue: 10
+                },
+                numberRangeTests: {
+                    minimum: 1
+                }
+            },
+            {
+                property: 'memoryMonitor.logLevel',
+                enumTests: {
+                    allowed: ['verbose', 'debug', 'info', 'error'],
+                    notAllowed: ['my-log-level', 'warning']
+                },
+                defaultValueTests: {
+                    defaultValue: 'debug'
+                }
+            },
+            {
+                property: 'memoryMonitor.memoryThresholdPercent',
+                defaultValueTests: {
+                    defaultValue: undefined
+                },
+                numberRangeTests: {
+                    minimum: 1,
+                    maximum: 100
+                }
+            },
+            {
+                property: 'memoryMonitor.osFreeMemory',
+                defaultValueTests: {
+                    defaultValue: 30
+                },
+                numberRangeTests: {
+                    minimum: 1
+                }
+            },
+            {
+                property: 'memoryMonitor.provisionedMemory',
+                defaultValueTests: {
+                    defaultValue: undefined
+                },
+                numberRangeTests: {
+                    minimum: 1,
+                    maximum: 1400
+                }
+            },
+            {
+                property: 'memoryMonitor.thresholdReleasePercent',
+                defaultValueTests: {
+                    defaultValue: 90
+                },
+                numberRangeTests: {
+                    minimum: 1,
+                    maximum: 100
+                }
+            }
+        ]
+    );
 
-    describe('listenerMode', () => {
+    schemaValidationUtil.generateSchemaBasicTests(
+        (decl) => validateMinimal(decl),
+        {
+            class: 'Controls',
+            runtime: {
+                enableGC: true,
+                maxHeapSize: 1400
+            }
+        },
         [
             {
-                listenerMode: 'string',
-                expectedToPass: true
-            },
-            {
-                listenerMode: 'buffer',
-                expectedToPass: true
-            },
-            {
-                listenerMode: 'other',
-                expectedToPass: false
-            },
-            {
-                listenerMode: 'mode',
-                expectedToPass: false
-            }
-        ].forEach((testCase) => {
-            it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "listenerMode" to "${testCase.listenerMode}"`, () => {
-                const data = {
-                    class: 'Telemetry',
-                    Controls: {
-                        class: 'Controls',
-                        listenerMode: testCase.listenerMode
+                property: 'runtime',
+                optionalPropTests: true,
+                additionalPropsTests: {
+                    allowed: {
+                        enableGC: true,
+                        maxHeapSize: 1400
+                    },
+                    notAllowed: {
+                        something: 'else',
+                        memoryAllocator: 'default'
                     }
-                };
-                if (testCase.expectedToPass) {
-                    return declValidator(data)
-                        .then((validConfig) => {
-                            assert.strictEqual(validConfig.Controls.listenerMode, testCase.listenerMode, `'should match "${testCase.listenerMode}"`);
-                        });
+                },
+                defaultValueTests: {
+                    defaultValue: undefined
                 }
-                return assert.isRejected(declValidator(data), /listenerMode.*should be equal to one of the allowed value/);
-            });
-        });
-    });
-    describe('listenerStrategy', () => {
-        [
-            {
-                listenerStrategy: 'drop',
-                expectedToPass: true
             },
             {
-                listenerStrategy: 'ring',
-                expectedToPass: true
+                property: 'runtime.enableGC',
+                booleanTests: true,
+                valueTests: {
+                    invalid: 'debug'
+                },
+                defaultValueTests: {
+                    defaultValue: false
+                }
             },
             {
-                listenerStrategy: 'other',
-                expectedToPass: false
-            },
-            {
-                listenerStrategy: 'mode',
-                expectedToPass: false
+                property: 'runtime.maxHeapSize',
+                defaultValueTests: {
+                    defaultValue: 1400
+                },
+                numberRangeTests: {
+                    minimum: 1400
+                }
             }
-        ].forEach((testCase) => {
-            it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "listenerStrategy" to "${testCase.listenerStrategy}"`, () => {
-                const data = {
-                    class: 'Telemetry',
-                    Controls: {
-                        class: 'Controls',
-                        listenerStrategy: testCase.listenerStrategy
-                    }
-                };
-                if (testCase.expectedToPass) {
-                    return declValidator(data)
-                        .then((validConfig) => {
-                            assert.strictEqual(validConfig.Controls.listenerStrategy, testCase.listenerStrategy, `'should match "${testCase.listenerStrategy}"`);
-                        });
-                }
-                return assert.isRejected(declValidator(data), /listenerStrategy.*should be equal to one of the allowed value/);
-            });
-        });
-    });
-
-    describe('debug', () => {
-        [
-            {
-                debug: true,
-                expectedToPass: true
-            },
-            {
-                debug: false,
-                expectedToPass: true
-            },
-            {
-                debug: 'invalidValue',
-                expectedToPass: false
-            }
-        ].forEach((testCase) => {
-            it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "debug" to "${testCase.debug}"`, () => {
-                const data = {
-                    class: 'Telemetry',
-                    Controls: {
-                        class: 'Controls',
-                        debug: testCase.debug
-                    }
-                };
-                if (testCase.expectedToPass) {
-                    return declValidator(data)
-                        .then((validConfig) => {
-                            assert.strictEqual(validConfig.Controls.debug, testCase.debug, `'should match "${testCase.debug}"`);
-                        });
-                }
-                return assert.isRejected(declValidator(data), /debug.*should be boolean/);
-            });
-        });
-    });
-
-    describe('memoryThresholdPercent', () => {
-        [
-            {
-                memoryThresholdPercent: 1,
-                expectedToPass: true
-            },
-            {
-                memoryThresholdPercent: 100,
-                expectedToPass: true
-            },
-            {
-                memoryThresholdPercent: 50,
-                expectedToPass: true
-            },
-            {
-                memoryThresholdPercent: 101,
-                expectedToPass: false,
-                errorMsg: /memoryThresholdPercent.*should be <= 100/
-            },
-            {
-                memoryThresholdPercent: 0,
-                expectedToPass: false,
-                errorMsg: /memoryThresholdPercent.*should be >= 1/
-            },
-            {
-                memoryThresholdPercent: 'invalidValue',
-                expectedToPass: false,
-                errorMsg: /memoryThresholdPercent.*should be integer/
-            }
-        ].forEach((testCase) => {
-            it(`should ${testCase.expectedToPass ? '' : 'not '}allow to set "memoryThresholdPercent" to "${testCase.memoryThresholdPercent}"`, () => {
-                const data = {
-                    class: 'Telemetry',
-                    Controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: testCase.memoryThresholdPercent
-                    }
-                };
-                if (testCase.expectedToPass) {
-                    return declValidator(data)
-                        .then((validConfig) => {
-                            assert.strictEqual(validConfig.Controls.memoryThresholdPercent, testCase.memoryThresholdPercent, `'should match "${testCase.memoryThresholdPercent}"`);
-                        });
-                }
-                return assert.isRejected(declValidator(data), testCase.errorMsg);
-            });
-        });
-    });
+        ]
+    );
 });
+
+function validateMinimal(controlsProps, expectedProps, addtlContext) {
+    return common.validatePartOfIt(
+        {
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls'
+            }
+        },
+        'controls',
+        controlsProps,
+        {
+            class: 'Controls'
+        },
+        expectedProps,
+        addtlContext
+    );
+}

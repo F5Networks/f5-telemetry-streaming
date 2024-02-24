@@ -28,8 +28,7 @@ const systemPollerConfigTestsData = require('./data/systemPollerTestsData');
 const testUtil = require('./shared/util');
 
 const configWorker = sourceCode('src/lib/config');
-const constants = sourceCode('src/lib/constants');
-const monitor = sourceCode('src/lib/utils/monitor');
+const ResourceMonitor = sourceCode('src/lib/resourceMonitor');
 const systemPoller = sourceCode('src/lib/systemPoller');
 const SystemStats = sourceCode('src/lib/systemStats');
 const tracerMgr = sourceCode('src/lib/tracerManager');
@@ -725,7 +724,7 @@ describe('System Poller', () => {
             });
         });
 
-        describe('monitor "on check" event', () => {
+        describe('Resource Monitor', () => {
             const defaultDeclaration = {
                 class: 'Telemetry',
                 My_System: {
@@ -746,39 +745,66 @@ describe('System Poller', () => {
                 }
             };
 
+            let clock;
             let pollerTimers;
+            let resourceMonitor;
 
             beforeEach(() => {
+                clock = stubs.clock();
+                resourceMonitor = new ResourceMonitor();
+
+                const appCtx = {
+                    configMgr: configWorker,
+                    resourceMonitor
+                };
+
+                resourceMonitor.initialize(appCtx);
+                systemPoller.initialize(appCtx);
+
                 pollerTimers = {};
                 sinon.stub(systemPoller, 'getPollerTimers').returns(pollerTimers);
-                return configWorker.processDeclaration(testUtil.deepCopy(defaultDeclaration))
+
+                return resourceMonitor.start()
+                    .then(() => Promise.all([
+                        configWorker.processDeclaration(testUtil.deepCopy(defaultDeclaration)),
+                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 30 })
+                    ]))
                     .then(() => {
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
                         assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be active');
                     });
             });
 
-            it('should disable running pollers when thresholds not ok', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
-                .then(() => {
-                    assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
-                    assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be inactive');
-                    assert.isFalse(systemPoller.isEnabled(), 'should set processingEnabled to false');
-                }));
+            afterEach(() => resourceMonitor.destroy());
 
-            it('should enable disabled pollers when thresholds become ok', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
-                .then(() => {
-                    assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
-                    assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be inactive');
-                    assert.isFalse(systemPoller.isEnabled(), 'should set processingEnabled to false');
-                    return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK);
-                })
-                .then(() => {
-                    assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
-                    assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
-                    assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be active');
-                    assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.intervalInS, 200, 'should set configured interval');
-                    assert.isTrue(systemPoller.isEnabled(), 'should set processingEnabled to true');
-                }));
+            it('should disable running pollers when thresholds not ok', () => {
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 10;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
+                    .then(() => {
+                        assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
+                        assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be inactive');
+                        assert.isFalse(systemPoller.isEnabled(), 'should set processingEnabled to false');
+                    });
+            });
+
+            it('should enable disabled pollers when thresholds become ok', () => {
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 10;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
+                    .then(() => {
+                        assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be inactive');
+                        assert.isFalse(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be inactive');
+                        assert.isFalse(systemPoller.isEnabled(), 'should set processingEnabled to false');
+                        coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
+                        return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+                    })
+                    .then(() => {
+                        assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.isActive(), 'should be active');
+                        assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_1'].timer.intervalInS, 180, 'should set configured interval');
+                        assert.isTrue(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.isActive(), 'should be active');
+                        assert.strictEqual(pollerTimers['f5telemetry_default::My_System::SystemPoller_2'].timer.intervalInS, 200, 'should set configured interval');
+                        assert.isTrue(systemPoller.isEnabled(), 'should set processingEnabled to true');
+                    });
+            });
         });
     });
 });

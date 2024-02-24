@@ -118,7 +118,7 @@ describe('Logger', () => {
                 const msg = `this is a ${logType} message`;
                 logger[logType](msg);
 
-                if (logger.getLevel(logType) >= logger.getLevel()) {
+                if (logger.isLevelAllowed(logType)) {
                     assert.lengthOf(coreStub.logger.messages[logType], 1);
                     // check it contains the message - no exact match as prefix [telemetry] will be added
                     assert.include(coreStub.logger.messages[logType][0], msg);

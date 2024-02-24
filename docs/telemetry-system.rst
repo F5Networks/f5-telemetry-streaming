@@ -27,7 +27,8 @@ The system poller collects and normalizes statistics from a system, such as BIG-
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | Parameter          | Options                        |  Description/Notes                                                                                                                         |
 +====================+================================+============================================================================================================================================+
-| interval           | 60 - 6000, **300**             |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
+| interval           | 0, 60 - 6000, **300**          |  This value determines the polling period in seconds. By default, Telemetry Streaming collects statistics every 300 seconds.               |
+|                    |                                |     When value set to 0 then interval polling is disabled, useful when you want to configure :ref:`pullconsumer-ref`                       |
 +--------------------+--------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. _ihealthpoller:

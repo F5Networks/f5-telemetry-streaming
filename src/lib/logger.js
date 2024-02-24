@@ -125,6 +125,23 @@ class Logger {
     }
 
     /**
+     * @param {string | number} aLevel - desired level
+     *
+     * @returns {boolean} true if log message will be logged under current logging level
+     */
+    isLevelAllowed(aLevel) {
+        if (typeof aLevel === 'string') {
+            aLevel = this.getLevel(aLevel.toLowerCase());
+        } else if (typeof aLevel !== 'number') {
+            aLevel = undefined;
+        }
+
+        return aLevel === undefined
+            ? false
+            : aLevel >= this.getLevel();
+    }
+
+    /**
      * Get child logger
      *
      * @param {string} prefix - message prefix, will be joined with parent's prefix

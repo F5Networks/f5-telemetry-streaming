@@ -24,13 +24,15 @@ const sinon = require('sinon');
 const assert = require('./shared/assert');
 const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
+const testUtil = require('./shared/util');
 
 const actionProcessor = sourceCode('src/lib/actionProcessor');
+const configWorker = sourceCode('src/lib/config');
 const constants = sourceCode('src/lib/constants');
 const consumers = sourceCode('src/lib/consumers');
 const dataPipeline = sourceCode('src/lib/dataPipeline');
 const forwarder = sourceCode('src/lib/forwarder');
-const monitor = sourceCode('src/lib/utils/monitor');
+const ResourceMonitor = sourceCode('src/lib/resourceMonitor');
 
 const EVENT_TYPES = constants.EVENT_TYPES;
 
@@ -311,7 +313,29 @@ describe('Data Pipeline', () => {
     });
 
     describe('monitor "on check" event', () => {
+        let clock;
         let coreStub;
+        let resourceMonitor;
+
+        const defaultDeclaration = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                trace: true,
+                systemPoller: [
+                    {
+                        interval: 180
+                    },
+                    {
+                        interval: 200
+                    }
+                ]
+            },
+            My_Poller: {
+                class: 'Telemetry_System_Poller',
+                interval: 0
+            }
+        };
 
         const dataCtx = {
             data: {
@@ -321,17 +345,6 @@ describe('Data Pipeline', () => {
             },
             type: EVENT_TYPES.LTM_EVENT,
             destinationIds: [1234, 6789]
-        };
-
-        const dataCtx2 = {
-            data: {
-                EOCTimestamp: '1556592720',
-                AggrInterval: '30',
-                HitCount: '3',
-                telemetryEventCategory: 'AVR'
-            },
-            type: EVENT_TYPES.AVR_EVENT,
-            destinationIds: [4564]
         };
 
         const options = {
@@ -344,6 +357,18 @@ describe('Data Pipeline', () => {
         };
 
         beforeEach(() => {
+            clock = stubs.clock();
+            coreStub = stubs.default.coreStub({});
+            resourceMonitor = new ResourceMonitor();
+
+            const appCtx = {
+                configMgr: configWorker,
+                resourceMonitor
+            };
+
+            resourceMonitor.initialize(appCtx);
+            dataPipeline.initialize(appCtx);
+
             sinon.stub(consumers, 'getConsumers').returns([
                 {
                     name: 'consumer1',
@@ -358,44 +383,36 @@ describe('Data Pipeline', () => {
                     id: 6789
                 }
             ]);
-            coreStub = stubs.default.coreStub({ logger: true });
+            return resourceMonitor.start()
+                .then(() => Promise.all([
+                    configWorker.processDeclaration(testUtil.deepCopy(defaultDeclaration)),
+                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 30 })
+                ]));
         });
 
-        it('should not forward when memory thresholds reached and log info for skipped data', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
-            .then(() => dataPipeline.process(dataCtx, options))
-            .then(() => {
-                assert.strictEqual(forwardFlag, false, 'should not call forwarder');
-                assert.strictEqual(dataPipeline.isEnabled(), false, 'should disable data pipeline');
-                assert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_HIGH. Incoming data will not be forwarded');
-                assert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "LTM" | Consumers: ["consumer1","consumer3"] | Addtl Info: "event_timestamp": "2019-01-01:01:01.000Z"');
-            }));
+        it('should not forward when memory thresholds reached and log info for skipped data', () => {
+            coreStub.resourceMonitorUtils.osAvailableMem.free = 10;
+            return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
+                .then(() => dataPipeline.process(dataCtx, options))
+                .then(() => {
+                    assert.strictEqual(forwardFlag, false, 'should not call forwarder');
+                    assert.strictEqual(dataPipeline.isEnabled(), false, 'should disable data pipeline');
+                });
+        });
 
-        it('should re-enable when memory thresholds return to normal', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK)
-            .then(() => dataPipeline.process(dataCtx, options))
-            .then(() => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK))
-            .then(() => dataPipeline.process(dataCtx, options))
-            .then(() => {
-                assert.strictEqual(forwardFlag, true, 'should call forwarder');
-                assert.strictEqual(dataPipeline.isEnabled(), true, 'should enable data pipeline');
-                assert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_OK. Resuming data pipeline processing.');
-            }));
-
-        it('should only log when status changed', () => monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.OK)
-            .then(() => dataPipeline.process(dataCtx, options))
-            .then(() => {
-                // default threshold ok, so emitting an OK should not trigger a log
-                assert.isTrue(coreStub.logger.proxy_warning.notCalled);
-                return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK);
-            })
-            .then(() => dataPipeline.process(dataCtx, options))
-            .then(() => {
-                assert.includeMatch(coreStub.logger.messages.warning, 'MEMORY_USAGE_HIGH. Incoming data will not be forwarded.');
-                assert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "LTM" | Consumers: ["consumer1","consumer3"] | Addtl Info: "event_timestamp": "2019-01-01:01:01.000Z"');
-                return monitor.safeEmitAsync('check', constants.APP_THRESHOLDS.MEMORY.NOT_OK);
-            })
-            .then(() => dataPipeline.process(dataCtx2, options))
-            .then(() => {
-                assert.includeMatch(coreStub.logger.messages.warning, 'Skipped Data - Category: "AVR" | Consumers: ["consumer2"] | Addtl Info: "EOCTimestamp": "1556592720"');
-            }));
+        it('should re-enable when memory thresholds return to normal', () => {
+            coreStub.resourceMonitorUtils.osAvailableMem.free = 10;
+            return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
+                .then(() => dataPipeline.process(dataCtx, options))
+                .then(() => {
+                    coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
+                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+                })
+                .then(() => dataPipeline.process(dataCtx, options))
+                .then(() => {
+                    assert.strictEqual(forwardFlag, true, 'should call forwarder');
+                    assert.strictEqual(dataPipeline.isEnabled(), true, 'should enable data pipeline');
+                });
+        });
     });
 });

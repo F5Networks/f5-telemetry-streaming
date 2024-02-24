@@ -26,6 +26,8 @@ const objectGet = require('lodash/get');
 const childProcess = require('child_process');
 const fs = require('fs');
 const net = require('net');
+const v8 = require('v8');
+
 // deep require support is deprecated for versions 7+ (requires node8+)
 const uuidv4 = require('uuid/v4');
 const jsonDuplicateKeyHandle = require('json-duplicate-key-handle');
@@ -704,6 +706,23 @@ module.exports = {
     },
 
     /**
+     * Deeply freeze an object
+     *
+     * @param {any} obj - object to freeze
+     *
+     * @returns {any} freezed object
+     */
+    deepFreeze(obj) {
+        Object.freeze(obj);
+        traverseJSON(obj, (parent, key) => {
+            if (typeof parent[key] === 'object') {
+                Object.freeze(parent[key]);
+            }
+        });
+        return obj;
+    },
+
+    /**
      * Merges an Array of Objects into a single Object (uses lodash.mergeWith under the hood).
      * Note: Nested Arrays are concatenated, not overwritten.
      * Note: Passed data gets *spoiled* - copy if you need the original data
@@ -774,10 +793,13 @@ module.exports = {
     },
 
     /**
-     * Return Node version without 'v'
+     * @returns {RuntimeInfo}
      */
     getRuntimeInfo() {
-        return { nodeVersion: process.version.substring(1) };
+        return {
+            maxHeapSize: v8.getHeapStatistics().heap_size_limit / (1024 * 1024),
+            nodeVersion: process.version.substring(1)
+        };
     },
 
     /**
@@ -1113,4 +1135,10 @@ module.exports = {
  * @param {Array} path - path to parent element
  *
  * @returns {boolean} false when item should be ignored
+ */
+/**
+ * @typedef RuntimeInfo
+ * @type {Object}
+ * @property {integer} maxHeapSize - max V8 heap size
+ * @property {string} nodeVersion - node.js version without `v` prefix
  */

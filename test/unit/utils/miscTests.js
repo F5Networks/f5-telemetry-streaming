@@ -21,6 +21,7 @@ const moduleCache = require('../shared/restoreCache')();
 
 const net = require('net');
 const sinon = require('sinon');
+const v8 = require('v8');
 
 const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
@@ -149,12 +150,17 @@ describe('Misc Util', () => {
     describe('.getRuntimeInfo()', () => {
         beforeEach(() => {
             sinon.stub(process, 'version').value('v14.5.1');
+            sinon.stub(v8, 'getHeapStatistics').callsFake(() => ({
+                heap_size_limit: 2000 * 1024 * 1024
+            }));
         });
         it('should return runtime info', () => {
-            const nodeVersion = process.version;
-            const returnValue = util.getRuntimeInfo().nodeVersion;
-            assert(returnValue === '14.5.1', 'getRuntimeInfo returns wrong value 1');
-            assert(returnValue === nodeVersion.substring(1), 'getRuntimeInfo returns wrong value 2');
+            const returnValue = util.getRuntimeInfo();
+            assert.deepStrictEqual(returnValue, {
+                maxHeapSize: 2000,
+                nodeVersion: '14.5.1'
+            });
+            assert.deepStrictEqual(returnValue.nodeVersion, process.version.slice(1));
         });
     });
 
@@ -201,6 +207,21 @@ describe('Misc Util', () => {
             // let's check that copy is deep
             src.schedule.frequency = 'frequency';
             assert.notStrictEqual(copy.schedule.frequency, src.schedule.frequency, 'should not be equal');
+        });
+    });
+
+    describe('.deepFreeze()', () => {
+        it('should make deep freeze for an object', () => {
+            const src = { schedule: { frequency: 'daily', time: { start: '04:20', end: '6:00' } } };
+            let copy = util.deepCopy(src);
+            copy = util.deepFreeze(copy);
+            assert.deepStrictEqual(copy, src, 'should be equal');
+
+            // let's check that copy is deeply freezed
+            assert.throws(() => {
+                copy.schedule.frequency = 'frequency';
+            });
+            assert.deepStrictEqual(copy, src, 'should be equal');
         });
     });
 

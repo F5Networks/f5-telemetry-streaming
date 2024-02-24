@@ -16,7 +16,8 @@
 
 'use strict';
 
-/* eslint-disable no-multi-assign, no-plusplus, no-var, one-var, one-var-declaration-per-line */
+/* eslint-disable no-multi-assign, no-plusplus, no-var, one-var, one-var-declaration-per-line, no-unused-expressions */
+/* eslint-disable no-nested-ternary */
 /**
  * NOTE: `var`, `++` are intentional and helps to gain some perf
  */
@@ -56,9 +57,7 @@ class CircularArray {
 
     /** @returns {integer} number of items */
     get length() {
-        return this._isEmpty
-            ? 0
-            : ((this._backIdx >= this._frontIdx ? this._size : 0) - this._backIdx + this._frontIdx);
+        return this._isEmpty ? 0 : segmentLength(this._backIdx, this._frontIdx, this._size);
     }
 
     /** @returns {integer} buffer size (max number of items) */
@@ -77,6 +76,33 @@ class CircularArray {
     }
 
     /**
+     * Array data (shallow-copy of it)
+     *
+     * NOTE:
+     * `callee` is responsible for cheking `start` and `end` to be
+     * withing the boundaries (>= startIdx and <= endIdx)
+     *
+     * @param {integer} [start] - start index
+     * @param {integer} [end] - index of last item to include
+     *
+     * @returns {Array<any>} shallow-copy of data for provided range of indexes
+     */
+    content(start, end) {
+        var slen = this._storage.length;
+        var storage = this._storage;
+
+        if (arguments.length === 0) {
+            start = this.startIdx;
+        }
+        if (arguments.length < 2) {
+            end = this.endIdx;
+        }
+        return start <= end
+            ? storage.slice(start, end + 1)
+            : storage.slice(start, slen).concat(storage.slice(0, end + 1));
+    }
+
+    /**
      * Erase all data
      *
      * @param {InitOptions} [options] - options
@@ -85,15 +111,13 @@ class CircularArray {
         options = options || {};
         if (typeof options.size !== 'undefined') {
             const size = options.size;
-            if (!(Number.isSafeInteger(size) && size > 0)) {
-                throw RangeError(`Invalid "size" value. Should be an integer value greater than 0, got '${size}' instead (type = ${typeof size})`);
-            }
+            checkSizeValue(size);
             this._size = size;
         } else if (typeof this._size === 'undefined') {
             this._size = 1;
         }
 
-        const prealloc = options.prealloc === true
+        const prealloc = (this._size === 1 || options.prealloc === true)
             ? this._size
             : Math.min(
                 this._size,
@@ -106,6 +130,7 @@ class CircularArray {
         }
 
         if (!(this._storage && this._storage.length === prealloc)) {
+            // TODO: provide option for TypedArray
             this._storage = new Array(prealloc);
         }
         if (this._holeSet) {
@@ -117,15 +142,19 @@ class CircularArray {
         this._isEmpty = true;
     }
 
-    /** Feel non-empty nodes with 'fill' value */
-    fastErase() {
+    /**
+     * Feel non-empty nodes with 'fill' value
+     *
+     * @param {boolean} [freeRefs = true] - free object references
+     */
+    fastErase(freeRefs) {
         var end = this.endIdx;
         var hole = this._hole;
         var idx = this._backIdx;
         var storage = this._storage;
 
-        if (!this._isEmpty) {
-            if (this.length === 1 || this.size === 1) {
+        if (!this._isEmpty && freeRefs !== false) {
+            if (this.length === 1) {
                 storage[idx] = hole;
             } else {
                 // read from left to right or from left to end
@@ -141,8 +170,8 @@ class CircularArray {
                     }
                 }
             }
-            this._isEmpty = true;
         }
+        this._isEmpty = true;
         this._backIdx = this._frontIdx = 0;
     }
 
@@ -154,10 +183,12 @@ class CircularArray {
     /**
      * @param {integer} idx - base index number, 0 <= idx < size
      *
+     * NOTE: '%' is slow, use basic comparisons
+     *
      * @returns {integer} next index number
      */
     nextIdx(idx) {
-        return (idx + 1) % this._size;
+        return (this._size === 1 || ++idx >= this._size) ? 0 : idx;
     }
 
     /**
@@ -173,11 +204,15 @@ class CircularArray {
     pop() {
         var value = this._storage[this._backIdx];
         this._storage[this._backIdx] = this._hole;
-        this._backIdx = this.nextIdx(this._backIdx);
-        this._isEmpty = this._backIdx === this._frontIdx;
-        if (this._isEmpty) {
-            // rebase
-            this._backIdx = this._frontIdx = 0;
+        if (this._size === 1) {
+            this._isEmpty = true;
+        } else {
+            this._backIdx = this.nextIdx(this._backIdx);
+            this._isEmpty = this._backIdx === this._frontIdx;
+            if (this._isEmpty) {
+                // rebase
+                this._backIdx = this._frontIdx = 0;
+            }
         }
         return value;
     }
@@ -185,10 +220,12 @@ class CircularArray {
     /**
      * @param {integer} idx - base index number, 0 <= idx < size
      *
+     * NOTE: '%' is slow, use basic comparisons
+     *
      * @returns {integer} previous index number
      */
     prevIdx(idx) {
-        return (idx || this._size) - 1;
+        return this._size === 1 ? 0 : (idx === 0 || idx >= this._size) ? (this._size - 1) : --idx;
     }
 
     /**
@@ -198,22 +235,29 @@ class CircularArray {
      */
     push(value) {
         var oldValue = this._hole;
-        var sameCell = this._frontIdx === this._backIdx;
+        var sameCell;
+        var storage = this._storage;
 
-        if (this._frontIdx >= this._storage.length) {
-            this._storage.push(value);
+        if (this._size === 1) {
+            oldValue = storage[0];
+            storage[0] = value;
         } else {
-            oldValue = this._storage[this._frontIdx];
-            this._storage[this._frontIdx] = value;
-        }
+            sameCell = this._frontIdx === this._backIdx;
 
-        this._frontIdx = this.nextIdx(this._frontIdx);
+            if (this._frontIdx >= storage.length) {
+                storage.push(value);
+            } else {
+                oldValue = storage[this._frontIdx];
+                storage[this._frontIdx] = value;
+            }
 
-        if (!this._isEmpty && sameCell) {
-            this._backIdx = this._frontIdx;
+            this._frontIdx = this.nextIdx(this._frontIdx);
+
+            if (!this._isEmpty && sameCell) {
+                this._backIdx = this._frontIdx;
+            }
         }
         this._isEmpty = false;
-
         return oldValue;
     }
 
@@ -273,23 +317,394 @@ class CircularArray {
     }
 }
 
-/** @returns {integer} Greater common divider */
-function getGCD(a, b) {
-    return (b ? getGCD(b, a % b) : a);
+/**
+ * Reader Class
+ */
+class Reader {
+    /**
+     * @param {ReaderProxy} proxy - Reader proxy
+     * @param {integer} rid - Reader ID
+     */
+    constructor(proxy, rid) {
+        this._proxy = proxy;
+        this._rid = rid;
+    }
+
+    /** @returns {integer} end index */
+    get endIdx() {
+        return this._proxy.endIdx(this);
+    }
+
+    /** @returns {number} number of elements from current position to the end, e.g. from 5 to 10 = 6 */
+    get length() {
+        return this._proxy.length(this);
+    }
+
+    /** @returns {integer} start index */
+    get startIdx() {
+        return this._proxy.startIdx(this);
+    }
+
+    /** Destroy the reader */
+    destroy() {
+        this._proxy.destroy(this);
+    }
+
+    /** @returns {boolean} true the reader may need to make a copy of data it points to before any modifications */
+    needCopy() {
+        return this._proxy.needCopy(this);
+    }
+
+    /** @returns {any} value of the backmost node (will be deleted if no readers left behind) */
+    pop() {
+        return this._proxy.pop(this);
+    }
 }
 
 /**
- * Shift sub-array to index 0
- *
- * @param {any[]} array
- * @param {integer} startIdx
- * @param {integer} endIdx
+ * Reader Proxy Class
  */
-function shiftSubArray(array, startIdx, endIdx) {
-    var i = startIdx;
-    for (; i < endIdx; i += 1) {
-        array[i - startIdx] = array[i];
+class ReaderProxy {
+    /** @param {CircularArrayMR} carr */
+    constructor(carr) {
+        this._carr = carr;
+        // - readers should be sorted by .length property
+        // - reader with idx 0 should point to the backmost node
+        // [Reader, index, is-empty]
+        this._readers = [];
     }
+
+    /** @returns {Reader} a new reader that points to the beginning of the data */
+    create() {
+        var readers = this._readers;
+        var rid = 0; // set it to 0 index
+
+        readers.unshift([new Reader(this, rid), this._carr.startIdx, false]);
+        if (readers.length > 1) {
+            // re-index readers
+            readers.forEach((rdr, idx) => { rdr[0]._rid = idx; });
+        }
+        return readers[rid][0];
+    }
+
+    /** @param {Reader} [rdr] - reader to destroy. If not set then all readers will be destroyed */
+    destroy(rdr) {
+        var rid;
+        var readers = this._readers;
+        var rlen = readers.length;
+        var dlen = 0;
+
+        // if there is only 1 reader then all data should be left untouched
+        if (!rdr || rlen < 2) {
+            readers.forEach((reader) => {
+                reader[0]._proxy = null;
+            });
+            this._readers = [];
+            return;
+        }
+        // if there are more than 1 reader then all nodes between
+        // reader 0 and reader 1 should be freed
+
+        rid = rdr._rid;
+        rdr = readers[rid];
+        rdr[0]._proxy = null;
+
+        // if reader is empty and rid === 0 - no data at all in the list
+        if (rid === 0 && this.length(rdr[0])) {
+            // free nodes between reader 0 and 1
+            dlen = this._carr.length - this.length(readers[1][0]);
+            while (dlen--) {
+                this._carr._pop();
+            }
+            // no data left - reset all readers to be in sync with the array
+            if (this._carr._isEmpty && rlen) {
+                this.resetAll();
+            }
+        }
+
+        // re-index readers
+        rid++;
+        while (rid < rlen) {
+            rdr = readers[rid];
+            rdr[0]._rid = rid - 1;
+            readers[rdr[0]._rid] = rdr;
+            rid++;
+        }
+
+        readers.length = rlen - 1;
+    }
+
+    /**
+     * @param {Reader} rdr
+     *
+     * @returns {integer} end index
+     */
+    endIdx() {
+        return this._carr.endIdx;
+    }
+
+    /**
+     * @param {Reader} rdr
+     *
+     * @returns {number} calculate length for the reader
+     */
+    length(rdr) {
+        rdr = this._readers[rdr._rid];
+        return (this._carr._isEmpty || (rdr[2] && rdr[1] === this._carr._frontIdx))
+            ? 0
+            : segmentLength(rdr[1], this._carr._frontIdx, this._carr.size);
+    }
+
+    /**
+     * @param {Reader} rdr
+     *
+     * @returns {boolean} true the reader needs to make a copy of data it points to before any modifications
+     */
+    needCopy(rdr) {
+        var readers = this._readers;
+        // data may need a copy if:
+        // - more than 1 reader registered
+        // - reader doesn't point to the backmost item
+        // if reader points to the backmost item and
+        // next reader too and has no data left to read
+        // then no copy needed
+        return readers.length !== 1 && (
+            rdr._rid !== 0
+            || (readers[0][1] === readers[1][1] && !readers[1][2]));
+    }
+
+    /** @returns {integer} number of active readers */
+    numberOfReaders() {
+        return this._readers.length;
+    }
+
+    /**
+     * `callee` is responsible to check `.length` property for presense of
+     * data before call .pop() method
+     *
+     * @param {Reader} rdr
+     *
+     * @returns {any} value of the backmost node (will be deleted if no readers left behind)
+     */
+    pop(rdr) {
+        var cid;
+        var nextlen;
+        var readers = this._readers;
+        var retval;
+        var rid = rdr._rid;
+        var rlen = readers.length - 1;
+        rdr = readers[rid];
+        nextlen = this.length(rdr[0]) - 1;
+        cid = rdr[1];
+
+        if (rlen === 0 || (rid === 0 && (readers[1][1] !== cid || readers[1][2]))) {
+            // call .pop() when:
+            // - one reader only
+            // - the reader points to the tail and:
+            //   - next reader does not
+            //   - next reader has no data to read (is empty)
+            // NOTE: _readers should be sorted already
+            retval = this._carr._pop();
+
+            if (this._carr._isEmpty) {
+                // all data read, reset position of all readers to be in sync with the array
+                // also is a shortcut for size === 1
+                this.resetAll();
+            } else if (rlen && readers[1][1] === cid && readers[1][2] && cid !== this._carr._frontIdx) {
+                // next reader points to `cid` (origin position) and read its data already and new
+                // data was pushed since last .pop() for that reader - need to sync
+                this.sync();
+            }
+            cid = this._carr._backIdx;
+        } else {
+            retval = this._carr.peak(cid);
+            // array sorted already, readers[i].length >= readers[i + 1].length
+            while (rid < rlen && this.length(readers[rid + 1][0]) > nextlen) {
+                // swap readers and update rid
+                readers[rid] = readers[rid + 1];
+                readers[rid][0]._rid = rid++;
+            }
+            if (rdr[0]._rid !== rid) {
+                // position changed
+                rdr[0]._rid = rid;
+                readers[rid] = rdr;
+            }
+            cid = this._carr.nextIdx(cid);
+            rdr[2] = cid === this._carr._frontIdx;
+        }
+
+        rdr[1] = cid;
+        return retval;
+    }
+
+    /**
+     * Update all readers after .rebase() call
+     *
+     * @param {integer} delta - difference for the backmost node IDx before and aftet .rebase() call
+     */
+    rebase(delta) {
+        if (delta) {
+            this._readers.forEach((reader) => {
+                var cid = reader[1] - delta;
+                if (cid < 0) {
+                    // frontIndx <= backIndx in the past
+                    // calculate a new position
+                    cid += this._carr.size;
+                }
+                reader[1] = cid;
+            });
+        }
+    }
+
+    /** Reset all readers to point to the beginning of data */
+    resetAll() {
+        this._readers.forEach((reader) => {
+            reader[1] = this._carr.startIdx;
+            reader[2] = false;
+        });
+    }
+
+    /**
+     * @param {Reader} rdr
+     *
+     * @returns {integer} start index
+     */
+    startIdx(rdr) {
+        return this._readers[rdr._rid][1];
+    }
+
+    /** Synchronize readers state with the underlying array state */
+    sync() {
+        var isEmpty = this._carr._isEmpty;
+        var readers = this._readers;
+        var rlen = readers.length;
+        var rdr = readers[0];
+        var prev = rdr[1]; // points to prev value of _backIdx
+        var cur = this._carr.nextIdx(prev);
+
+        if (rlen === 1) {
+            // single reader points to the backmost node only
+            rdr[1] = cur;
+            rdr[2] = isEmpty;
+        } else {
+            for (let i = 0; i < rlen; i++) {
+                rdr = readers[i];
+                if (rdr[1] !== prev) {
+                    break;
+                }
+                rdr[1] = cur;
+                rdr[2] = isEmpty;
+            }
+        }
+    }
+}
+
+/**
+ * Circular Array Class extension with Multiple Readers
+ *
+ * Multiple Readers are able to read data without removing
+ * it from the underlying array until no refs left.
+ *
+ * Example:
+ *
+ * reader = cl.reader();
+ * // reader.length === cl.length === 5;
+ * reader.pop(); // some data returned
+ * // reader.length === cl.length === 4;
+ *
+ * reader2 = cl.reader();
+ * // reader2.length === reader.length === cl.length === 4;
+ * reader2.pop(); // some data returned
+ * // reader2.length === 3, reader.length === cl.length === 4;
+ * reader2.pop(); // some data returned
+ * // reader2.length === 2, reader.length === cl.length === 4;
+ * reader.pop(); // some data returned
+ * // reader2.length === 2, reader.length === cl.length === 3;
+ * reader.destroy();
+ * // reader2.length === cl.length === 2;
+ *
+ * `callee` is responsible to check `.length` property for presense of
+ * data before call .pop() method
+ */
+class CircularArrayMR extends CircularArray {
+    /** @returns {integer} number of active readers */
+    get readers() {
+        return this._readers.numberOfReaders();
+    }
+
+    /**
+     * Origin pop method
+     *
+     * @see CircularArray.pop
+     */
+    _pop() {
+        return super.pop.apply(this, arguments);
+    }
+
+    /**
+     * Erase all data
+     *
+     * @see CircularArray.erase
+     *
+     * @param {boolean} [options.keepReaders = false] - keep readers
+     */
+    erase(options) {
+        super.erase(options);
+
+        if (options && options.keepReaders && this._readers) {
+            // reset readers state only
+            this._readers.resetAll();
+        } else if (this._readers) {
+            this._readers.destroy();
+        } else {
+            this._readers = new ReaderProxy(this);
+        }
+    }
+
+    /** @see CircularArray.fastErase */
+    fastErase() {
+        super.fastErase.apply(this, arguments);
+        this._readers.resetAll();
+    }
+
+    /** @see CircularArray.pop */
+    pop() {
+        var ret = super.pop.apply(this, arguments);
+        this.readers && this._readers.sync();
+        return ret;
+    }
+
+    /** @see CircularArray.push */
+    push() {
+        var before = this._backIdx;
+        var ret = super.push.apply(this, arguments);
+        (this._size === 1 || this._backIdx !== before) && this.readers && this._readers.sync();
+        return ret;
+    }
+
+    /** @returns {Reader} a new reader */
+    reader() {
+        return this._readers.create();
+    }
+
+    /** @see CircularArray.rebase */
+    rebase() {
+        const before = this._backIdx;
+        super.rebase.apply(this, arguments);
+        this._readers.rebase(before - this._backIdx);
+    }
+}
+
+/** @throws {RangeError} when invalid value passed */
+function checkSizeValue(size) {
+    if (!Number.isSafeInteger(size) || size < 1) {
+        throw RangeError(`Invalid "size" value. Should be an integer value greater than 0, got '${size}' instead (type = ${typeof size})`);
+    }
+}
+
+/** @returns {integer} Greater common divider */
+function getGCD(a, b) {
+    return (b ? getGCD(b, a % b) : a);
 }
 
 /**
@@ -353,7 +768,35 @@ function rotateSubArray(array, startIdx, endIdx, length) {
     return delta !== 0;
 }
 
-module.exports = CircularArray;
+/**
+ * @param {integer} start - start position
+ * @param {integer} end - end position
+ * @param {integer} size - size of object
+ *
+ * @returns {integer} length of segment defined by `start` and `end`
+ */
+function segmentLength(start, end, size) {
+    return (start >= end ? size : 0) - start + end;
+}
+
+/**
+ * Shift sub-array to index 0
+ *
+ * @param {any[]} array
+ * @param {integer} startIdx
+ * @param {integer} endIdx
+ */
+function shiftSubArray(array, startIdx, endIdx) {
+    var i = startIdx;
+    for (; i < endIdx; i += 1) {
+        array[i - startIdx] = array[i];
+    }
+}
+
+module.exports = {
+    CircularArray,
+    CircularArrayMR
+};
 
 /**
  * @typedef InitOptions

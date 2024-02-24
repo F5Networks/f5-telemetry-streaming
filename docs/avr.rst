@@ -25,9 +25,18 @@ To use AVR with BIG-IP Telemetry Streaming, you must modify the AVR logging conf
 Use the following TMSH command, but be sure to change **telemetry_publisher** to the name of your Log Publisher if your publisher has a different name.
 
 
+AS3 compatible command for TMSH:
+
 .. code-block:: bash
 
     modify analytics global-settings { external-logging-publisher /Common/Shared/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
+
+
+TMSH command:
+
+.. code-block:: bash
+
+    modify analytics global-settings { external-logging-publisher /Common/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
 
 
 

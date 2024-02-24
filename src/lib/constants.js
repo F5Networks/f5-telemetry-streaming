@@ -60,15 +60,57 @@ module.exports = {
     },
     APP_NAME: 'Telemetry Streaming',
     APP_THRESHOLDS: {
-        MONITOR_DISABLED: 'MONITOR_DISABLED',
+        MONITOR_DISABLED: 'MONITOR_DISABLED', // TODO: delete
         MEMORY: {
-            // node default max is 1.4 GB
-            // assume this is the default provisioning
-            // value can vary according to db variables, handled by restjavad
+            /** TODO: DELETE */
             DEFAULT_MB: 1433,
-            DEFAULT_LIMIT_PERCENT: 90,
             OK: 'MEMORY_USAGE_OK',
-            NOT_OK: 'MEMORY_USAGE_HIGH'
+            NOT_OK: 'MEMORY_USAGE_HIGH',
+            /** TODO: DELETE END */
+
+            ARGRESSIVE_CHECK_INTERVALS: [
+                { usage: 50, interval: 0.5 },
+                { usage: 60, interval: 0.4 },
+                { usage: 70, interval: 0.3 },
+                { usage: 80, interval: 0.2 },
+                { usage: 90, interval: 0.2 },
+                { usage: 100, interval: 0.1 }
+            ],
+            DEFAULT_CHECK_INTERVALS: [
+                { usage: 50, interval: 1.5 },
+                { usage: 60, interval: 1.0 },
+                { usage: 70, interval: 0.8 },
+                { usage: 80, interval: 0.5 },
+                { usage: 90, interval: 0.2 },
+                { usage: 100, interval: 0.1 }
+            ],
+            // default GC call interval in seconds
+            DEFAULT_GC_INTERVAL: 60,
+            // default check interval in seconds
+            DEFAULT_INTERVAL: 5,
+            // node.js default heap size
+            DEFAULT_HEAP_SIZE: 1400,
+            // 90% should be enough for everyone
+            DEFAULT_LIMIT_PERCENT: 90,
+            DEFAULT_LOG_FREQ: 10 * 1000,
+            DEFAULT_LOG_LEVEL: 'debug',
+            // min amount of system's free memory
+            DEFAULT_MIN_FREE_MEM: 30,
+            // default minimal check interval in seconds when mem usage is >= 100%
+            DEFAULT_MIN_INTERVAL: 0.1,
+            // default percent, when exceed that value app will disable processing
+            DEFAULT_OK_USAGE_PERCENT: 100,
+            // 90% should be enough to avoid processing state flapping
+            DEFAULT_RELEASE_PERCENT: 90,
+            STATE: {
+                OK: 'MEMORY_USAGE_BELOW_THRESHOLD',
+                NOT_OK: 'MEMORY_USAGE_ABOVE_THRESHOLD'
+            },
+            TREND: {
+                DOWN: 'MEMORY_USAGE_GOES_DOWN',
+                NO_CHANGE: 'MEMORY_USAGE_NO_CHANGE',
+                UP: 'MEMORY_USAGE_GOES_UP'
+            }
         }
     },
     CONFIG_CLASSES: {
@@ -116,6 +158,7 @@ module.exports = {
     EVENT_LISTENER: {
         PARSER_MODE: 'buffer', // default parsing mode
         PARSER_MAX_ITERS_PER_CHECK: 1000, // how often to check the time spent on data processing
+        PARSER_MAX_KV_PAIRS: 2000, // max number of key=value pairs per message
         PARSER_MAX_MSG_SIZE: 16 * 1024, // max message size in chars (string) or bytes (buffer)
         PARSER_PREALLOC: 1000, // preallocated buffer size
         NETWORK_SERVICE_RESTART_DELAY: 10 * 1000, // 10 sec. delay before restart (units - ms.)

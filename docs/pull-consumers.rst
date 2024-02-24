@@ -70,6 +70,8 @@ Default Pull Consumer
 
 This example shows how to use the default pull consumer.  For the default pull consumer, the type must be **default** in the Pull Consumer class as shown.
 
+The primary use case of such type of pull consumer is troubleshooting.
+
 Example declaration:
 
 .. literalinclude:: ../examples/declarations/consumers/Pull_Consumer/default_pull_consumer.json

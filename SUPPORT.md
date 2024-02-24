@@ -25,6 +25,7 @@ Currently supported versions:
 |------------------|------------------------|---------------------|------------------|
 | TS 1.33.0        | LTS                    |  22-Mar-2023        | Maintenance mode |
 | TS 1.34.0        | Feature                |  16-Jan-2024        | 16-Apr-2024      |
+| TS 1.35.0        | Feature                |  23-Feb-2024        | 23-May-2024      |
 
 Versions no longer supported:
 
