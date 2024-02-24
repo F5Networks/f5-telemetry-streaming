@@ -23,12 +23,8 @@
 * Make sure RC branch has actual release version and build numbers. **Note:** atg-build bumps the build number (e.g. to get first build vX.Y.Z-1, you must set package and package-lock to vX.Y.Z-0). Check the following files and do corrections if needed:
   * [package.json](package.json)
   * [package-lock.json](package-lock.json)
-  * [project.spec](project.spec) (not required starting from 1.5)
-  * [versions.json](versions.json)
-  * [src/lib/constants.js](src/lib/constants.js) (not required starting from 1.10)
   * [src/schema/latest/base_schema.json](src/schema/latest/base_schema.json)
   * [contributing/README.md](contributing/README.md) (example of response, optional)
-  * [docs/conf.py](docs/conf.py)
   * do simple `grep` in repository to ensure that no unexpected files with old version left
   * A new directory should be added for the new release version (same files that are in [src/schema/latest](src/schema/latest) go here)
   * There should be exact same files across following directories:
@@ -70,6 +66,7 @@
     * 1.32.0 - 20.5 MB
     * 1.33.0 - 22.1 MB
     * 1.34.0 - 18.4 MB
+    * 1.35.0 - 18.4 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -102,7 +99,7 @@
       * 1.31.0 - 153 MB (NOTE: inclusion of OpenTelemetry and grpc-js libraries)
       * 1.32.0 - 154 MB
       * 1.33.0 - 164 MB
-      * 1.34.0 - 136 MB
+      * 1.35.0 - 164 MB
     * Check `node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:

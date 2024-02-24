@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -f /service/${service}/debug ]; then
+    exec /usr/bin/f5-rest-node --debug /usr/share/rest/node/src/restnode.js -p 8105 --logLevel finest -i ${LOG_FILE} -s none ${RCWFeature} >> /var/tmp/${service}.out 2>&1
+else
+    exec /usr/bin/f5-rest-node /usr/share/rest/node/src/restnode.js -p 8105 --logLevel finest -i ${LOG_FILE} -s none ${RCWFeature} >> /var/tmp/${service}.out 2>&1
+fi

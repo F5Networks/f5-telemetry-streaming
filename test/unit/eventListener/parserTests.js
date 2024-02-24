@@ -16,10 +16,11 @@
 
 'use strict';
 
-/* eslint-disable import/order */
+/* eslint-disable import/order, no-restricted-properties, prefer-template, no-bitwise */
 const moduleCache = require('../shared/restoreCache')();
 
 const sinon = require('sinon');
+const StringDecoder = require('string_decoder').StringDecoder;
 
 const assert = require('../shared/assert');
 const parserTestData = require('./data/parserTestsData');
@@ -52,12 +53,17 @@ describe('Event Listener / Parser', () => {
             assert.deepStrictEqual(p._buffers.allocated, 1000);
             assert.deepStrictEqual(p.maxSize, 16 * 1024);
             assert.deepStrictEqual(p.freeBuffers, 16 * 1024 + 1);
+            assert.isTrue(p.featKVPairs);
+            assert.isTrue(p.featF5EvtCategory);
+            assert.deepStrictEqual(p.features & Parser.FEAT_ALL, Parser.FEAT_ALL);
+            assert.deepStrictEqual(p.maxKVPairs, 2000);
         });
 
         it('should use non-default values', () => {
             const p = new Parser(callback, {
                 bufferPrealloc: 10,
                 bufferSize: 11,
+                maxKVPairs: 0,
                 maxSize: 100,
                 mode: 'string'
             });
@@ -65,25 +71,118 @@ describe('Event Listener / Parser', () => {
             assert.deepStrictEqual(p._buffers.allocated, 10);
             assert.deepStrictEqual(p.maxSize, 100);
             assert.deepStrictEqual(p.freeBuffers, 11);
+            assert.isFalse(p.featKVPairs);
+            assert.isTrue(p.featF5EvtCategory);
+            assert.deepStrictEqual(p.features & Parser.FEAT_ALL, Parser.FEAT_ALL);
+            assert.deepStrictEqual(p.maxKVPairs, 0);
+        });
+
+        it('should use non-default values (example 2)', () => {
+            const p = new Parser(callback, {
+                bufferPrealloc: 10,
+                bufferSize: 11,
+                features: Parser.FEAT_NONE,
+                maxSize: 100,
+                mode: 'string'
+            });
+            assert.deepStrictEqual(p.mode, 'string');
+            assert.deepStrictEqual(p._buffers.allocated, 10);
+            assert.deepStrictEqual(p.maxSize, 100);
+            assert.deepStrictEqual(p.freeBuffers, 11);
+            assert.isFalse(p.featKVPairs);
+            assert.isFalse(p.featF5EvtCategory);
+            assert.deepStrictEqual(p.features & Parser.FEAT_ALL, Parser.FEAT_NONE);
+            assert.deepStrictEqual(p.maxKVPairs, 2000);
+        });
+
+        it('should use non-default values (example 3)', () => {
+            const p = new Parser(callback, {
+                bufferPrealloc: 10,
+                bufferSize: 11,
+                features: Parser.FEAT_KV_PAIRS,
+                maxSize: 100,
+                mode: 'string'
+            });
+            assert.deepStrictEqual(p.mode, 'string');
+            assert.deepStrictEqual(p._buffers.allocated, 10);
+            assert.deepStrictEqual(p.maxSize, 100);
+            assert.deepStrictEqual(p.freeBuffers, 11);
+            assert.isTrue(p.featKVPairs);
+            assert.isFalse(p.featF5EvtCategory);
+            assert.deepStrictEqual(p.features & Parser.FEAT_ALL, Parser.FEAT_KV_PAIRS);
+            assert.deepStrictEqual(p.maxKVPairs, 2000);
         });
     });
 
-    describe('.process()', () => {
-        ['buffer', 'string'].forEach((mode) => {
-            describe(`mode = ${mode}`, () => {
+    describe('data processing', () => {
+        const inputModes = [
+            'regular',
+            'byHalf'
+        ];
+        const featMap = {
+            FEAT_KV_PAIRS: Parser.FEAT_KV_PAIRS,
+            FEAT_F5_EVT_CAT: Parser.FEAT_F5_EVT_CAT,
+            FEAT_ALL: Parser.FEAT_ALL,
+            FEAT_NONE: Parser.FEAT_NONE
+        };
+        const modes = [
+            'buffer',
+            'string'
+        ];
+
+        function checkCharCodesKVPairs(results, mayHaveKeyValuePairs) {
+            mayHaveKeyValuePairs.forEach((symb, idx) => {
+                if (symb) {
+                    for (let i = 1; i < symb.length; i += 2) {
+                        assert.deepStrictEqual(
+                            results[idx][symb[i]],
+                            i & 0b1 ? ',' : '=',
+                            'should match char codes at particular position'
+                        );
+                    }
+                }
+            });
+        }
+
+        function checkCharCodesF5Telemetry(results, mayHaveF5EventCategory) {
+            mayHaveF5EventCategory.forEach((offset, idx) => {
+                if (offset) {
+                    assert.deepStrictEqual(results[idx].slice(offset - 1, offset + 1), '$F', 'should match char codes at particular position');
+                }
+            });
+        }
+
+        testUtil.product(inputModes, Object.keys(featMap), modes).forEach((product) => {
+            const feature = product[1];
+            const inputMode = product[0];
+            const mode = product[2];
+
+            describe(`mode = ${mode}, features = ${feature}, input = ${inputMode}`, () => {
                 let callback;
                 let makeInput;
                 let parser;
                 let results;
+                let mayHaveKeyValuePairs;
+                let mayHaveF5EventCategory;
+                let stringDecoder;
+
+                const defaultStringDecoder = new StringDecoder('utf8');
 
                 if (mode === 'string') {
-                    callback = (chunks) => {
+                    callback = (chunks, hasKVPair, hasEvtCat) => {
+                        mayHaveF5EventCategory.push(hasEvtCat);
+                        mayHaveKeyValuePairs.push(hasKVPair);
                         results.push(chunks.length === 1 ? chunks[0] : chunks.reduce((a, v) => a + v, ''));
                     };
                     makeInput = (chunk) => [chunk, Buffer.from(chunk).length, chunk.length];
                 } else {
-                    callback = (chunks) => {
-                        results.push(chunks.length === 1 ? chunks[0].toString() : chunks.reduce((a, v) => a + v.toString(), ''));
+                    callback = (chunks, hasKVPair, hasEvtCat) => {
+                        mayHaveF5EventCategory.push(hasEvtCat);
+                        mayHaveKeyValuePairs.push(hasKVPair);
+
+                        chunks = chunks.map((c) => stringDecoder.write(c));
+                        chunks.push(stringDecoder.end());
+                        results.push(chunks.join(''));
                     };
                     makeInput = (chunk) => {
                         chunk = Buffer.from(chunk);
@@ -92,15 +191,21 @@ describe('Event Listener / Parser', () => {
                 }
 
                 beforeEach(() => {
-                    parser = new Parser(callback, { mode });
+                    mayHaveF5EventCategory = [];
+                    mayHaveKeyValuePairs = [];
+                    parser = new Parser(callback, { mode, features: featMap[feature] });
                     results = [];
+
+                    if (stringDecoder !== defaultStringDecoder) {
+                        stringDecoder = defaultStringDecoder;
+                    }
                 });
 
                 describe('Data sets', () => {
                     parserTestData.process.forEach((testConf) => {
                         const separators = JSON.stringify(testConf.chunks).indexOf('{sep}') !== -1 ? ['\n', '\r\n'] : [''];
                         separators.forEach((sep) => {
-                            let sepMsg = 'built-in the test new line separator';
+                            let sepMsg = 'built in the test new line separator';
                             if (sep) {
                                 sepMsg = sep.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
                             }
@@ -109,13 +214,31 @@ describe('Event Listener / Parser', () => {
                                 let totalBytes = 0;
                                 let totalLength = 0;
 
-                                testConf.chunks.forEach((chunk) => {
-                                    const payload = makeInput(chunk.replace(/\{sep\}/g, sep));
-                                    totalBuffers += 1;
-                                    totalBytes += payload[1];
-                                    totalLength += payload[2];
-                                    parser.push(payload);
-                                });
+                                if (inputMode === 'regular') {
+                                    testConf.chunks.forEach((chunk) => {
+                                        const payload = makeInput(chunk.replace(/\{sep\}/g, sep));
+                                        totalBuffers += 1;
+                                        totalBytes += payload[1];
+                                        totalLength += payload[2];
+                                        parser.push(payload);
+                                    });
+                                } else {
+                                    testConf.chunks.forEach((chunk) => {
+                                        chunk = chunk.replace(/\{sep\}/g, sep);
+                                        const mid = (chunk.length / 2) >> 0;
+                                        const payloads = [];
+                                        if (mid) {
+                                            payloads.push(makeInput(chunk.slice(0, mid)));
+                                        }
+                                        payloads.push(makeInput(chunk.slice(mid)));
+                                        payloads.forEach((payload) => {
+                                            totalBuffers += 1;
+                                            totalBytes += payload[1];
+                                            totalLength += payload[2];
+                                            parser.push(payload);
+                                        });
+                                    });
+                                }
 
                                 assert.deepStrictEqual(parser.buffers, totalBuffers, 'should match expected number of pending buffers');
                                 assert.deepStrictEqual(parser.bytes, totalBytes, 'should match expected number of pending bytes');
@@ -127,6 +250,24 @@ describe('Event Listener / Parser', () => {
                                     testConf.expectedData.map((d) => d.replace(/\{sep\}/g, sep))
                                 );
 
+                                if (parser.featKVPairs && testConf.mayHaveKeyValuePairs) {
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs, testConf.mayHaveKeyValuePairs, 'should match expected key-value pairs');
+                                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+                                } else if (!parser.featKVPairs) {
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs, (new Array(results.length)).fill(null), 'should match expected key-value pairs');
+                                }
+
+                                if (parser.featF5EvtCategory && testConf.mayHaveF5EventCategory) {
+                                    assert.deepStrictEqual(mayHaveF5EventCategory.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveF5EventCategory, testConf.mayHaveF5EventCategory, 'should match expected event categories');
+                                    checkCharCodesF5Telemetry(results, mayHaveF5EventCategory);
+                                } else if (!parser.featF5EvtCategory) {
+                                    assert.deepStrictEqual(mayHaveF5EventCategory.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveF5EventCategory, (new Array(results.length)).fill(0), 'should match expected event categories');
+                                }
+
                                 assert.deepStrictEqual(parser.buffers, 0, 'should have no buffers left');
                                 assert.deepStrictEqual(parser.bytes, 0, 'should have no bytes left');
                                 assert.deepStrictEqual(parser.length, 0, 'should have no bytes/chars left');
@@ -134,6 +275,65 @@ describe('Event Listener / Parser', () => {
                         });
                     });
                 });
+
+                if (mode === 'string') {
+                    it('should process UTF-8 broken into parts', () => {
+                        parser.push(['ключ=значение,$F5TelemetryEventCategory=категор\nия', 51]);
+                        parser.process(true);
+
+                        assert.deepStrictEqual(results, [
+                            'ключ=значение,$F5TelemetryEventCategory=категор',
+                            'ия'
+                        ]);
+                        assert.deepStrictEqual(
+                            mayHaveKeyValuePairs,
+                            parser.featKVPairs
+                                ? [new Uint16Array([4, 13, 39]), null]
+                                : [null, null]
+                        );
+
+                        checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                        assert.deepStrictEqual(
+                            mayHaveF5EventCategory,
+                            parser.featF5EvtCategory ? [15, 0] : [0, 0]
+                        );
+
+                        checkCharCodesF5Telemetry(results, mayHaveF5EventCategory);
+                    });
+                }
+
+                if (mode === 'buffer') {
+                    it('should process UTF-8 broken into parts', () => {
+                        Buffer.from('ключ=значение,$F5TelemetryEventCategory=категор\nия', 'utf-8')
+                            .forEach((byte) => parser.push([Buffer.from([byte]), 1]));
+
+                        parser.process(true);
+
+                        assert.deepStrictEqual(results, [
+                            'ключ=значение,$F5TelemetryEventCategory=категор',
+                            'ия'
+                        ]);
+
+                        if (parser.featKVPairs) {
+                            assert.notDeepEqual(mayHaveKeyValuePairs, [
+                                new Uint16Array([4, 13, 39]),
+                                null
+                            ], 'UTF-8 parsing fixed???????!!! HURAY');
+                        } else {
+                            assert.deepStrictEqual(mayHaveKeyValuePairs, [null, null]);
+                        }
+
+                        if (parser.featF5EvtCategory) {
+                            assert.notDeepEqual(mayHaveF5EventCategory, [
+                                15,
+                                0
+                            ], 'UTF-8 parsing fixed???????!!! HURAY');
+                        } else {
+                            assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0]);
+                        }
+                    });
+                }
 
                 it('should not emit data on incomplete message (single buffer)', () => {
                     parser.push(makeInput('firstLine\nsecondLineIncomple="value'));
@@ -162,6 +362,16 @@ describe('Event Listener / Parser', () => {
                     assert.deepStrictEqual(parser.buffers, 0, 'should have no buffers left');
                     assert.deepStrictEqual(parser.bytes, 0, 'should have no bytes left');
                     assert.deepStrictEqual(parser.length, 0, 'should have no bytes/chars left');
+
+                    assert.deepStrictEqual(
+                        mayHaveKeyValuePairs,
+                        parser.featKVPairs
+                            ? [null, new Uint16Array([18])]
+                            : [null, null]
+                    );
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0]);
                 });
 
                 it('should not emit data on incomplete message (multiple buffers)', () => {
@@ -192,6 +402,16 @@ describe('Event Listener / Parser', () => {
                     assert.deepStrictEqual(parser.buffers, 0, 'should have no buffers left');
                     assert.deepStrictEqual(parser.bytes, 0, 'should have no bytes left');
                     assert.deepStrictEqual(parser.length, 0, 'should have no bytes/chars left');
+
+                    assert.deepStrictEqual(
+                        mayHaveKeyValuePairs,
+                        parser.featKVPairs
+                            ? [null, new Uint16Array([18])]
+                            : [null, null]
+                    );
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0]);
                 });
 
                 it('should not emit data on incomplete message (multiple buffers)', () => {
@@ -223,6 +443,16 @@ describe('Event Listener / Parser', () => {
                     assert.deepStrictEqual(parser.buffers, 0, 'should have no buffers left');
                     assert.deepStrictEqual(parser.bytes, 0, 'should have no bytes left');
                     assert.deepStrictEqual(parser.length, 0, 'should have no bytes/chars left');
+
+                    assert.deepStrictEqual(
+                        mayHaveKeyValuePairs,
+                        parser.featKVPairs
+                            ? [null, new Uint16Array([18])]
+                            : [null, null]
+                    );
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0]);
                 });
 
                 it('should process empty line', () => {
@@ -369,6 +599,212 @@ describe('Event Listener / Parser', () => {
                         parser.process(true);
                         assert.deepStrictEqual(parser.freeBuffers, 5);
                     });
+                });
+
+                describe('.erase()', () => {
+                    it('should erase state', () => {
+                        parser = new Parser(callback, {
+                            bufferSize: 5,
+                            mode,
+                            maxSize: 100
+                        });
+
+                        for (let i = 0; i < 2; i += 1) {
+                            parser.push(makeInput('li'));
+                            parser.push(makeInput(`ne #${i}\n`));
+                        }
+
+                        assert.deepStrictEqual(parser.buffers, 4);
+                        assert.deepStrictEqual(parser.bytes, 16);
+
+                        parser.erase();
+
+                        assert.deepStrictEqual(parser.buffers, 0);
+                        assert.deepStrictEqual(parser.bytes, 0);
+                    });
+                });
+
+                it('should use non-default values (Uint32Array)', () => {
+                    const p = new Parser(callback, {
+                        maxSize: Math.pow(2, 16) + 100,
+                        mode
+                    });
+                    assert.deepStrictEqual(p.maxSize, Math.pow(2, 16) + 100);
+
+                    p.push(makeInput(
+                        'something=test'
+                        + '\\'.repeat(64 * 1024)
+                        + ',something2=test2,something3=test3\\\\\\\n'
+                    ));
+
+                    assert.deepStrictEqual(p.bytes, 65588);
+                    assert.deepStrictEqual(p.buffers, 1);
+
+                    p.process();
+
+                    assert.deepStrictEqual(mayHaveKeyValuePairs, [
+                        new Uint32Array([9, 65550, 65561, 65567, 65578])
+                    ]);
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0]);
+                });
+
+                it('should use custom maxSize', () => {
+                    const p = new Parser(callback, {
+                        maxSize: 100,
+                        mode
+                    });
+                    assert.deepStrictEqual(p.maxSize, 100);
+
+                    const str = 'something=testtest1,';
+
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+
+                    assert.deepStrictEqual(p.bytes, str.length * 5 * 6);
+                    assert.deepStrictEqual(p.buffers, 6);
+
+                    p.process(true);
+                    assert.isFalse(parser.isReady(), 'should return false when no data');
+
+                    assert.deepStrictEqual(results, [
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5)
+                    ]);
+
+                    assert.deepStrictEqual(mayHaveKeyValuePairs, [
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39, 49, 59, 69, 79, 89, 99
+                        ])
+                    ]);
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0, 0, 0, 0, 0]);
+                });
+
+                it('should use custom maxKVPairs', () => {
+                    const p = new Parser(callback, {
+                        maxKVPairs: 2,
+                        maxSize: 100,
+                        mode
+                    });
+                    assert.deepStrictEqual(p.maxKVPairs, 2);
+                    assert.deepStrictEqual(p.maxSize, 100);
+
+                    const str = 'something=testtest1,';
+
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+                    p.push(makeInput(str.repeat(5)));
+
+                    assert.deepStrictEqual(p.bytes, str.length * 5 * 6);
+                    assert.deepStrictEqual(p.buffers, 6);
+
+                    p.process(true);
+                    assert.isFalse(parser.isReady(), 'should return false when no data');
+
+                    assert.deepStrictEqual(results, [
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5),
+                        str.repeat(5)
+                    ]);
+
+                    assert.deepStrictEqual(mayHaveKeyValuePairs, [
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ]),
+                        new Uint16Array([
+                            9, 19, 29, 39
+                        ])
+                    ]);
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0, 0, 0, 0, 0]);
+                });
+
+                it('should correctly process extended ASCII', () => {
+                    stringDecoder = {
+                        write(chunk) {
+                            return chunk.toString('binary');
+                        },
+                        end() {
+                            return '';
+                        }
+                    };
+
+                    const str = '"key=value,key=value';
+
+                    const asciiTable = 255;
+                    const buffer = Buffer.alloc(asciiTable + str.length);
+                    for (let i = 0; i < asciiTable; i += 1) {
+                        buffer[i] = i;
+                    }
+                    for (let i = asciiTable; i < asciiTable + str.length; i += 1) {
+                        buffer[i] = str.charCodeAt(i - asciiTable);
+                    }
+                    const expected = buffer.toString('binary');
+
+                    parser.push([
+                        mode === 'string' ? buffer.toString('binary') : buffer,
+                        buffer.length
+                    ]);
+                    parser.process(true);
+                    assert.isFalse(parser.isReady(), 'should return false when no data');
+
+                    assert.deepStrictEqual(results, [
+                        expected.slice(0, 10),
+                        expected.slice(11)
+                    ]);
+
+                    assert.deepStrictEqual(mayHaveKeyValuePairs, [
+                        null,
+                        parser.featKVPairs ? new Uint16Array([248, 254, 258]) : null
+                    ]);
+                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+
+                    assert.deepStrictEqual(mayHaveF5EventCategory, [0, 0]);
                 });
             });
         });

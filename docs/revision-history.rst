@@ -21,12 +21,16 @@ There is no plan to deprecate this product.
         - Description
         - Date
 
+      * - 1.35.0
+        - Updated the documentation for Telemetry Streaming v1.35.0. This release contains the following changes: |br| * Added "memoryMonitor" (see :ref:`Memory Mamangement<memorymanagement>`).
+        - 01-19-24
+
+      * - 1.34.0
+        - Updated the documentation for Telemetry Streaming v1.34.0. This release contains the following changes: |br| * Added "verbose" option for "logLevel". |br| * Event Listener bugfixes, performance and memory usage improvements. |br| * Updated description for "default" consumers. |br| * More troubleshooting entries. |br| |br| Changed: |br| * Update npm packages
+        - 01-19-24
+
       * - 1.33.0
-<<<<<<< HEAD
         - Updated the documentation for Telemetry Streaming v1.33.0. This release contains the following changes: |br| * Added allowing user provided endpoints for the Azure consumers |br| |br| Changed: |br| * Update npm packages
-=======
-        - Released Telemetry Streaming v1.33.0 as a LTS (Long Term Support) version. See the Telemetry Streaming |supportmd| for information about the Telemetry Streaming support policy. |br|Updated the documentation for Telemetry Streaming v1.33.0. This release contains the following changes: |br| * Added allowing user provided endpoints for the Azure consumers |br| |br| Changed: |br| * Update npm packages
->>>>>>> develop
         - 03-17-23
 
       * - 1.32.0

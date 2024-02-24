@@ -16,14 +16,12 @@
 
 'use strict';
 
-const APP_THRESHOLDS = require('./constants').APP_THRESHOLDS;
 const configUtil = require('./utils/config');
 const configWorker = require('./config');
 const constants = require('./constants');
 const dataPipeline = require('./dataPipeline');
 const errors = require('./errors');
 const logger = require('./logger');
-const monitor = require('./utils/monitor');
 const promiseUtil = require('./utils/promise');
 const SystemStats = require('./systemStats');
 const timers = require('./utils/timers');
@@ -35,8 +33,6 @@ const util = require('./utils/misc');
 // key - poller name, value - { timer, config }
 const POLLER_TIMERS = {};
 
-let processingEnabled = true;
-
 class NoPollersError extends errors.ConfigLookupError {}
 
 /**
@@ -46,17 +42,6 @@ class NoPollersError extends errors.ConfigLookupError {}
  */
 function getPollerTimers() {
     return POLLER_TIMERS;
-}
-
-/**
- * Check if systemPoller(s) are running
- * Toggled by monitor checks
- *
- * @returns {Boolean} - whether or not processing is enabled
- */
-
-function isEnabled() {
-    return processingEnabled;
 }
 
 function findSystemOrPollerConfigs(originalConfig, sysOrPollerName, pollerName, namespace) {
@@ -332,30 +317,63 @@ function fetchPollersData(pollerConfigs, decryptSecrets) {
 configWorker.on('change', (config) => Promise.resolve()
     .then(() => {
         logger.debug('configWorker change event in systemPoller');
-        // reset for monitor check
-        processingEnabled = true;
         return applyConfig(util.deepCopy(config));
     })
     .then(() => logger.debug(`${Object.keys(getPollerTimers()).length} system poller(s) running`))
     .catch((error) => logger.exception('Uncaught error during System Poller(s) configuration', error)));
 
-monitor.on('check', (status) => new Promise((resolve) => {
-    const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
-    // only enable/disable when there is change in state
-    if (processingEnabled !== monitorChecksOk) {
-        // also only log here to minimize entries
-        logger.warning(`${status}. ${monitorChecksOk ? 'Re-enabling system poller(s).' : 'Temporarily disabling system poller(s).'}`);
-        if (monitorChecksOk) {
-            enablePollers();
-        } else {
-            disablePollers();
+/**
+ * TEMP BLOCK OF CODE, REMOVE AFTER REFACTORING
+ */
+let processingEnabled = true;
+let processingState = null;
+let processingStatePromise = Promise.resolve();
+
+/** @param {restWorker.ApplicationContext} appCtx - application context */
+function initialize(appCtx) {
+    if (appCtx.resourceMonitor) {
+        if (processingState) {
+            logger.debug('Destroying existing ProcessingState instance');
+            processingState.destroy();
         }
+        processingState = appCtx.resourceMonitor.initializePState(
+            onResourceMonitorUpdate.bind(null, true),
+            onResourceMonitorUpdate.bind(null, false)
+        );
+        processingEnabled = processingState.enabled;
+        onResourceMonitorUpdate(processingEnabled);
+    } else {
+        logger.error('Unable to subscribe to Resource Monitor updates!');
     }
-    processingEnabled = monitorChecksOk;
-    resolve();
-}).catch((err) => {
-    logger.exception('Unexpected error in system poller (monitor check handler).', err);
-}));
+}
+
+/** @param {boolean} enabled - true if processing enabled otherwise false */
+function onResourceMonitorUpdate(enabled) {
+    processingEnabled = enabled;
+    processingStatePromise = processingStatePromise.then(() => {
+        if (enabled) {
+            logger.warning('Enabling system poller(s).');
+            return enablePollers();
+        }
+        logger.warning('Temporarily disabling system poller(s).');
+        return disablePollers();
+    })
+        .catch((error) => logger.exception(`Unexpected error on attempt to ${enabled ? 'enable' : 'disable'} system pollers:`, error));
+}
+
+/**
+ * Check if systemPoller(s) are running
+ * Toggled by monitor checks
+ *
+ * @returns {Boolean} - whether or not processing is enabled
+ */
+
+function isEnabled() {
+    return processingEnabled;
+}
+/**
+ * TEMP BLOCK OF CODE END
+ */
 
 module.exports = {
     NoPollersError,
@@ -365,5 +383,6 @@ module.exports = {
     getPollerTimers,
     process,
     safeProcess,
-    isEnabled
+    isEnabled,
+    initialize
 };

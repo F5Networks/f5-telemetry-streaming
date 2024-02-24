@@ -4,7 +4,19 @@
         "class": "Controls",
         "logLevel": "info",
         "debug": false,
-        "memoryThresholdPercent": 90
+        "memoryThresholdPercent": 90,
+        "memoryMonitor": {
+            "interval": "aggressive",
+            "logFrequency": 60,
+            "logLevel": "debug",
+            "memoryThresholdPercent": 90,
+            "osFreeMemory": 100,
+            "provisionedMemory": 500
+        },
+        "runtime": {
+            "enableGC": true,
+            "maxHeapSize": 1400
+        }
     },
     "My_System": {
         "class": "Telemetry_System",

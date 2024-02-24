@@ -16,6 +16,8 @@
 
 'use strict';
 
+/* eslint-disable no-multi-assign, no-var */
+
 const dgram = require('dgram');
 const net = require('net');
 
@@ -34,8 +36,8 @@ class SocketServiceError extends Error {}
  * @see module:utils/service.Service
  *
  * @property {string} address - address to listen on
- * @property {logger.Logger} logger - logger instance
  * @property {ReceiverCallback} callback - `connection` callback
+ * @property {logger.Logger} logger - logger instance
  * @property {integer} port - port to listen on
  *
  * NOTE: running instance should be restarted if `address` or `port` updated
@@ -52,12 +54,25 @@ class BaseNetworkService extends Service {
         super();
 
         options = options || {};
-        this.address = options.address;
-        this.callback = callback;
-        this.port = port;
-        this.restartsEnabled = true;
 
-        this.logger = options.logger || logger.getChild(`${this.constructor.name}::${this.address}::${port}`);
+        /** define static read-only props that should not be overriden */
+        Object.defineProperties(this, {
+            address: {
+                value: options.address
+            },
+            callback: {
+                value: callback
+            },
+            port: {
+                value: port
+            }
+        });
+        Object.defineProperties(this, {
+            logger: {
+                value: options.logger || logger.getChild(`${this.constructor.name}::${this.address}::${port}`)
+            }
+        });
+        this.restartsEnabled = true;
     }
 
     /**
@@ -92,6 +107,7 @@ class TCPService extends BaseNetworkService {
         super(callback, port, options);
 
         this._connections = null;
+        this._handleConnection = handleTcpConnection.bind(this);
         this._socket = null;
     }
 
@@ -108,6 +124,12 @@ class TCPService extends BaseNetworkService {
             if (this._socket) {
                 reject(new SocketServiceError('_socket exists already!'));
             } else {
+                const srvOpts = this.getReceiverOptions();
+                this.logger.debug(`starting listen using following options ${JSON.stringify(srvOpts)}`);
+
+                // reset connections registry
+                this._connections = [];
+
                 this._socket = net.createServer({
                     allowHalfOpen: false,
                     pauseOnConnect: false
@@ -135,23 +157,8 @@ class TCPService extends BaseNetworkService {
                         }
                     });
 
-                this._socket.on('connection', (conn) => {
-                    const dst = this.callback({
-                        address: conn.remoteAddress,
-                        family: conn.remoteFamily,
-                        port: conn.remotePort
-                    });
-                    addTcpConnection.call(this, conn, dst);
-                    conn.on('data', dst.push.bind(dst))
-                        .on('error', () => conn.destroy()) // destroy emits 'close' event
-                        .on('close', () => removeTcpConnection.call(this, conn))
-                        .on('end', () => {}); // allowHalfOpen is false, no need to call 'end' explicitly
-                });
-
-                const options = this.getReceiverOptions();
-                this.logger.debug(`starting listen using following options ${JSON.stringify(options)}`);
-                this._connections = [];
-                this._socket.listen(options);
+                this._socket.on('connection', this._handleConnection);
+                this._socket.listen(srvOpts);
             }
         });
     }
@@ -200,8 +207,9 @@ class UDPService extends BaseNetworkService {
             }
         });
 
-        this._connections = null;
         this._cleanupID = null;
+        this._connections = null;
+        this._handleConnection = handleUdpConnection.bind(this);
         this._socket = null;
     }
 
@@ -218,6 +226,12 @@ class UDPService extends BaseNetworkService {
             if (this._socket) {
                 reject(new SocketServiceError('_socket exists already!'));
             } else {
+                const srvOpts = this.getReceiverOptions();
+                this.logger.debug(`starting listen using following options ${JSON.stringify(srvOpts)}`);
+
+                // reset connections registry
+                this._connections = {};
+
                 this._socket = dgram.createSocket({
                     type: this.family,
                     ipv6Only: this.family === 'udp6', // available starting from node 11+ only
@@ -246,15 +260,8 @@ class UDPService extends BaseNetworkService {
                         }
                     });
 
-                this._socket.on('message', (data, remoteInfo) => {
-                    const key = `${remoteInfo.address}-${remoteInfo.port}`;
-                    (this._connections[key] || addUdpConnection.call(this, key, remoteInfo)).push(data);
-                });
-
-                const options = this.getReceiverOptions();
-                this.logger.debug(`starting listen using following options ${JSON.stringify(options)}`);
-                this._connections = {};
-                this._socket.bind(options);
+                this._socket.on('message', this._handleConnection);
+                this._socket.bind(srvOpts);
 
                 this._cleanupID = setInterval(() => {
                     Object.keys(this._connections).forEach((key) => {
@@ -314,9 +321,7 @@ class DualUDPService extends BaseNetworkService {
             if (this._services) {
                 reject(new SocketServiceError('_services exists already!'));
             } else {
-                // should never happen
-                this._onFailCb = onFatalError;
-                this.ee.on('failed', this._onFailCb);
+                this._listenerOnFailed = this.ee.on('failed', onFatalError, { objectify: true });
 
                 this._services = ['udp4', 'udp6'].map((family) => {
                     const service = new UDPService(
@@ -353,8 +358,7 @@ class DualUDPService extends BaseNetworkService {
             if (!this._services) {
                 resolve();
             } else {
-                this.ee.removeListener('failed', this._onFailCb);
-                this._onFailCb = null;
+                this._listenerOnFailed.off();
 
                 this.ee.stopListeningTo();
                 promiseUtil.allSettled(this._services.map((srv) => srv.destroy()))
@@ -371,32 +375,6 @@ class DualUDPService extends BaseNetworkService {
 /**
  * PRIVATE METHODS
  */
-/**
- * Add connection to the list of opened connections
- *
- * @this TCPService
- * @param {net.Socket} conn - connection to add
- * @param {MessageStream} receiver - data receiver
- */
-function addTcpConnection(conn, receiver) {
-    this.logger.verbose(`new connection - "${conn.remoteAddress}" port "${conn.remotePort}"`);
-    this._connections.push([conn, receiver]);
-}
-
-/**
- * Add connection to the list of opened connections
- *
- * @this UDPService
- * @param {string} connKey - connection to add
- * @param {ConnInfo} connInfo - connection info
- *
- * @returns {MessageStream} data receiver
- */
-function addUdpConnection(connKey, connInfo) {
-    this.logger.verbose(`new connection - "${connInfo.address}" port "${connInfo.port}"`);
-    // eslint-disable-next-line no-return-assign
-    return this._connections[connKey] = this.callback(connInfo);
-}
 
 /**
  * Close all opened client connections
@@ -425,11 +403,53 @@ function closeAllUdpConnections() {
         .forEach((connKey) => removeUdpConnection.call(this, connKey));
     this._connections = {};
 }
+/**
+ * Add connection to the list of opened connections
+ *
+ * @this TCPService
+ *
+ * @param {net.Socket} conn - connection to add
+ */
+function handleTcpConnection(conn) {
+    var receiver = this.callback({
+        address: conn.remoteAddress,
+        family: conn.remoteFamily,
+        port: conn.remotePort
+    });
+    this.logger.verbose(`new connection - "${conn.remoteAddress}" port "${conn.remotePort}"`);
+    this._connections.push([conn, receiver]);
+
+    conn.on('data', receiver.push.bind(receiver))
+        .on('error', () => conn.destroy()) // destroy emits 'close' event
+        .on('close', () => removeTcpConnection.call(this, conn))
+        .on('end', () => {}); // allowHalfOpen is false, no need to call 'end' explicitly
+}
+
+/**
+ * Add connection to the list of opened connections
+ *
+ * @this UDPService
+ *
+ * @param {Buffer} data - data to process
+ * @param {object} remoteInfo - connection info
+ */
+function handleUdpConnection(data, remoteInfo) {
+    var key = `${remoteInfo.address}-${remoteInfo.port}`;
+    var stream = this._connections[key];
+
+    if (stream === undefined) {
+        stream = this._connections[key] = this.callback(remoteInfo);
+        this.logger.verbose(`new connection - "${remoteInfo.address}" port "${remoteInfo.port}"`);
+    }
+
+    stream.push(data);
+}
 
 /**
  * Remove connection from the list of opened connections
  *
  * @this TCPService
+ *
  * @param {net.Socket} conn - connection to remove
  */
 function removeTcpConnection(conn) {
@@ -450,6 +470,7 @@ function removeTcpConnection(conn) {
  * Remove connection from the list of opened connections
  *
  * @this UDPService
+ *
  * @param {string} connKey - unique connection key
  */
 function removeUdpConnection(connKey) {

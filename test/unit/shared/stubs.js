@@ -110,29 +110,34 @@ const _module = module.exports = {
                 if (typeof repeatTimes === 'undefined' || (repeatTimes && repeatTimes > callCount)) {
                     return fwdOptions.promisify ? Promise.resolve().then(timeTick) : timeTick();
                 }
+                return fwdOptions.promisify ? Promise.resolve() : undefined;
             }
             function then(ticks) {
-                if (stopClockForward) {
-                    return;
-                }
-                if (ticks === false) {
-                    return;
+                if (stopClockForward || ticks === false || !ctx.fakeClock) {
+                    return fwdOptions.promisify ? Promise.resolve() : undefined;
                 }
                 ticks = typeof ticks === 'number' ? ticks : tickStep;
-                if (ctx.fakeClock) {
-                    if (typeof fwdOptions.delay === 'number') {
-                        ctx.fakeClock._setTimeout(doTimeTick, fwdOptions.delay, ticks);
-                    } else if (fwdOptions.promisify) {
-                        ctx.fakeClock._setImmediate(doTimeTick, ticks);
-                    } else {
-                        doTimeTick(ticks);
+                if (typeof fwdOptions.delay === 'number') {
+                    if (fwdOptions.promisify) {
+                        return new Promise((resolve) => {
+                            ctx.fakeClock._setTimeout(resolve, fwdOptions.delay);
+                        })
+                            .then(() => doTimeTick(ticks));
                     }
+                    return ctx.fakeClock._setTimeout(doTimeTick, fwdOptions.delay, ticks);
                 }
+                if (fwdOptions.promisify) {
+                    return new Promise((resolve) => {
+                        ctx.fakeClock._setImmediate(resolve);
+                    })
+                        .then(() => doTimeTick(ticks));
+                }
+                return doTimeTick(ticks);
             }
             function timeTick() {
                 let nextTick = tickStep;
                 if (stopClockForward) {
-                    return;
+                    return fwdOptions.promisify ? Promise.resolve() : undefined;
                 }
                 if (fwdOptions.cb) {
                     nextTick = fwdOptions.cb();
@@ -141,10 +146,9 @@ const _module = module.exports = {
                     if (!fwdOptions.promisify) {
                         throw new Error('Callback passed to "clockForward" returned Promise but "clockForward" was not configured to use Promises!');
                     }
-                    nextTick.then(then);
-                } else {
-                    then(nextTick);
+                    return nextTick.then(then);
                 }
+                return then(nextTick);
             }
             return fwdOptions.promisify ? Promise.resolve().then(timeTick) : timeTick();
         };
@@ -188,6 +192,12 @@ const _module = module.exports = {
         }
         if (coreModules.persistentStorage) {
             ctx.persistentStorage = _module.persistentStorage(coreModules.persistentStorage, options.persistentStorage);
+        }
+        if (coreModules.resourceMonitorUtils) {
+            ctx.resourceMonitorUtils = _module.resourceMonitorUtils(
+                coreModules.resourceMonitorUtils,
+                options.resourceMonitorUtils
+            );
         }
         if (coreModules.teemReporter) {
             ctx.teemReporter = _module.teemReporter(coreModules.teemReporter, options.teemReporter);
@@ -469,6 +479,34 @@ const _module = module.exports = {
     },
 
     /**
+     * Stub for ResourceMonitor
+     *
+     * @param {module} resourceMonitor - module
+     *
+     * @returns {ResourceMonitorUtilsStubCtx} stub context
+     */
+    resourceMonitorUtils(resourceMonitorUtils) {
+        const ctx = {
+            appMemoryUsage: sinon.stub(resourceMonitorUtils, 'appMemoryUsage'),
+            osAvailableMem: sinon.stub(resourceMonitorUtils, 'osAvailableMem')
+        };
+        ctx.appMemoryUsage.external = 100;
+        ctx.appMemoryUsage.heapTotal = 101;
+        ctx.appMemoryUsage.heapUsed = 90;
+        ctx.appMemoryUsage.rss = 300;
+        ctx.appMemoryUsage.callsFake(() => ({
+            external: ctx.appMemoryUsage.external,
+            heapTotal: ctx.appMemoryUsage.heapTotal,
+            heapUsed: ctx.appMemoryUsage.heapUsed,
+            rss: ctx.appMemoryUsage.rss
+        }));
+
+        ctx.osAvailableMem.free = 100;
+        ctx.osAvailableMem.callsFake(() => ctx.osAvailableMem.free);
+        return ctx;
+    },
+
+    /**
      * Stub for TeemReporter
      *
      * @param {module} teemReporter - module
@@ -628,7 +666,11 @@ const _module = module.exports = {
         });
 
         ctx.getRuntimeInfo.nodeVersion = '4.6.0';
-        ctx.getRuntimeInfo.callsFake(() => ({ nodeVersion: ctx.getRuntimeInfo.nodeVersion }));
+        ctx.getRuntimeInfo.maxHeapSize = 4096;
+        ctx.getRuntimeInfo.callsFake(() => ({
+            maxHeapSize: ctx.getRuntimeInfo.maxHeapSize,
+            nodeVersion: ctx.getRuntimeInfo.nodeVersion
+        }));
         ctx.networkCheck.resolves();
         return ctx;
     }
@@ -653,6 +695,7 @@ _module.default = {
             deviceUtil: 'src/lib/utils/device',
             logger: 'src/lib/logger',
             persistentStorage: 'src/lib/persistentStorage',
+            resourceMonitorUtils: 'src/lib/resourceMonitor/utils',
             teemReporter: 'src/lib/teemReporter',
             tracer: 'src/lib/utils/tracer',
             utilMisc: 'src/lib/utils/misc'
@@ -723,22 +766,6 @@ _module.default = {
  * @property {object} stub - sinon stub
  */
 /**
- * @typedef LoggerStubCtx
- * @type {object}
- * @property {object} messages - logged messages
- * @property {Array<string>} messages.all - all logged messages
- * @property {Array<string>} messages.debug - debug messages
- * @property {Array<string>} messages.error - error messages
- * @property {Array<string>} messages.info - info messages
- * @property {Array<string>} messages.warning - warning messages
- * @property {Array<string>} logLevelHistory - log level history
- * @property {object} proxy_verbose - sinon stub for Logger.logger.verbose
- * @property {object} proxy_debug - sinon stub for Logger.logger.debug
- * @property {object} proxy_info - sinon stub for Logger.logger.info
- * @property {object} proxy_warning - sinon stub for Logger.logger.warning
- * @property {object} proxy_erro - sinon stub for Logger.logger.error
- */
-/**
  * @typedef iHealthPollerStubCtx
  * @type {object}
  * @property {ihealthUtilStubCtx} ihealthUtil - iHealth Utils stubs
@@ -756,6 +783,22 @@ _module.default = {
  * @property {object} QkviewManager.process - stub for QkviewManager.prototype.process
  */
 /**
+ * @typedef LoggerStubCtx
+ * @type {object}
+ * @property {object} messages - logged messages
+ * @property {Array<string>} messages.all - all logged messages
+ * @property {Array<string>} messages.debug - debug messages
+ * @property {Array<string>} messages.error - error messages
+ * @property {Array<string>} messages.info - info messages
+ * @property {Array<string>} messages.warning - warning messages
+ * @property {Array<string>} logLevelHistory - log level history
+ * @property {object} proxy_verbose - sinon stub for Logger.logger.verbose
+ * @property {object} proxy_debug - sinon stub for Logger.logger.debug
+ * @property {object} proxy_info - sinon stub for Logger.logger.info
+ * @property {object} proxy_warning - sinon stub for Logger.logger.warning
+ * @property {object} proxy_erro - sinon stub for Logger.logger.error
+ */
+/**
  * @typedef PersistentStorageStubCtx
  * @type {object}
  * @property {function} loadCbAfter - error to throw on attempt to load
@@ -770,6 +813,17 @@ _module.default = {
  * @property {any} savedState - saved state on attempt to save (will override 'loadState')
  * @property {boolean} savedStateParse - parse '_data_' property of saved state if exist
  * @property {object} storage - sinon stub for persistentStorage.persistentStorage.storage
+ */
+/**
+ * @typedef ResourceMonitorUtilsStubCtx
+ * @type {object}
+ * @property {object} appMemoryUsage - stub for appMemoryUsage
+ * @property {number} appMemoryUsage.external - `external` value
+ * @property {number} appMemoryUsage.heapTotal - `heapTotal` value
+ * @property {number} appMemoryUsage.heapUsed - `heapUsed` value
+ * @property {number} appMemoryUsage.rss - `rss` value
+ * @property {object} osAvailableMem - stub for osAvailableMem
+ * @property {number} osAvailableMem.free - free memory value
  */
 /**
  * @typedef TeemReporterStubCtx
@@ -793,5 +847,7 @@ _module.default = {
  * @property {number} generateUuid.uuidCounter - counter value
  * @property {boolean} generateUuid.numbersOnly - numbers only
  * @property {object} getRuntimeInfo - stub for getRuntimeInfo
+ * @property {string} getRuntimeInfo.nodeVersion - node.js version
+ * @property {number} getRuntimeInfo.maxHeapSize - V8 max heap size
  * @property {object} networkCheck - stub for networkCheck
  */

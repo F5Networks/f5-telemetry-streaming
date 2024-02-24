@@ -36,6 +36,10 @@ const networkService = sourceCode('src/lib/eventListener/networkService');
 moduleCache.remember();
 
 describe('Event Listener / TCP and UDP Services', () => {
+    before(() => {
+        moduleCache.restore();
+    });
+
     let coreStub;
     let dataReceivers;
     let receiverInst;
@@ -98,10 +102,6 @@ describe('Event Listener / TCP and UDP Services', () => {
         assert.notIncludeMatch(coreStub.logger.messages[lvl], msg);
     }
 
-    before(() => {
-        moduleCache.restore();
-    });
-
     beforeEach(() => {
         sinon.stub(constants.EVENT_LISTENER, 'NETWORK_SERVICE_RESTART_DELAY').value(1);
         coreStub = stubs.default.coreStub({
@@ -134,6 +134,7 @@ describe('Event Listener / TCP and UDP Services', () => {
             assert.deepStrictEqual(receiverInst.getRestartOptions(), {
                 delay: 1
             });
+            assert.isTrue(receiverInst.restartsEnabled);
         });
     });
 

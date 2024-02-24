@@ -23,4 +23,5 @@ Using F5 BIG-IP Telemetry Streaming Index
    data-modification
    customizing-data
    advanced-options
+   memory-monitor
    deleting-ts-config

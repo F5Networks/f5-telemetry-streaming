@@ -7,7 +7,7 @@ In this section, we show you how to validate a F5 BIG-IP Telemetry Streaming dec
 For more information on editing JSON with Visual Studio Code, see |json|. 
 
 
-To validate a declaration
+How to validate a declaration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Use the following procedure to validate a declaration.
 

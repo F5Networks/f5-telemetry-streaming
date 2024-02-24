@@ -17,7 +17,8 @@
 'use strict';
 
 /* eslint-disable no-continue, no-multi-assign, no-plusplus, no-unused-expressions */
-/* eslint-disable no-use-before-define, no-var, vars-on-top */
+/* eslint-disable no-use-before-define, no-var, vars-on-top, no-bitwise */
+/* eslint-disable no-nested-ternary, no-cond-assign, no-return-assign */
 
 const assignDefaults = require('../utils/misc').assignDefaults;
 const constants = require('../constants').EVENT_LISTENER;
@@ -27,23 +28,31 @@ const CircularArray = require('../utils/structures').CircularArray;
 /** @module eventListener/parser */
 
 /**
+ * TODO: perf tests
+ * - Linked List vs Array
+ * - Slow Buffer vs Buffer
+ */
+
+/**
  * DEV NOTES:
  *
- * THIS IS THE CORE OF EVENT LISTNER MODULE BE CAREFUL WITH CHANGING/UPDATING IT
+ * THIS IS THE CORE OF EVENT LISTNER MODULE. BE CAREFUL WITH CHANGING/UPDATING IT
  * EVEN A SMALL CHANGE MAY RESULT IN SIGNIFICANT SLOWDOWN DUE V8 NATURE
  *
- * - buffer is more performant than string
+ * - original naive implementation takes about 4+ seconds to parse 145MB
+ *
+ * - buffer is more performant than string (Apple M1 Pro)
  *   - buffer may result in external memory grow/fragmentation if held for too long
  *   - Parser's perf stats:
- *     - v4.8.0 - 1.6sec, - 91 MByte/s
- *     - v8.11.1 - 14.x - 750ms, - 194 MByte/s
- *     - v16 - 21.x - 550ms - 264 MByte/s
- * - string is slower (x1.5-2 times) but no external memory grow/fragmentation
+ *     - v4.8.0 - 1.5sec, - 100 MByte/s
+ *     - v8.11.1 - 14.x - 600, - 245 MByte/s
+ *     - v16 - 21.x - 441ms - 334 MByte/s
+ * - string is slower (x1.5-2 times) but no external memory grow/fragmentation (Apple M1 Pro)
  *   - Parser's perf stats:
- *     - v4.8.0 - 1.6sec, - 91 MByte/s
- *     - v8.11.1 - 1.6sec, - 91 MByte/s
- *     - v12.x - 14.x -  121 MByte/s
- *     - v16 - 21.x - 550ms - 182 MByte/s
+ *     - v4.8.0 - 1.5sec, - 96 MByte/s
+ *     - v8.11.1 - 1.1sec, - 132 MByte/s
+ *     - v12.x - 14.x -  173 MByte/s
+ *     - v16 - 21.x - 441ms - 334 MByte/s
  * - V8 optimizations:
  *   - monomorphic structures
  *   - instances re-use
@@ -51,29 +60,89 @@ const CircularArray = require('../utils/structures').CircularArray;
  *   - pre-compute if possible
  *   - less `this` (??)
  *
+ * `=,` search and `$F5` check adds +0.2-0.3 sec. but it saves more time
+ * down the pipeline
+ *
  * Update this file/code only in case of bug or beter solution/optiimzation found.
  * Run benchmark(s) and see opt/deopt logs by using following node.js flags:
  * --turbo_profiling --print_deopt_stress --code_comments --trace_opt --trace_deopt
+ *
+ * Even small function may help to gain perf - try to move code to funcs:
+ * smaller funcs are easier to optimize
  */
 
-/**
- * Character codes
- *
- * @type {{string: integer}}
- */
-const CC_BS = '\\'.charCodeAt(0);
-const CC_CR = '\r'.charCodeAt(0);
-const CC_DQ = '"'.charCodeAt(0);
-const CC_EM = '\0'.charCodeAt(0);
-const CC_NL = '\n'.charCodeAt(0);
-const CC_SQ = '\''.charCodeAt(0);
+// Character codes
+var CC_BS = '\\'.charCodeAt(0);
+var CC_CM = ','.charCodeAt(0);
+var CC_CR = '\r'.charCodeAt(0);
+var CC_DQ = '"'.charCodeAt(0);
+var CC_EM = '\0'.charCodeAt(0);
+var CC_EQ = '='.charCodeAt(0);
+var CC_NL = '\n'.charCodeAt(0);
+var CC_SQ = '\''.charCodeAt(0);
+
+// ASCII len === UTF-8 len
+var F5_FCAT_LEN = Buffer.from('$F5TelemetryEventCategory').length; // pre-compute for `if` statement down below
+var F5_SCAT_DS = '$'.charCodeAt(0);
+var F5_SCAT_LF = 'F'.charCodeAt(0);
+var F5_SCAT_NOT_FOUND = 0b001; // 1 - nothing found yet
+var F5_SCAT_FOUND = 0b000; // 0 - $F found
+var F5_ECAT_DEFAULT_STATE_IDX = 2;
+var F5_ECAT_STATE_IDX = 0;
+var F5_ECAT_OFFSET_IDX = 1;
+
+// KV Pairs states and variables
+var KV_DISABLED = 0b0000; //    0b0000 - 0 - feature disabled
+var KV_FULL = 0b0001; //        0b0001 - 1 - number of pairs exceeded the limit
+var KV_NOT_FOUND = 0b0100; //   0b0100 - 4 - next pair not found
+var KV_FOUND = 0b0110; //       0b0110 - 6 - `=` found
+var KV_INVALID_SEQ = 0b1000; // 0b1000 - 8 - invalid sequence
+
+var KV_DEFAULT_STATE_IDX = 0; // item at index stores default state
+var KV_STATE_IDX = 1; // item at index stores current state
+var KV_OFFSET_IDX = 2; // item at index stores current offset
+var KV_MAX_OFFSET_IDX = 8; // item at index stores max allowed offset
+var KV_RESERVED_IDX = 3; // item at index stores number of revserved elems
+
+// max unsiged 16 bit int
+var MAX_UINT16 = 64 * 1024;
+
+// parser flag features
+var FEAT_NONE = 0b000; // 0 - no features
+var FEAT_F5_EVT_CAT = 0b001; // 1 - $F scan
+var FEAT_KV_PAIRS = 0b010; // 2 - key-value pairs scan
+var FEAT_ALL = FEAT_NONE
+    | FEAT_F5_EVT_CAT
+    | FEAT_KV_PAIRS;
+
+// NOTE: everything above is ASCII -> no issues with UTF-8
 
 /**
  * Parser Class
  *
  * Parses messages separated by new line chars.
+ * Also does non-strict matching for $F5TelemetryEventCategory keyword.
+ * Also does colloecting info about `=` and `,` symbols outside of quotes.
  *
- * NOTE: data may contain multiple events separated by newline
+ * NOTE:
+ * Parser uses only ASCII chars to search for data, so any encoding
+ * with first 127-ASCII chars should work.
+ * ASCII strings (1-bytes) are faster than UTF-8 strings (2+ bytes)
+ *
+ * NOTE:
+ * due the way how node.js encode/decode UTF-8 I was not able to
+ * find a reliable way to calculate number of UxFFFD substitutions
+ * for invalid bytes. As result offsets for `=` and etc. in UTF-8
+ * strings may be incorrect.
+ * - use `buffer` mode or `ascii` or `binary` encoding for strings
+ * - update Pointer class with appropriate logic for UxFFFD calculations
+ *
+ * there is no sense to collect any info about offsets, because it may change
+ * after conversion from buffer to string (requires to calculate
+ * all UTF-8 bytes and check for errors)
+ *
+ * NOTE:
+ * data may contain multiple events separated by newline
  * however newline chars may also show up inside a given event
  * so split only on newline with preceding double quote.
  * Expected behavior is that every channel (TCP connection)
@@ -86,10 +155,12 @@ const CC_SQ = '\''.charCodeAt(0);
  */
 class Parser {
     /**
-     * @param {function(Buffer[]|string[])} callback - callback
+     * @param {OnLineFoundCb} callback - callback
      * @param {object} [options] - options
      * @param {integer} [options.bufferPrealloc = PARSER_PREALLOC] - number of buffer's items to preallocate
      * @param {integer} [options.bufferSize = PARSER_MAX_MSG_SIZE + 1] - number of max buffer's items
+     * @param {integer} [options.features = FEAT_ALL] - processing features, by default all enabled
+     * @param {integer} [options.maxKVPairs = PARSER_MAX_KV_PAIRS] - max number of key=value pairs per message
      * @param {integer} [options.maxSize = PARSER_MAX_MSG_SIZE] - max message size (bytes (buffer) or chars (string))
      * @param {'buffer' | 'string'} [options.mode = 'buffer'] - processing mode
      */
@@ -101,6 +172,8 @@ class Parser {
              * in case when input Buffers has 1 char/byte only
              */
             bufferSize: constants.PARSER_MAX_MSG_SIZE + 1,
+            features: FEAT_ALL,
+            maxKVPairs: constants.PARSER_MAX_KV_PAIRS,
             maxSize: constants.PARSER_MAX_MSG_SIZE,
             mode: constants.PARSER_MODE
         });
@@ -109,6 +182,12 @@ class Parser {
 
         /** read-only static properties */
         Object.defineProperties(this, {
+            features: {
+                value: options.features
+            },
+            maxKVPairs: {
+                value: options.maxKVPairs
+            },
             maxSize: {
                 value: options.maxSize
             },
@@ -124,7 +203,7 @@ class Parser {
             size: options.bufferSize
         });
         this._cb = callback;
-        this._state = new State(pointerCls);
+        this._state = new State(pointerCls, this);
     }
 
     /** @returns {integer} number of pending buffers */
@@ -132,11 +211,19 @@ class Parser {
         return this._buffers.length;
     }
 
-    /**
-     * @returns {integer} size of pending data in bytes
-     */
+    /** @returns {integer} size of pending data in bytes */
     get bytes() {
         return this._bytes;
+    }
+
+    /** @returns {boolean} true if $F scan enabled */
+    get featF5EvtCategory() {
+        return !!(this.features & FEAT_F5_EVT_CAT);
+    }
+
+    /** @returns {boolean} true if key=value scan enabled */
+    get featKVPairs() {
+        return !!((this.features & FEAT_KV_PAIRS) && this.maxKVPairs);
     }
 
     /** @returns {number} number of free buffers */
@@ -151,6 +238,7 @@ class Parser {
         return this._length;
     }
 
+    /** Erase all data, can not be used after that anymore */
     erase() {
         this._buffers.erase({ size: 1 });
         this._state.erase();
@@ -220,20 +308,53 @@ class Parser {
  */
 class State {
     /** @param {Object} PointerCls - class to use to create pointers */
-    constructor(PointerCls) {
+    constructor(PointerCls, parser) {
         this.backSlash = false;
+
+        // Uint16Array allows to store indexes up to 65535
+        // Uint32Array allows to store indexes for long lines
+
+        this.eventCategory = new (
+            parser.maxSize <= MAX_UINT16 ? Uint16Array : Uint32Array
+        )(3);
+        this.eventCategory[F5_ECAT_OFFSET_IDX] = 0;
+        this.eventCategory[F5_ECAT_DEFAULT_STATE_IDX] = parser.featF5EvtCategory ? F5_SCAT_NOT_FOUND : F5_SCAT_FOUND;
+        this.eventCategory[F5_ECAT_STATE_IDX] = this.eventCategory[F5_ECAT_DEFAULT_STATE_IDX];
+
+        // - buffer to store positions of special symbols that
+        //   speed up data processing later down the pipeline
+        // - uint16 for small buffers
+        // - uint32 for large buffers to be able to store values 2^16 ++
+        // - mult. by 2 because `=` and `,` need to be stored for each pair
+        var maxKVSize = (parser.featKVPairs ? (parser.maxKVPairs * 2) : 0) + 9;
+        this.kvSymbols = new this.eventCategory.constructor(maxKVSize);
+        this.kvSymbols[KV_RESERVED_IDX] = this.kvSymbols[KV_OFFSET_IDX] = 8; // number reserved cells and start index
+        this.kvSymbols[KV_DEFAULT_STATE_IDX] = parser.featKVPairs ? KV_NOT_FOUND : KV_DISABLED;
+        this.kvSymbols[KV_STATE_IDX] = this.kvSymbols[KV_DEFAULT_STATE_IDX]; // current state
+        this.kvSymbols[KV_MAX_OFFSET_IDX] = maxKVSize - 1;
+        this.kvSymbols[KV_NOT_FOUND] = CC_EQ; // 4 - searcing for `=`
+        this.kvSymbols[KV_NOT_FOUND + 1] = KV_FOUND; // 5 - `=` found - next state 6
+        this.kvSymbols[KV_FOUND] = CC_CM; // 6 - searching for `,`
+        this.kvSymbols[KV_FOUND + 1] = KV_NOT_FOUND; // 7 - `=` found - next state 4
+
         this.pointerCls = PointerCls;
         this.prevChar = CC_EM;
+
         /** Create all pointers with stub buffer obj - helps V8 to optimize */
         this.pLeft = new PointerCls(PointerCls.BUFFER_STUB, 0);
         this.pNewLine = new PointerCls(PointerCls.BUFFER_STUB, 0);
         this.pQuote = new PointerCls(PointerCls.BUFFER_STUB, 0);
         this.pRight = new PointerCls(PointerCls.BUFFER_STUB, 0);
+        this.pValidNewLine = new PointerCls(PointerCls.BUFFER_STUB, 0);
     }
 
     /** @param {Parser} parser */
     erase() {
         this.backSlash = false;
+        this.eventCategory[F5_ECAT_STATE_IDX] = this.eventCategory[F5_ECAT_DEFAULT_STATE_IDX];
+        this.eventCategory[F5_ECAT_OFFSET_IDX] = 0;
+        this.kvSymbols[KV_OFFSET_IDX] = this.kvSymbols[KV_RESERVED_IDX];
+        this.kvSymbols[KV_STATE_IDX] = this.kvSymbols[KV_DEFAULT_STATE_IDX];
         this.prevChar = CC_EM;
         /**
          * - create all pointers with stub buffer obj - helps V8 to optimize
@@ -246,6 +367,7 @@ class State {
         this.pNewLine.init(this.pointerCls.BUFFER_STUB, 0);
         this.pQuote.init(this.pointerCls.BUFFER_STUB, 0);
         this.pRight.init(this.pointerCls.BUFFER_STUB, 0);
+        this.pValidNewLine.init(this.pointerCls.BUFFER_STUB, 0);
     }
 
     refresh() {
@@ -253,6 +375,7 @@ class State {
         this.pNewLine.refresh();
         this.pQuote.refresh();
         this.pRight.refresh();
+        this.pValidNewLine.refresh();
     }
 }
 
@@ -428,19 +551,26 @@ StringPointer.BUFFER_STUB = new CircularArray({
  */
 function splitByLines(timeLimit) {
     // local vars a faster than property access/lookup
-    var backSlash = this._state.backSlash;
-    var prevChar = this._state.prevChar;
-    var pNewLine = this._state.pNewLine;
-    var pQuote = this._state.pQuote;
-    var pLeft = this._state.pLeft;
-    var pRight = this._state.pRight;
+    var state = this._state;
+    var backSlash = state.backSlash;
+    var eventCategory = state.eventCategory;
+    var kvSymbols = state.kvSymbols;
+    var prevChar = state.prevChar;
+    var pNewLine = state.pNewLine;
+    var pQuote = state.pQuote;
+    var pLeft = state.pLeft;
+    var pRight = state.pRight;
+    var pValidNewLine = state.pValidNewLine;
 
     var char = CC_EM;
-    var qchar = pQuote.isFree ? char : pQuote.value();
+    var ecState = eventCategory[F5_ECAT_STATE_IDX];
     var forceSplit = false;
     var iterNo = 0;
+    var kvState = kvSymbols[KV_STATE_IDX];
     var maxItersBeforeTimeCheck = constants.PARSER_MAX_ITERS_PER_CHECK;
     var maxMsgSize = this.maxSize;
+    var qchar = pQuote.isFree ? char : pQuote.value();
+
     // pre-compute to save CPU cycles (pre-optimization)
     var maxTimeTs = hrtimestamp() + timeLimit;
 
@@ -453,54 +583,68 @@ function splitByLines(timeLimit) {
         pLeft.inc();
     }
 
-    while (pRight.inc()) {
-        iterNo++;
-        char = pRight.value();
-
-        if (char === CC_BS) {
-            backSlash = !backSlash;
-            if (backSlash) {
-                continue;
-            }
-        } else if (char === CC_DQ || char === CC_SQ) {
-            // igore escaped quotes
-            if (!backSlash) {
-                if (pQuote.isFree) {
-                    // reset value, this new line is invalid now (before quote starts, from prev message probably)
-                    pNewLine.isFree = true;
-                    // quote opened, reuse pointer
-                    pRight.copy(pQuote);
-                    qchar = char;
-                } else if (char === qchar) {
-                    // reset value, this new line is invalid now (between quotes)
-                    // quote closed
-                    pQuote.isFree = pNewLine.isFree = true;
+    while (!pRight.endOfData()) {
+        while (pRight.msgOffset < maxMsgSize && pRight.inc()) {
+            iterNo++;
+            char = pRight.value();
+            if (char === CC_BS) {
+                prevChar = char;
+                if ((backSlash = !backSlash)) {
+                    // - go to next char if leading `\`
+                    continue;
                 }
-            }
-        } else if (char === CC_NL) {
-            if (pNewLine.isFree) {
-                // remember position of new line (it might be closest to the open quote)
+            } else if (char === CC_DQ || char === CC_SQ) {
+                // igore escaped quotes
+                if (!backSlash) {
+                    if (pQuote.isFree) {
+                        // reset value, this new line is invalid now (before quote starts, from prev message probably)
+                        pValidNewLine.isFree = true;
+                        // quote opened, reuse pointer
+                        pRight.copy(pQuote);
+                        qchar = char;
+                    } else if (char === qchar) {
+                        // reset value, this new line is invalid now (between quotes)
+                        // quote closed
+                        pQuote.isFree = pValidNewLine.isFree = true;
+                    }
+                }
+            } else if (char === CC_NL) {
+                // most recent new line char
                 pRight.copy(pNewLine);
-
                 // point to \r if exist
                 prevChar === CC_CR && pNewLine.dec();
+
+                if (pValidNewLine.isFree) {
+                    // remember position of new line char (it might be closest to the open quote or to the start)
+                    pNewLine.copy(pValidNewLine);
+                }
+                if (pQuote.isFree) {
+                    forceSplit = true;
+                    break;
+                }
+            } else if (kvState & KV_NOT_FOUND && pQuote.isFree && prevChar !== CC_CM
+                && (char === CC_EQ || char === CC_CM)
+            ) {
+                kvState = checkKeyValuePair(kvSymbols, char, pRight.msgOffset);
+            } else if (ecState & F5_SCAT_NOT_FOUND && prevChar === F5_SCAT_DS && char === F5_SCAT_LF) {
+                ecState = eventCategory[F5_ECAT_STATE_IDX] = F5_SCAT_FOUND;
+                eventCategory[F5_ECAT_OFFSET_IDX] = pRight.msgOffset - 1;
             }
-            if (pQuote.isFree) {
-                // regular split
-                forceSplit = true;
-            }
+
+            backSlash = false;
+            prevChar = char;
         }
 
-        backSlash = false;
-        prevChar = char;
+        if (forceSplit || pRight.msgOffset === maxMsgSize) {
+            extractLine.call(this, pLeft, pRight, pQuote, kvSymbols, eventCategory);
 
-        if (!forceSplit && pRight.msgOffset >= maxMsgSize) {
-            forceSplit = true;
-        }
-        if (forceSplit) {
-            extractLine.call(this, pLeft, pRight, pQuote, pNewLine);
-            prevChar = CC_EM;
+            // reset state before next iteration
+            backSlash = false;
+            ecState = eventCategory[F5_ECAT_STATE_IDX] = eventCategory[F5_ECAT_DEFAULT_STATE_IDX];
             forceSplit = false;
+            kvState = kvSymbols[KV_STATE_IDX] = kvSymbols[KV_DEFAULT_STATE_IDX];
+            kvSymbols[KV_OFFSET_IDX] = kvSymbols[KV_RESERVED_IDX];
+            prevChar = CC_EM;
         }
         // compare SMI (small integers) is faster than '%' operation
         if (iterNo > maxItersBeforeTimeCheck) {
@@ -511,8 +655,9 @@ function splitByLines(timeLimit) {
         }
     }
 
-    this._state.backSlash = backSlash;
-    this._state.prevChar = prevChar;
+    // save all state's data
+    state.backSlash = backSlash;
+    state.prevChar = prevChar;
 }
 
 /**
@@ -523,11 +668,17 @@ function splitByLines(timeLimit) {
  * @param {Pointer} pLeft
  * @param {Pointer} pRight
  * @param {Pointer} pQuote
- * @param {Pointer} pNewLine
+ * @param {integer} kvOffset
+ * @param {integer} kvInvalidOffset
+ * @param {integer} evtCatOffset
  */
-function extractLine(pLeft, pRight, pQuote, pNewLine) {
-    var pRightNewLine = false;
+function extractLine(pLeft, pRight, pQuote, kvSymbols, eventCategory) {
+    var pNewLine = this._state.pNewLine;
+    var pValidNewLine = this._state.pValidNewLine;
+
     var forceSplit = true;
+    var maxMsgSize = this.maxSize;
+    var pRightNewLine = false;
 
     /**
      * Split reasons:
@@ -535,32 +686,44 @@ function extractLine(pLeft, pRight, pQuote, pNewLine) {
      * - msg is too long and no new line
      * - opened quote is too long
      */
-    if (!pQuote.isFree) {
+    if (pQuote.isFree === false) {
         // malformed quote - too long
         // split by new line char closest to quote
         // or split by open quote
-        if (pNewLine.isFree) {
-            pQuote.copy(pRight);
-        } else {
+        if (pValidNewLine.isFree === false) {
+            pRightNewLine = true;
+            pValidNewLine.copy(pRight);
+        } else if (pNewLine.isFree === false) {
             pRightNewLine = true;
             pNewLine.copy(pRight);
+        } else {
+            pQuote.copy(pRight);
         }
-    } else if (!pNewLine.isFree) {
+    } else if (pValidNewLine.isFree === false) {
         // points to \r or \n
-        if (pNewLine.msgOffset > 1) {
+        if (pValidNewLine.msgOffset > 1) {
             // msg has atleast 1 char
             pRightNewLine = true;
-            pNewLine.copy(pRight);
+            pValidNewLine.copy(pRight);
         } else {
             // \n\n or \r\n\r\n or similar
             forceSplit = false;
         }
+    } else if (pRight.msgOffset >= maxMsgSize && pNewLine.isFree === false) {
+        // - points to \r or \n
+        // pNewLine.msgOffset for sure > 1
+        pRightNewLine = true;
+        pNewLine.copy(pRight);
     } // else message is too long - split by pRight
 
     if (forceSplit) {
         // ignore new line char \r\n or \n
         pRightNewLine && pRight.dec();
-        this._cb(slicer(pLeft.cArr, pLeft, pRight));
+        this._cb(
+            slicer(pLeft, pRight),
+            getKVPairsOffsets(kvSymbols, pRight.msgOffset),
+            getEventCategoryOffset(eventCategory, pRight.msgOffset)
+        );
     }
 
     pRightNewLine && pRight.inc()
@@ -570,7 +733,7 @@ function extractLine(pLeft, pRight, pQuote, pNewLine) {
     pRight.copy(pLeft);
     // move to start of next msg
     pLeft.inc();
-    pQuote.isFree = pNewLine.isFree = true;
+    pQuote.isFree = pValidNewLine.isFree = pNewLine.isFree = true;
 }
 
 /**
@@ -601,14 +764,17 @@ function extractLine(pLeft, pRight, pQuote, pNewLine) {
  *  - third item is amount of time in ns. spent to parse data and do cleanup
  */
 function splitLines(timeLimit, flush) {
-    var pLeft = this._state.pLeft;
-    var pRight = this._state.pRight;
+    var parseTime;
+    var state = this._state;
+    var pLeft = state.pLeft;
+    var pRight = state.pRight;
+
     // do -1 to start time just to show the data was processed (e.g delta will be 1)
     var startTs = hrtimestamp() - 1;
 
     splitByLines.call(this, timeLimit);
 
-    var parseTime = hrtimestamp() - startTs;
+    parseTime = hrtimestamp() - startTs;
 
     if (pRight.endOfData()) {
         // all data read
@@ -622,7 +788,11 @@ function splitLines(timeLimit, flush) {
 
             // all valid new lines were processed already, no chance there is an empty message
             // no need to check length
-            this._cb(slicer(pLeft.cArr, pLeft, pRight));
+            this._cb(
+                slicer(pLeft, pRight),
+                getKVPairsOffsets(state.kvSymbols, pRight.msgOffset),
+                getEventCategoryOffset(state.eventCategory, pRight.msgOffset)
+            );
             pRight.isFree = true;
         }
     }
@@ -646,13 +816,12 @@ function splitLines(timeLimit, flush) {
 /**
  * Make a slice
  *
- * @param {CircularArray} cArr
  * @param {Pointer} pleft
  * @param {Pointer} pright
  *
  * @returns {Buffer[] | string[]}
  */
-function slicer(cArr, pleft, pright) {
+function slicer(pleft, pright) {
     /**
      * General assumption: 1 buffer (string too) may contain a lot of messages, node:buffer.slice()
      * shares memory with parent buffer - less fragmentation. To avoid growing
@@ -660,7 +829,7 @@ function slicer(cArr, pleft, pright) {
      */
     return pleft.cArrIdx === pright.cArrIdx
         ? singleBuffer(pleft, pright)
-        : bufferChain(cArr, pleft, pright);
+        : bufferChain(pleft.cArr, pleft, pright);
 }
 
 /** @return {Buffer[] | string[]} */
@@ -725,4 +894,111 @@ function freeNodes(nodes) {
     this._length -= length;
 }
 
+/**
+ * Filter out symbols that execeeding `maxPos`
+ *
+ * @param {Uint16Array | Uint32Array} symbols
+ * @param {integer} start
+ * @param {integer} end
+ * @param {integer} maxPos
+ *
+ * @returns {interger} last index to include to result array
+ */
+function filterSymbols(symbols, start, end, maxPos) {
+    // simple binary search
+    var mid = 0;
+    while (start <= end) {
+        mid = ((start + end) / 2) >> 0;
+        if (symbols[mid] < maxPos) {
+            start = mid + 1;
+        } else if (symbols[mid] > maxPos) {
+            end = mid - 1;
+        } else {
+            return mid;
+        }
+    }
+    return start - 1;
+}
+
+/**
+ * Process key-value data
+ *
+ * @param {Uint16Array | Uint32Array} kvSymbols
+ * @param {integer} char
+ * @param {integer} offset
+ *
+ * @returns {integer} next state
+ */
+function checkKeyValuePair(kvSymbols, char, offset) {
+    // detects pairs of key=value - scanning for unquoted `=` and `,` in correct order
+    // out of order sequences result in KV_DONE
+    var kvState = kvSymbols[KV_STATE_IDX];
+    var kvIndex = kvSymbols[KV_OFFSET_IDX];
+
+    // compare to target char and do not allow:
+    // - `=` be first char in message
+    // - `,` be in front of `,` or `=`
+    kvState = kvSymbols[kvState] === char && offset !== 1
+        ? kvSymbols[kvState + 1] // success - next state
+        : KV_INVALID_SEQ; // fail
+
+    // record offset even if invalid
+    kvSymbols[(kvSymbols[KV_OFFSET_IDX] = ++kvIndex)] = offset - 1; // store 0-based offsets
+    (kvIndex === kvSymbols[KV_MAX_OFFSET_IDX]) && (kvState = KV_FULL);
+
+    return kvSymbols[KV_STATE_IDX] = kvState;
+}
+
+/**
+ * @param {Uint16Array | Uint32Array} kvSymbols
+ * @param {integer} maxOffset
+ *
+ * @returns {null | Uint16Array | Uint32Array} 0-based offsets if found else null
+ */
+function getKVPairsOffsets(kvSymbols, maxOffset) {
+    if (kvSymbols[KV_STATE_IDX] === KV_DISABLED) {
+        return null;
+    }
+
+    var kvIndex = kvSymbols[KV_OFFSET_IDX]; // points to last added item
+    var kvStart = kvSymbols[KV_RESERVED_IDX];
+    var isInvalid = kvSymbols[KV_STATE_IDX] === KV_INVALID_SEQ;
+
+    if (kvIndex !== kvStart && kvSymbols[kvIndex] > maxOffset) {
+        kvIndex = filterSymbols(kvSymbols, kvStart + 1, kvIndex, maxOffset);
+        isInvalid = false;
+    }
+
+    return (kvIndex === kvStart || isInvalid)
+        ? null
+        : kvSymbols.slice(kvStart + 1, kvIndex + 1);
+}
+
+/**
+ * @param {Uint16Array | Uint32Array} eventCategory
+ * @param {integer} maxOffset
+ *
+ * @returns {integer} 1-base offset if found else 0
+ */
+function getEventCategoryOffset(eventCategory, maxOffset) {
+    return (eventCategory[F5_ECAT_STATE_IDX] === F5_SCAT_FOUND
+        && (eventCategory[F5_ECAT_OFFSET_IDX] + F5_FCAT_LEN) <= maxOffset // $F5TelemetryEventCategory= is ok
+    )
+        ? eventCategory[F5_ECAT_OFFSET_IDX] // 1-base offset (receiver should do -1 to get actual position)
+        : 0; // no match
+}
+
 module.exports = Parser;
+module.exports.FEAT_ALL = FEAT_ALL;
+module.exports.FEAT_F5_EVT_CAT = FEAT_F5_EVT_CAT;
+module.exports.FEAT_KV_PAIRS = FEAT_KV_PAIRS;
+module.exports.FEAT_NONE = FEAT_NONE;
+
+/**
+ * @callback OnLineFoundCb
+ * @param {Buffer[] | String[]} chunks - data chunks to build a line
+ * @param {null | Uint16Array | Uint32Array} mayHaveKeyVals - 0-based offsets for unquoted `=` and `,`.
+ *  Even index for `=`, odd index for `,`.
+ * @param {integer} mayHaveEvtCat - 1-base offset if `$F` found else 0
+ * (non-strict check done)
+ */

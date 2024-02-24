@@ -87,6 +87,14 @@ class ReceiversManager {
             });
     }
 
+    disableIngress() {
+        Object.keys(this.registered).forEach((key) => this.registered[key].disableDataFlow());
+    }
+
+    enableIngress() {
+        Object.keys(this.registered).forEach((key) => this.registered[key].enableDataFlow());
+    }
+
     /**
      * All registered receivers
      *
@@ -424,5 +432,56 @@ onApplicationExit(() => {
     EventListener.getAll().map(EventListener.remove);
     EventListener.receiversManager.destroyAll().then(() => logger.info('All Event Listeners and Data Receivers destroyed'));
 });
+
+/**
+ * TEMP BLOCK OF CODE, REMOVE AFTER REFACTORING
+ */
+let processingEnabled = true;
+let processingState = null;
+
+/** @param {restWorker.ApplicationContext} appCtx - application context */
+EventListener.initialize = function initialize(appCtx) {
+    if (appCtx.resourceMonitor) {
+        if (processingState) {
+            logger.debug('Destroying existing ProcessingState instance');
+            processingState.destroy();
+        }
+        processingState = appCtx.resourceMonitor.initializePState(
+            onResourceMonitorUpdate.bind(null, true),
+            onResourceMonitorUpdate.bind(null, false)
+        );
+        processingEnabled = processingState.enabled;
+        onResourceMonitorUpdate(processingEnabled);
+    } else {
+        logger.error('Unable to subscribe to Resource Monitor updates!');
+    }
+};
+
+/** @param {boolean} enabled - true if processing enabled otherwise false */
+function onResourceMonitorUpdate(enabled) {
+    processingEnabled = enabled;
+    if (enabled) {
+        logger.warning('Restriction ceased.');
+        EventListener.receiversManager.enableIngress();
+    } else {
+        logger.warning('Applying restrictions to incomming data.');
+        EventListener.receiversManager.disableIngress();
+    }
+}
+
+/**
+ * Check if systemPoller(s) are running
+ * Toggled by monitor checks
+ *
+ * @returns {Boolean} - whether or not processing is enabled
+ */
+
+EventListener.isEnabled = function isEnabled() {
+    return processingEnabled;
+};
+
+/**
+ * TEMP BLOCK OF CODE END
+ */
 
 module.exports = EventListener;

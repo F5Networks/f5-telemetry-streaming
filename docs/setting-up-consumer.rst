@@ -11,6 +11,22 @@ Use the index on the right to locate a specific consumer.
 
 |
 
+.. _push:
+
+Default Push Consumer
+---------------------
+
+This example shows how to use the default push consumer.  For the default push consumer, the type must be **default** in the Consumer class as shown.
+
+The primary use case of such type of push consumer is troubleshooting.
+
+Example declaration:
+
+.. literalinclude:: ../examples/declarations/consumers/default_consumer.json
+    :language: json
+
+|
+
 .. _splunk-ref:
 
 Splunk

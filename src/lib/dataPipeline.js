@@ -17,53 +17,10 @@
 'use strict';
 
 const actionProcessor = require('./actionProcessor');
-const constants = require('./constants');
-const consumersHandler = require('./consumers');
 const EVENT_TYPES = require('./constants').EVENT_TYPES;
 const forwarder = require('./forwarder');
 const logger = require('./logger');
-const monitor = require('./utils/monitor');
 const util = require('./utils/misc');
-
-const EVENT_CUSTOM_TIMESTAMP_KEY = constants.EVENT_CUSTOM_TIMESTAMP_KEY;
-const APP_THRESHOLDS = constants.APP_THRESHOLDS;
-
-let processingEnabled = true;
-
-/**
- * Check if dataPipeline is running
- * Toggled by monitor checks
- *
- * @returns {Boolean} - whether or not processing is enabled
- */
-function isEnabled() {
-    return processingEnabled;
-}
-
-/**
- * Build log entry for data that we do not process and include details to help users troubleshoot
- *
- * @param {Object} dataCtx - the data context
- * @returns {String} - the assembled log entry
- */
-function buildSkippedDataLog(dataCtx) {
-    let timestampInfo = '';
-    // best effort to log some known timestamp obj/fields
-    const timestampKeys = ['telemetryServiceInfo', EVENT_CUSTOM_TIMESTAMP_KEY, 'EOCTimestamp', 'event_timestamp'];
-    // need just one field to match
-    timestampKeys.some((key) => {
-        if (dataCtx.data[key]) {
-            timestampInfo = `"${key}": ${JSON.stringify(dataCtx.data[key])}`;
-            return true;
-        }
-        return false;
-    });
-
-    const consumers = consumersHandler.getConsumers()
-        .filter((c) => dataCtx.destinationIds.indexOf(c.id) > -1)
-        .map((c) => c.name);
-    return `Skipped Data - Category: "${dataCtx.data.telemetryEventCategory}" | Consumers: ${JSON.stringify(consumers)} | Addtl Info: ${timestampInfo}`;
-}
 
 /**
 * Pipeline to process data
@@ -81,7 +38,6 @@ function buildSkippedDataLog(dataCtx) {
 */
 function process(dataCtx, options) {
     if (!isEnabled()) {
-        logger.warning(buildSkippedDataLog(dataCtx));
         return Promise.resolve();
     }
 
@@ -119,19 +75,56 @@ function process(dataCtx, options) {
     });
 }
 
-monitor.on('check', (status) => new Promise((resolve) => {
-    const monitorChecksOk = status === APP_THRESHOLDS.MEMORY.OK;
-    // only log on status change to minimize entries
-    if (processingEnabled !== monitorChecksOk) {
-        logger.warning(`${status}. ${monitorChecksOk ? 'Resuming data pipeline processing.' : 'Incoming data will not be forwarded.'}`);
+/**
+ * TEMP BLOCK OF CODE, REMOVE AFTER REFACTORING
+ */
+let processingEnabled = true;
+let processingState = null;
+
+/** @param {restWorker.ApplicationContext} appCtx - application context */
+function initialize(appCtx) {
+    if (appCtx.resourceMonitor) {
+        if (processingState) {
+            logger.debug('Destroying existing ProcessingState instance');
+            processingState.destroy();
+        }
+        processingState = appCtx.resourceMonitor.initializePState(
+            onResourceMonitorUpdate.bind(null, true),
+            onResourceMonitorUpdate.bind(null, false)
+        );
+        processingEnabled = processingState.enabled;
+        onResourceMonitorUpdate(processingEnabled);
+    } else {
+        logger.error('Unable to subscribe to Resource Monitor updates!');
     }
-    processingEnabled = monitorChecksOk;
-    resolve();
-}).catch((err) => {
-    logger.exception('Unexpected error in data pipeline (monitor check handler).', err);
-}));
+}
+
+/** @param {boolean} enabled - true if processing enabled otherwise false */
+function onResourceMonitorUpdate(enabled) {
+    processingEnabled = enabled;
+    if (enabled) {
+        logger.warning('Resuming data pipeline processing.');
+    } else {
+        logger.warning('Incoming data will not be forwarded.');
+    }
+}
+
+/**
+ * Check if systemPoller(s) are running
+ * Toggled by monitor checks
+ *
+ * @returns {Boolean} - whether or not processing is enabled
+ */
+
+function isEnabled() {
+    return processingEnabled;
+}
+/**
+ * TEMP BLOCK OF CODE END
+ */
 
 module.exports = {
     process,
+    initialize,
     isEnabled
 };

@@ -16,10 +16,11 @@
 
 'use strict';
 
-/* eslint-disable import/order */
+/* eslint-disable import/order, no-bitwise */
 const moduleCache = require('../shared/restoreCache')();
 
 const sinon = require('sinon');
+const StringDecoder = require('string_decoder').StringDecoder;
 
 const assert = require('../shared/assert');
 const parserTestData = require('./data/parserTestsData');
@@ -78,36 +79,89 @@ describe('Event Listener / Stream', () => {
         });
     });
 
-    describe('.proccess()', () => {
-        ['buffer', 'string'].forEach((mode) => {
-            describe(`mode = ${mode}`, () => {
+    describe('data processing', () => {
+        const inputModes = [
+            'regular',
+            'byHalf'
+        ];
+        const modes = [
+            'buffer',
+            'string'
+        ];
+
+        function checkCharCodesKVPairs(results, mayHaveKeyValuePairs) {
+            mayHaveKeyValuePairs.forEach((symb, idx) => {
+                if (symb) {
+                    for (let i = 1; i < symb.length; i += 2) {
+                        assert.deepStrictEqual(
+                            results[idx][symb[i]],
+                            i & 0b1 ? ',' : '=',
+                            'should match char codes at particular position'
+                        );
+                    }
+                }
+            });
+        }
+
+        function checkCharCodesF5Telemetry(results, mayHaveF5EventCategory) {
+            mayHaveF5EventCategory.forEach((offset, idx) => {
+                if (offset) {
+                    assert.deepStrictEqual(results[idx].slice(offset - 1, offset + 1), '$F', 'should match char codes at particular position');
+                }
+            });
+        }
+        testUtil.product(inputModes, modes).forEach((product) => {
+            const inputMode = product[0];
+            const mode = product[1];
+
+            describe(`mode = ${mode}, input = ${inputMode}`, () => {
                 let callback;
-                let makeInput;
                 let parser;
                 let stream;
                 let results;
+                let mayHaveKeyValuePairs;
+                let mayHaveF5EventCategory;
+                let stringDecoder;
+
+                const defaultStringDecoder = new StringDecoder('utf8');
 
                 if (mode === 'string') {
-                    callback = (chunks) => {
+                    callback = (chunks, hasKVPair, hasEvtCat) => {
+                        mayHaveF5EventCategory.push(hasEvtCat);
+                        mayHaveKeyValuePairs.push(hasKVPair);
                         results.push(chunks.length === 1 ? chunks[0] : chunks.reduce((a, v) => a + v, ''));
                     };
-                    makeInput = (chunk) => [chunk, Buffer.from(chunk).length, chunk.length];
                 } else {
-                    callback = (chunks) => {
-                        results.push(chunks.length === 1 ? chunks[0].toString() : chunks.reduce((a, v) => a + v.toString(), ''));
-                    };
-                    makeInput = (chunk) => {
-                        chunk = Buffer.from(chunk);
-                        return [chunk, chunk.length, chunk.length];
+                    callback = (chunks, hasKVPair, hasEvtCat) => {
+                        mayHaveF5EventCategory.push(hasEvtCat);
+                        mayHaveKeyValuePairs.push(hasKVPair);
+                        if (chunks.length === 1) {
+                            results.push(chunks[0].toString());
+                        } else {
+                            chunks = chunks.map((c) => defaultStringDecoder.write(c));
+                            chunks.push(defaultStringDecoder.end());
+                            results.push(chunks.join(''));
+                        }
                     };
                 }
+
+                const makeInput = (chunk) => {
+                    const buf = Buffer.from(chunk);
+                    return [buf, buf.length, (mode === 'string') ? chunk.length : buf.length];
+                };
 
                 const makeInput2 = (chunk) => makeInput(chunk)[0];
 
                 beforeEach(() => {
+                    mayHaveF5EventCategory = [];
+                    mayHaveKeyValuePairs = [];
                     parser = new Parser(callback, { mode });
-                    stream = new Stream(parser);
                     results = [];
+                    stream = new Stream(parser);
+
+                    if (stringDecoder !== defaultStringDecoder) {
+                        stringDecoder = defaultStringDecoder;
+                    }
                 });
 
                 describe('Data sets', () => {
@@ -124,16 +178,37 @@ describe('Event Listener / Stream', () => {
                                 let totalLength = 0;
 
                                 let lastTimePush;
-                                testConf.chunks.forEach((chunk) => {
-                                    const payload = makeInput(chunk.replace(/\{sep\}/g, sep));
-                                    totalBuffers += 1;
-                                    totalBytes += payload[1];
-                                    totalLength += payload[2];
+                                if (inputMode === 'regular') {
+                                    testConf.chunks.forEach((chunk) => {
+                                        const payload = makeInput(chunk.replace(/\{sep\}/g, sep));
+                                        totalBuffers += 1;
+                                        totalBytes += payload[1];
+                                        totalLength += payload[2];
 
-                                    lastTimePush = stream.lastPushTimeDelta();
-                                    stream.push(payload[0]);
-                                    assert.notDeepEqual(stream.lastPushTimeDelta(), lastTimePush);
-                                });
+                                        lastTimePush = stream.lastPushTimeDelta();
+                                        stream.push(payload[0]);
+                                        assert.notDeepEqual(stream.lastPushTimeDelta(), lastTimePush);
+                                    });
+                                } else {
+                                    testConf.chunks.forEach((chunk) => {
+                                        chunk = chunk.replace(/\{sep\}/g, sep);
+                                        const mid = (chunk.length / 2) >> 0;
+                                        const payloads = [];
+                                        if (mid) {
+                                            payloads.push(makeInput(chunk.slice(0, mid)));
+                                        }
+                                        payloads.push(makeInput(chunk.slice(mid)));
+                                        payloads.forEach((payload) => {
+                                            totalBuffers += 1;
+                                            totalBytes += payload[1];
+                                            totalLength += payload[2];
+
+                                            lastTimePush = stream.lastPushTimeDelta();
+                                            stream.push(payload[0]);
+                                            assert.notDeepEqual(stream.lastPushTimeDelta(), lastTimePush);
+                                        });
+                                    });
+                                }
 
                                 assert.deepStrictEqual(stream.buffers, totalBuffers, 'should match expected number of pending buffers');
                                 assert.deepStrictEqual(stream.bytes, totalBytes, 'should match expected number of pending bytes');
@@ -147,6 +222,18 @@ describe('Event Listener / Stream', () => {
                                     testConf.expectedData.map((d) => d.replace(/\{sep\}/g, sep))
                                 );
                                 assert.notDeepEqual(stream.lastProcessTimeDelta(), lastTimeProcess);
+
+                                if (testConf.mayHaveKeyValuePairs) {
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveKeyValuePairs, testConf.mayHaveKeyValuePairs, 'should match expected key-value pairs');
+                                    checkCharCodesKVPairs(results, mayHaveKeyValuePairs);
+                                }
+
+                                if (testConf.mayHaveF5EventCategory) {
+                                    assert.deepStrictEqual(mayHaveF5EventCategory.length, results.length, 'should match length of results');
+                                    assert.deepStrictEqual(mayHaveF5EventCategory, testConf.mayHaveF5EventCategory, 'should match expected event categories');
+                                    checkCharCodesF5Telemetry(results, mayHaveF5EventCategory);
+                                }
 
                                 assert.deepStrictEqual(stream.buffers, 0, 'should have no buffers left');
                                 assert.deepStrictEqual(stream.bytes, 0, 'should have no bytes left');
@@ -206,7 +293,7 @@ describe('Event Listener / Stream', () => {
                     assert.deepStrictEqual(stream.length, 0, 'should have no bytes/chars left');
                 });
 
-                it('should flush parser if there is no free spots in parser\'s buffer ', () => {
+                it('should flush parser if there is no free spots in parser\'s buffer', () => {
                     parser = new Parser(callback, { mode, bufferSize: 2 });
                     stream = new Stream(parser);
 
@@ -285,6 +372,43 @@ describe('Event Listener / Stream', () => {
                     stream.push(makeInput2('line\n'));
                     assert.isFalse(stream.process(1e9)[0], 'should have no data to process');
                     assert.deepStrictEqual(results, ['testline']);
+                });
+
+                it('should erase all data', () => {
+                    parser = new Parser(callback, { mode, bufferSize: 2 });
+                    stream = new Stream(parser);
+
+                    stream.push(makeInput2('inc'));
+                    stream.push(makeInput2('omp'));
+                    stream.push(makeInput2('let'));
+                    stream.push(makeInput2('e m'));
+                    stream.push(makeInput2('ess'));
+                    stream.push(makeInput2('age'));
+                    stream.push(makeInput2('\n'));
+
+                    assert.deepStrictEqual(stream.buffers, 7, 'should match expected number of pending buffers');
+                    assert.deepStrictEqual(stream.bytes, 19, 'should match expected number of pending bytes');
+                    assert.deepStrictEqual(stream.length, 19, 'should match expected number of pending bytes/chars');
+
+                    assert.isTrue(stream.process(1e9)[0], 'should have data to process');
+                    assert.deepStrictEqual(results, []);
+
+                    stream.push(makeInput2('inc'));
+                    stream.push(makeInput2('omp'));
+                    stream.push(makeInput2('let'));
+                    stream.push(makeInput2('e m'));
+                    stream.push(makeInput2('ess'));
+                    stream.push(makeInput2('age'));
+                    stream.push(makeInput2('\n'));
+
+                    assert.deepStrictEqual(stream.buffers, 14, 'should match expected number of pending buffers');
+                    assert.deepStrictEqual(stream.bytes, 38, 'should match expected number of pending bytes');
+                    assert.deepStrictEqual(stream.length, 38, 'should match expected number of pending bytes/chars');
+
+                    stream.erase();
+                    assert.deepStrictEqual(stream.buffers, 0, 'should match expected number of pending buffers');
+                    assert.deepStrictEqual(stream.bytes, 0, 'should match expected number of pending bytes');
+                    assert.deepStrictEqual(stream.length, 0, 'should match expected number of pending bytes/chars');
                 });
 
                 describe('"drop" strategy', () => {

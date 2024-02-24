@@ -93,7 +93,10 @@ class StreamService extends Service {
             this._streamID = 0;
 
             const streamCb = () => {
-                const parser = new Parser(this._onMessageCb, { mode: this._parsingMode });
+                const parser = new Parser(this._onMessageCb, {
+                    features: Parser.FEAT_NONE,
+                    mode: this._parsingMode
+                });
                 const stream = new Stream(parser, { strategy: this._bufferingStrategy });
                 if (!this._dataFlowEnabled) {
                     stream.disableIngress();

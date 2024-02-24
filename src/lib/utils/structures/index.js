@@ -20,6 +20,8 @@ const CircularArray = require('./circularArray');
 const CircularLinkedList = require('./circularLinkedList');
 
 module.exports = {
-    CircularArray,
-    CircularLinkedList
+    CircularArray: CircularArray.CircularArray,
+    CircularArrayMR: CircularArray.CircularArrayMR,
+    CircularLinkedList: CircularLinkedList.CircularLinkedList,
+    CircularLinkedListMR: CircularLinkedList.CircularLinkedListMR
 };

@@ -19,12 +19,30 @@ include:
   - project: automation-toolchain/atg-shared-templates
     file: security/base.gitlab-ci.yml
 
+variables:
+  FORCE_DOCS_STAGGING:
+    value: "false"
+    options:
+      - "false"
+      - "true"
+    description: "Force docs to be build and published to GitLab on non-docs branches"
+
 
 ##############################################################
 #                                                            #
 # Jobs and commands templates                                #
 #                                                            #
 ##############################################################
+
+.rules_config:
+    docs_only:
+        rules:
+            - if: $CI_COMMIT_BRANCH =~ /^docs/
+            - if: $FORCE_DOCS_STAGGING == "true"
+    not_docs:
+        rules:
+            - if: $CI_COMMIT_BRANCH !~ /^docs/
+
 
 .run_unittest_cmd: &run_unittest_cmd
 - npm run test-only
@@ -51,6 +69,9 @@ include:
 .job_definition: &job_definition
     tags:
         - docker-executor
+    rules:
+        - !reference [.rules_config, not_docs, rules]
+
 
 .test_job_definition: &test_job_definition
     extends:
@@ -228,6 +249,8 @@ coverage:
 
 build_rpm:
     image: ${ATG_ARTIFACTORY_PUBLISH_URL}/${ATG_ARTIFACTORY_DOCKER_REPO}/f5-telemetry-streaming-rpm-builder-image:v1.2
+    extends:
+        - .job_definition
     stage: build
     script:
         - npm run build
@@ -242,6 +265,7 @@ build_rpm:
 build_docs:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: build
+    needs: []
     script:
         # create 'dist' folder because it probably not exists yet
         - mkdir -p dist
@@ -249,7 +273,7 @@ build_docs:
         # - node scripts/schema-check.js
         - node scripts/schema-to-rst.js
         - node scripts/poller-default-output-doc-gen.js
-        - if [ "$CI_COMMIT_REF_NAME" = "docs-staging" ] || [ "$CI_COMMIT_REF_NAME" = "docs-latest" ]; then
+        - if [ "$CI_COMMIT_REF_NAME" = "docs-latest" ]; then
         -   rm -rf docs/_templates
         - fi
         - make html
@@ -262,6 +286,8 @@ build_docs:
         paths:
             - docs/_build/html
         expire_in: 1 month
+    rules:
+        - !reference [.rules_config, docs_only, rules]
 
 ##############################################################
 # BEGIN VIO                                                  #
@@ -420,6 +446,7 @@ teardown_env_aws:
 pages:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: doc
+    needs: [build_docs]
     environment:
         name: staging
         url: https://${CI_PROJECT_NAMESPACE}.${PAGES_DOMAIN}/${CI_PROJECT_NAME}
@@ -436,37 +463,18 @@ pages:
         - PUBLIC_DOCS=${PUBLIC_DIR}/public-docs
         - mkdir -p ${PUBLIC_DOCS}
         - cp -R docs/_build/html/* ${PUBLIC_DOCS}
-        #### place code coverage docs under: /coverage-docs ####
-        - COVERAGE_DOCS=${PUBLIC_DIR}/coverage-docs
-        - mkdir -p ${COVERAGE_DOCS}
-        - cp -R coverage/* ${COVERAGE_DOCS}
-        #### place code contribution docs (mainly for presentation) under: /contribute-docs ####
-        - CONTRIBUTE_DOCS=${PUBLIC_DIR}/contribute-docs
-        - CONTRIBUTE_DIR=contributing
-        # install presentation site dependencies
-        - cd ${CONTRIBUTE_DIR} && npm install && cd ..
-        - mkdir -p ${CONTRIBUTE_DOCS}
-        - cp -R ${CONTRIBUTE_DIR}/* ${CONTRIBUTE_DOCS}
-        # make relative links absolute - this could be better...
-        # ![diagram](../test/README.md) -> ![diagram](https://base.url/../test/README.md)
-        - BASE_URL_FOR_LINKS=${CI_PROJECT_URL}/tree/${CI_COMMIT_REF_NAME}/${CONTRIBUTE_DIR}/
-        - README=${CONTRIBUTE_DOCS}/README.md
-        # make absolute URL(s) for relative URL(s) outside current directory '../'
-        - sed -i -E 's/\[.*\]\(\.\./&SED_TEMP/' ${README} && sed -i "s|..SED_TEMP|${BASE_URL_FOR_LINKS}..|" ${README}
     artifacts:
         paths:
             - public
-    only:
-        # only update on designated, stable branch
-        - develop
-        - doc-release-branch
-        - joes-new-ts-wip
-        - debs-doc-wip
+    rules:
+        - !reference [.rules_config, docs_only, rules]
+
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:
     image: ${CONTAINTHEDOCS_IMAGE}
     stage: doc
+    needs: [build_docs]
     environment:
         name: production
         url: https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest

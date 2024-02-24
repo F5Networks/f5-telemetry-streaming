@@ -5,8 +5,8 @@ set -evx
 
 # RPM template: <app-name>-<version>-<release>.<arch>.rpm
 # For DEV <release> === <release>.<buildtimestamp>.<commit-sha>.<sanitized-branch>
-# DEV RPM: f5-telemetry-1.34.0-0.20240107071243.28507f40.dev_build_info.noarch.rpm
-# Release RPM: f5-telemetry-1.34.0-0.noarch.rpm
+# DEV RPM: f5-telemetry-1.35.0-0.20240107071243.28507f40.dev_build_info.noarch.rpm
+# Release RPM: f5-telemetry-1.35.0-0.noarch.rpm
 
 is_release_tag () {(
     node -e "process.exit(+!(/^(v[0-9]+\.[0-9]+\.[0-9]+|latest)$/.test('$1')));"
@@ -48,7 +48,6 @@ elif ! is_release_tag "${CI_COMMIT_TAG}"; then
     GIT_REF_NAME_SLUG=$(sanitize "${GIT_REF_NAME}")
     RELEASE="${RELEASE}.${BUILD_TIMESTAMP}.${GIT_COMMIT_SHA}.${GIT_REF_NAME_SLUG}"
 fi
-
 
 rpmbuild -bb \
     --define "BUILD_TIMESTAMP ${BUILD_TIMESTAMP}" \

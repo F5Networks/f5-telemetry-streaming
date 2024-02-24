@@ -26,21 +26,23 @@ const logger = require('../lib/logger');
 const util = require('../lib/utils/misc');
 
 const ActivityRecorder = require('../lib/activityRecorder');
+const DataPipeline = require('../lib/dataPipeline');
+const EventListener = require('../lib/eventListener');
 const deviceUtil = require('../lib/utils/device');
 const retryPromise = require('../lib/utils/promise').retry;
 const persistentStorage = require('../lib/persistentStorage');
 const configWorker = require('../lib/config');
 const requestRouter = require('../lib/requestHandlers/router');
+const ResourceMonitor = require('../lib/resourceMonitor');
+const RuntimeConfig = require('../lib/runtimeConfig');
+const SystemPoller = require('../lib/systemPoller');
 
 const configListenerModulesToLoad = [
-    '../lib/eventListener',
     '../lib/consumers',
     '../lib/pullConsumers',
-    '../lib/systemPoller',
     '../lib/ihealth',
     '../lib/requestHandlers/connections',
-    '../lib/tracerManager.js',
-    '../lib/utils/monitor.js'
+    '../lib/tracerManager.js'
 ];
 
 configListenerModulesToLoad.forEach((module) => {
@@ -124,15 +126,32 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
     this.activityRecorder = new ActivityRecorder();
     this.activityRecorder.recordDeclarationActivity(configWorker);
 
+    const appCtx = {
+        configMgr: configWorker,
+        resourceMonitor: new ResourceMonitor(),
+        runtimeConfig: new RuntimeConfig()
+    };
+
+    appCtx.resourceMonitor.initialize(appCtx);
+    appCtx.runtimeConfig.initialize(appCtx);
+
+    DataPipeline.initialize(appCtx);
+    EventListener.initialize(appCtx);
+    SystemPoller.initialize(appCtx);
+
     // configure global socket maximum
     http.globalAgent.maxSockets = 5;
     https.globalAgent.maxSockets = 5;
 
-    // try to load pre-existing configuration
-    const ps = persistentStorage.persistentStorage;
-    // only RestStorage is supported for now
-    ps.storage = new persistentStorage.RestStorage(this);
-    ps.load()
+    appCtx.runtimeConfig.start()
+        .then(() => appCtx.resourceMonitor.start())
+        .then(() => {
+            // try to load pre-existing configuration
+            const ps = persistentStorage.persistentStorage;
+            // only RestStorage is supported for now
+            ps.storage = new persistentStorage.RestStorage(this);
+            return ps.load();
+        })
         .then((loadedState) => {
             logger.debug(`Loaded state ${util.stringify(loadedState)}`);
         })

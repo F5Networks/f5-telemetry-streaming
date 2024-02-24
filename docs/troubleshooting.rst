@@ -18,7 +18,7 @@ Logging
 -------
 F5 BIG-IP Telemetry Streaming writes log output to the file **/var/log/restnoded/restnoded.log** on the BIG-IP.
 The verbosity of the log output can be adjusted by submitting a BIG-IP Telemetry Streaming declaration with a Controls class.
-The allowed log levels (in increasing order of verbosity) are **error**, **info**, and **debug**.
+The allowed log levels (in increasing order of verbosity) are **error**, **info**, **debug** and **verbose*.
 The following is an example declaration containing a Controls class that sets the logging level to debug.
 
 .. code-block:: json
@@ -297,11 +297,10 @@ BIG-IP Telemetry Streaming sends this JSON payload to the Event Listener you spe
 
 |
 
-
 .. _trace:
 
 How can I write an Event Listener's incoming raw data to a trace file?
-----------------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. sidebar:: :fonticon:`fa fa-info-circle fa-lg` Version Notice:
 
    Support for writing an Event Listener's incoming raw data to a trace file is available in BIG-IP TS v1.20 and later
@@ -369,6 +368,8 @@ Increase the memory allocated for the restjavad daemon (e.g. 2 GB), by running t
 
 .. IMPORTANT:: You should not exceed 2500MB
 
+.. NOTE:: The configuration above does not affect F5 BIG-IP Telemetry Streaming. It does not increse amount of memory available for application. For more information see :doc:`memory-monitor`.
+
 |
 
 .. _memory: 
@@ -377,7 +378,7 @@ Where can I find the BIG-IP TS memory threshold information?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This section contains guidance how to configure the F5 BIG-IP Telemetry Streaming memory usage threshold to help prevent **restnoded** from restarting when too much memory is used. When **restnoded** restarts, the BIG-IP Telemetry Streaming consumer is unavailable.
 
-F5 BIG-IP Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default, unless you set the db variables as noted in the workaround section of :ref:`restjavad`).
+F5 BIG-IP Telemetry Streaming v1.18 introduced a change in behavior by adding monitor checks that run by default. Memory usage is monitored to prevent **restnoded** from crashing and restarting if memory usage becomes too high. By default (without user configuration), this translates to 90% of total memory allocated for restnoded (1433 MB by default).
 
 You can configure your memory threshold using the new **memoryThresholdPercent** property in the **Controls** class.  For example, to set the memory threshold to 65%, you use:
 
@@ -385,16 +386,17 @@ You can configure your memory threshold using the new **memoryThresholdPercent**
    :emphasize-lines: 6
 
    {
-    "class": "Telemetry",
-    "controls": {
-        "class": "Controls",
-        "logLevel": "info",
-        "memoryThresholdPercent": 65
+        "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "logLevel": "info",
+            "memoryThresholdPercent": 65
         }
     }
 
 .. NOTE:: You can disable monitor checks by setting **memoryThresholdPercent** value to 100.
 
+For more information see :doc:`memory-monitor`.
 
 Monitor checks run by default on intervals depending on %memory usage:
 
@@ -404,20 +406,28 @@ Monitor checks run by default on intervals depending on %memory usage:
       * - % of total memory usage
         - Interval
       
-      * - 0 - 24
-        - 30 seconds 
+      * - 0 - 50
+        - 1.5 seconds 
   
-      * - 25 - 49
-        - 15 seconds 
+      * - 50 - 60
+        - 1 seconds 
   
-      * - 50 - 74
-        - 10 seconds 
+      * - 60 - 70
+        - 0.8 seconds 
+  
+      * - 70 - 80
+        - 0.5 seconds 
+  
+      * - 80 - 90
+        - 0.2 seconds 
 
-      * - 75 - 89
-        - 5 seconds 
+      * - 90 - 100
+        - 0.1 second
 
-      * - 90+
-        - 3 seconds 
+      * - 100+
+        - 1 second (data processing disabled already)
+
+
 
 
 |
@@ -430,7 +440,66 @@ By default, BIG-IP Telemetry Streaming compresses data before sending it to Splu
 
 F5 BIG-IP Telemetry Streaming 1.19 and later includes the **compressionType** property in the |telemetryconsumer| class.  You can set this property to **none** (**gzip** is the default) to help reduce memory usage.
 
+|
 
+.. _bigucstimeout:
+
+Why is BIG-IP TS not showing up in UCS archive?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to include it to UCS archive. You may see following log entries in **/var/log/ltm**:
+
+.. code-block:: bash
+
+     err iAppsLX_save_pre[<PID>]: Failed to get task response within timeout for: /shared/iapp/build-package/16d78253-a7fb-449c-8c90-1c04a57a3af3
+     err iAppsLX_save_pre[<PID>]: Failed to get getRPM build response within timeout for f5-telemetry
+
+Or you trying to save UCS from the CLI and it will run indefinitely and cancelling the operation with CTRL+C produces output similar to the following:
+
+.. code-block:: bash
+
+     ^CTraceback (most recent call last):
+        File "/usr/libexec/iAppsLX_save_pre", line 158, in <module>
+            taskResult = getFinishedTask(taskUri, 1.0, subprocess.check_output("getdb iapplxrpm.timeout", shell=True))
+        File "/usr/libexec/iAppsLX_save_pre", line 86, in getFinishedTask
+            time.sleep(delay)
+        KeyboardInterrupt
+        ^CError executing 'pre-save' configsync script /var/tmp/cs_save_pre_script.
+        ^C/var/tmp/configsync.spec: Error creating package
+
+        WARNING:There are error(s) during saving.
+                Not everything was saved.
+                Be very careful when using this saved file!
+
+**Workaround** |br|
+Increase the value of **sys db iapplxrpm.timeout**:
+ 
+``tmsh modify sys db iapplxrpm.timeout value 600`` |br|
+``tmsh restart sys service restjavad`` |br|
+
+For more information see `K51300313 <https://my.f5.com/manage/s/article/K51300313>`_ and `Bug ID 796605 <https://cdn.f5.com/product/bugtracker/ID796605.html>`_.
+
+|
+
+.. _bigucshasync:
+
+Why is BIG-IP TS not syncing across HA group?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to sync it across all devices in HA group.
+
+For more details and workaround see :ref:`bigucshasync`
+
+|
+
+.. _bigucsupgrade:
+
+Why is BIG-IP TS not showing up after BIG-IP upgrade?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to back it up then restore to new volume with upgraded version of software.
+
+For more details and workaround see :ref:`bigucshasync`
 
 .. |br| raw:: html
 
