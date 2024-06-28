@@ -123,7 +123,7 @@
             "name": "virtualServers",
             "path": "/mgmt/tm/ltm/virtual",
             "includeStats": true,
-            "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask", "pool", "profilesReference" ],
+            "endpointFields": [ "name", "fullPath", "selfLink", "appService", "ipProtocol", "mask", "pool", "profilesReference", "description" ],
             "expandReferences": { "profilesReference": { "endpointSuffix": "?$select=name,fullPath" } }
         },
         {
