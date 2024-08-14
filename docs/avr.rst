@@ -29,7 +29,7 @@ AS3 compatible command for TMSH:
 
 .. code-block:: bash
 
-    modify analytics global-settings { external-logging-publisher /Common/Shared/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
+    modify analytics global-settings { external-logging-publisher /Common/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
 
 
 TMSH command:

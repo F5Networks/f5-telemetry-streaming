@@ -22,9 +22,7 @@ const IPV6_REGEXP = /([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9]{4})([A-Fa-f0-9
 const IPV6_V4_PREFIX_REGEXP = /::ffff:/ig;
 
 // Canonical format
-function defaultFormat(globalCtx) {
-    const data = globalCtx.event.data;
-
+function defaultFormat(data) {
     // certain events may not have system object
     let time = Date.parse(new Date());
     let host = 'null';
@@ -136,7 +134,7 @@ function getTemplate(sourceName, data, cache) {
 }
 
 function getData(request, key) {
-    let data = request.globalCtx.event.data;
+    let data = request.dataCtx.data;
     const splittedKey = key.split('.');
 
     for (let i = 0; i < splittedKey.length; i += 1) {
@@ -163,7 +161,7 @@ function formatHexIP(originData) {
 }
 
 function overall(request) {
-    const data = request.globalCtx.event.data;
+    const data = request.dataCtx.data;
     const template = getTemplate('bigip.stats.summary', data, request.cache);
     Object.assign(template.event, {
         files_sent: request.results.numberOfRequests,
@@ -173,7 +171,7 @@ function overall(request) {
 }
 
 function ihealth(request) {
-    const data = request.globalCtx.event.data;
+    const data = request.dataCtx.data;
     const diagnostics = getData(request, 'diagnostics');
     const system = getData(request, 'system');
     const template = getTemplate('bigip.ihealth.diagnostics', data, request.cache);
@@ -207,7 +205,7 @@ function ihealth(request) {
 const stats = [
     function (request) {
         const data = getData(request, 'system');
-        const template = getTemplate('bigip.tmsh.system_status', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.system_status', request.dataCtx.data, request.cache);
         Object.assign(template.event, {
             iapp_version: data.iappVersion,
             version: data.version,
@@ -238,7 +236,7 @@ const stats = [
         const networkInterfaces = getData(request, 'system.networkInterfaces');
         if (networkInterfaces === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.interface_status', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.interface_status', request.dataCtx.data, request.cache);
         return Object.keys(networkInterfaces).map((key) => {
             const newData = Object.assign({}, template);
             newData.event = Object.assign({}, template.event);
@@ -252,7 +250,7 @@ const stats = [
         const diskStorage = getData(request, 'system.diskStorage');
         if (diskStorage === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.disk_usage', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.disk_usage', request.dataCtx.data, request.cache);
         return Object.keys(diskStorage).map((key) => {
             const newData = Object.assign({}, template);
             newData.event = Object.assign({}, diskStorage[key]);
@@ -266,7 +264,7 @@ const stats = [
         const diskLatency = getData(request, 'system.diskLatency');
         if (diskLatency === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.disk_latency', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.disk_latency', request.dataCtx.data, request.cache);
         return Object.keys(diskLatency).map((key) => {
             const newData = Object.assign({}, template);
             newData.event = Object.assign({}, diskLatency[key]);
@@ -280,7 +278,7 @@ const stats = [
         const sslCerts = getData(request, 'sslCerts');
         if (sslCerts === undefined) return undefined;
 
-        const template = getTemplate('bigip.objectmodel.cert', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.objectmodel.cert', request.dataCtx.data, request.cache);
         return Object.keys(sslCerts).map((key) => {
             const newData = Object.assign({}, template);
             newData.event = Object.assign({}, template.event);
@@ -295,7 +293,7 @@ const stats = [
         const vsStats = getData(request, 'virtualServers');
         if (vsStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.virtual_status', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.virtual_status', request.dataCtx.data, request.cache);
         return Object.keys(vsStats).map((key) => {
             const vsStat = vsStats[key];
             const newData = Object.assign({}, template);
@@ -315,7 +313,7 @@ const stats = [
         const vsStats = getData(request, 'virtualServers');
         if (vsStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.objectmodel.virtual', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.objectmodel.virtual', request.dataCtx.data, request.cache);
         return Object.keys(vsStats).map((key) => {
             const vsStat = vsStats[key];
             const newData = Object.assign({}, template);
@@ -337,7 +335,7 @@ const stats = [
         const vsStats = getData(request, 'virtualServers');
         if (vsStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.objectmodel.virtual.profiles', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.objectmodel.virtual.profiles', request.dataCtx.data, request.cache);
         const ret = [];
         Object.keys(vsStats).forEach((vsKey) => {
             const vsStat = vsStats[vsKey];
@@ -364,7 +362,7 @@ const stats = [
         const vsStats = getData(request, 'virtualServers');
         if (vsStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.objectmodel.virtual.pools', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.objectmodel.virtual.pools', request.dataCtx.data, request.cache);
         const ret = [];
         Object.keys(vsStats).forEach((key) => {
             const vsStat = vsStats[key];
@@ -388,7 +386,7 @@ const stats = [
         const poolStats = getData(request, 'pools');
         if (poolStats === undefined) return undefined;
 
-        const template = getTemplate('bigip.tmsh.pool_member_status', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmsh.pool_member_status', request.dataCtx.data, request.cache);
         const output = [];
 
         Object.keys(poolStats).forEach((poolName) => {
@@ -417,7 +415,7 @@ const stats = [
         if (tmstats === undefined) return undefined;
 
         const hexIpProps = ['addr', 'source', 'destination'];
-        const template = getTemplate('bigip.tmstats', request.globalCtx.event.data, request.cache);
+        const template = getTemplate('bigip.tmstats', request.dataCtx.data, request.cache);
         const output = [];
 
         Object.keys(tmstats).forEach((key) => {

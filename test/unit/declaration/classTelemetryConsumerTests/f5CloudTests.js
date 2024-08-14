@@ -29,18 +29,20 @@ moduleCache.remember();
 
 describe('Declarations -> Telemetry_Consumer -> F5_Cloud', () => {
     const basicSchemaTestsValidator = (decl) => shared.validateMinimal(decl);
+    let coreStub;
 
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules()
-            .utilMisc
-            .getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

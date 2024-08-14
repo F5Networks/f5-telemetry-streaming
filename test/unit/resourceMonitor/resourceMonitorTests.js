@@ -26,33 +26,51 @@ const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 
 const APP_THRESHOLDS = sourceCode('src/lib/constants').APP_THRESHOLDS;
-const configWorker = sourceCode('src/lib/config');
-const persistentStorage = sourceCode('src/lib/persistentStorage');
 const ResourceMonitor = sourceCode('src/lib/resourceMonitor');
 
 moduleCache.remember();
 
 describe('Resource Monitor / Resource Monitor', () => {
+    let appEvents;
+    let clock;
+    let configWorker;
     let coreStub;
     let resourceMonitor;
     let events;
+    let psEvents;
 
     function eraseEvents() {
         events = {
             all: [],
             check: [],
             notOk: [],
-            ok: [],
-            stop: []
+            ok: []
         };
+    }
+
+    function processDeclaration(decl, sleepOpts, waitForConfig) {
+        return Promise.all([
+            configWorker.processDeclaration(decl),
+            sleepOpts !== false
+                ? clock.clockForward(
+                    (sleepOpts || {}).time || 3000,
+                    Object.assign({ promisify: true, delay: 1, repeat: 10 }, sleepOpts || {})
+                )
+                : Promise.resolve(),
+            waitForConfig !== false
+                ? appEvents.waitFor('resmon.config.applied')
+                : Promise.resolve()
+        ]);
     }
 
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         eraseEvents();
+        psEvents = [];
+
         resourceMonitor = new ResourceMonitor();
         resourceMonitor.ee.on(APP_THRESHOLDS.MEMORY.STATE.NOT_OK, (stats) => {
             const evt = { name: 'notOk', stats };
@@ -64,11 +82,6 @@ describe('Resource Monitor / Resource Monitor', () => {
             events.ok.push(evt);
             events.all.push(evt);
         });
-        resourceMonitor.ee.on('memoryMonitorStop', () => {
-            const evt = { name: 'stop' };
-            events.stop.push(evt);
-            events.all.push(evt);
-        });
         resourceMonitor.ee.on('memoryCheckStatus', (stats) => {
             const evt = { name: 'check', stats };
             events.check.push(evt);
@@ -76,7 +89,6 @@ describe('Resource Monitor / Resource Monitor', () => {
         });
 
         coreStub = stubs.default.coreStub({}, { logger: { ignoreLevelChange: false } });
-        coreStub.persistentStorage.loadData = { config: { } };
         coreStub.utilMisc.generateUuid.numbersOnly = false;
         Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
             external: 10 * 1024 * 1024,
@@ -86,15 +98,23 @@ describe('Resource Monitor / Resource Monitor', () => {
         });
         coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
 
-        return configWorker.cleanup()
-            .then(() => persistentStorage.persistentStorage.load())
-            .then(() => resourceMonitor.initialize({ configMgr: configWorker }));
+        appEvents = coreStub.appEvents.appEvents;
+        configWorker = coreStub.configWorker.configWorker;
+
+        resourceMonitor.initialize(appEvents);
+        appEvents.on('resmon.pstate', (getPState) => psEvents.push(getPState));
+
+        await coreStub.startServices();
+        await configWorker.cleanup();
     });
 
-    afterEach(() => resourceMonitor.destroy()
-        .then(() => {
-            sinon.restore();
-        }));
+    afterEach(async () => {
+        await resourceMonitor.destroy();
+        await coreStub.destroyServices();
+
+        appEvents.stop();
+        sinon.restore();
+    });
 
     describe('constructor', () => {
         it('should create a new instance', () => {
@@ -115,14 +135,13 @@ describe('Resource Monitor / Resource Monitor', () => {
     });
 
     describe('lifecycle', () => {
-        let clock;
-
         beforeEach(() => {
             clock = stubs.clock();
         });
 
         it('should ignore changes in configuration when destroyed', () => resourceMonitor.start()
             .then(() => {
+                assert.lengthOf(psEvents, 1);
                 assert.isTrue(resourceMonitor.isRunning());
                 assert.isFalse(resourceMonitor.isMemoryMonitorActive);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
@@ -133,17 +152,15 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isFalse(resourceMonitor.isRunning());
                 assert.isFalse(resourceMonitor.isMemoryMonitorActive);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    }
+                }, {}, false);
             })
             .then(() => {
+                assert.lengthOf(psEvents, 1);
                 assert.isTrue(resourceMonitor.isDestroyed());
                 assert.isFalse(resourceMonitor.isRunning());
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
@@ -176,16 +193,14 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isEmpty(events.all);
             }));
 
-        it('should not generate log messages when log level is not debug or verbose', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry',
-                listener: {
-                    class: 'Telemetry_Listener'
-                }
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+        it('should not generate log messages when log level is not debug or verbose', () => processDeclaration({
+            class: 'Telemetry',
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
             .then(() => {
+                assert.lengthOf(psEvents, 1);
                 coreStub.logger.setLogLevel('verbose');
                 coreStub.logger.removeAllMessages();
 
@@ -219,28 +234,26 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isEmpty(coreStub.logger.messages.debug);
                 coreStub.logger.setLogLevel('error');
                 coreStub.logger.removeAllMessages();
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        controls: {
-                            class: 'Controls',
-                            memoryMonitor: {
-                                logLevel: 'error',
-                                logFrequency: 30
-                            }
-                        },
-                        listener: {
-                            class: 'Telemetry_Listener'
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        memoryMonitor: {
+                            logLevel: 'error',
+                            logFrequency: 30
                         }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                    },
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    }
+                });
             })
             .then(() => {
                 coreStub.logger.removeAllMessages();
                 return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 11 });
             })
             .then(() => {
+                assert.lengthOf(psEvents, 1);
                 assert.lengthOf(coreStub.logger.messages.error, 1);
                 assert.isEmpty(coreStub.logger.messages.verbose);
                 assert.isEmpty(coreStub.logger.messages.debug);
@@ -248,12 +261,9 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.includeMatch(coreStub.logger.messages.error, /MEMORY_USAGE_BELOW_THRESHOLD/);
             }));
 
-        it('should work according to declaration content', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry'
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+        it('should work according to declaration content', () => processDeclaration({
+            class: 'Telemetry'
+        })
             .then(() => {
                 assert.isFalse(resourceMonitor.isRunning());
                 assert.isFalse(resourceMonitor.isMemoryMonitorActive);
@@ -277,15 +287,12 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isNull(resourceMonitor.memoryState);
                 assert.isEmpty(events.all);
 
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    }
+                });
             })
             .then(() => {
                 assert.isTrue(resourceMonitor.isRunning());
@@ -320,19 +327,15 @@ describe('Resource Monitor / Resource Monitor', () => {
                     }
                 });
 
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry'
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                return processDeclaration({
+                    class: 'Telemetry'
+                });
             })
             .then(() => {
                 assert.isTrue(resourceMonitor.isRunning());
                 assert.isFalse(resourceMonitor.isMemoryMonitorActive);
                 assert.isNull(resourceMonitor.memoryState);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
-                assert.lengthOf(events.stop, 1);
 
                 eraseEvents();
                 return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
@@ -345,15 +348,12 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
             }));
 
-        it('should use `warning` level when status changed', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry',
-                listener: {
-                    class: 'Telemetry_Listener'
-                }
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+        it('should use `warning` level when status changed', () => processDeclaration({
+            class: 'Telemetry',
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
             .then(() => {
                 assert.isNotEmpty(events.ok);
                 assert.isEmpty(events.notOk);
@@ -411,48 +411,39 @@ describe('Resource Monitor / Resource Monitor', () => {
                 ), 1);
             }));
 
-        it('should apply custom configuration from declaration', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry'
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
-            .then(() => Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: 90,
-                        memoryMonitor: {
-                            provisionedMemory: 500
-                        }
+        it('should apply custom configuration from declaration', () => processDeclaration({
+            class: 'Telemetry'
+        })
+            .then(() => processDeclaration({
+                class: 'Telemetry',
+                controls: {
+                    class: 'Controls',
+                    memoryThresholdPercent: 90,
+                    memoryMonitor: {
+                        provisionedMemory: 500
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ]))
+                }
+            }))
             .then(() => {
                 assert.isFalse(resourceMonitor.isRunning());
                 assert.isFalse(resourceMonitor.isMemoryMonitorActive);
                 assert.isNull(resourceMonitor.memoryState);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
             })
-            .then(() => Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    listener: {
-                        class: 'Telemetry_Listener'
-                    },
-                    controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: 90,
-                        memoryMonitor: {
-                            provisionedMemory: 500,
-                            thresholdReleasePercent: 80
-                        }
+            .then(() => processDeclaration({
+                class: 'Telemetry',
+                listener: {
+                    class: 'Telemetry_Listener'
+                },
+                controls: {
+                    class: 'Controls',
+                    memoryThresholdPercent: 90,
+                    memoryMonitor: {
+                        provisionedMemory: 500,
+                        thresholdReleasePercent: 80
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ]))
+                }
+            }))
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
                     config: {
@@ -539,23 +530,20 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isEmpty(events.notOk);
                 assert.isEmpty(events.ok);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        },
-                        controls: {
-                            class: 'Controls',
-                            memoryThresholdPercent: 90,
-                            memoryMonitor: {
-                                provisionedMemory: 500,
-                                memoryThresholdPercent: 70
-                            }
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    controls: {
+                        class: 'Controls',
+                        memoryThresholdPercent: 90,
+                        memoryMonitor: {
+                            provisionedMemory: 500,
+                            memoryThresholdPercent: 70
                         }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                    }
+                });
             })
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
@@ -585,43 +573,37 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isFalse(resourceMonitor.isProcessingEnabled());
                 eraseEvents();
             })
-            .then(() => Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    listener: {
-                        class: 'Telemetry_Listener'
-                    },
-                    controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: 50,
-                        memoryMonitor: {
-                            provisionedMemory: 500
-                        }
+            .then(() => processDeclaration({
+                class: 'Telemetry',
+                listener: {
+                    class: 'Telemetry_Listener'
+                },
+                controls: {
+                    class: 'Controls',
+                    memoryThresholdPercent: 50,
+                    memoryMonitor: {
+                        provisionedMemory: 500
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ]))
+                }
+            }))
             .then(() => {
                 assert.isEmpty(events.notOk);
                 assert.isEmpty(events.ok);
                 assert.isFalse(resourceMonitor.isProcessingEnabled());
             })
-            .then(() => Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    listener: {
-                        class: 'Telemetry_Listener'
-                    },
-                    controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: 90,
-                        memoryMonitor: {
-                            provisionedMemory: 500
-                        }
+            .then(() => processDeclaration({
+                class: 'Telemetry',
+                listener: {
+                    class: 'Telemetry_Listener'
+                },
+                controls: {
+                    class: 'Controls',
+                    memoryThresholdPercent: 90,
+                    memoryMonitor: {
+                        provisionedMemory: 500
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ]))
+                }
+            }))
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
                     config: {
@@ -647,29 +629,25 @@ describe('Resource Monitor / Resource Monitor', () => {
                 });
                 assert.isEmpty(events.notOk);
                 assert.isNotEmpty(events.ok);
-                assert.isEmpty(events.stop);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
             }));
 
         it('should log a message when provisioned is more that configured', () => {
             coreStub.utilMisc.getRuntimeInfo.maxHeapSize = 1000;
-            return Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    listener: {
-                        class: 'Telemetry_Listener'
-                    },
-                    controls: {
-                        class: 'Controls',
-                        memoryThresholdPercent: 100,
-                        memoryMonitor: {
-                            provisionedMemory: 1300,
-                            interval: 'aggressive'
-                        }
+            return processDeclaration({
+                class: 'Telemetry',
+                listener: {
+                    class: 'Telemetry_Listener'
+                },
+                controls: {
+                    class: 'Controls',
+                    memoryThresholdPercent: 100,
+                    memoryMonitor: {
+                        provisionedMemory: 1300,
+                        interval: 'aggressive'
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ])
+                }
+            })
                 .then(() => {
                     assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
                         config: {
@@ -698,49 +676,42 @@ describe('Resource Monitor / Resource Monitor', () => {
                     assert.includeMatch(coreStub.logger.messages.all, /Disabling Memory Monitor due high threshold percent value/);
                     assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig.config.provisioned, 1000);
                     assert.isTrue(resourceMonitor.isProcessingEnabled());
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            listener: {
-                                class: 'Telemetry_Listener'
-                            },
-                            controls: {
-                                class: 'Controls',
-                                memoryMonitor: {
-                                    provisionedMemory: 1300,
-                                    memoryThresholdPercent: 100
-                                }
+                    return processDeclaration({
+                        class: 'Telemetry',
+                        listener: {
+                            class: 'Telemetry_Listener'
+                        },
+                        controls: {
+                            class: 'Controls',
+                            memoryMonitor: {
+                                provisionedMemory: 1300,
+                                memoryThresholdPercent: 100
                             }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
+                        }
+                    });
                 })
                 .then(() => {
                     assert.includeMatch(coreStub.logger.messages.all, /Please, adjust memory limit/);
                     assert.includeMatch(coreStub.logger.messages.all, /Disabling Memory Monitor due high threshold percent value/);
-                    assert.isEmpty(events.stop);
                     assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig.config.provisioned, 1000);
                     assert.isTrue(resourceMonitor.isProcessingEnabled());
                 });
         });
 
-        it('should notify when not enough OS free memory', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry',
-                listener: {
-                    class: 'Telemetry_Listener'
-                },
-                controls: {
-                    class: 'Controls',
-                    memoryMonitor: {
-                        osFreeMemory: 50,
-                        interval: 'aggressive',
-                        memoryThresholdPercent: 80
-                    }
+        it('should notify when not enough OS free memory', () => processDeclaration({
+            class: 'Telemetry',
+            listener: {
+                class: 'Telemetry_Listener'
+            },
+            controls: {
+                class: 'Controls',
+                memoryMonitor: {
+                    osFreeMemory: 50,
+                    interval: 'aggressive',
+                    memoryThresholdPercent: 80
                 }
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+            }
+        })
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
                     config: {
@@ -782,22 +753,19 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isNotEmpty(events.ok);
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
                 eraseEvents();
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        },
-                        controls: {
-                            class: 'Controls',
-                            memoryMonitor: {
-                                interval: 'aggressive',
-                                memoryThresholdPercent: 80
-                            }
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    controls: {
+                        class: 'Controls',
+                        memoryMonitor: {
+                            interval: 'aggressive',
+                            memoryThresholdPercent: 80
                         }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                    }
+                });
             })
             .then(() => {
                 assert.isEmpty(events.notOk);
@@ -816,22 +784,18 @@ describe('Resource Monitor / Resource Monitor', () => {
                 assert.isTrue(resourceMonitor.isProcessingEnabled());
                 assert.isEmpty(events.notOk);
                 assert.isNotEmpty(events.ok);
-                assert.isEmpty(events.stop);
             }));
 
-        it('should update check intervals according to declaration', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry',
-                listener: {
-                    class: 'Telemetry_Listener'
-                },
-                controls: {
-                    class: 'Controls',
-                    logLevel: 'verbose'
-                }
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+        it('should update check intervals according to declaration', () => processDeclaration({
+            class: 'Telemetry',
+            listener: {
+                class: 'Telemetry_Listener'
+            },
+            controls: {
+                class: 'Controls',
+                logLevel: 'verbose'
+            }
+        })
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
                     config: {
@@ -862,22 +826,19 @@ describe('Resource Monitor / Resource Monitor', () => {
                 // default interval is 1.5 for low pressure. for 30seconds we should have at least 10
                 assert.isBelow(events.check.length, 25);
                 eraseEvents();
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        },
-                        controls: {
-                            class: 'Controls',
-                            logLevel: 'verbose',
-                            memoryMonitor: {
-                                interval: 'aggressive'
-                            }
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    controls: {
+                        class: 'Controls',
+                        logLevel: 'verbose',
+                        memoryMonitor: {
+                            interval: 'aggressive'
                         }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                    }
+                });
             })
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
@@ -909,22 +870,19 @@ describe('Resource Monitor / Resource Monitor', () => {
                 // default interval is 0.5 for low pressure. for 30seconds we should have at least 20
                 assert.isAbove(events.check.length, 35);
                 eraseEvents();
-                return Promise.all([
-                    configWorker.processDeclaration({
-                        class: 'Telemetry',
-                        listener: {
-                            class: 'Telemetry_Listener'
-                        },
-                        controls: {
-                            class: 'Controls',
-                            logLevel: 'verbose',
-                            memoryMonitor: {
-                                interval: 'default'
-                            }
+                return processDeclaration({
+                    class: 'Telemetry',
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    },
+                    controls: {
+                        class: 'Controls',
+                        logLevel: 'verbose',
+                        memoryMonitor: {
+                            interval: 'default'
                         }
-                    }),
-                    clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                ]);
+                    }
+                });
             })
             .then(() => {
                 assert.deepStrictEqual(resourceMonitor.memoryMonitorConfig, {
@@ -960,7 +918,6 @@ describe('Resource Monitor / Resource Monitor', () => {
 
     describe('ProcessingState', () => {
         let cbEvents;
-        let clock;
         let onDisableCb;
         let onEnableCb;
         let ps;
@@ -974,6 +931,7 @@ describe('Resource Monitor / Resource Monitor', () => {
 
         beforeEach(() => {
             clock = stubs.clock();
+            ps = null;
 
             onDisableCb = () => {
                 const memState = ps.memoryState;
@@ -981,56 +939,55 @@ describe('Resource Monitor / Resource Monitor', () => {
                 cbEvents.onDisable.push(memState);
             };
             onEnableCb = () => {
-                const memState = ps.memoryState;
+                const memState = ps.destroyed === false && ps.memoryState;
                 if (memState) {
                     assert.deepStrictEqual(memState.thresholdStatus, APP_THRESHOLDS.MEMORY.STATE.OK);
                 }
                 cbEvents.onEnable.push(memState);
             };
 
-            ps = resourceMonitor.initializePState(onEnableCb, onDisableCb);
+            appEvents.on('resmon.pstate', (getPState) => {
+                assert.isNull(ps, 'should not raise event more than once');
+                ps = getPState(onEnableCb, onDisableCb);
+                assert.isFalse(ps.destroyed);
+            });
 
             eraseCbEvents();
+            return resourceMonitor.start();
         });
 
         it('should allow processing once created', () => {
+            assert.lengthOf(psEvents, 1);
             assert.isTrue(ps.enabled);
-        });
-
-        it('should not call callbacks on initialization', () => {
-            ps.initialize(onEnableCb, onDisableCb);
-            assert.isEmpty(cbEvents.onDisable);
-            assert.isEmpty(cbEvents.onEnable);
 
             return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
                 .then(() => {
+                    assert.isTrue(ps.enabled);
                     assert.isEmpty(cbEvents.onDisable);
-                    assert.isEmpty(cbEvents.onEnable);
+                    assert.lengthOf(cbEvents.onEnable, 1);
                 });
         });
 
-        it('should change state according to memory usage', () => Promise.all([
-            configWorker.processDeclaration({
-                class: 'Telemetry',
-                controls: {
-                    class: 'Controls',
-                    memoryMonitor: {
-                        provisionedMemory: 300,
-                        memoryThresholdPercent: 90
-                    }
-                },
-                listener: {
-                    class: 'Telemetry_Listener'
+        it('should change state according to memory usage', () => processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                memoryMonitor: {
+                    provisionedMemory: 300,
+                    memoryThresholdPercent: 90
                 }
-            }),
-            clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-        ])
+            },
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
             .then(() => {
                 assert.isTrue(ps.enabled);
                 // should not call callbacks if enabled already
-                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onEnable, 1);
                 assert.isEmpty(cbEvents.onDisable);
                 assert.isNotEmpty(events.all);
+                eraseCbEvents();
 
                 Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
                     external: 290 * 1024 * 1024,
@@ -1039,8 +996,6 @@ describe('Resource Monitor / Resource Monitor', () => {
                     rss: 290 * 1024 * 1024
                 });
 
-                ps.initialize(onEnableCb, onDisableCb);
-                assert.isTrue(ps.enabled);
                 return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
             })
             .then(() => {
@@ -1051,10 +1006,166 @@ describe('Resource Monitor / Resource Monitor', () => {
                 return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
             }));
 
-        it('should change state according to memory usage', () => {
-            ps.initialize(onEnableCb, onDisableCb);
-            return Promise.all([
-                configWorker.processDeclaration({
+        it('should change state according to memory usage', () => processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                memoryMonitor: {
+                    provisionedMemory: 300,
+                    memoryThresholdPercent: 90
+                }
+            },
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                // should not call callbacks if enabled already
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isNotEmpty(events.all);
+                eraseCbEvents();
+            })
+            .then(() => {
+                Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
+                    external: 290 * 1024 * 1024,
+                    heapTotal: 290 * 1024 * 1024,
+                    heapUsed: 290 * 1024 * 1024,
+                    rss: 290 * 1024 * 1024
+                });
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
+                    external: 100 * 1024 * 1024,
+                    heapTotal: 100 * 1024 * 1024,
+                    heapUsed: 100 * 1024 * 1024,
+                    rss: 100 * 1024 * 1024
+                });
+                eraseCbEvents();
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isNotEmpty(events.all);
+
+                eraseCbEvents();
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
+                eraseCbEvents();
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            }));
+
+        it('should enable processing when memory monitor deactivated', () => processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                memoryMonitor: {
+                    provisionedMemory: 300,
+                    memoryThresholdPercent: 90
+                }
+            },
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                // should not call callbacks if enabled already
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isNotEmpty(events.all);
+                eraseCbEvents();
+
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        memoryMonitor: {
+                            provisionedMemory: 300,
+                            memoryThresholdPercent: 90
+                        }
+                    }
+                });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isNotEmpty(events.all);
+                eraseEvents();
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isEmpty(events.all);
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isEmpty(events.all);
+
+                return processDeclaration({
                     class: 'Telemetry',
                     controls: {
                         class: 'Controls',
@@ -1066,105 +1177,102 @@ describe('Resource Monitor / Resource Monitor', () => {
                     listener: {
                         class: 'Telemetry_Listener'
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ])
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    // should not call callbacks if enabled already
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.isNotEmpty(events.all);
-                })
-                .then(() => {
-                    Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
-                        external: 290 * 1024 * 1024,
-                        heapTotal: 290 * 1024 * 1024,
-                        heapUsed: 290 * 1024 * 1024,
-                        rss: 290 * 1024 * 1024
-                    });
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
-                        external: 100 * 1024 * 1024,
-                        heapTotal: 100 * 1024 * 1024,
-                        heapUsed: 100 * 1024 * 1024,
-                        rss: 100 * 1024 * 1024
-                    });
-                    eraseCbEvents();
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.isNotEmpty(events.all);
-
-                    eraseCbEvents();
-                    coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
-                    eraseCbEvents();
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
                 });
-        });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
 
-        it('should change enable processing when memory monitor deactivated', () => {
-            ps.initialize(onEnableCb, onDisableCb);
-            return Promise.all([
-                configWorker.processDeclaration({
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        memoryMonitor: {
+                            provisionedMemory: 300,
+                            memoryThresholdPercent: 90
+                        }
+                    }
+                });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+            }));
+
+        it('should enable processing when memory monitor deactivated (high mem usage)', () => processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                memoryMonitor: {
+                    provisionedMemory: 300,
+                    memoryThresholdPercent: 90
+                }
+            },
+            listener: {
+                class: 'Telemetry_Listener'
+            }
+        })
+            .then(() => {
+                assert.lengthOf(psEvents, 1);
+                assert.isTrue(ps.enabled);
+                // should not call callbacks if enabled already
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isEmpty(cbEvents.onDisable);
+                assert.isNotEmpty(events.all);
+                eraseCbEvents();
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        memoryMonitor: {
+                            provisionedMemory: 300,
+                            memoryThresholdPercent: 90
+                        }
+                    }
+                });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+                eraseEvents();
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isEmpty(events.all);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isEmpty(events.all);
+                eraseCbEvents();
+
+                return processDeclaration({
                     class: 'Telemetry',
                     controls: {
                         class: 'Controls',
@@ -1176,135 +1284,45 @@ describe('Resource Monitor / Resource Monitor', () => {
                     listener: {
                         class: 'Telemetry_Listener'
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ])
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    // should not call callbacks if enabled already
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.isNotEmpty(events.all);
-
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                memoryMonitor: {
-                                    provisionedMemory: 300,
-                                    memoryThresholdPercent: 90
-                                }
-                            }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.isNotEmpty(events.all);
-                    eraseEvents();
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.isEmpty(events.all);
-                    coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    assert.isEmpty(events.all);
-
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                memoryMonitor: {
-                                    provisionedMemory: 300,
-                                    memoryThresholdPercent: 90
-                                }
-                            },
-                            listener: {
-                                class: 'Telemetry_Listener'
-                            }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
-
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                memoryMonitor: {
-                                    provisionedMemory: 300,
-                                    memoryThresholdPercent: 90
-                                }
-                            }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    assert.isNotEmpty(events.all);
                 });
-        });
+            })
+            .then(() => {
+                assert.lengthOf(psEvents, 1);
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                assert.isNotEmpty(events.all);
+            }));
 
         it('should enable processing once resource monitor destroyed', () => {
             coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
-            ps.initialize(onEnableCb, onDisableCb);
-            return Promise.all([
-                configWorker.processDeclaration({
-                    class: 'Telemetry',
-                    controls: {
-                        class: 'Controls',
-                        logLevel: 'verbose',
-                        memoryMonitor: {
-                            provisionedMemory: 300,
-                            memoryThresholdPercent: 90
-                        }
-                    },
-                    listener: {
-                        class: 'Telemetry_Listener'
+            return processDeclaration({
+                class: 'Telemetry',
+                controls: {
+                    class: 'Controls',
+                    logLevel: 'verbose',
+                    memoryMonitor: {
+                        provisionedMemory: 300,
+                        memoryThresholdPercent: 90
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ])
+                },
+                listener: {
+                    class: 'Telemetry_Listener'
+                }
+            })
                 .then(() => {
+                    assert.lengthOf(psEvents, 1);
                     assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
+                    assert.lengthOf(cbEvents.onEnable, 1);
                     assert.lengthOf(cbEvents.onDisable, 1);
                     assert.isNotEmpty(events.all);
+                    eraseCbEvents();
                     return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
                 })
                 .then(() => {
                     assert.isFalse(ps.enabled);
                     assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
+                    assert.isEmpty(cbEvents.onDisable);
                     assert.isNotEmpty(events.all);
                     return resourceMonitor.destroy();
                 })
@@ -1312,15 +1330,36 @@ describe('Resource Monitor / Resource Monitor', () => {
                 .then(() => {
                     assert.isTrue(ps.enabled);
                     assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.lengthOf(cbEvents.onDisable, 1);
+                    assert.isEmpty(cbEvents.onDisable);
                     assert.isNotEmpty(events.all);
                 });
         });
 
-        it('should enable/disable processing according to the state', () => {
-            ps.initialize(onEnableCb, onDisableCb);
-            return Promise.all([
-                configWorker.processDeclaration({
+        it('should enable/disable processing according to the state', () => processDeclaration({
+            class: 'Telemetry',
+            controls: {
+                class: 'Controls',
+                logLevel: 'verbose',
+                memoryMonitor: {
+                    provisionedMemory: 300,
+                    memoryThresholdPercent: 90
+                }
+            }
+        })
+            .then(() => clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 }))
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.isEmpty(cbEvents.onDisable);
+                eraseCbEvents();
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.isEmpty(cbEvents.onDisable);
+                return processDeclaration({
                     class: 'Telemetry',
                     controls: {
                         class: 'Controls',
@@ -1329,45 +1368,127 @@ describe('Resource Monitor / Resource Monitor', () => {
                             provisionedMemory: 300,
                             memoryThresholdPercent: 90
                         }
+                    },
+                    listener: {
+                        class: 'Telemetry_Listener'
                     }
-                }),
-                clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-            ])
+                });
+            })
+            .then(() => clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 }))
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.isEmpty(cbEvents.onEnable);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 1);
+                Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
+                    external: 340 * 1024 * 1024,
+                    heapTotal: 340 * 1024 * 1024,
+                    heapUsed: 340 * 1024 * 1024,
+                    rss: 340 * 1024 * 1024
+                });
+                return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+            })
+            .then(() => {
+                assert.isFalse(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 1);
+                assert.lengthOf(cbEvents.onDisable, 2);
+
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        logLevel: 'verbose',
+                        memoryMonitor: {
+                            provisionedMemory: 500,
+                            memoryThresholdPercent: 90
+                        }
+                    },
+                    listener: {
+                        class: 'Telemetry_Listener'
+                    }
+                });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 2);
+                assert.lengthOf(cbEvents.onDisable, 2);
+
+                return processDeclaration({
+                    class: 'Telemetry',
+                    controls: {
+                        class: 'Controls',
+                        logLevel: 'verbose',
+                        memoryMonitor: {
+                            provisionedMemory: 500,
+                            memoryThresholdPercent: 90
+                        }
+                    }
+                });
+            })
+            .then(() => {
+                assert.isTrue(ps.enabled);
+                assert.lengthOf(cbEvents.onEnable, 2);
+                assert.lengthOf(cbEvents.onDisable, 2);
+            }));
+
+        it('should restart destroyed instance and restore config', () => {
+            let oldPs;
+            return processDeclaration({
+                class: 'Telemetry',
+                controls: {
+                    class: 'Controls',
+                    logLevel: 'verbose',
+                    memoryMonitor: {
+                        provisionedMemory: 300,
+                        memoryThresholdPercent: 90
+                    }
+                }
+            })
                 .then(() => clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 }))
+                .then(() => {
+                    assert.isTrue(ps.enabled);
+                    assert.lengthOf(cbEvents.onEnable, 1);
+                    assert.isEmpty(cbEvents.onDisable);
+                    eraseCbEvents();
+
+                    return processDeclaration({
+                        class: 'Telemetry',
+                        controls: {
+                            class: 'Controls',
+                            logLevel: 'verbose',
+                            memoryMonitor: {
+                                provisionedMemory: 300,
+                                memoryThresholdPercent: 90
+                            }
+                        },
+                        listener: {
+                            class: 'Telemetry_Listener'
+                        }
+                    });
+                })
                 .then(() => {
                     assert.isTrue(ps.enabled);
                     assert.isEmpty(cbEvents.onEnable);
                     assert.isEmpty(cbEvents.onDisable);
                     coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isTrue(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.isEmpty(cbEvents.onDisable);
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                logLevel: 'verbose',
-                                memoryMonitor: {
-                                    provisionedMemory: 300,
-                                    memoryThresholdPercent: 90
-                                }
-                            },
-                            listener: {
-                                class: 'Telemetry_Listener'
-                            }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
-                })
-                .then(() => clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 }))
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.isEmpty(cbEvents.onEnable);
-                    assert.lengthOf(cbEvents.onDisable, 1);
                     return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
                 })
                 .then(() => {
@@ -1381,67 +1502,46 @@ describe('Resource Monitor / Resource Monitor', () => {
                     assert.isTrue(ps.enabled);
                     assert.lengthOf(cbEvents.onEnable, 1);
                     assert.lengthOf(cbEvents.onDisable, 1);
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
+                    assert.isFalse(ps.destroyed);
+                    eraseCbEvents();
+                    return resourceMonitor.destroy();
                 })
                 .then(() => {
                     assert.isTrue(ps.enabled);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.lengthOf(cbEvents.onDisable, 1);
-                    Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
-                        external: 340 * 1024 * 1024,
-                        heapTotal: 340 * 1024 * 1024,
-                        heapUsed: 340 * 1024 * 1024,
-                        rss: 340 * 1024 * 1024
-                    });
-                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
-                })
-                .then(() => {
-                    assert.isFalse(ps.enabled);
-                    assert.lengthOf(cbEvents.onEnable, 1);
-                    assert.lengthOf(cbEvents.onDisable, 2);
+                    assert.isEmpty(cbEvents.onEnable);
+                    assert.isEmpty(cbEvents.onDisable);
+                    assert.isTrue(ps.destroyed);
+                    assert.doesNotThrow(() => ps.destroy());
 
+                    oldPs = ps;
+                    ps = null;
+                    coreStub.resourceMonitorUtils.osAvailableMem.free = 20;
+                    eraseCbEvents();
+
+                    resourceMonitor.initialize(appEvents);
                     return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                logLevel: 'verbose',
-                                memoryMonitor: {
-                                    provisionedMemory: 500,
-                                    memoryThresholdPercent: 90
-                                }
-                            },
-                            listener: {
-                                class: 'Telemetry_Listener'
-                            }
-                        }),
+                        resourceMonitor.restart(),
                         clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
                     ]);
                 })
                 .then(() => {
+                    assert.ok(oldPs !== ps);
                     assert.isTrue(ps.enabled);
-                    assert.lengthOf(cbEvents.onEnable, 2);
-                    assert.lengthOf(cbEvents.onDisable, 2);
+                    assert.isTrue(oldPs.enabled);
 
-                    return Promise.all([
-                        configWorker.processDeclaration({
-                            class: 'Telemetry',
-                            controls: {
-                                class: 'Controls',
-                                logLevel: 'verbose',
-                                memoryMonitor: {
-                                    provisionedMemory: 500,
-                                    memoryThresholdPercent: 90
-                                }
-                            }
-                        }),
-                        clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 })
-                    ]);
+                    // should enable at start
+                    assert.lengthOf(cbEvents.onEnable, 1);
+                    assert.lengthOf(cbEvents.onDisable, 0);
+
+                    coreStub.resourceMonitorUtils.osAvailableMem.free = 500;
+                    return clock.clockForward(3000, { promisify: true, delay: 1, repeat: 10 });
                 })
                 .then(() => {
                     assert.isTrue(ps.enabled);
-                    assert.lengthOf(cbEvents.onEnable, 2);
-                    assert.lengthOf(cbEvents.onDisable, 2);
+                    assert.isTrue(oldPs.enabled);
+                    // should not call destroyed PS instance
+                    assert.lengthOf(cbEvents.onEnable, 1);
+                    assert.lengthOf(cbEvents.onDisable, 0);
                 });
         });
     });

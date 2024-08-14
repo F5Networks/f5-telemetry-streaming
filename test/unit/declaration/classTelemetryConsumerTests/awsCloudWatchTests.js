@@ -30,16 +30,19 @@ moduleCache.remember();
 
 describe('Declarations -> Telemetry_Consumer -> AWS_CloudWatch', () => {
     const basicSchemaTestsValidator = (decl) => shared.validateMinimal(decl);
+    let coreStub;
 
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

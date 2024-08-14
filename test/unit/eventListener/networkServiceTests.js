@@ -19,7 +19,6 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const EventEmitter = require('events').EventEmitter;
 const sinon = require('sinon');
 const net = require('net');
 const udp = require('dgram');
@@ -139,43 +138,13 @@ describe('Event Listener / TCP and UDP Services', () => {
     });
 
     describe('TCPService', () => {
-        class MockSocket extends EventEmitter {
-            constructor() {
-                super();
-                sinon.spy(this, 'destroy');
-            }
-
-            destroy() {
-                setImmediate(() => this.emit('destroyMock', this));
-            }
-        }
-        class MockServer extends EventEmitter {
-            constructor() {
-                super();
-                sinon.spy(this, 'close');
-                sinon.spy(this, 'listen');
-            }
-
-            setInitArgs(opts) {
-                this.opts = opts;
-            }
-
-            listen() {
-                setImmediate(() => this.emit('listenMock', this, Array.from(arguments)));
-            }
-
-            close() {
-                setImmediate(() => this.emit('closeMock', this, Array.from(arguments)));
-            }
-        }
-
         let createServerMockCb;
 
         beforeEach(() => {
             receiverInst = new networkService.TCPService(createDataReceiver, testPort, { address: testAddr });
 
             sinon.stub(net, 'createServer').callsFake(function () {
-                const serverMock = new MockServer();
+                const serverMock = new testUtil.TCPServerMock();
                 serverMock.setInitArgs.apply(serverMock, arguments);
                 if (createServerMockCb) {
                     createServerMockCb(serverMock);
@@ -194,7 +163,7 @@ describe('Event Listener / TCP and UDP Services', () => {
 
             const createMockSocket = () => {
                 socketId += 1;
-                const socketMock = new MockSocket();
+                const socketMock = new testUtil.TCPSocketMock();
                 socketMock.remoteAddress = testAddr;
                 socketMock.remotePort = testPort + socketId;
                 socketMock.remoteFamily = 'IPV4';
@@ -409,7 +378,7 @@ describe('Event Listener / TCP and UDP Services', () => {
             it('should close all opened connections', () => {
                 const sockets = [];
                 const createMockSocket = () => {
-                    const socketMock = new MockSocket();
+                    const socketMock = new testUtil.TCPSocketMock();
                     socketMock.remoteAddress = testAddr;
                     socketMock.remotePort = testPort + sockets.length;
                     socketMock.destroy = sinon.spy(() => {
@@ -470,33 +439,13 @@ describe('Event Listener / TCP and UDP Services', () => {
     });
 
     describe('UDPService', () => {
-        class MockServer extends EventEmitter {
-            constructor() {
-                super();
-                sinon.spy(this, 'close');
-                sinon.spy(this, 'bind');
-            }
-
-            setInitArgs(opts) {
-                this.opts = opts;
-            }
-
-            bind() {
-                setImmediate(() => this.emit('bindMock', this, Array.from(arguments)));
-            }
-
-            close() {
-                setImmediate(() => this.emit('closeMock', this, Array.from(arguments)));
-            }
-        }
-
         let createServerMockCb;
 
         beforeEach(() => {
             receiverInst = new networkService.UDPService(createDataReceiver, testPort, { address: testAddr });
 
             sinon.stub(udp, 'createSocket').callsFake(function () {
-                const serverMock = new MockServer();
+                const serverMock = new testUtil.UDPServerMock();
                 serverMock.setInitArgs.apply(serverMock, arguments);
                 if (createServerMockCb) {
                     serverMock.on('closeMock', (inst, args) => setImmediate(() => Promise.resolve(serverMock.emit('close')).then(args[0])));
@@ -818,20 +767,6 @@ describe('Event Listener / TCP and UDP Services', () => {
     });
 
     describe('DualUDPService', () => {
-        class MockServer extends EventEmitter {
-            setInitArgs(opts) {
-                this.opts = opts;
-            }
-
-            bind() {
-                this.emit('bindMock', this, Array.from(arguments));
-            }
-
-            close() {
-                this.emit('closeMock', this, Array.from(arguments));
-            }
-        }
-
         let serverMocks;
         let onMockCreatedCallback;
         const getServerMock = (ipv6) => serverMocks.find((mock) => (ipv6 && mock.opts.type === 'udp6') || (!ipv6 && mock.opts.type === 'udp4'));
@@ -843,7 +778,7 @@ describe('Event Listener / TCP and UDP Services', () => {
             );
 
             sinon.stub(udp, 'createSocket').callsFake(function () {
-                const mock = new MockServer();
+                const mock = new testUtil.UDPServerMock();
                 mock.setInitArgs.apply(mock, arguments);
                 serverMocks.push(mock);
                 if (onMockCreatedCallback) {

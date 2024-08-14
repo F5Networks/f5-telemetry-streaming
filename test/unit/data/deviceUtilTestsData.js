@@ -26,91 +26,6 @@ module.exports = {
         incorrectData: 'Edition: Final\nProduct: BIG-IQ\nVersion: 14.1.0\n'
     },
     encryptSecret: {
-        'encrypt-14.0.0': [
-            {
-                endpoint: '/mgmt/tm/ltm/auth/radius-server',
-                method: 'post',
-                request: {
-                    name: `telemetry_delete_me_${encryptEncode('test')}`,
-                    secret: 'foo',
-                    server: 'foo'
-                },
-                response: {
-                    secret: 'secret'
-                }
-            },
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '14.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
-                method: 'delete'
-            }
-        ],
-        'encrypt-14.1.x': [
-            {
-                endpoint: '/mgmt/tm/ltm/auth/radius-server',
-                method: 'post',
-                request: {
-                    name: `telemetry_delete_me_${encryptEncode('test')}`,
-                    secret: 'foo',
-                    server: 'foo'
-                },
-                response: {
-                    secret: 'secret'
-                }
-            },
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '14.1.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
-                method: 'delete'
-            },
-            {
-                endpoint: '/mgmt/tm/util/bash',
-                method: 'post',
-                request: {
-                    command: 'run',
-                    utilCmdArgs: `-c "tmsh -a list auth radius-server telemetry_delete_me_${encryptEncode('test')} secret"`
-                },
-                response: {
-                    commandResult: 'auth radius-server telemetry_delete_me {\n    secret secret\n}'
-                }
-            }
-        ],
         'encrypt-15.0.0': [
             {
                 endpoint: '/mgmt/tm/ltm/auth/radius-server',
@@ -122,25 +37,6 @@ module.exports = {
                 },
                 response: {
                     secret: 'secret'
-                }
-            },
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '15.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             },
             {
@@ -157,25 +53,6 @@ module.exports = {
             {
                 endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
                 method: 'delete'
-            },
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '15.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         ],
         encrypt1kSecret: [
@@ -190,25 +67,6 @@ module.exports = {
                 }
             },
             {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '14.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            {
                 endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
                 method: 'delete',
                 options: {
@@ -217,25 +75,6 @@ module.exports = {
             }
         ],
         encrypt1kSecretWithNewLines: [
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '14.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             {
                 endpoint: `/mgmt/tm/ltm/auth/radius-server/telemetry_delete_me_${encryptEncode('test')}`,
                 method: 'delete',
@@ -255,25 +94,6 @@ module.exports = {
                 },
                 response: {
                     secret: 'secret,secret'
-                }
-            },
-            {
-                endpoint: '/mgmt/tm/sys/version',
-                response: {
-                    entries: {
-                        someKey: {
-                            nestedStats: {
-                                entries: {
-                                    version: {
-                                        description: '14.0.0'
-                                    },
-                                    BuildInfo: {
-                                        description: '0.0.1'
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             },
             {

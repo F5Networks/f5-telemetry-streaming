@@ -57,7 +57,7 @@ if (IS_8_11_1_PLUS) {
 
 moduleCache.remember();
 
-(IS_8_11_1_PLUS ? describe : describe.skip)('OpenTelemetry_Exporter', () => {
+(IS_8_11_1_PLUS ? describe.skip : describe.skip)('OpenTelemetry_Exporter', () => {
     if (!IS_8_11_1_PLUS) {
         return;
     }
@@ -136,12 +136,11 @@ moduleCache.remember();
         }
 
         function initDefaultNockMock(options) {
-            getMockNock(options).reply(function (_, requestBody) {
+            getMockNock(options).reply(200, function (_, requestBody) {
                 if (onDataReceivedCallback) {
                     onDataReceivedCallback(requestBody);
                 }
                 requestHeaders = this.req.headers;
-                return 200;
             });
         }
 
@@ -259,9 +258,9 @@ moduleCache.remember();
         });
 
         afterEach(() => {
-            testUtil.checkNockActiveMocks(nock);
+            testUtil.checkNockActiveMocks();
+            testUtil.nockCleanup();
             sinon.restore();
-            nock.cleanAll();
         });
 
         describe('OpenTelemetry metrics', () => {

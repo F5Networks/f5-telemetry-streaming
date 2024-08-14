@@ -97,6 +97,8 @@ function generateDeclarationAndExpectedOutput(trace) {
                     'My_Poller_1',
                     {
                         interval: 60,
+                        workers: 6,
+                        chunkSize: 60,
                         trace: trace.systemPoller
                     }
                 ]
@@ -133,10 +135,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         port: 8100,
                         protocol: 'http'
                     },
-                    credentials: {
-                        passphrase: undefined,
-                        username: undefined
-                    },
                     dataOpts: {
                         actions: [
                             {
@@ -147,12 +145,13 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 }
                             }
                         ],
-                        noTMStats: true,
-                        tags: undefined
+                        noTMStats: true
                     },
                     enable: true,
                     id: 'f5telemetry_default::My_Poller_2::My_Poller_2',
                     interval: 300,
+                    workers: 5,
+                    chunkSize: 30,
                     name: 'My_Poller_2',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_Poller_2',
@@ -173,10 +172,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         port: 8100,
                         protocol: 'http'
                     },
-                    credentials: {
-                        passphrase: undefined,
-                        username: undefined
-                    },
                     dataOpts: {
                         actions: [
                             {
@@ -187,12 +182,13 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 }
                             }
                         ],
-                        noTMStats: true,
-                        tags: undefined
+                        noTMStats: true
                     },
                     enable: true,
                     id: 'f5telemetry_default::My_System::My_Poller_1',
                     interval: 300,
+                    workers: 5,
+                    chunkSize: 30,
                     name: 'My_Poller_1',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System',
@@ -213,10 +209,6 @@ function generateDeclarationAndExpectedOutput(trace) {
                         port: 8100,
                         protocol: 'http'
                     },
-                    credentials: {
-                        passphrase: undefined,
-                        username: undefined
-                    },
                     dataOpts: {
                         actions: [
                             {
@@ -227,12 +219,13 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 }
                             }
                         ],
-                        noTMStats: true,
-                        tags: undefined
+                        noTMStats: true
                     },
                     enable: true,
                     id: 'f5telemetry_default::My_System::SystemPoller_1',
                     interval: 60,
+                    workers: 6,
+                    chunkSize: 60,
                     name: 'SystemPoller_1',
                     namespace: 'f5telemetry_default',
                     systemName: 'My_System',
@@ -266,44 +259,26 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 protected: 'SecureVault'
                             }
                         },
-                        downloadFolder: undefined,
+                        downloadFolder: '/shared/tmp',
                         interval: {
-                            day: undefined,
                             frequency: 'daily',
                             timeWindow: {
                                 start: '23:15',
                                 end: '02:15'
                             }
-                        },
-                        proxy: {
-                            connection: {
-                                host: undefined,
-                                port: undefined,
-                                protocol: undefined,
-                                allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
-                            }
                         }
                     },
                     system: {
-                        host: 'host3',
                         name: 'My_System',
                         connection: {
+                            host: 'host3',
                             port: 8100,
                             protocol: 'http',
                             allowSelfSignedCert: false
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     id: 'f5telemetry_default::My_System::iHealthPoller_1',
                     namespace: 'f5telemetry_default',
-                    systemName: 'My_System',
                     traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                 },
                 {
@@ -327,44 +302,26 @@ function generateDeclarationAndExpectedOutput(trace) {
                                 protected: 'SecureVault'
                             }
                         },
-                        downloadFolder: undefined,
+                        downloadFolder: '/shared/tmp',
                         interval: {
-                            day: undefined,
                             frequency: 'daily',
                             timeWindow: {
                                 start: '23:15',
                                 end: '02:15'
                             }
-                        },
-                        proxy: {
-                            connection: {
-                                host: undefined,
-                                port: undefined,
-                                protocol: undefined,
-                                allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
-                            }
                         }
                     },
                     system: {
-                        host: 'host4',
                         name: 'My_System_2',
                         connection: {
+                            host: 'host4',
                             port: 8100,
                             protocol: 'http',
                             allowSelfSignedCert: false
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                     namespace: 'f5telemetry_default',
-                    systemName: 'My_System_2',
                     traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                 }
             ]

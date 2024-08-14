@@ -29,15 +29,19 @@ const generateInputActionsTests = require('./generators/inputDataActions');
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_Listener', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

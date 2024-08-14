@@ -24,7 +24,7 @@ const MetricReader = require('@opentelemetry/sdk-metrics').MetricReader;
 const ProtobufMetricExporter = require('@opentelemetry/exporter-metrics-otlp-proto').OTLPMetricExporter;
 const OTELApi = require('@opentelemetry/api');
 
-const httpUtil = require('../shared/httpUtil');
+const httpUtil = require('../../utils/http');
 const metricsUtil = require('../shared/metricsUtil');
 const miscUtil = require('../../utils/misc');
 

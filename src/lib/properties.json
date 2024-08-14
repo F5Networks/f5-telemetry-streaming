@@ -1,12 +1,8 @@
 {
     "stats": {
-        "system": {
-            "structure": { "folder": true }
-        },
         "hostname": {
             "key": "deviceInfo::hostname",
             "structure": { "parentKey": "system" },
-            "normalize": null,
             "normalization": [
                 {
                     "convertArrayToMap": null
@@ -102,15 +98,7 @@
         },
         "configReady": {
             "structure": { "parentKey": "system" },
-            "if": {
-                "deviceVersionGreaterOrEqual": "13.1"
-            },
-            "then": {
-                "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
-            },
-            "else": {
-                "disabled": true
-            }
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::configReady"
         },
         "configSyncSucceeded": {
             "structure": { "parentKey": "system" },
@@ -123,27 +111,11 @@
         },
         "licenseReady": {
             "structure": { "parentKey": "system" },
-            "if": {
-                "deviceVersionGreaterOrEqual": "13.1"
-            },
-            "then": {
-                "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady"
-            },
-            "else": {
-                "disabled": true
-            }
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::licenseReady"
         },
         "provisionReady": {
             "structure": { "parentKey": "system" },
-            "if": {
-                "deviceVersionGreaterOrEqual": "13.1"
-            },
-            "then": {
-                "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
-            },
-            "else": {
-                "disabled": true
-            }
+            "key": "/mgmt/tm/sys/ready::sys/ready/0::provisionReady"
         },
         "syncMode": {
             "structure": { "parentKey": "system" },
@@ -1002,9 +974,6 @@
                     "addKeysByTag": { "skip": ["events"] }
                 }
             ]
-        },
-        "tmstats": {
-            "structure": { "folder": true }
         },
         "asmCpuUtilStats": {
             "structure": { "parentKey": "tmstats" },
@@ -1968,22 +1937,6 @@
             "CGNAT": { "keys": [ { "required": [ "lsn_event" ], "optional": [ "lsn_client", "lsn_pb", "start" ] } ] }
         },
         "addTimestampForCategories": [ "APM" ]
-    },
-    "ihealth": {
-        "filterKeys": { "exclude": [ "name", "output", "match" ] },
-        "renameKeys": {
-            "patterns": {
-                "h_importance": { "constant": "importance" },
-                "h_action": { "constant": "action" },
-                "h_name": { "constant": "name" },
-                "h_cve_ids": { "constant": "cveIds" },
-                "h_header": { "constant": "header" },
-                "h_summary": { "constant": "summary" }
-            },
-            "options": {
-                "exactMatch": true
-            }
-        }
     },
     "context": {
         "HOSTNAME": {

@@ -26,7 +26,12 @@ variables:
       - "false"
       - "true"
     description: "Force docs to be build and published to GitLab on non-docs branches"
-
+  SKIP_UNIT_TESTS:
+    value: "false"
+    options:
+      - "false"
+      - "true"
+    description: "Force CI/CD to skip 'test_nodeX' jobs on feature branches"
 
 ##############################################################
 #                                                            #
@@ -42,6 +47,12 @@ variables:
     not_docs:
         rules:
             - if: $CI_COMMIT_BRANCH !~ /^docs/
+    skip_unit_feat_brach:
+        rules:
+            - if: $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_BRANCH == 'develop'
+            - if: $SKIP_UNIT_TESTS == 'true'
+              when: never
+            - !reference [.rules_config, not_docs, rules]
 
 
 .run_unittest_cmd: &run_unittest_cmd
@@ -52,9 +63,7 @@ variables:
 - echo "**** Node.js version - $nodeFullVer (bundled with npm@$(npm --version)) ****"
 - ver=$(echo $nodeFullVer | cut -d. -f 1)
 - installNPM=no
-- if [ "$ver" = "v4" ]; then
--   installNPM=5
-- elif [ "$ver" = "v8" ]; then
+- if [ "$ver" = "v8" ]; then
 -   installNPM=6
 - elif [ "$ver" = "v10" ] || [ "$ver" = "v12" ] || [ "$ver" = "v14" ]; then
 -   installNPM=7
@@ -71,7 +80,6 @@ variables:
         - docker-executor
     rules:
         - !reference [.rules_config, not_docs, rules]
-
 
 .test_job_definition: &test_job_definition
     extends:
@@ -175,43 +183,13 @@ lint:
         - *install_unittest_packages_cmd
         - npm run lint
 
-# BIG-IP 13.x and BIG-IP 14.0
-test_node4:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:4.8.0
-
 # BIG-IP 14.1+
 test_node8:
     extends:
         - .run_unittest
     image: ${ARTIFACTORY_DOCKER_HUB}/node:8.11.1
-
-test_node10:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:10
-
-test_node12:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:12
-
-test_node14:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:14
-
-test_node16:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
-
-# disabled for now, failing unit tests
-.test_node_latest:
-    extends:
-        - .run_unittest
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:latest
+    rules:
+        - !reference [.rules_config, skip_unit_feat_brach, rules]
 
 # packages audit
 npm_audit:
@@ -246,6 +224,8 @@ coverage:
         name: ${CI_COMMIT_REF_NAME}_unittests_coverage
         paths:
             - coverage
+    rules:
+        - !reference [.rules_config, skip_unit_feat_brach, rules]
 
 build_rpm:
     image: ${ATG_ARTIFACTORY_PUBLISH_URL}/${ATG_ARTIFACTORY_DOCKER_REPO}/f5-telemetry-streaming-rpm-builder-image:v1.2
@@ -326,7 +306,10 @@ test_functional:
             # enable this job
             - $RUN_FUNCTIONAL_TESTS == "true"
     script:
-        - export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
+        - if [ -z "${TEST_HARNESS_FILE}" ]; then
+        -     export TEST_HARNESS_FILE=${CI_PROJECT_DIR}/harness_facts_flat.json
+        - fi
+        - echo "Harness data - ${TEST_HARNESS_FILE}"
         - ls ./dist -ls
         # really only need dev dependencies
         - *install_unittest_packages_cmd
@@ -347,8 +330,6 @@ teardown_env:
 ##############################################################
 # END VIO                                                    #
 ##############################################################
-
-
 ##############################################################
 # BEGIN CLOUD                                                #
 ##############################################################
@@ -380,7 +361,6 @@ teardown_env_azure:
     script:
         - source ./scripts/functional_testing/azure/teardown_env.sh
 
-
 # Azure Gov
 deploy_env_azure_gov:
     extends:
@@ -402,13 +382,11 @@ test_functional_azure_gov:
         - build_rpm
         - deploy_env_azure_gov
 
-
 teardown_env_azure_gov:
     extends:
         - .teardown_azure
     script:
         - source ./scripts/functional_testing/azure/teardown_env.sh 'gov'
-
 
 deploy_env_aws:
     extends:
@@ -468,7 +446,6 @@ pages:
             - public
     rules:
         - !reference [.rules_config, docs_only, rules]
-
 
 # Publish docs to clouddocs.f5.com
 publish_docs_to_production:

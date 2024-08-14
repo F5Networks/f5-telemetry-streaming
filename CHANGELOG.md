@@ -1,6 +1,33 @@
 # Changelog
 Changes to this project are documented in this file. More detail and links can be found in the Telemetry Streaming [Document Revision History](https://clouddocs.f5.com/products/extensions/f5-telemetry-streaming/latest/revision-history.html).
 
+## 1.Y.Z
+### Added
+### Fixed
+### Changed
+### Removed
+
+## 1.36.0
+**Important**: Starting from BIG-IP Telemetry Streaming version 1.36.0, BIG-IP Telemetry Streaming no longer supports BIG-IP 13.1 to 15.0.x. However, if you are still using the BIG-IP 13.1 to 15.0.x versions, you can use BIG-IP Telemetry Streaming 1.35.0 or earlier.
+### Added
+- New "httpTimeout" option to configure HTTP timeout value for incoming REST API requests to Pull Consumers
+- MBIPMP-37620: EndpointLoader support pagination
+- MBIPMP-37621: Support for additional system poller settings: workers and httpAgentOpts
+### Fixed
+- Event Listener throws an uncaught error when the buffer pointer was set to a wrong position
+- Event Listener allocates more memory than required for chunked data
+- MBIPMP-41257: Update iHealth to use new authentication API
+### Changed
+- MBIPMP-37253: Update memoryMonitor.provisionedMemory limits (should allow to provision up to runtime.maxHeapSize value)
+- MBIPMP-37255: Removed node 4 testing due to the end of support for BIG-IP 13.1 : ([Supported BIG-IP Versions](https://my.f5.com/manage/s/article/K5903)).
+- MBIPMP-37374: Update Kafka consumer to support multi-host, formatting and custom opts
+- MBIPMP-37631: Update Splunk consumer to use data queues, HTTP agent options, events batching
+- Update Telemetry_System to require `passphrase` when `username` defined.
+- Set default logging level to "info" instead of "debug".
+- Allow to set single-digit minute value for iHealth polling interval
+### Removed
+- MBIPMP-37374: Kafka consumer support for ZooKeepeer
+
 ## 1.35.0
 ### Added
 - NEXTACC-414: Add Resource Monitor

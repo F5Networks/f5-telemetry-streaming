@@ -20,8 +20,6 @@ const defaultsDeep = require('lodash/defaultsDeep');
 const cloneDeep = require('lodash/cloneDeep');
 const setByKey = require('lodash/set');
 
-// TODO: add tests for this file later
-
 /**
  * Merge data
  *
@@ -371,6 +369,12 @@ module.exports = {
                 decrypted: declarationComponentGenerator({
                     class: 'Telemetry_Pull_Consumer',
                     type: 'default'
+                })
+            },
+            prometheus: {
+                decrypted: declarationComponentGenerator({
+                    class: 'Telemetry_Pull_Consumer',
+                    type: 'Prometheus'
                 })
             }
         },

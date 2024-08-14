@@ -35,8 +35,8 @@ const requestsUtil = sourceCode('src/lib/utils/requests');
 moduleCache.remember();
 
 describe('Azure_Application_Insights', () => {
+    let aiSpy;
     let requests;
-    const aiSpy = sinon.spy(appInsights);
 
     before(() => {
         moduleCache.restore();
@@ -44,6 +44,8 @@ describe('Azure_Application_Insights', () => {
 
     beforeEach(() => {
         requests = [];
+        aiSpy = sinon.spy(appInsights);
+
         sinon.stub(aiSpy.TelemetryClient.prototype, 'trackMetric').callsFake((metric) => {
             requests.push(metric);
         });
@@ -140,6 +142,11 @@ describe('Azure_Application_Insights', () => {
                         { name: 'F5_parent_child4_grandchild1', value: 99 },
                         { name: 'F5_parent_child4_grandchild2_greatgrandchild1', value: 100 }
                     ]);
+
+                    assert(
+                        aiSpy.setup.withArgs('f5-telemetry-default').calledOnce,
+                        'The app insights default client must be setup once with instrumentation key'
+                    );
                 });
         });
 
@@ -242,20 +249,29 @@ describe('Azure_Application_Insights', () => {
                 .then(() => {
                     // Second call - simulate logLevel: info
                     context.logger.setLogLevel('info');
+
+                    // configured already
+                    assert(
+                        aiSpy.setup.withArgs('f5-telemetry-default').notCalled,
+                        'The app insights default client must be setup once with instrumentation key'
+                    );
+
                     return azureAppInsightsIndex(context);
                 })
-                .then(() => assert.deepStrictEqual(
-                    logRequests,
-                    [
-                        { debug: true, warn: true },
-                        { debug: false, warn: false }
-                    ]
-                ));
-        });
+                .then(() => {
+                    assert.deepStrictEqual(
+                        logRequests,
+                        [
+                            { debug: true, warn: true },
+                            { debug: false, warn: false }
+                        ]
+                    );
 
-        it('should configure default client once', () => assert(
-            aiSpy.setup.withArgs('f5-telemetry-default').calledOnce,
-            'The app insights default client must be setup once with instrumentation key'
-        ));
+                    assert(
+                        aiSpy.setup.withArgs('f5-telemetry-default').notCalled,
+                        'The app insights default client must be setup once with instrumentation key'
+                    );
+                });
+        });
     });
 });

@@ -28,7 +28,7 @@ const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
 const genericHttpIndex = sourceCode('src/lib/consumers/Generic_HTTP/index');
-const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
+const httpUtil = sourceCode('src/lib/utils/http');
 
 moduleCache.remember();
 
@@ -46,9 +46,9 @@ describe('Generic_HTTP', () => {
     });
 
     afterEach(() => {
-        testUtil.checkNockActiveMocks(nock);
+        testUtil.checkNockActiveMocks();
+        testUtil.nockCleanup();
         sinon.restore();
-        nock.cleanAll();
     });
 
     describe('process', () => {

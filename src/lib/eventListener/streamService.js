@@ -19,14 +19,17 @@
 /* eslint-disable consistent-return, no-multi-assign, no-plusplus */
 
 const hrtimestamp = require('../utils/datetime').hrtimestamp;
-const logger = require('../logger');
 const netService = require('./networkService');
 const Parser = require('./parser');
 const promiseUtil = require('../utils/promise');
 const Service = require('../utils/service');
 const Stream = require('./stream');
 
-/** @module eventListener/streamService */
+/**
+ * @private
+ *
+ * @module eventListener/streamService
+ */
 
 class StreamServiceError extends Error {}
 
@@ -49,11 +52,10 @@ class StreamService extends Service {
      * @param {boolean} [options.rawDataForwarding = false] - enable raw data forwarding
      */
     constructor(port, options) {
-        super();
-
         options = options || {};
+        super(options.logger);
+
         this.address = options.address;
-        this.logger = (options.logger || logger).getChild('messageStream');
         this.port = port;
         this.protocols = options.protocols || ['tcp', 'udp'];
 

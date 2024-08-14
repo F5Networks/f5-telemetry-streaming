@@ -30,16 +30,19 @@ moduleCache.remember();
 
 describe('Declarations -> Telemetry_Consumer -> DataDog', () => {
     const basicSchemaTestsValidator = (decl) => shared.validateMinimal(decl);
+    let coreStub;
 
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -72,8 +75,7 @@ describe('Declarations -> Telemetry_Consumer -> DataDog', () => {
                 { name: 'keepAlive', value: true },
                 { name: 'keepAliveMsecs', value: 0 },
                 { name: 'maxSockets', value: 0 },
-                { name: 'maxFreeSockets', value: 0 },
-                { name: 'anotherFeatureOption', value: 'test' }
+                { name: 'maxFreeSockets', value: 0 }
             ],
             proxy: {
                 host: 'localhost',
@@ -100,8 +102,7 @@ describe('Declarations -> Telemetry_Consumer -> DataDog', () => {
                 { name: 'keepAlive', value: true },
                 { name: 'keepAliveMsecs', value: 0 },
                 { name: 'maxSockets', value: 0 },
-                { name: 'maxFreeSockets', value: 0 },
-                { name: 'anotherFeatureOption', value: 'test' }
+                { name: 'maxFreeSockets', value: 0 }
             ],
             proxy: {
                 host: 'localhost',

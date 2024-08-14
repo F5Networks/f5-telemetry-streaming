@@ -48,7 +48,6 @@ function fromConfig(config) {
         tracer = getOrCreate(config.path, {
             encoding: config.encoding,
             inactivityTimeout: config.inactivityTimeout,
-            fs: config.fs,
             maxRecords: config.maxRecords
         });
     }

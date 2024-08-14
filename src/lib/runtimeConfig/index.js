@@ -19,50 +19,37 @@
 /* eslint-disable no-unused-expressions, no-nested-ternary, prefer-template */
 /* eslint-disable no-use-before-define */
 
-const fs = require('fs');
-
 const configUtil = require('../utils/config');
 const constants = require('../constants');
-const logger = require('../logger').getChild('runtimeConfig');
 const miscUtil = require('../utils/misc');
 const Service = require('../utils/service');
 const Task = require('./task');
 const updater = require('./updater');
 
-/** @module runtimeConfig */
+/**
+ * @module runtimeConfig
+ *
+ * @typedef {import('./updater').AppContext} AppContext
+ * @typedef {import('../appEvents').ApplicationEvents} ApplicationEvents
+ * @typedef {import('../utils/config').Configuration} Configuration
+ * @typedef {import('./updater').ScriptConfig} ScriptConfig
+ */
+
+const EE_NAMESPACE = 'runtimecfg';
 
 /**
  * Runtime Config Class
- *
- * @property {logger.Logger} logger
  */
-class RuntimeConfig extends Service {
-    /** @param {updater.FSLikeObject} [fsUtil] */
-    constructor(fsUtil) {
-        super();
-
-        /** define static read-only props that should not be overriden */
-        Object.defineProperties(this, {
-            logger: {
-                value: logger.getChild(this.constructor.name)
-            }
-        });
-        this.fsUtil = fsUtil || fs;
-        this.restartsEnabled = true;
-    }
-
+class RuntimeConfigService extends Service {
     /**
      * Configure and start the service
      *
      * @param {function} onFatalError - function to call on fatal error to restart the service
      */
-    _onStart() {
-        return new Promise((resolve) => {
-            this._taskLoop = Promise.resolve();
-            this._currentTask = null;
-            this._nextTask = null;
-            resolve();
-        });
+    async _onStart() {
+        this._taskLoop = Promise.resolve();
+        this._currentTask = null;
+        this._nextTask = null;
     }
 
     /**
@@ -70,21 +57,16 @@ class RuntimeConfig extends Service {
      *
      * @param {boolean} [restart] - true if service going to be restarted
      */
-    _onStop() {
-        return new Promise((resolve, reject) => {
-            this._taskLoop = null;
-            this._nextTask = null;
+    async _onStop() {
+        this._taskLoop = null;
+        this._nextTask = null;
 
-            Promise.resolve()
-                .then(() => this._currentTask && this._currentTask.isRunning() && this._currentTask.stop())
-                .then(
-                    () => {
-                        this._currentTask = null;
-                    },
-                    () => {} // ignore everything
-                )
-                .then(resolve, reject);
-        });
+        try {
+            await (this._currentTask && this._currentTask.isRunning() && this._currentTask.stop());
+            this._currentTask = null;
+        } catch (error) {
+            // ignore everything
+        }
     }
 
     /** @returns {Promise<boolean>} resolved with true when service destroyed or if it was destroyed already */
@@ -93,74 +75,93 @@ class RuntimeConfig extends Service {
             && this._offConfigUpdates.off()
             && (this._offConfigUpdates = null);
 
-        return super.destroy();
+        return super.destroy()
+            .then((ret) => {
+                this._offMyEvents
+                    && this._offMyEvents.off()
+                    && (this._offMyEvents = null);
+
+                return ret;
+            });
     }
 
-    /** @param {restWorker.ApplicationContext} appCtx - application context */
-    initialize(appCtx) {
-        if (appCtx.configMgr) {
-            this._offConfigUpdates = appCtx.configMgr.on('change', onConfigEvent.bind(this), { objectify: true });
-            this.logger.debug('Subscribed to configuration updates.');
-        } else {
-            this.logger.warning('Unable to subscribe to configuration updates!');
-        }
+    /** @param {ApplicationEvents} appEvents - application events */
+    initialize(appEvents) {
+        this._offConfigUpdates = appEvents.on('config.change', onConfigEvent.bind(this), { objectify: true });
+        this.logger.debug('Subscribed to Configuration updates.');
+
+        this._offMyEvents = appEvents.register(this.ee, EE_NAMESPACE, [
+            { 'config.applied': 'config.applied' }
+        ]);
     }
 }
 
 /**
- * @this ResourceMonitor
+ * @this RuntimeConfigService
  *
  * @param {Configuration} config
- *
- * @returns {Promise} resolved once config applied to the instance
  */
-function onConfigEvent(config) {
-    return Promise.resolve()
-        .then(() => {
-            this.logger.verbose('Config "change" event');
-            this.logger.info(`Current runtime state: ${JSON.stringify(runtimeState())}`);
+async function onConfigEvent(config) {
+    const applyConfig = () => {
+        /**
+         * Configuration is validated, no additional check required
+         */
+        this.logger.debug('Config "change" event');
+        this.logger.info(`Current runtime state: ${JSON.stringify(runtimeState())}`);
 
-            // even empty configuration should be processed - e.g. restore defaults
-            const runtimeConfig = configUtil.getTelemetryControls(config).runtime || {};
-            const newRuntimeConfig = updater.enrichScriptConfig({}); // initialize with defaults
+        // even empty configuration should be processed - e.g. restore defaults
+        const runtimeConfig = configUtil.getTelemetryControls(config).runtime || {};
+        const newRuntimeConfig = updater.enrichScriptConfig({}); // initialize with defaults
 
-            if (runtimeConfig.enableGC === true) {
-                this.logger.info('Going to try to enable GC (request from user).');
-                newRuntimeConfig.gcEnabled = true;
-            } // disabled by default
+        if (runtimeConfig.enableGC === true) {
+            this.logger.info('Going to try to enable GC (request from user).');
+            newRuntimeConfig.gcEnabled = true;
+        } // disabled by default
 
-            if (Number.isSafeInteger(runtimeConfig.maxHeapSize)) {
-                if (runtimeConfig.maxHeapSize <= constants.APP_THRESHOLDS.MEMORY.DEFAULT_HEAP_SIZE) {
-                    // - need to remove CLI option from the script if presented - use default value then
-                    // - can't go lower than default without affecting other apps
-                    this.logger.info('Going to try to restore the default heap size (request from user).');
-                } else {
-                    // need to add/update CLI option to the script
-                    this.logger.info(`Going to try to set the heap size to ${runtimeConfig.maxHeapSize} MB (request from user).`);
-                    newRuntimeConfig.heapSize = runtimeConfig.maxHeapSize;
-                }
-            } // else use default value
+        if (Number.isSafeInteger(runtimeConfig.maxHeapSize)) {
+            if (runtimeConfig.maxHeapSize <= constants.APP_THRESHOLDS.MEMORY.DEFAULT_HEAP_SIZE) {
+                // - need to remove CLI option from the script if presented - use default value then
+                // - can't go lower than default without affecting other apps
+                this.logger.info('Going to try to restore the default heap size (request from user).');
+            } else {
+                // need to add/update CLI option to the script
+                this.logger.info(`Going to try to set the heap size to ${runtimeConfig.maxHeapSize} MB (request from user).`);
+                newRuntimeConfig.heapSize = runtimeConfig.maxHeapSize;
+            }
+        } // else use default value
 
-            this.logger.info(`New runtime configuration: ${JSON.stringify(newRuntimeConfig)}`);
-            this.logger.debug('Scheduling an update to apply the new runtime configuration.');
+        if (Number.isSafeInteger(runtimeConfig.httpTimeout)) {
+            this.logger.info(`Going to try to set the HTTP timeout value to ${runtimeConfig.httpTimeout} seconds (request from user).`);
+            newRuntimeConfig.httpTimeout = runtimeConfig.httpTimeout * 1000; // to ms.
+        }
 
-            addTask.call(this, newRuntimeConfig);
-        }).catch((err) => {
-            this.logger.exception('Error caught on attempt to apply configuration to Runtime Config:', err);
-        });
+        this.logger.info(`New runtime configuration: ${JSON.stringify(newRuntimeConfig)}`);
+        this.logger.debug('Scheduling an update to apply the new runtime configuration.');
+
+        addTask.call(this, newRuntimeConfig);
+    };
+
+    try {
+        applyConfig();
+    } catch (error) {
+        this.logger.exception('Error caught on attempt to apply configuration to Runtime Config:', error);
+    } finally {
+        // emit in any case to show we are done with config processing
+        this.ee.safeEmitAsync('config.applied');
+    }
 }
 
 /**
  * @private
  *
- * @this RuntimeConfig
+ * @this RuntimeConfigService
  *
- * @returns {updater.AppContext}
+ * @returns {AppContext}
  */
 function makeAppCtx() {
     const log = this.logger;
     return {
-        fsUtil: this.fsUtil,
+        fsUtil: miscUtil.fs,
         logger: {
             debug(msg) { log.debug(msg); },
             error(msg) { log.error(msg); },
@@ -174,7 +175,7 @@ function makeAppCtx() {
 /**
  * @private
  *
- * @returns {object} current state of the runtime
+ * @returns {NodeRuntimeState} current state of the runtime
  */
 function runtimeState() {
     return {
@@ -188,9 +189,9 @@ function runtimeState() {
  *
  * @private
  *
- * @this RuntimeConfig
+ * @this RuntimeConfigService
  *
- * @param {updater.ScriptConfig} config - configuration to apply
+ * @param {ScriptConfig} config - configuration to apply
  */
 function addTask(config) {
     taskLoop.call(this, new Task(config, makeAppCtx.call(this), this.logger.getChild('task')));
@@ -201,7 +202,7 @@ function addTask(config) {
  *
  * @private
  *
- * @this RuntimeConfig
+ * @this RuntimeConfigService
  *
  * @param {Task} task - task to add to the loop
  */
@@ -253,4 +254,11 @@ function taskLoop(task) {
     return Promise.resolve();
 }
 
-module.exports = RuntimeConfig;
+module.exports = RuntimeConfigService;
+
+/**
+ * @typedef NodeRuntimeState
+ * @type {object}
+ * @property {boolean} gcEnabled - true if GC enabled
+ * @property {integer} maxHeapSize - max V8 heap size in MB
+ */

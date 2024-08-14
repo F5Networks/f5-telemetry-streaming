@@ -21,9 +21,13 @@ There is no plan to deprecate this product.
         - Description
         - Date
 
+      * - 1.36.0
+        - Updated the documentation for Telemetry Streaming v1.36.0. This release contains the following changes: |br| * Drop support for BIG-IP 13.1 to 15.0.x
+        - 06-10-24
+
       * - 1.35.0
-        - Updated the documentation for Telemetry Streaming v1.35.0. This release contains the following changes: |br| * Added "memoryMonitor" (see :ref:`Memory Mamangement<memorymanagement>`).
-        - 01-19-24
+        - Updated the documentation for Telemetry Streaming v1.35.0. This release contains the following changes: |br| * Added "memoryMonitor" (see :ref:`Memory Mamangement<memorymanagement>`). |br| |br| Changed: * Event Listener performance improvements
+        - 02-23-24
 
       * - 1.34.0
         - Updated the documentation for Telemetry Streaming v1.34.0. This release contains the following changes: |br| * Added "verbose" option for "logLevel". |br| * Event Listener bugfixes, performance and memory usage improvements. |br| * Updated description for "default" consumers. |br| * More troubleshooting entries. |br| |br| Changed: |br| * Update npm packages

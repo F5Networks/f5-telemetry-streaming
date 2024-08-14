@@ -26,7 +26,6 @@ const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
 const testUtil = require('./shared/util');
 
-const configWorker = sourceCode('src/lib/config');
 const tracer = sourceCode('src/lib/utils/tracer');
 const tracerMgr = sourceCode('src/lib/tracerManager');
 
@@ -35,6 +34,7 @@ moduleCache.remember();
 describe('Tracer Manager', () => {
     const tracerFile = 'tracerTest';
     const fakeDate = new Date();
+    let configWorker;
     let coreStub;
 
     const addTimestamps = (data) => data.map((item) => ({ data: item, timestamp: new Date().toISOString() }));
@@ -43,21 +43,26 @@ describe('Tracer Manager', () => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         coreStub = stubs.default.coreStub();
-        stubs.clock({ fakeTimersOpts: fakeDate });
+        configWorker = coreStub.configWorker.configWorker;
+
+        await coreStub.startServices();
+        await configWorker.processDeclaration(dummies.declaration.base.decrypted());
+
         coreStub.logger.removeAllMessages();
-        return configWorker.processDeclaration(dummies.declaration.base.decrypted())
-            .then(() => {
-                assert.isEmpty(tracerMgr.registered(), 'should have no registered tracers');
-            });
+        stubs.clock({ fakeTimersOpts: fakeDate });
+
+        assert.isEmpty(tracerMgr.registered(), 'should have no registered tracers');
     });
 
-    afterEach(() => configWorker.processDeclaration(dummies.declaration.base.decrypted())
-        .then(() => {
-            assert.isEmpty(tracerMgr.registered(), 'should have no registered tracers');
-            sinon.restore();
-        }));
+    afterEach(async () => {
+        await configWorker.processDeclaration(dummies.declaration.base.decrypted());
+        await coreStub.destroyServices();
+
+        assert.isEmpty(tracerMgr.registered(), 'should have no registered tracers');
+        sinon.restore();
+    });
 
     describe('.fromConfig()', () => {
         let tracerInst;

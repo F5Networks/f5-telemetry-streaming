@@ -35,8 +35,9 @@ describe('Declarations -> Examples', () => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         coreStub = common.stubCoreModules();
+        await coreStub.utilMisc.fs.promise.mkdir('/example_download_folder');
 
         // fs access modification to skip folder check
         const originFsAccess = fs.access;
@@ -49,10 +50,12 @@ describe('Declarations -> Examples', () => {
                 originFsAccess.apply(null, arguments);
             }
         });
-        coreStub.utilMisc.getRuntimeInfo.nodeVersion = '8.12.0';
+
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

@@ -382,6 +382,7 @@ module.exports = function (data, cb) {
  * @callback CastCb
  * @param {String} key - key
  * @param {Any} value - value to cast to metric
+ *
  * @returns {Number} metric value
  */
 /**
@@ -396,6 +397,7 @@ module.exports = function (data, cb) {
  * @callback DeleteCb
  * @param {String} key - key to delete
  * @param {Any} value - value
+ *
  * @returns {Boolean} true if key needs to be deleted
  */
 /**
@@ -412,6 +414,7 @@ module.exports = function (data, cb) {
  * @callback PrefixCb
  * @param {String} key - key to prepend prefix to
  * @param {Any} value - value
+ *
  * @returns {String} prefix to prepend to a key
  */
 /**
@@ -420,6 +423,7 @@ module.exports = function (data, cb) {
  * @callback RenameCb
  * @param {String} key - key to rename
  * @param {Any} value - value
+ *
  * @returns {String} renamed key
  */
 /**
@@ -428,6 +432,7 @@ module.exports = function (data, cb) {
  * @callback SkipCb
  * @param {String} key - key to skip
  * @param {Any} value - value
+ *
  * @returns {Boolean} true if key needs to be skipped
  */
 /**

@@ -23,6 +23,7 @@ const sinon = require('sinon');
 
 const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
+const testUtil = require('../shared/util');
 
 const promiseUtil = sourceCode('src/lib/utils/promise');
 
@@ -561,6 +562,24 @@ describe('Promise Util', () => {
                     assert.isTrue(/canceled/.test(err));
                     assert.isFalse(promise.cancel(new Error('expected error')));
                 });
+        });
+    });
+
+    describe('.withResolvers()', () => {
+        it('should resolve promise', async () => {
+            const resolvers = promiseUtil.withResolvers();
+            testUtil.sleep(100)
+                .then(() => resolvers.resolve('test'));
+
+            await assert.becomes(resolvers.promise, 'test');
+        });
+
+        it('should reject promise', async () => {
+            const resolvers = promiseUtil.withResolvers();
+            testUtil.sleep(100)
+                .then(() => resolvers.reject(new Error('expected test error')));
+
+            await assert.isRejected(resolvers.promise, /expected test error/);
         });
     });
 });

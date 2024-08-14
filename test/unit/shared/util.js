@@ -18,9 +18,11 @@
 
 const assignDefaults = require('lodash/defaultsDeep');
 const deepCopy = require('lodash/cloneDeep');
+const EventEmitter2 = require('eventemitter2');
 const fsUtil = require('fs');
 const nock = require('nock');
 const pathUtil = require('path');
+const requestLib = require('request');
 const sinon = require('sinon');
 const urllib = require('url');
 
@@ -29,6 +31,15 @@ const systemPollerData = require('../../../examples/output/system_poller/output.
 const avrData = require('../consumers/data/avrData.json');
 const ltmData = require('../consumers/data/ltmData.json');
 
+const SMOKE_TEST_SYMB = Symbol.for('SMOKE_TEST');
+const SMOKE_TESTING_ENABLED = !!process.env.SMOKE_TESTING;
+
+function responseWrapper(code, response) {
+    return function inner() {
+        const ret = response.apply(this, arguments);
+        return Array.isArray(ret) ? ret : [code || 200, ret];
+    };
+}
 function MockRestOperation(opts) {
     opts = opts || {};
     this.method = opts.method || 'GET';
@@ -38,20 +49,81 @@ function MockRestOperation(opts) {
     this.statusCode = null;
     this.uri = {};
     this.uri.pathname = opts.uri;
+
+    this.getBody = sinon.stub().callsFake(() => this.body);
+    this.setBody = sinon.stub().callsFake((body) => { this.body = body; });
+    this.getContentType = sinon.stub().callsFake(() => this.contentType);
+    this.setContentType = sinon.stub().callsFake((ct) => { this.contentType = ct; });
+    this.getHeaders = sinon.stub().callsFake(() => this.headers);
+    this.setHeaders = sinon.stub().callsFake((headers) => { this.headers = headers; });
+    this.getMethod = sinon.stub().callsFake(() => this.method);
+    this.setMethod = sinon.stub().callsFake((method) => { this.method = method; });
+    this.getStatusCode = sinon.stub().callsFake(() => this.statusCode);
+    this.setStatusCode = sinon.stub().callsFake((code) => { this.statusCode = code; });
+    this.getUri = sinon.stub().callsFake(() => this.uri);
+    this.complete = sinon.stub().callsFake(() => {});
 }
-MockRestOperation.prototype.getBody = function () { return this.body; };
-MockRestOperation.prototype.setBody = function (body) { this.body = body; };
-MockRestOperation.prototype.getContentType = function () { return this.contentType; };
-MockRestOperation.prototype.setContentType = function (ct) { this.contentType = ct; };
-MockRestOperation.prototype.getHeaders = function () { return this.headers; };
-MockRestOperation.prototype.setHeaders = function (headers) { this.headers = headers; };
-MockRestOperation.prototype.getMethod = function () { return this.method; };
-MockRestOperation.prototype.setMethod = function (method) { this.method = method; };
-MockRestOperation.prototype.getStatusCode = function () { return this.statusCode; };
-MockRestOperation.prototype.setStatusCode = function (code) { this.statusCode = code; };
-MockRestOperation.prototype.getUri = function () { return this.uri; };
-MockRestOperation.prototype.complete = function () { };
 MockRestOperation.prototype.parseAndSetURI = function (uri) { this.uri = module.exports.parseURL(uri); };
+
+/**
+ * TCP Socket Class Mock
+ */
+class TCPSocketMock extends EventEmitter2 {
+    constructor() {
+        super();
+        sinon.spy(this, 'destroy');
+    }
+
+    destroy() {
+        setImmediate(() => this.emit('destroyMock', this));
+    }
+}
+
+/**
+ * TCP Server Class Mock
+ */
+class TCPServerMock extends EventEmitter2 {
+    constructor() {
+        super();
+        sinon.spy(this, 'close');
+        sinon.spy(this, 'listen');
+    }
+
+    setInitArgs(opts) {
+        this.opts = opts;
+    }
+
+    listen() {
+        setImmediate(() => this.emit('listenMock', this, Array.from(arguments)));
+    }
+
+    close() {
+        setImmediate(() => this.emit('closeMock', this, Array.from(arguments)));
+    }
+}
+
+/**
+ * UDP Server Class Mock
+ */
+class UDPServerMock extends EventEmitter2 {
+    constructor() {
+        super();
+        sinon.spy(this, 'close');
+        sinon.spy(this, 'bind');
+    }
+
+    setInitArgs(opts) {
+        this.opts = opts;
+    }
+
+    bind() {
+        setImmediate(() => this.emit('bindMock', this, Array.from(arguments)));
+    }
+
+    close() {
+        setImmediate(() => this.emit('closeMock', this, Array.from(arguments)));
+    }
+}
 
 /**
  * Logger mock object
@@ -89,6 +161,9 @@ const _module = module.exports = {
     MockRestOperation,
     MockLogger,
     MockTracer,
+    TCPServerMock,
+    TCPSocketMock,
+    UDPServerMock,
 
     /**
      * Assign defaults to object (uses lodash.defaultsDeep under the hood)
@@ -285,20 +360,33 @@ const _module = module.exports = {
                     };
                 }
             }
-            apiMock.reply(endpointMock.code || 200, response, endpointMock.responseHeaders);
+            if (typeof response === 'function') {
+                apiMock.reply(responseWrapper(endpointMock.code, response));
+            } else {
+                apiMock.reply(endpointMock.code || 200, response, endpointMock.responseHeaders);
+            }
         });
+    },
+
+    /**
+     * Remove all nock interceptors
+     *
+     * @param {Object} [nockInstance] - instance of nock library
+     */
+    nockCleanup(nockInstance = nock) {
+        nockInstance.abortPendingRequests();
+        nockInstance.cleanAll();
     },
 
     /**
      * Check if nock has unused mocks and raise assertion error if so
      *
-     * @param {Object} nockInstance - instance of nock library
+     * @param {Object} [nockInstance] - instance of nock library
      */
-    checkNockActiveMocks(nockInstance) {
-        const activeMocks = nockInstance.activeMocks().join('\n');
+    checkNockActiveMocks(nockInstance = nock) {
         assert.ok(
-            activeMocks.length === 0,
-            `nock should have no active mocks after the test, instead mocks are still active:\n${activeMocks}\n`
+            nockInstance.isDone(),
+            `nock should have no active mocks after the test, instead mocks are still active:\n${nockInstance.activeMocks().join('\n')}\n`
         );
     },
 
@@ -312,7 +400,7 @@ const _module = module.exports = {
      */
     getSpoiledDataValidator() {
         const getValidator = (idx, copy, src) => () => {
-            assert.deepStrictEqual(src, copy, `Original data at index ${idx} was spoiled...`);
+            assert.deepStrictEqual(src, copy, `Original data at index ${idx} unexpectedly mutated...`);
             return true;
         };
         const validators = [];
@@ -328,9 +416,6 @@ const _module = module.exports = {
      * @returns {Function(url)} function to parse URL into URL object
      */
     parseURL: (function () {
-        if (process.versions.node.startsWith('4.')) {
-            return urllib.parse;
-        }
         return (url) => new urllib.URL(url);
     }()),
 
@@ -416,12 +501,58 @@ const _module = module.exports = {
     },
 
     /**
+     * @returns {object} 'request' spies
+     */
+    requestSpies() {
+        const ret = {};
+        ['del', 'delete', 'get', 'head', 'options', 'post', 'put', 'patch'].forEach((verb) => {
+            ret[verb] = sinon.spy(requestLib, verb);
+        });
+        return ret;
+    },
+
+    checkRequestSpies(spies, props) {
+        Object.entries(spies).forEach(([key, spy]) => {
+            if (spy.callCount !== 0) {
+                spy.args.forEach((args) => {
+                    Object.entries(props).forEach(([name, expected]) => {
+                        const actual = args[0][name];
+                        assert.deepStrictEqual(actual, expected, `request.${key} should use ${name} = ${expected}, got ${actual}`);
+                    });
+                });
+            }
+        });
+    },
+
+    /**
      * Sleep for N ms.
      *
      * @returns {Promise} resolved once N .ms passed
      */
     sleep(sleepTime) {
         return new Promise((resolve) => { setTimeout(resolve, sleepTime); });
+    },
+
+    smokeTests: {
+        /**
+         * Remove SMOKE_TEST_SYMB from the collection
+         *
+         * @param {any[]} collection
+         */
+        filter(collection) {
+            return collection.filter((item) => item !== SMOKE_TEST_SYMB);
+        },
+
+        /**
+         * Ignore value if smoke testing enabled
+         *
+         * @param {any} value
+         *
+         * @returns {SMOKE_TEST_SYMB | any}
+         */
+        ignore(value) {
+            return SMOKE_TESTING_ENABLED ? SMOKE_TEST_SYMB : value;
+        }
     },
 
     /**
@@ -444,11 +575,17 @@ const _module = module.exports = {
      *
      * @param {function} cb - callback to call (async or sync)
      * @param {number} [delay=0] - delay before next call
+     * @param {boolean} [ignoreError = false] - ignore uncaught errors
      *
      * @returns {Promise} resolved once `cb` returned true. Has `.cancel()` method
      *  to cancel and reject promise
      */
-    waitTill(cb, delay) {
+    waitTill(cb, delay = 0, ignoreError = false) {
+        if (typeof arguments[1] === 'boolean') {
+            ignoreError = delay;
+            delay = 0;
+        }
+
         let timeoutID;
         let promiseReject;
         const promise = new Promise((resolve, reject) => {
@@ -467,10 +604,10 @@ const _module = module.exports = {
                                     return !ret && !!promiseReject;
                                 },
                                 (err) => {
-                                    if (promiseReject) {
+                                    if (!ignoreError && promiseReject) {
                                         promiseReject(err);
                                     }
-                                    return false;
+                                    return ignoreError;
                                 }
                             )
                             .then((keep) => {
@@ -481,7 +618,7 @@ const _module = module.exports = {
                                 }
                             });
                     },
-                    delay || 0
+                    delay
                 );
             }());
         });

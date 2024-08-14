@@ -16,12 +16,19 @@
 
 'use strict';
 
+/* eslint-disable no-cond-assign */
+
 const assert = require('assert');
 const Console = require('console').Console;
+const escapeRegExp = require('lodash/escapeRegExp');
 const fs = require('fs');
 const pathUtil = require('path');
 
-/** @module runtimeConfig/updater */
+/**
+ * @private
+ *
+ * @module runtimeConfig/updater
+ */
 
 /**
  * THE SCRIPT MAY BE RUN IN TWO CONTEXTS:
@@ -29,13 +36,16 @@ const pathUtil = require('path');
  * - as regular node.js script - none of iApp LX libs are available
  */
 
+const HTTP_TIMEOUT_DEFAULT = 60000; // in ms.
+
 // approximation for default heap size
 const NODEJS_DEFAULT_HEAP_SIZE = 1400;
 
 // should be used to check single-line only
 const RESTNODE_EXEC_LINE_REGEX = /^.*exec\s*\/usr\/bin\/f5-rest-node/;
+const RESTNODE_SCRIPT_REGEX = /^.*restnode\.js/;
 
-const SCRIPT_CONFIG_ID = /# ID:[a-zA-Z0-9-]+/gm;
+const SCRIPT_CONFIG_ID = /# ID:[a-zA-Z0-9-]+/g;
 
 // the restnode startup script
 const RESTNODE_SCRIPT_FPATH = '/etc/bigstart/scripts/restnoded';
@@ -45,6 +55,11 @@ const SCRIPT_CONFIG_FPATH = pathUtil.join(__dirname, 'config.json');
 
 // most recent logs
 const SCRIPT_LOGS_FPATH = pathUtil.join(__dirname, 'logs.txt');
+
+const EXPOSE_GC_OPTION = 'expose-gc';
+const HEAP_OPTION_NEW_STYLE = 'max-old-space-size';
+const HEAP_OPTION_OLD_STYLE = 'max_old_space_size';
+const HTTP_TIMEOUT_OPTION = 'k';
 
 /**
  * Add notes about restoring original behavior to the script's content
@@ -75,7 +90,7 @@ function addAttentionBlockIfNeeded(script, execLine, appCtx) {
         + `${indent}# The block below should be removed to restore original behavior!\n`
         + execLine;
 
-    return script.replace(execLine, comment);
+    return script.replace(new RegExp(`^${escapeRegExp(execLine)}$`, 'm'), comment);
 }
 
 /**
@@ -119,12 +134,12 @@ function applyScriptConfig(script, config, appCtx) {
     // enable/disable GC
     if (currentConfig.gcEnabled !== config.gcEnabled) {
         appCtx.logger.info('Updating GC config.');
-        newExecLine = newExecLine.replace(/ --expose-gc/g, '');
+        newExecLine = newExecLine.replace(new RegExp(` --${EXPOSE_GC_OPTION}`, 'g'), '');
         if (config.gcEnabled) {
             appCtx.logger.info('Enabling GC config.');
             const substr = newExecLine.match(RESTNODE_EXEC_LINE_REGEX)[0];
             newExecLine = newExecLine.slice(0, substr.length)
-                .concat(' --expose-gc')
+                .concat(` --${EXPOSE_GC_OPTION}`)
                 .concat(newExecLine.slice(substr.length));
         } else {
             appCtx.logger.info('Disabling GC config.');
@@ -134,7 +149,7 @@ function applyScriptConfig(script, config, appCtx) {
     // enable/disable custom heap size
     if (currentConfig.heapSize !== config.heapSize) {
         appCtx.logger.info('Upading heap size.');
-        newExecLine = newExecLine.replace(/ --max_old_space_size=\d+/g, '');
+        newExecLine = newExecLine.replace(new RegExp(` --(?:${HEAP_OPTION_NEW_STYLE}|${HEAP_OPTION_OLD_STYLE})=\\d+`, 'g'), '');
         if (config.heapSize
             && Number.isSafeInteger(config.heapSize)
             && config.heapSize > NODEJS_DEFAULT_HEAP_SIZE
@@ -142,10 +157,26 @@ function applyScriptConfig(script, config, appCtx) {
             appCtx.logger.info(`Setting heap size to ${config.heapSize} MB.`);
             const substr = newExecLine.match(RESTNODE_EXEC_LINE_REGEX)[0];
             newExecLine = newExecLine.slice(0, substr.length)
-                .concat(` --max_old_space_size=${config.heapSize}`)
+                .concat(` --${HEAP_OPTION_NEW_STYLE}=${config.heapSize}`)
                 .concat(newExecLine.slice(substr.length));
         } else {
             appCtx.logger.info(`Setting heap size to default value - ${NODEJS_DEFAULT_HEAP_SIZE} MB.`);
+        }
+    }
+
+    // http timeout
+    if (currentConfig.httpTimeout !== config.httpTimeout) {
+        appCtx.logger.info('Upading HTTP timeout.');
+        newExecLine = newExecLine.replace(new RegExp(` -${HTTP_TIMEOUT_OPTION} \\d+`, 'g'), '');
+
+        if (config.httpTimeout <= HTTP_TIMEOUT_DEFAULT) {
+            appCtx.logger.info(`Setting HTTP timeout to default value - ${HTTP_TIMEOUT_DEFAULT} ms.`);
+        } else {
+            appCtx.logger.info(`Setting HTT timeout value to ${config.httpTimeout} ms.`);
+            const substr = newExecLine.match(RESTNODE_SCRIPT_REGEX)[0];
+            newExecLine = newExecLine.slice(0, substr.length)
+                .concat(` -${HTTP_TIMEOUT_OPTION} ${config.httpTimeout}`)
+                .concat(newExecLine.slice(substr.length));
         }
     }
 
@@ -155,7 +186,7 @@ function applyScriptConfig(script, config, appCtx) {
     newExecLine = `${getIndent(originExecLine)}# ID:${config.id}\n${newExecLine}`;
 
     script = addAttentionBlockIfNeeded(script, originExecLine, appCtx);
-    script = script.replace(originExecLine, newExecLine);
+    script = script.replace(new RegExp(`^${escapeRegExp(originExecLine)}$`, 'm'), newExecLine);
     return script;
 }
 
@@ -196,6 +227,9 @@ function enrichScriptConfig(config) {
     if (typeof config.heapSize === 'undefined') {
         config.heapSize = NODEJS_DEFAULT_HEAP_SIZE;
     }
+    if (typeof config.httpTimeout === 'undefined') {
+        config.httpTimeout = HTTP_TIMEOUT_DEFAULT;
+    }
     return config;
 }
 
@@ -220,12 +254,24 @@ function fetchConfigFromScript(script, appCtx) {
 
     const config = enrichScriptConfig({});
     // check for GC
-    config.gcEnabled = execLine.indexOf('--expose-gc') !== -1;
+    config.gcEnabled = execLine.indexOf(`--${EXPOSE_GC_OPTION}`) !== -1;
 
-    // check for custom heap size
-    const heapMatch = execLine.match(/--max_old_space_size=(\d+)/);
-    if (heapMatch) {
-        config.heapSize = parseInt(heapMatch[1], 10);
+    // - check for custom heap size
+    // - check both options due back-compatibility
+    // - take the last match only
+    const heapRegex = new RegExp(`--(?:${HEAP_OPTION_NEW_STYLE}|${HEAP_OPTION_OLD_STYLE})=(\\d+)`, 'g');
+    const matches = [];
+    let match;
+    while ((match = heapRegex.exec(execLine)) !== null) {
+        matches.push(match);
+    }
+    if (matches.length) {
+        config.heapSize = parseInt(matches[matches.length - 1][1], 10);
+    }
+
+    const httpTimeoutRegex = new RegExp(`-${HTTP_TIMEOUT_OPTION} (\\d+)`, 'g');
+    if ((match = httpTimeoutRegex.exec(execLine))) {
+        config.httpTimeout = parseInt(match[1], 10);
     }
 
     const scriptIDMatch = script.match(SCRIPT_CONFIG_ID);
@@ -429,4 +475,5 @@ module.exports = {
  * @property {boolean} gcEnabled - true when GC enabled
  * @property {number} heapSize - heap size (in MB)
  * @property {string} id - configuration ID
+ * @property {number} httpTimeout - HTTP timeout (in ms.)
  */

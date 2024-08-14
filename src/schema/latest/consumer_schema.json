@@ -145,47 +145,10 @@
             "title": "Custom Opts (Client Library Dependent)",
             "description": "Additional options for use by consumer client library. Refer to corresponding consumer lib documentation for acceptable keys and values." ,
             "type": "array",
-            "items": {
-                "properties": {
-                    "name": {
-                        "description": "Name of the option",
-                        "type": "string",
-                        "f5expand": true,
-                        "minLength": 1
-                    },
-                    "value": {
-                        "description": "Value of the option",
-                        "minLength": 1,
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "number"
-                            },
-                            {
-                                "allOf": [
-                                    {
-                                        "f5expand": true
-                                    },
-                                    {
-                                        "$ref": "base_schema.json#/definitions/stringOrSecret"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                "required": [
-                    "name",
-                    "value"
-                ],
-                "additionalProperties": false
-            },
-            "minItems": 1
+            "allOf": [ { "$ref": "common_schema.json#/definitions/additionalOptions" } ]
         },
         "format": {
-            "$comment": "Required for certain consumers: Splunk and Azure_Log_Analytics",
+            "$comment": "Required for certain consumers: Splunk, Azure_Log_Analytics, Kafka",
             "title": "Format (informs consumer additional formatting may be required)",
             "description": "",
             "type": "string"
@@ -689,26 +652,9 @@
             }
         },
         "customHttpOpts": {
-            "items": {
-                "allOf": [
-                    {
-                        "if": { "properties": { "name": { "const": "keepAlive" } } },
-                        "then": { "properties": { "value": { "type": "boolean" } } } 
-                    },
-                    {
-                        "if": { "properties": { "name": { "const": "keepAliveMsecs" } } },
-                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
-                    },
-                    {
-                        "if": { "properties": { "name": { "const": "maxSockets" } } },
-                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
-                    },
-                    {
-                        "if": { "properties": { "name": { "const": "maxFreeSockets" } } },
-                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } } 
-                    }
-                ]
-            }
+            "title": "Custom Http Options",
+            "description": "Additional options to customize Http requests",
+            "allOf": [ { "$ref": "common_schema.json#/definitions/httpAgentOptions" } ]
         },
         "otelExporter": {
             "$comment": "Required for certain consumers: OpenTelemetry_Exporter",
@@ -716,6 +662,19 @@
             "description": "" ,
             "type": "string",
             "enum": ["grpc", "json", "protobuf" ]
+        },
+        "partitionerType": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Partitioner Type",
+            "description": "The type of partitioning strategy to use for the consumer" ,
+            "type": "string"
+        },
+        "partitionKey": {
+            "$comment": "Required for certain consumers: Kafka",
+            "title": "Partition Key",
+            "description": "The identifier to use for keyed partitions" ,
+            "type": "string",
+            "minLength": 1
         }
     },
     "allOf": [
@@ -856,7 +815,9 @@
                             "metricsPath": {},
                             "service": {},
                             "convertBooleansToMetrics": {},
-                            "exporter": {}
+                            "exporter": {},
+                            "partitionerType": {},
+                            "partitionKey": {}
                         },
                         "additionalProperties": false,
                         "dependencies": {
@@ -942,7 +903,13 @@
                                 "passphrase": { "$ref": "base_schema.json#/definitions/secret" },
                                 "format": { "$ref": "#/definitions/format", "enum": [ "default", "legacy", "multiMetric" ], "default": "default" },
                                 "proxy": { "$ref": "base_schema.json#/definitions/proxy" },
-                                "compressionType": { "$ref": "#/definitions/compressionType", "default": "gzip" }
+                                "compressionType": { "$ref": "#/definitions/compressionType", "default": "gzip" },
+                                "customOpts": { 
+                                    "allOf": [
+                                        { "$ref": "#/definitions/customOpts" },
+                                        { "$ref": "#/definitions/customHttpOpts" }
+                                    ]
+                                }
                             }
                         },
                         "else": {}
@@ -1156,10 +1123,29 @@
                             ],
                             "properties": {
                                 "authenticationProtocol": { "$ref": "#/definitions/authenticationProtocol", "default": "None" },
-                                "host": { "$ref": "#/definitions/host" },
+                                "customOpts": { "$ref": "#/definitions/customOpts" },
+                                "format": { "$ref": "#/definitions/format", "enum": [ "default", "split" ], "default": "default" },
+                                "host": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/definitions/host"
+                                        },
+                                        {
+                                            "type": "array",
+                                            "description": "List FQDNs or IP addresses to use as hosts" ,
+                                            "minItems": 1,
+                                            "items": {
+                                                "allOf": [{
+                                                    "$ref": "#/definitions/host"
+                                                }]
+                                            }
+                                        }
+                                    ]
+                                },
+                                "partitionerType": { "$ref": "#/definitions/partitionerType", "enum": ["default", "random", "cyclic", "keyed" ], "default": "default" },
                                 "protocol": { "$ref": "#/definitions/protocols", "default": "binaryTcpTls" },
                                 "port": { "$ref": "#/definitions/port", "default": 9092 },
-                                "topic": { "$ref": "#/definitions/topic" } 
+                                "topic": { "$ref": "#/definitions/topic" }
                             },
                             "allOf": [
                                 {
@@ -1195,6 +1181,23 @@
                                             "rootCertificate": { "$ref": "#/definitions/rootCertificate" },
                                             "protocol": { "const": "binaryTcpTls" }
                                         }
+                                    },
+                                    "else": {}
+                                },
+                                {
+                                    "if": { "properties": { "partitionerType": { "const": "keyed" } } },
+                                    "then": {
+                                        "required": [ "partitionKey" ],
+                                        "properties": {
+                                            "partitionKey": { "$ref": "#/definitions/partitionKey" }
+                                        }
+                                    },
+                                    "else": {}
+                                },
+                                {
+                                    "if": { "properties": { "partitionerType": { "not": { "const": "keyed" } } } },
+                                    "then": {
+                                        "not": { "required": [ "partitionKey" ] }
                                     },
                                     "else": {}
                                 }
@@ -1380,8 +1383,7 @@
                                 "serviceAccount": { "$ref": "#/definitions/serviceAccount" },
                                 "targetAudience": { "$ref": "#/definitions/targetAudience" },
                                 "useSSL": { "$ref": "#/definitions/useSSL", "default": true }
-                            },
-                            "nodeSupportVersion": "8.11.1"
+                            }
                         },
                         "else": {}
                     },
@@ -1432,7 +1434,6 @@
                                 "clientCertificate": ["privateKey"],
                                 "privateKey": ["clientCertificate"]
                             },
-                            "nodeSupportVersion": "8.11.1",
                             "allOf": [
                                 {
                                     "if": { "properties": { "exporter": { "const": "grpc" } } } ,

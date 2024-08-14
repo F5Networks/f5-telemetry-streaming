@@ -16,19 +16,39 @@
 
 'use strict';
 
+/* eslint-disable import/order */
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const kafka = require('kafka-node');
-
-const constants = require('../shared/constants');
-const harnessUtils = require('../shared/harness');
-const logger = require('../shared/utils/logger').getChild('kafkaTests');
-const miscUtils = require('../shared/utils/misc');
-const promiseUtils = require('../shared/utils/promise');
-const testUtils = require('../shared/testUtils');
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
+
+const constants = require('../shared/constants');
+const harnessUtils = require('../shared/harness');
+const miscUtils = require('../shared/utils/misc');
+const promiseUtils = require('../shared/utils/promise');
+const testUtils = require('../shared/testUtils');
+const logger = require('../shared/utils/logger').getChild('kafkaTests');
+
+// <customLogger>
+// uncomment section below to enable a much more verbose logging from the kafka-node lib
+
+// const kafkaLogging = require('kafka-node/logging');
+
+// function customLoggerProvider() {
+//     const customLogger = logger.getChild('kafkaNodeClient');
+//     return {
+//         debug: customLogger.debug.bind(console),
+//         info: customLogger.info.bind(console),
+//         warn: customLogger.warning.bind(console),
+//         error: customLogger.error.bind(console)
+//     };
+// }
+
+// kafkaLogging.setLoggerProvider(customLoggerProvider);
+// </customLogger>
+
+const kafka = require('kafka-node');
 
 /**
  * @module test/functional/consumersTests/kafka
@@ -42,33 +62,29 @@ const KAFKA_CONSUMER_NAME = 'Consumer_Kafka';
 const KAFKA_PORT = 9092;
 const KAFKA_PROTOCOL = 'binaryTcp';
 const KAFKA_TOPIC = 'f5-telemetry';
+const KAFKA_FORMAT = 'split';
+const KAFKA_PARTITIONER_TYPE = 'cyclic';
 const KAFKA_TIMEOUT = 2000;
-const ZOOKEEPER_CLIENT_PORT = 2181;
 const DOCKER_CONTAINERS = {
     Kafka: {
         detach: true,
         env: {
-            ALLOW_PLAINTEXT_LISTENER: 'yes',
-            KAFKA_ADVERTISED_LISTENERS: null,
-            KAFKA_ZOOKEEPER_CONNECT: null
+            // KRaft settings
+            KAFKA_CFG_NODE_ID: 0,
+            KAFKA_BROKER_ID: 0,
+            KAFKA_CFG_PROCESS_ROLES: 'controller,broker',
+            KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: `0@127.0.0.1:2${KAFKA_PORT}`,
+            KAFKA_CFG_LISTENERS: `PLAINTEXT_HOST://:${KAFKA_PORT},CONTROLLER://:2${KAFKA_PORT}`,
+            KAFKA_CFG_ADVERTISED_LISTENERS: `PLAINTEXT_HOST://kafka-server:${KAFKA_PORT}`,
+            KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT',
+            KAFKA_CFG_CONTROLLER_LISTENER_NAMES: 'CONTROLLER',
+            KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT_HOST',
+            KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
         },
         image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/kafka:latest`,
         name: 'kafka-server',
         publish: {
             [KAFKA_PORT]: KAFKA_PORT
-        },
-        restart: 'always'
-    },
-    Zookeeper: {
-        detach: true,
-        env: {
-            ALLOW_ANONYMOUS_LOGIN: 'yes',
-            ZOOKEEPER_CLIENT_PORT
-        },
-        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/zookeeper:latest`,
-        name: 'zookeeper-server',
-        publish: {
-            [ZOOKEEPER_CLIENT_PORT]: ZOOKEEPER_CLIENT_PORT
         },
         restart: 'always'
     }
@@ -242,9 +258,8 @@ let CONTAINERS_STARTED;
 function setup() {
     describe('Consumer Setup: Kafka', () => {
         const cs = harnessUtils.getDefaultHarness().other[0];
-
-        DOCKER_CONTAINERS.Kafka.env.KAFKA_ADVERTISED_LISTENERS = `PLAINTEXT://${cs.host.host}:${KAFKA_PORT}`;
-        DOCKER_CONTAINERS.Kafka.env.KAFKA_ZOOKEEPER_CONNECT = `${cs.host.host}:${ZOOKEEPER_CLIENT_PORT}`;
+        // replace with ip accessible outside of docker network
+        DOCKER_CONTAINERS.Kafka.env.KAFKA_CFG_ADVERTISED_LISTENERS = `PLAINTEXT_HOST://${cs.host.host}:${KAFKA_PORT}`;
 
         describe('Clean-up TS before service configuration', () => {
             harnessUtils.getDefaultHarness()
@@ -270,8 +285,7 @@ function setup() {
                 () => harnessUtils.docker.stopAndRemoveContainer(cs.docker, DOCKER_CONTAINERS[serviceName].name)
             ));
 
-            // order matters
-            ['Zookeeper', 'Kafka'].forEach((serviceName) => it(
+            Object.keys(DOCKER_CONTAINERS).forEach((serviceName) => it(
                 `should start new ${serviceName} docker container`,
                 () => harnessUtils.docker.startNewContainer(cs.docker, DOCKER_CONTAINERS[serviceName])
                     .then(() => CONTAINERS_STARTED.push(true))
@@ -291,7 +305,7 @@ function test() {
         let kafkaClient = null;
 
         before(() => {
-            assert.isOk(CONTAINERS_STARTED, 'should start Kafka and Zookeeper containers!');
+            assert.isOk(CONTAINERS_STARTED, 'should start Kafka container(s)!');
         });
 
         describe('Connect to Kafka server', () => {
@@ -304,7 +318,7 @@ function test() {
                         },
                         (err) => client.close()
                             .then(() => {
-                                logger.error('Unable to connect to Kafka and Zookeeper. Going to sleep for 2sec and re-try:', err);
+                                logger.error('Unable to connect to Kafka broker. Going to sleep for 2sec and re-try:', err);
                                 return promiseUtils.sleepAndReject(2000, err);
                             })
                     );
@@ -325,12 +339,14 @@ function test() {
                     protocol: KAFKA_PROTOCOL,
                     port: KAFKA_PORT,
                     topic: KAFKA_TOPIC,
-                    authenticationProtocol: KAFKA_AUTH_PROTOCOL
+                    authenticationProtocol: KAFKA_AUTH_PROTOCOL,
+                    format: KAFKA_FORMAT,
+                    partitionerType: KAFKA_PARTITIONER_TYPE
                 };
             });
 
             testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
-            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${KAFKA_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`);
+            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${KAFKA_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"\n`);
         });
 
         describe('Event Listener data', () => {

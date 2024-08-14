@@ -26,7 +26,7 @@ const sourceCode = require('../shared/sourceCode');
 const testUtil = require('../shared/util');
 
 const elasticSearchIndex = sourceCode('src/lib/consumers/ElasticSearch/index');
-const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
+const httpUtil = sourceCode('src/lib/utils/http');
 const util = sourceCode('src/lib/utils/misc');
 
 moduleCache.remember();

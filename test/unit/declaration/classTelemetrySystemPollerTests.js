@@ -29,15 +29,19 @@ const generateInputActionsTests = require('./generators/inputDataActions');
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_System_Poller', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -63,6 +67,8 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                 assert.strictEqual(poller.enable, true);
                 assert.strictEqual(poller.trace, undefined);
                 assert.strictEqual(poller.interval, 300);
+                assert.strictEqual(poller.workers, 5);
+                assert.strictEqual(poller.chunkSize, 30);
                 assert.deepStrictEqual(poller.actions, [{ enable: true, setTag: { tenant: '`T`', application: '`A`' } }]);
                 assert.strictEqual(poller.actions[0].ifAllMatch, undefined);
                 assert.strictEqual(poller.actions[0].locations, undefined);
@@ -74,6 +80,7 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                 assert.strictEqual(poller.username, undefined);
                 assert.strictEqual(poller.passphrase, undefined);
                 assert.strictEqual(poller.endpointList, undefined);
+                assert.strictEqual(poller.httpAgentOpts, undefined);
             });
     });
 
@@ -85,6 +92,8 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                 enable: true,
                 trace: true,
                 interval: 150,
+                workers: 2,
+                chunkSize: 50,
                 tag: {
                     tenant: '`B`',
                     application: '`C`'
@@ -181,6 +190,12 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                         protocol: 'snmp',
                         numericalEnums: true
                     }
+                ],
+                httpAgentOpts: [
+                    { name: 'keepAlive', value: true },
+                    { name: 'keepAliveMsecs', value: 18000 },
+                    { name: 'maxSockets', value: 5 },
+                    { name: 'maxFreeSockets', value: 3 }
                 ]
             }
         };
@@ -252,6 +267,16 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                         }
                     ]
                 );
+                // httpAgentOptions
+                assert.deepStrictEqual(
+                    poller.httpAgentOpts,
+                    [
+                        { name: 'keepAlive', value: true },
+                        { name: 'keepAliveMsecs', value: 18000 },
+                        { name: 'maxSockets', value: 5 },
+                        { name: 'maxFreeSockets', value: 3 }
+                    ]
+                );
             });
     });
 
@@ -314,6 +339,19 @@ describe('Declarations -> Telemetry_System_Poller', () => {
             }
         };
         return assert.isRejected(declValidator(data), /someProp.*should NOT have additional properties/);
+    });
+
+    it('should not allow set passphrase without username', async () => {
+        const data = {
+            class: 'Telemetry',
+            My_Poller: {
+                class: 'Telemetry_System_Poller',
+                passphrase: {
+                    cipherText: 'test_passphrase_1'
+                }
+            }
+        };
+        return assert.isRejected(declValidator(data), /passphrase.*should have property username when property passphrase is present/);
     });
 
     describe('interval', () => {
@@ -589,6 +627,54 @@ describe('Declarations -> Telemetry_System_Poller', () => {
                         }
                     );
                 });
+        });
+    });
+
+    describe('httpAgentOpts', () => {
+        it('should require at least one item if present', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    httpAgentOpts: []
+                }
+            };
+            const errMsg = 'should NOT have fewer than 1 items';
+            return assert.isRejected(declValidator(data), errMsg);
+        });
+
+        it('should not allow an unknown option name', () => {
+            const data = {
+                class: 'Telemetry',
+                My_Poller: {
+                    class: 'Telemetry_System_Poller',
+                    httpAgentOpts: [{ name: 'some_txt', value: 'anything' }]
+                }
+            };
+            const errMsg = '"allowedValues":["keepAlive","keepAliveMsecs","maxSockets","maxFreeSockets"]';
+            return assert.isRejected(declValidator(data), errMsg);
+        });
+
+        describe('invalid values', () => {
+            const invalidVals = [
+                { name: 'keepAlive', type: 'boolean', value: 123 },
+                { name: 'keepAliveMsecs', type: 'integer', value: { a: 'b' } },
+                { name: 'maxSockets', type: 'integer', value: '23dQW' },
+                { name: 'maxFreeSockets', type: 'integer', value: 1.3034 }
+            ];
+            invalidVals.forEach((testVal) => {
+                it(`${testVal.name} should be ${testVal.type}`, () => {
+                    const data = {
+                        class: 'Telemetry',
+                        My_Poller: {
+                            class: 'Telemetry_System_Poller',
+                            httpAgentOpts: [{ name: testVal.name, value: testVal.value }]
+                        }
+                    };
+                    const errMsg = `should be ${testVal.type}`;
+                    return assert.isRejected(declValidator(data), errMsg);
+                });
+            });
         });
     });
 });

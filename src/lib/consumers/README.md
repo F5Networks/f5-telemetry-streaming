@@ -81,3 +81,35 @@ Please be aware that this solution should anticipate processing a moderately hig
 Value conversion rules:
 
 - *boolean* -> **Number**(*boolean*) - **true** === 1 and **false** === 0
+
+
+### Example v2.0
+
+For all details see [API](./api.js) definition file.
+
+```javascript
+'use strict';
+
+const API = require('../api.js');
+
+class MyConsumerModule extends API.ConsumerModule {
+    /* Module Implementation */
+}
+
+/**
+ * Load Consumer module
+ *
+ * Note: called once only if not in memory yet
+ *
+ * @param {API.ModuleConfig} moduleConfig - module's config
+ *
+ * @return {API.ConsumerModuleInterface | Promise<API.ConsumerModuleInterface>} module instance
+ */
+module.exports = {
+    load({ name, path }) {
+        /* do some basic initialization if needed */
+        /* ... */
+        return new MyConsumerModule();
+    }
+}
+```

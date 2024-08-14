@@ -140,45 +140,55 @@ describe('Logger', () => {
 
     it('should log an exception', () => {
         const msgType = 'exception';
-        logger.exception(`this is a ${msgType} message`, new Error('foo'));
-        logger.debugException(`this is a ${msgType} message`, new Error('foo'));
-        logger.verboseException(`this is a ${msgType} message`, new Error('foo'));
+        const error = new Error('foo');
+
+        logger.exception(`this is a ${msgType} message`, error);
+        logger.debugException(`this is a ${msgType} message`, error);
+        logger.verboseException(`this is a ${msgType} message`, error);
 
         assert.lengthOf(coreStub.logger.messages.error, 1);
         assert.isEmpty(coreStub.logger.messages.debug);
-        assert.include(coreStub.logger.messages.error[0], `this is a ${msgType} message`);
+        assert.include(coreStub.logger.messages.error[0], `this is a ${msgType} message\nMessage: foo\nTraceback:`);
 
         logger.setLogLevel('debug');
-        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.exception(`this is a ${msgType} message`, error);
         logger.exception(`this is a ${msgType} message`);
-        logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message [debug]`, error);
         logger.debugException(`this is a ${msgType} message [debug]`);
-        logger.verboseException(`this is a ${msgType} message [verbose]`, new Error('foo'));
+        logger.verboseException(`this is a ${msgType} message [verbose]`, error);
         logger.verboseException(`this is a ${msgType} message [verbose]`);
 
         assert.lengthOf(coreStub.logger.messages.error, 3);
         assert.lengthOf(coreStub.logger.messages.debug, 2);
-        assert.include(coreStub.logger.messages.error[1], `this is a ${msgType} message`);
-        assert.include(coreStub.logger.messages.error[2], `this is a ${msgType} message\nTraceback:\nno traceback available`);
-        assert.include(coreStub.logger.messages.debug[0], `this is a ${msgType} message [debug]`);
-        assert.include(coreStub.logger.messages.debug[1], `this is a ${msgType} message [debug]\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.error[1], `this is a ${msgType} message\nMessage: foo\nTraceback:`);
+        assert.include(coreStub.logger.messages.error[2], `this is a ${msgType} message\nMessage: no message available\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.debug[0], `this is a ${msgType} message [debug]\nMessage: foo\nTraceback:`);
+        assert.include(coreStub.logger.messages.debug[1], `this is a ${msgType} message [debug]\nMessage: no message available\nTraceback:\nno traceback available`);
 
         logger.setLogLevel('verbose');
-        logger.exception(`this is a ${msgType} message`, new Error('foo'));
+        logger.exception(`this is a ${msgType} message`, error);
         logger.exception(`this is a ${msgType} message`);
-        logger.debugException(`this is a ${msgType} message [debug]`, new Error('foo'));
+        logger.debugException(`this is a ${msgType} message [debug]`, error);
         logger.debugException(`this is a ${msgType} message [debug]`);
-        logger.verboseException(`this is a ${msgType} message [verbose]`, new Error('foo'));
+        logger.verboseException(`this is a ${msgType} message [verbose]`, error);
         logger.verboseException(`this is a ${msgType} message [verbose]`);
 
         assert.lengthOf(coreStub.logger.messages.error, 5);
         assert.lengthOf(coreStub.logger.messages.debug, 6);
-        assert.include(coreStub.logger.messages.error[3], `this is a ${msgType} message`);
-        assert.include(coreStub.logger.messages.error[4], `this is a ${msgType} message\nTraceback:\nno traceback available`);
-        assert.include(coreStub.logger.messages.debug[2], `this is a ${msgType} message [debug]`);
-        assert.include(coreStub.logger.messages.debug[3], `this is a ${msgType} message [debug]\nTraceback:\nno traceback available`);
-        assert.include(coreStub.logger.messages.debug[4], `this is a ${msgType} message [verbose]`);
-        assert.include(coreStub.logger.messages.debug[5], `this is a ${msgType} message [verbose]\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.error[3], `this is a ${msgType} message\nMessage: foo\nTraceback:`);
+        assert.include(coreStub.logger.messages.error[4], `this is a ${msgType} message\nMessage: no message available\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.debug[2], `this is a ${msgType} message [debug]\nMessage: foo\nTraceback:`);
+        assert.include(coreStub.logger.messages.debug[3], `this is a ${msgType} message [debug]\nMessage: no message available\nTraceback:\nno traceback available`);
+        assert.include(coreStub.logger.messages.debug[4], `this is a ${msgType} message [verbose]\nMessage: foo\nTraceback:`);
+        assert.include(coreStub.logger.messages.debug[5], `this is a ${msgType} message [verbose]\nMessage: no message available\nTraceback:\nno traceback available`);
+
+        error.message = 'my custom message';
+        logger.exception(`this is a ${msgType} message`, error);
+        logger.debugException(`this is a ${msgType} message [debug]`, error);
+        logger.verboseException(`this is a ${msgType} message [verbose]`, error);
+        assert.include(coreStub.logger.messages.error[5], `this is a ${msgType} message\nMessage: my custom message\nTraceback:\nError: foo`);
+        assert.include(coreStub.logger.messages.debug[6], `this is a ${msgType} message [debug]\nMessage: my custom message\nTraceback:\nError: foo`);
+        assert.include(coreStub.logger.messages.debug[7], `this is a ${msgType} message [verbose]\nMessage: my custom message\nTraceback:\nError: foo`);
     });
 
     it('should stringify object', () => {

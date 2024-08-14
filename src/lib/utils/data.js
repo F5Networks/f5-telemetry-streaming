@@ -137,7 +137,9 @@ function getMatches(data, property, propAsKey) {
     if (Object.prototype.hasOwnProperty.call(data, property)) {
         return [property];
     }
-    const checkFx = propAsKey ? ((key) => property.match(key)) : ((key) => key.match(property));
+    const matchFn = (d, pattern) => d.match(pattern === '*' ? '.*' : pattern);
+    const checkFx = propAsKey ? ((key) => matchFn(property, key)) : ((key) => matchFn(key, property));
+
     return Object.keys(data).filter(checkFx);
 }
 
@@ -168,9 +170,6 @@ function getDeepMatches(data, matchObj) {
             matches.forEach((match) => {
                 deepMatches = deepMatches.concat(getDeepMatches(data[match], matchObj[key]));
             });
-        } else {
-            // No matches for the property key were found in the data
-            logger.verbose(`The data does not have anything that matches the property key ${key}`);
         }
     });
     return deepMatches;

@@ -118,11 +118,11 @@ function test() {
                 }
                 return declaration;
             });
+
+            it('sleep for 60sec while Azure AI consumer is not ready', () => promiseUtils.sleep(60000));
         });
 
         describe('System Poller data', () => {
-            it('sleep for 60sec while AI API is not ready', () => promiseUtils.sleep(60000));
-
             harness.bigip.forEach((bigip) => {
                 it(`should check Azure AI for system poller data - ${bigip.name}`, () => {
                     const apiInfo = getAppInsightAPIInfo(bigip.name);

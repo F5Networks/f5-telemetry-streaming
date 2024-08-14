@@ -17,10 +17,10 @@
 'use strict';
 
 const configUtil = require('../utils/config');
-const configWorker = require('../config');
 const constants = require('../constants');
 const dataPipeline = require('../dataPipeline');
-const logger = require('../logger');
+const hrtimestamp = require('../utils/datetime').hrtimestamp;
+const logger = require('../logger').getChild('eventListener');
 const normalize = require('../normalize');
 const onApplicationExit = require('../utils/misc').onApplicationExit;
 const promiseUtil = require('../utils/promise');
@@ -29,7 +29,11 @@ const StreamService = require('./streamService');
 const stringify = require('../utils/misc').stringify;
 const tracerMgr = require('../tracerManager');
 
-/** @module EventListener */
+/**
+ * @module EventListener
+ *
+ * @typedef {import('../appEvents').ApplicationEvents} ApplicationEvents
+ */
 
 const normalizationOpts = {
     global: properties.global,
@@ -258,7 +262,12 @@ class EventListener {
                     sourceId: this.id,
                     destinationIds: this.destinationIds
                 };
-                const p = dataPipeline.process(dataCtx, { tracer: this.tracer, actions: this.actions })
+                const p = dataPipeline.process(
+                    dataCtx,
+                    constants.DATA_PIPELINE.PUSH_EVENT,
+                    null,
+                    { tracer: this.tracer, actions: this.actions }
+                )
                     .catch((err) => this.logger.exception('EventListener:_processEvents unexpected error from dataPipeline:process', err));
                 promises.push(p);
             }
@@ -376,57 +385,60 @@ EventListener.remove = function (listener) {
 };
 
 // config worker change event
-configWorker.on('change', (config) => {
-    logger.debug('configWorker change event in eventListener'); // helpful debug
-    const configuredListeners = configUtil.getTelemetryListeners(config);
-    const controls = configUtil.getTelemetryControls(config);
+function onConfigChange(config) {
+    Promise.resolve()
+        .then(() => {
+            logger.debug('configWorker change event in eventListener'); // helpful debug
+            const configuredListeners = configUtil.getTelemetryListeners(config);
+            const controls = configUtil.getTelemetryControls(config);
 
-    // stop all removed listeners
-    EventListener.getAll().forEach((listener) => {
-        const configMatch = configuredListeners.find((n) => n.traceName === listener.name);
-        if (!configMatch) {
-            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.messageStream.port}]. Reason - removed from configuration.`);
-            EventListener.remove(listener);
-        }
-    });
-    // stop all disabled listeners
-    configuredListeners.forEach((listenerConfig) => {
-        const listener = EventListener.getByName(listenerConfig.traceName);
-        if (listener && listenerConfig.enable === false) {
-            logger.debug(`Removing event listener - ${listener.name} [port = ${listener.port}]. Reason - disabled.`);
-            EventListener.remove(listener);
-        }
-    });
+            // stop all removed listeners
+            EventListener.getAll().forEach((listener) => {
+                const configMatch = configuredListeners.find((n) => n.traceName === listener.name);
+                if (!configMatch) {
+                    logger.debug(`Removing event listener - ${listener.name} [port = ${listener.messageStream.port}]. Reason - removed from configuration.`);
+                    EventListener.remove(listener);
+                }
+            });
+            // stop all disabled listeners
+            configuredListeners.forEach((listenerConfig) => {
+                const listener = EventListener.getByName(listenerConfig.traceName);
+                if (listener && listenerConfig.enable === false) {
+                    logger.debug(`Removing event listener - ${listener.name} [port = ${listener.port}]. Reason - disabled.`);
+                    EventListener.remove(listener);
+                }
+            });
 
-    configuredListeners.forEach((listenerConfig) => {
-        if (listenerConfig.skipUpdate || listenerConfig.enable === false) {
-            return;
-        }
-        // use name (prefixed if namespace is present)
-        const name = listenerConfig.traceName;
-        const port = listenerConfig.port;
+            configuredListeners.forEach((listenerConfig) => {
+                if (listenerConfig.skipUpdate || listenerConfig.enable === false) {
+                    return;
+                }
+                // use name (prefixed if namespace is present)
+                const name = listenerConfig.traceName;
+                const port = listenerConfig.port;
 
-        const msgPrefix = EventListener.getByName(name) ? 'Updating event' : 'Creating new event';
-        logger.debug(`${msgPrefix} listener - ${name} [port = ${port}]`);
+                const msgPrefix = EventListener.getByName(name) ? 'Updating event' : 'Creating new event';
+                logger.debug(`${msgPrefix} listener - ${name} [port = ${port}]`);
 
-        const listener = EventListener.get(name, port, controls.listenerMode || 'buffer', controls.listenerStrategy || 'ring');
-        listener.updateConfig({
-            actions: listenerConfig.actions,
-            destinationIds: configUtil.getReceivers(config, listenerConfig).map((r) => r.id),
-            filterFunc: buildFilterFunc(listenerConfig),
-            id: listenerConfig.id,
-            tags: listenerConfig.tag,
-            tracer: tracerMgr.fromConfig(listenerConfig.trace),
-            inputTracer: tracerMgr.fromConfig(listenerConfig.traceInput)
+                const listener = EventListener.get(name, port, controls.listenerMode || 'buffer', controls.listenerStrategy || 'ring');
+                listener.updateConfig({
+                    actions: listenerConfig.actions,
+                    destinationIds: configUtil.getReceivers(config, listenerConfig).map((r) => r.id),
+                    filterFunc: buildFilterFunc(listenerConfig),
+                    id: listenerConfig.id,
+                    tags: listenerConfig.tag,
+                    tracer: tracerMgr.fromConfig(listenerConfig.trace),
+                    inputTracer: tracerMgr.fromConfig(listenerConfig.traceInput)
+                });
+                listener.updateRawDataHandling();
+            });
+
+            return EventListener.receiversManager.stopAndRemoveInactive()
+                .then(() => EventListener.receiversManager.start())
+                .then(() => logger.debug(`${EventListener.getAll().length} event listener(s) listening`))
+                .catch((err) => logger.exception('Unable to start some (or all) of the event listeners', err));
         });
-        listener.updateRawDataHandling();
-    });
-
-    return EventListener.receiversManager.stopAndRemoveInactive()
-        .then(() => EventListener.receiversManager.start())
-        .then(() => logger.debug(`${EventListener.getAll().length} event listener(s) listening`))
-        .catch((err) => logger.exception('Unable to start some (or all) of the event listeners', err));
-});
+}
 
 onApplicationExit(() => {
     EventListener.getAll().map(EventListener.remove);
@@ -436,37 +448,45 @@ onApplicationExit(() => {
 /**
  * TEMP BLOCK OF CODE, REMOVE AFTER REFACTORING
  */
-let processingEnabled = true;
-let processingState = null;
-
-/** @param {restWorker.ApplicationContext} appCtx - application context */
-EventListener.initialize = function initialize(appCtx) {
-    if (appCtx.resourceMonitor) {
-        if (processingState) {
-            logger.debug('Destroying existing ProcessingState instance');
-            processingState.destroy();
-        }
-        processingState = appCtx.resourceMonitor.initializePState(
-            onResourceMonitorUpdate.bind(null, true),
-            onResourceMonitorUpdate.bind(null, false)
-        );
-        processingEnabled = processingState.enabled;
-        onResourceMonitorUpdate(processingEnabled);
-    } else {
-        logger.error('Unable to subscribe to Resource Monitor updates!');
-    }
+const processingState = {
+    enabled: true,
+    promise: Promise.resolve(),
+    timestamp: hrtimestamp()
 };
 
-/** @param {boolean} enabled - true if processing enabled otherwise false */
-function onResourceMonitorUpdate(enabled) {
-    processingEnabled = enabled;
-    if (enabled) {
-        logger.warning('Restriction ceased.');
-        EventListener.receiversManager.enableIngress();
-    } else {
-        logger.warning('Applying restrictions to incomming data.');
-        EventListener.receiversManager.disableIngress();
-    }
+/** @param {ApplicationEvents} appEvents - application events */
+EventListener.initialize = function initialize(appEvents) {
+    appEvents.on('config.change', onConfigChange);
+    logger.debug('Subscribed to Configuration updates.');
+
+    appEvents.on('resmon.pstate', (makePState) => makePState(
+        // on enable
+        () => updateProcessingState(true),
+        // on disable
+        () => updateProcessingState(false)
+    ));
+    logger.debug('Subscribed to Resource Monitor updates.');
+};
+
+function updateProcessingState(processingEnabledNew) {
+    const updateTs = hrtimestamp();
+    processingState.timestamp = updateTs;
+    processingState.promise = processingState.promise
+        .then(() => {
+            if (processingState.timestamp !== updateTs || processingState.enabled === processingEnabledNew) {
+                // too late or same state
+                return;
+            }
+            processingState.enabled = processingEnabledNew;
+            if (processingState.enabled) {
+                logger.warning('Restriction ceased.');
+                EventListener.receiversManager.enableIngress();
+            } else {
+                logger.warning('Applying restrictions to incomming data.');
+                EventListener.receiversManager.disableIngress();
+            }
+        })
+        .catch((error) => logger.exception(`Unexpected error on attempt to ${processingEnabledNew ? 'enable' : 'disable'} event listeners:`, error));
 }
 
 /**
@@ -477,7 +497,7 @@ function onResourceMonitorUpdate(enabled) {
  */
 
 EventListener.isEnabled = function isEnabled() {
-    return processingEnabled;
+    return processingState.enabled;
 };
 
 /**

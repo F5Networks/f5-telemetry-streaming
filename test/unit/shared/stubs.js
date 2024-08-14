@@ -18,16 +18,21 @@
 
 const EventEmitter2 = require('eventemitter2');
 const memfs = require('memfs');
+const nodeFS = require('fs');
+const nodeUtil = require('util');
 const pathUtil = require('path');
 const sinon = require('sinon');
 
+const assert = require('./assert');
 const assignDefaults = require('./util').assignDefaults;
+const BigIpRestApiMock = require('./bigipAPIMock');
 const deepCopy = require('./util').deepCopy;
 const tsLogsForwarder = require('../../winstonLogger').tsLogger;
 const sourceCode = require('./sourceCode');
 
-const constants = sourceCode('src/lib/constants');
-const promisifyNodeFsModule = sourceCode('src/lib/utils/misc').promisifyNodeFsModule;
+/**
+ * @typedef {import("./bigipAPIMock").MockNockStubBase} MockNockStubBase
+ */
 
 let SINON_FAKE_CLOCK = null;
 
@@ -50,6 +55,24 @@ function addStubRestore(stub, restoreFn) {
 // reference to module.exports
 // eslint-disable-next-line no-multi-assign
 const _module = module.exports = {
+    /**
+     * Stub for Application Events
+     *
+     * @param {object} AppEvents - class
+     *
+     * @returns {AppEventsStubCtx} stub context
+     */
+    appEvents(AppEvents) {
+        const ctx = {
+            appEvents: new AppEvents(),
+            stub: sinon.stub()
+        };
+        addStubRestore(ctx.stub, () => {
+            ctx.appEvents.stop();
+        });
+        return ctx;
+    },
+
     /**
      * Sinon fake timers
      *
@@ -170,8 +193,6 @@ const _module = module.exports = {
      * @param {ConfigWorker} [coreModules.configWorker] - config worker
      * @param {module} [coreModules.deviceUtil] - Device Utils module
      * @param {module} [coreModules.logger] - Logger module
-     * @param {module} [coreModules.persistentStorage] - Persistent Storage module
-     * @param {module} [coreModules.teemReporter] - Teem Reporter module
      * @param {module} [coreModules.tracer] - Tracer module
      * @param {module} [coreModules.utilMisc] - Utils (misc.) module
      * @param {object} [options] - options, see each stub for additional info
@@ -179,19 +200,31 @@ const _module = module.exports = {
      * @returns {CoreStubCtx} stubs for core modules
      */
     coreStub(coreModules, options) {
+        const localhostBigIp = new BigIpRestApiMock();
+        localhostBigIp.addPasswordlessUser('admin');
+
         options = options || {};
-        const ctx = {};
+        const ctx = {
+            localhostBigIp
+        };
+        if (coreModules.deviceUtil || coreModules.tracer || coreModules.utilMisc) {
+            coreModules.utilMisc = coreModules.utilMisc || sourceCode('src/lib/utils/misc');
+            ctx.utilMisc = _module.utilMisc(coreModules.utilMisc, options.utilMisc);
+        }
+        if (coreModules.tracer) {
+            ctx.tracer = _module.tracer(coreModules.tracer, options.tracer, ctx);
+        }
+        if (coreModules.appEvents) {
+            ctx.appEvents = _module.appEvents(coreModules.appEvents, options.appEvents);
+        }
         if (coreModules.configWorker) {
-            ctx.configWorker = _module.configWorker(coreModules.configWorker, options.configWorker);
+            ctx.configWorker = _module.configWorker(coreModules.configWorker, options.configWorker, ctx);
         }
         if (coreModules.deviceUtil) {
-            ctx.deviceUtil = _module.deviceUtil(coreModules.deviceUtil, options.deviceUtil);
+            ctx.deviceUtil = _module.deviceUtil(coreModules.deviceUtil, options.deviceUtil, ctx);
         }
         if (coreModules.logger) {
             ctx.logger = _module.logger(coreModules.logger, options.logger);
-        }
-        if (coreModules.persistentStorage) {
-            ctx.persistentStorage = _module.persistentStorage(coreModules.persistentStorage, options.persistentStorage);
         }
         if (coreModules.resourceMonitorUtils) {
             ctx.resourceMonitorUtils = _module.resourceMonitorUtils(
@@ -199,15 +232,49 @@ const _module = module.exports = {
                 options.resourceMonitorUtils
             );
         }
-        if (coreModules.teemReporter) {
-            ctx.teemReporter = _module.teemReporter(coreModules.teemReporter, options.teemReporter);
+        if (coreModules.storage) {
+            ctx.storage = _module.storage(
+                coreModules.storage,
+                options.storage,
+                ctx
+            );
         }
-        if (coreModules.tracer) {
-            ctx.tracer = _module.tracer(coreModules.tracer, options.tracer);
-        }
-        if (coreModules.utilMisc) {
-            ctx.utilMisc = _module.utilMisc(coreModules.utilMisc, options.utilMisc);
-        }
+
+        ctx.destroyServices = async () => {
+            if (ctx.storage && ctx.storage.service.isRunning()) {
+                if (ctx.configWorker) {
+                    await ctx.configWorker.configWorker.cleanup();
+                }
+                await ctx.storage.service.destroy();
+            }
+            // time to remove all listeners
+            if (ctx.appEvents) {
+                ctx.appEvents.appEvents.stop();
+            }
+        };
+        ctx.restartServices = async () => {
+            // start first, dependency for configWorker
+            if (ctx.storage) {
+                await ctx.storage.service.restart();
+                if (ctx.configWorker) {
+                    await ctx.configWorker.configWorker.load();
+                }
+            }
+        };
+        ctx.startServices = async () => {
+            // start first, dependency for configWorker
+            if (ctx.storage) {
+                await ctx.storage.service.start();
+                if (ctx.configWorker) {
+                    await ctx.configWorker.configWorker.cleanup();
+                }
+            }
+        };
+        ctx.stopServices = async () => {
+            if (ctx.storage && ctx.storage.service.isRunning()) {
+                await ctx.storage.service.stop();
+            }
+        };
         return ctx;
     },
 
@@ -215,10 +282,12 @@ const _module = module.exports = {
      * Stub for Config Worker
      *
      * @param {ConfigWorker} configWorker - instance of ConfigWorker
+     * @param {object} options
+     * @param {CoreStubCtx} coreCtx
      *
      * @returns {ConfigWorkerStubCtx} stub context
      */
-    configWorker(configWorker) {
+    configWorker(configWorker, options, coreCtx) {
         const ctx = _module.eventEmitter(configWorker);
         ctx.configs = [];
         ctx.receivedSpy = sinon.spy();
@@ -228,6 +297,12 @@ const _module = module.exports = {
         configWorker.on('received', ctx.receivedSpy);
         configWorker.on('validationFailed', ctx.validationFailedSpy);
         configWorker.on('validationSucceed', ctx.validationSucceedSpy);
+
+        if (coreCtx.appEvents) {
+            configWorker.initialize(coreCtx.appEvents.appEvents);
+        }
+
+        ctx.configWorker = configWorker;
         return ctx;
     },
 
@@ -235,18 +310,28 @@ const _module = module.exports = {
      * Stub for Device Utils
      *
      * @param {module} deviceUtil - module
+     * @param {object} options
+     * @param {CoreStubCtx} coreCtx
      *
      * @returns {DeviceUtilStubCtx} stub context
      */
-    deviceUtil(deviceUtil) {
+    deviceUtil(deviceUtil, options, coreCtx) {
+        const decryptStub = coreCtx.localhostBigIp.mockDecryptSecret();
+        decryptStub.callsFake((...secrets) => secrets.map((s) => s.slice(3)).join(''));
+
+        const encryptStub = coreCtx.localhostBigIp.mockEncryptSecret({ optionally: true, replyTimes: Infinity });
+        encryptStub.encrypt.stub.callsFake((reqBody) => [200, {
+            secret: `$M$${reqBody.secret}`
+        }]);
+
+        const getDeviceType = coreCtx.localhostBigIp.mockDeviceType();
+
         const ctx = {
-            decryptSecret: sinon.stub(deviceUtil, 'decryptSecret'),
-            encryptSecret: sinon.stub(deviceUtil, 'encryptSecret'),
-            getDeviceType: sinon.stub(deviceUtil, 'getDeviceType')
+            decrypt: decryptStub,
+            encrypt: encryptStub,
+            getDeviceType
         };
-        ctx.decryptSecret.callsFake((data) => Promise.resolve(data.slice(3)));
-        ctx.encryptSecret.callsFake((data) => Promise.resolve(`$M$${data}`));
-        ctx.getDeviceType.callsFake(() => Promise.resolve(constants.DEVICE_TYPE.BIG_IP));
+
         return ctx;
     },
 
@@ -292,66 +377,6 @@ const _module = module.exports = {
     },
 
     /**
-     * Stub modules for iHealthPoller
-     *
-     * @param {object} modules - modules to stub
-     * @param {module} [modules.ihealthUtil] - iHealth Util
-     *
-     * @returns {iHealthPollerStubCtx} stubs for iHealthPoller related modules
-     */
-    iHealthPoller(modules) {
-        const ctx = {};
-        if (modules.ihealthUtil) {
-            ctx.ihealthUtil = _module.ihealthUtil(modules.ihealthUtil);
-        }
-        return ctx;
-    },
-
-    /**
-     * Stub for iHealth utils
-     *
-     * @param {module} ihealthUtil - module
-     *
-     * @returns {ihealthUtilStubCtx} stub context
-     */
-    ihealthUtil(ihealthUtil) {
-        const qkviewFile = 'qkviewFile';
-        const qkviewReportExample = {
-            diagnostics: [],
-            system_information: {
-                hostname: 'localhost.localdomain'
-            }
-        };
-        const qkviewURI = 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews/0000000';
-
-        const ctx = {
-            DeviceAPI: {
-                removeFile: sinon.stub(ihealthUtil.DeviceAPI.prototype, 'removeFile')
-            },
-            IHealthManager: {
-                constructor: sinon.spy(ihealthUtil, 'IHealthManager'),
-                fetchQkviewDiagnostics: sinon.stub(ihealthUtil.IHealthManager.prototype, 'fetchQkviewDiagnostics'),
-                isQkviewReportReady: sinon.stub(ihealthUtil.IHealthManager.prototype, 'isQkviewReportReady'),
-                initialize: sinon.stub(ihealthUtil.IHealthManager.prototype, 'initialize'),
-                uploadQkview: sinon.stub(ihealthUtil.IHealthManager.prototype, 'uploadQkview')
-            },
-            QkviewManager: {
-                constructor: sinon.spy(ihealthUtil, 'QkviewManager'),
-                initialize: sinon.stub(ihealthUtil.QkviewManager.prototype, 'initialize'),
-                process: sinon.stub(ihealthUtil.QkviewManager.prototype, 'process')
-            }
-        };
-        ctx.DeviceAPI.removeFile.resolves();
-        ctx.IHealthManager.fetchQkviewDiagnostics.callsFake(() => Promise.resolve(deepCopy(qkviewReportExample)));
-        ctx.IHealthManager.isQkviewReportReady.resolves(true);
-        ctx.IHealthManager.initialize.callsFake(function init() { return Promise.resolve(this); });
-        ctx.IHealthManager.uploadQkview.callsFake(() => Promise.resolve(deepCopy(qkviewURI)));
-        ctx.QkviewManager.initialize.callsFake(function init() { return Promise.resolve(this); });
-        ctx.QkviewManager.process.callsFake(() => Promise.resolve(deepCopy(qkviewFile)));
-        return ctx;
-    },
-
-    /**
      * Stub for Logger
      *
      * @param {module} logger - module
@@ -372,6 +397,7 @@ const _module = module.exports = {
         const setLogLevelOrigin = logger.setLogLevel;
         // deeply tied to current implementation
         const ctx = {
+            logger,
             messages: {
                 all: []
             },
@@ -419,75 +445,16 @@ const _module = module.exports = {
     },
 
     /**
-     * Stub for Persistent Storage with RestStorage as backend
-     *
-     * @param {module} persistentStorage - module
-     *
-     * @returns {PersistentStorageStubCtx} stub context
-     */
-    persistentStorage(persistentStorage) {
-        const restWorker = {
-            loadState: sinon.stub(),
-            saveState: sinon.stub()
-        };
-        const ctx = {
-            loadCbAfter: null,
-            loadCbBefore: null,
-            // loadData - should be set explicitly
-            loadError: null,
-            loadState: { _data_: {} },
-            restWorker,
-            saveCbAfter: null,
-            saveCbBefore: null,
-            saveError: null,
-            savedData: null,
-            savedState: null,
-            savedStateParse: true,
-            storage: sinon.stub(persistentStorage.persistentStorage, 'storage')
-        };
-        restWorker.loadState.callsFake((first, cb) => {
-            if (ctx.loadCbBefore) {
-                ctx.loadCbBefore(ctx, first, cb);
-            }
-            if (Object.prototype.hasOwnProperty.call(ctx, 'loadData')) {
-                ctx.loadState = { _data_: JSON.stringify(ctx.loadData) };
-                delete ctx.loadData;
-            }
-            cb(ctx.loadError, ctx.loadState);
-            if (ctx.loadCbAfter) {
-                ctx.loadCbAfter(ctx, first, cb);
-            }
-        });
-        restWorker.saveState.callsFake((first, state, cb) => {
-            if (ctx.saveCbBefore) {
-                ctx.saveCbBefore(ctx, first, state, cb);
-            }
-            // override to be able to load it again
-            ctx.loadState = state;
-            ctx.savedState = deepCopy(state);
-            if (ctx.savedState._data_ && ctx.savedStateParse) {
-                ctx.savedState._data_ = JSON.parse(ctx.savedState._data_);
-                ctx.savedData = deepCopy(ctx.savedState._data_);
-            }
-            cb(ctx.saveError);
-            if (ctx.saveCbAfter) {
-                ctx.saveCbAfter(ctx, first, state, cb);
-            }
-        });
-        ctx.storage.value(new persistentStorage.RestStorage(restWorker));
-        return ctx;
-    },
-
-    /**
      * Stub for ResourceMonitor
      *
      * @param {module} resourceMonitor - module
+     * @param {object} [options]
      *
      * @returns {ResourceMonitorUtilsStubCtx} stub context
      */
     resourceMonitorUtils(resourceMonitorUtils) {
         const ctx = {
-            appMemoryUsage: sinon.stub(resourceMonitorUtils, 'appMemoryUsage'),
+            appMemoryUsage: sinon.stub(process, 'memoryUsage'),
             osAvailableMem: sinon.stub(resourceMonitorUtils, 'osAvailableMem')
         };
         ctx.appMemoryUsage.external = 100;
@@ -507,21 +474,77 @@ const _module = module.exports = {
     },
 
     /**
-     * Stub for TeemReporter
+     * Stub for Persistent Storage with RestStorage as backend
      *
-     * @param {module} teemReporter - module
-     *
-     * @returns {TeemReporterStubCtx} stub context
+     * @returns {RestWorkerStubCtx} stub context
      */
-    teemReporter(teemReporter) {
+    restWorker() {
         const ctx = {
-            declarations: [],
-            process: sinon.stub(teemReporter.TeemReporter.prototype, 'process')
+            loadCbAfter: null,
+            loadCbBefore: null,
+            // loadData - should be set explicitly
+            loadError: null,
+            loadState: sinon.stub(),
+            loadStateData: { _data_: {} },
+            saveCbAfter: null,
+            saveCbBefore: null,
+            saveError: null,
+            savedData: null,
+            saveState: sinon.stub(),
+            savedState: null,
+            savedStateParse: true
         };
-        ctx.process.callsFake((declaration) => {
-            ctx.declarations.push(declaration);
-            return Promise.resolve();
+        ctx.loadState.callsFake((first, cb) => {
+            if (ctx.loadCbBefore) {
+                ctx.loadCbBefore(ctx, first, cb);
+            }
+            if (Object.prototype.hasOwnProperty.call(ctx, 'loadData')) {
+                ctx.loadStateData = { _data_: JSON.stringify(ctx.loadData) };
+                delete ctx.loadData;
+            }
+            cb(ctx.loadError, ctx.loadStateData);
+            if (ctx.loadCbAfter) {
+                ctx.loadCbAfter(ctx, first, cb);
+            }
         });
+        ctx.saveState.callsFake((first, state, cb) => {
+            if (ctx.saveCbBefore) {
+                ctx.saveCbBefore(ctx, first, state, cb);
+            }
+            // override to be able to load it again
+            ctx.loadStateData = state;
+            ctx.savedState = deepCopy(state);
+            if (ctx.savedState._data_ && ctx.savedStateParse) {
+                ctx.savedState._data_ = JSON.parse(ctx.savedState._data_);
+                ctx.savedData = deepCopy(ctx.savedState._data_);
+            }
+            cb(ctx.saveError);
+            if (ctx.saveCbAfter) {
+                ctx.saveCbAfter(ctx, first, state, cb);
+            }
+        });
+        return ctx;
+    },
+
+    /**
+     * Stub for Storage Service
+     *
+     * @param {object} StorageService - class
+     * @param {object} options
+     * @param {CoreStubCtx} coreCtx
+     *
+     * @returns {StorageStubCtx} stub context
+     */
+    storage(StorageService, options, coreCtx) {
+        const ctx = {
+            service: new StorageService(),
+            restWorker: _module.restWorker()
+        };
+
+        ctx.service.initialize(
+            coreCtx.appEvents.appEvents, ctx.restWorker
+        );
+
         return ctx;
     },
 
@@ -529,24 +552,17 @@ const _module = module.exports = {
      * Stub for Tracer
      *
      * @param {module} tracer - module
+     * @param {object} options
+     * @param {CoreStubCtx} coreCtx
      *
      * @returns {TracerStubCtx} stub context
      */
-    tracer(tracer) {
+    tracer(tracer, options, coreCtx) {
         const cwd = process.cwd();
         const pathMap = {};
-        const volume = new memfs.Volume();
-        const virtualFS = memfs.createFsFromVolume(volume);
-        const promisifiedFS = promisifyNodeFsModule(virtualFS);
+
         const emitter = new EventEmitter2();
         this.eventEmitter(emitter);
-
-        sinon.stub(virtualFS, 'mkdir').callsFake(function (dirPath) {
-            volume.mkdirSync(dirPath, { recursive: true });
-            return virtualFS.mkdir.wrappedMethod.apply(virtualFS, arguments);
-        });
-
-        volume.reset();
 
         let pendingWrites = 0;
         emitter.on('dec', () => emitter.emit('change', -1));
@@ -558,8 +574,6 @@ const _module = module.exports = {
 
         const ctx = {
             create: sinon.stub(tracer, 'create'),
-            fs: virtualFS,
-            promisifiedFS,
             waitForData() {
                 if (!pendingWrites) {
                     return Promise.resolve();
@@ -573,7 +587,7 @@ const _module = module.exports = {
         Object.defineProperties(ctx, {
             data: {
                 get() {
-                    const virtualPaths = volume.toJSON();
+                    const virtualPaths = coreCtx.utilMisc.fs.volume.toJSON();
                     Object.keys(virtualPaths).forEach((absolute) => {
                         // parse data at first
                         let data = virtualPaths[absolute];
@@ -598,7 +612,7 @@ const _module = module.exports = {
             }
         });
 
-        ctx.create.callsFake((path, options) => {
+        ctx.create.callsFake((path, createOptions) => {
             if (!pathUtil.isAbsolute(path)) {
                 const normPath = pathUtil.resolve(
                     pathUtil.join(cwd, pathUtil.normalize(path))
@@ -606,19 +620,7 @@ const _module = module.exports = {
                 pathMap[normPath] = pathMap[normPath] || [];
                 pathMap[normPath].push(path);
             }
-            // - make copy to avoid modifications for origin options
-            // - copy it back to origin options to reflect changes
-            // reason:
-            // - caller POV: want to see all changes and don't want to see virtualFS ref
-            // - Tracer POV: want to keep 'optionsCopy' unmodified
-            const optionsCopy = Object.assign({}, options || {});
-            optionsCopy.fs = promisifiedFS;
-            const inst = ctx.create.wrappedMethod.call(tracer, path, optionsCopy);
-            Object.assign(options || {}, optionsCopy);
-            if (options) {
-                delete options.fs;
-            }
-            return inst;
+            return ctx.create.wrappedMethod.call(tracer, path, createOptions);
         });
         ctx.write.callsFake(function (data) {
             emitter.emit('inc');
@@ -672,6 +674,58 @@ const _module = module.exports = {
             nodeVersion: ctx.getRuntimeInfo.nodeVersion
         }));
         ctx.networkCheck.resolves();
+
+        ctx.fs = {
+            volume: new memfs.Volume()
+        };
+        ctx.fs.fs = memfs.createFsFromVolume(ctx.fs.volume);
+
+        const realFS = utilMisc.fs;
+        const originMethods = {
+            mkdir: ctx.fs.fs.mkdir
+        };
+        ctx.fs.fs.mkdir = function customMkdir(dirPath) {
+            ctx.fs.volume.mkdirSync(pathUtil.dirname(dirPath), { recursive: true });
+            return originMethods.mkdir.apply(ctx.fs.fs, arguments);
+        };
+
+        ['access', 'readdir', 'stat'].forEach((method) => {
+            originMethods[method] = ctx.fs.fs[method];
+            ctx.fs.fs[method] = function customFN(fsPath) {
+                if (fsPath.includes('lib/consumers')
+                    || fsPath.includes('unit/consumers')
+                    || fsPath.includes('unit/dataPipeline/consumers')) {
+                    return realFS[method].apply(realFS, arguments);
+                }
+                return originMethods[method].apply(ctx.fs.fs, arguments);
+            };
+        });
+
+        // need to copy symbols first
+        const symb = Object.getOwnPropertySymbols(nodeFS.read).find((s) => /customPromisifyArgs/.test(s.toString()));
+        assert.isDefined(symb, 'should be able to find a symbol!');
+        Object.entries(nodeFS).forEach(([key, fn]) => {
+            if (fn[symb]) {
+                ctx.fs.fs[key][symb] = fn[symb];
+            }
+        });
+
+        ctx.fs.promise = (function promisifyNodeFsModule(fsModule) {
+            const newFsModule = Object.create(fsModule);
+            Object.keys(fsModule).forEach((key) => {
+                if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+                    newFsModule[key] = nodeUtil.promisify(fsModule[key]);
+                }
+            });
+            return newFsModule;
+        }(ctx.fs.fs));
+
+        sinon.stub(ctx.fs.promise);
+        Object.values(ctx.fs.promise).forEach((fn) => fn.callThrough());
+
+        utilMisc.fs = ctx.fs.promise;
+        ctx.fs.volume.reset();
+
         return ctx;
     }
 };
@@ -691,12 +745,12 @@ _module.default = {
     coreStub(modules, options) {
         modules = Object.assign({}, modules);
         const srcMap = {
+            appEvents: 'src/lib/appEvents',
             configWorker: 'src/lib/config',
             deviceUtil: 'src/lib/utils/device',
             logger: 'src/lib/logger',
-            persistentStorage: 'src/lib/persistentStorage',
             resourceMonitorUtils: 'src/lib/resourceMonitor/utils',
-            teemReporter: 'src/lib/teemReporter',
+            storage: 'src/lib/storage',
             tracer: 'src/lib/utils/tracer',
             utilMisc: 'src/lib/utils/misc'
         };
@@ -726,65 +780,51 @@ _module.default = {
 };
 
 /**
- * @typedef ClockStubCtx
- * @type {object}
+ * @typedef {object} AppEventsStubCtx
+ * @property {object} appEvents - instance of AppEvents
+ * @property {object} stub - sinon stub
+ */
+/**
+ * @typedef {object} ClockStubCtx
  * @property {function} clockForward - move clock forward
  * @property {object} [fakeClock] - sinon' fakeTimer object
  * @property {function} stopClockForward - stop fake clock activity
  * @property {object} stub - sinon stub
  */
 /**
- * @typedef ConfigWorkerStubCtx
- * @type {EventEmitter2Ctx}
+ * @typedef {EventEmitter2Ctx} ConfigWorkerStubCtx
  * @property {Array<object>} configs - list of emitted configs
+ * @property {ConfigWorker} configWorker - Config Worker instances
  * @property {sinon.spy} receivedSpy - spy for 'received' event
  * @property {sinon.spy} validationFailedSpy - spy for 'validationFailed' event
  * @property {sinon.spy} validationSucceedSpy - spy for 'validationSucceed' event
  */
 /**
- * @typedef CoreStubCtx
- * @type {object}
+ * @typedef {object} CoreStubCtx
  * @property {ConfigWorkerStubCtx} configWorker - config worker stub
+ * @property {function} destroyServices - destroy services
  * @property {DeviceUtilStubCtx} deviceUtil - Device Util stub
+ * @property {BigIpRestApiMock} localhostBigIp - BigIpRestApiMock instance for localhost
  * @property {LoggerStubCtx} logger - Logger stub
- * @property {PersistentStorageStubCtx} persistentStorage - Persistent Storage stub
- * @property {TeemReporterStubCtx} teemReporter - Teem Reporter stub
+ * @property {function} startServices - start services
+ * @property {function} stopServices - stop services
  * @property {TracerStubCtx} tracer - Tracer stub
  * @property {UtilMiscStubCtx} utilMisc - Util Misc. stub
  */
 /**
- * @typedef DeviceUtilStubCtx
- * @type {object}
- * @property {object} decryptSecret - stub for decryptSecret
- * @property {object} encryptSecret - stub for encryptSecret
- * @property {object} getDeviceType - stub for getDeviceType
+ * @typedef {object} DeviceUtilStubCtx
+ * @property {MockNockStubBase} decrypt - stub for decryptSecrets
+ * @property {MockNockStubBase} encrypt - stub for encryptSecret
+ * @property {MockNockStubBase} getDeviceType - stub for getDeviceType
  */
 /**
- * @typedef EventEmitter2Ctx
- * @type {object}
+ * @typedef {object} EventEmitter2Ctx
  * @property {Object<string, Array<function>} preExistingListeners - listeners to restore
  * @property {object} stub - sinon stub
  */
 /**
- * @typedef iHealthPollerStubCtx
- * @type {object}
- * @property {ihealthUtilStubCtx} ihealthUtil - iHealth Utils stubs
- */
-/**
- * @typedef ihealthUtilStubCtx
- * @type {object}
- * @property {object} IHealthManager - IHealthManager stubs
- * @property {object} IHealthManager.fetchQkviewDiagnostics - stub for IHealthManager.prototype.fetchQkviewDiagnostics
- * @property {object} IHealthManager.isQkviewReportReady - stub for IHealthManager.prototype.isQkviewReportReady
- * @property {object} IHealthManager.initialize - stub for IHealthManager.prototype.initialize
- * @property {object} IHealthManager.uploadQkview - stub for IHealthManager.prototype.uploadQkview
- * @property {object} QkviewManager - IHealthManager stubs
- * @property {object} QkviewManager.initialize - stub for QkviewManager.prototype.initialize
- * @property {object} QkviewManager.process - stub for QkviewManager.prototype.process
- */
-/**
- * @typedef LoggerStubCtx
- * @type {object}
+ * @typedef {object} LoggerStubCtx
+ * @property {Logger} logger - logger
  * @property {object} messages - logged messages
  * @property {Array<string>} messages.all - all logged messages
  * @property {Array<string>} messages.debug - debug messages
@@ -799,24 +839,7 @@ _module.default = {
  * @property {object} proxy_erro - sinon stub for Logger.logger.error
  */
 /**
- * @typedef PersistentStorageStubCtx
- * @type {object}
- * @property {function} loadCbAfter - error to throw on attempt to load
- * @property {function} loadCbBefore - error to throw on attempt to load
- * @property {any} loadData - data to set to '_data_' property on attempt to load
- * @property {Error} loadError - error to return to callback passed on attempt to load
- * @property {any} loadState - state to return on attempt to load
- * @property {object} restWorker - RestWorker stub
- * @property {function} saveCbAfter - error to throw on attempt to save
- * @property {function} saveCbBefore - error to throw on attempt to save
- * @property {Error} saveError - error to return to callback passed on attempt to save
- * @property {any} savedState - saved state on attempt to save (will override 'loadState')
- * @property {boolean} savedStateParse - parse '_data_' property of saved state if exist
- * @property {object} storage - sinon stub for persistentStorage.persistentStorage.storage
- */
-/**
- * @typedef ResourceMonitorUtilsStubCtx
- * @type {object}
+ * @typedef {object} ResourceMonitorUtilsStubCtx
  * @property {object} appMemoryUsage - stub for appMemoryUsage
  * @property {number} appMemoryUsage.external - `external` value
  * @property {number} appMemoryUsage.heapTotal - `heapTotal` value
@@ -826,14 +849,28 @@ _module.default = {
  * @property {number} osAvailableMem.free - free memory value
  */
 /**
- * @typedef TeemReporterStubCtx
- * @type {object}
- * @property {Array<object>} declarations - list of processed declarations
- * @property {object} process - sinon stub for TeemReporter.prototype.process
+ * @typedef {object} RestWorkerStubCtx
+ * @property {function} loadCbAfter - error to throw on attempt to load
+ * @property {function} loadCbBefore - error to throw on attempt to load
+ * @property {any} loadData - data to set to '_data_' property on attempt to load
+ * @property {Error} loadError - error to return to callback passed on attempt to load
+ * @property {sinon.stub} loadState - stub for 'loadState' function
+ * @property {any} loadStateData - state to return on attempt to load
+ * @property {object} restWorker - RestWorker stub
+ * @property {function} saveCbAfter - error to throw on attempt to save
+ * @property {function} saveCbBefore - error to throw on attempt to save
+ * @property {Error} saveError - error to return to callback passed on attempt to save
+ * @property {sinon.stub} saveState - stub for 'saveState' function
+ * @property {any} savedState - saved state on attempt to save (will override 'loadState')
+ * @property {boolean} savedStateParse - parse '_data_' property of saved state if exist
  */
 /**
- * @typedef TracerStubCtx
- * @type {object}
+ * @typedef {object} StorageStubCtx
+ * @property {StorageService} service - Storage Service instance
+ * @property {RestWorkerStubCtx} restWorker - Rest Worker stub
+ */
+/**
+ * @typedef {object} TracerStubCtx
  * @property {Object<string, Array<any>>} data - data written to tracers
  * @property {object} fromConfig - sinon stub for tracer.fromConfig method
  * @property {number} pendingWrites - number of pending attempts to write data
@@ -841,8 +878,11 @@ _module.default = {
  * @property {object} write - sinon stub for Tracer.prototype.write
  */
 /**
- * @typedef UtilMiscStubCtx
- * @type {object}
+ * @typedef {object} UtilMiscStubCtx
+ * @property {object} fs - stub for FS
+ * @property {memfs.Volume} fs.volume
+ * @property {memfs.FS} fs.fs - virtual FS module
+ * @property {memfs.FS} fs.promise - promisified virtual FS module
  * @property {object} generateUuid - stub for generateUuid
  * @property {number} generateUuid.uuidCounter - counter value
  * @property {boolean} generateUuid.numbersOnly - numbers only

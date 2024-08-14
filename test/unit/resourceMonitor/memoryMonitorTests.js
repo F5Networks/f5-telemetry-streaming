@@ -98,12 +98,14 @@ describe('Resource Monitor / Memory Monitor', () => {
 
     describe('service activity', () => {
         let clock;
-        let fsUtil;
 
-        beforeEach(() => {
-            fsUtil = {
-                readFileSync: () => PROC_MEM_INFO_OUTPUT
-            };
+        function updateProcMemInfo(data) {
+            coreStub.utilMisc.fs.promise.writeFileSync('/proc/meminfo', data);
+        }
+
+        beforeEach(async () => {
+            await coreStub.utilMisc.fs.promise.mkdir('/proc');
+            updateProcMemInfo(PROC_MEM_INFO_OUTPUT);
 
             Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
                 external: 10 * 1024 * 1024,
@@ -116,9 +118,7 @@ describe('Resource Monitor / Memory Monitor', () => {
         });
 
         it('should provide memory usage stats (simple check, default intervals - 1.5 sec)', () => {
-            memMon = new MemoryMonitor(callback, {
-                fs: fsUtil
-            });
+            memMon = new MemoryMonitor(callback);
             return Promise.all([
                 memMon.start(),
                 clock.clockForward(1000, { promisify: true, repeat: 2, delay: 50 })
@@ -154,7 +154,6 @@ describe('Resource Monitor / Memory Monitor', () => {
         it('should provide memory usage stats (non default intervals)', () => {
             memMon = new MemoryMonitor(callback, {
                 freeMemoryLimit: 10,
-                fs: fsUtil,
                 intervals: [
                     { usage: 50, interval: 0.5 },
                     { usage: 90, interval: 0.3 },
@@ -191,8 +190,7 @@ describe('Resource Monitor / Memory Monitor', () => {
                             utilizationPercent: 6.800000000000001
                         }
                     });
-
-                    fsUtil.readFileSync = () => 'MemAvailable:    9000 kB';
+                    updateProcMemInfo('MemAvailable:    9000 kB');
                 })
                 .then(() => clock.clockForward(300, { promisify: true, repeat: 2, delay: 10 }))
                 .then(() => {
@@ -220,7 +218,7 @@ describe('Resource Monitor / Memory Monitor', () => {
                         }
                     });
 
-                    fsUtil.readFileSync = () => PROC_MEM_INFO_OUTPUT;
+                    updateProcMemInfo(PROC_MEM_INFO_OUTPUT);
                 })
                 .then(() => clock.clockForward(600, { promisify: true, repeat: 2, delay: 10 }))
                 .then(() => {
@@ -251,7 +249,7 @@ describe('Resource Monitor / Memory Monitor', () => {
                 .then(() => clock.clockForward(75, { promisify: true, repeat: 2, delay: 10 }))
                 .then(() => {
                     assert.lengthOf(results, 3);
-                    fsUtil.readFileSync = () => 'MemFree:    9000 kB';
+                    updateProcMemInfo('MemFree:    9000 kB');
                 })
                 .then(() => clock.clockForward(300, { promisify: true, repeat: 2, delay: 10 }))
                 .then(() => {
@@ -311,7 +309,7 @@ describe('Resource Monitor / Memory Monitor', () => {
                             utilizationPercent: 10
                         }
                     });
-                    fsUtil.readFileSync = () => 'MemAvailable:    20000 kB';
+                    updateProcMemInfo('MemAvailable:    20000 kB');
                 })
                 .then(() => clock.clockForward(100, { promisify: true, repeat: 2, delay: 10 }))
                 .then(() => {
@@ -338,7 +336,7 @@ describe('Resource Monitor / Memory Monitor', () => {
                             utilizationPercent: 10
                         }
                     });
-                    fsUtil.readFileSync = () => 'MemAvai:    20000 kB';
+                    updateProcMemInfo('MemAvai:    20000 kB');
                     Object.assign(coreStub.resourceMonitorUtils.appMemoryUsage, {
                         external: 220 * 1024 * 1024,
                         heapTotal: 220 * 1024 * 1024,
@@ -440,7 +438,6 @@ describe('Resource Monitor / Memory Monitor', () => {
 
         it('should stop and resume activity', () => {
             memMon = new MemoryMonitor(callback, {
-                fs: fsUtil,
                 intervals: [
                     { usage: 100, interval: 0.1 }
                 ],
@@ -485,7 +482,6 @@ describe('Resource Monitor / Memory Monitor', () => {
                 rss: 17 * 1024 * 1024
             });
             memMon = new MemoryMonitor(callback, {
-                fs: fsUtil,
                 intervals: [
                     { usage: 50, interval: 0.5 },
                     { usage: 90, interval: 0.1 }
@@ -505,7 +501,6 @@ describe('Resource Monitor / Memory Monitor', () => {
         it('should call GC', () => {
             global.gc = sinon.spy();
             memMon = new MemoryMonitor(callback, {
-                fs: fsUtil,
                 intervals: [
                     { usage: 50, interval: 0.5 },
                     { usage: 90, interval: 0.1 }

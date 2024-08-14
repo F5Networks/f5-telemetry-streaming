@@ -24,9 +24,6 @@ const sinon = require('sinon');
 const assert = require('../shared/assert');
 const common = require('./common');
 const declValidator = require('./common').validate;
-const sourceCode = require('../shared/sourceCode');
-
-const constants = sourceCode('src/lib/constants');
 
 moduleCache.remember();
 
@@ -37,50 +34,14 @@ describe('Declarations -> AJV Custom Keywords', () => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
-    });
-
-    describe('nodeSupportVersion', () => {
-        const data = {
-            class: 'Telemetry',
-            My_Consumer: {
-                class: 'Telemetry_Consumer',
-                type: 'F5_Cloud',
-                f5csTenantId: 'a-blabla-a',
-                f5csSensorId: '12345',
-                payloadSchemaNid: 'f5',
-                serviceAccount: {
-                    type: 'not_used',
-                    projectId: 'deos-dev',
-                    privateKeyId: '11111111111111111111111',
-                    privateKey: {
-                        cipherText: 'privateKeyValue'
-                    },
-                    clientEmail: 'test@deos-dev.iam.gserviceaccount.com',
-                    clientId: '1212121212121212121212',
-                    authUri: 'https://accounts.google.com/o/oauth2/auth',
-                    tokenUri: 'https://oauth2.googleapis.com/token',
-                    authProviderX509CertUrl: 'https://www.googleapis.com/oauth2/v1/certs',
-                    clientX509CertUrl: 'https://www.googleapis.com/robot/v1/metadata/x509/test%40deos-dev.iam.gserviceaccount.com'
-                },
-                targetAudience: 'deos-ingest'
-            }
-        };
-
-        it('should fail because node version too low', () => {
-            coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.6.0' }));
-            return assert.isRejected(declValidator(data), 'requested node version');
-        });
-
-        it('should succeed because node version is higher then required', () => {
-            coreStub.utilMisc.getRuntimeInfo.value(() => ({ nodeVersion: '8.12.0' }));
-            return assert.isFulfilled(declValidator(data));
-        });
     });
 
     describe('pathExists', () => {
@@ -131,11 +92,12 @@ describe('Declarations -> AJV Custom Keywords', () => {
 
     describe('f5secret', () => {
         it('should fail cipherText with wrong device type', () => {
-            coreStub.deviceUtil.getDeviceType.resolves(constants.DEVICE_TYPE.CONTAINER);
+            coreStub.deviceUtil.getDeviceType.resolves('container');
             const data = {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         cipherText: 'mycipher'
                     }
@@ -151,6 +113,7 @@ describe('Declarations -> AJV Custom Keywords', () => {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         cipherText: cipher,
                         protected: 'SecureVault'
@@ -164,12 +127,12 @@ describe('Declarations -> AJV Custom Keywords', () => {
         });
 
         it('should base64 decode cipherText', () => {
-            coreStub.deviceUtil.encryptSecret.callsFake((data) => Promise.resolve(`$M$${data}`));
             const cipher = 'ZjVzZWNyZXQ='; // f5secret
             const data = {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         cipherText: cipher,
                         protected: 'plainBase64'
@@ -187,6 +150,7 @@ describe('Declarations -> AJV Custom Keywords', () => {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         cipherText: 'mycipher',
                         protected: 'SecureVault'
@@ -201,6 +165,7 @@ describe('Declarations -> AJV Custom Keywords', () => {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         protected: 'SecureVault'
                     }
@@ -214,6 +179,7 @@ describe('Declarations -> AJV Custom Keywords', () => {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         environmentVar: 'MY_ENV_SECRET'
                     }
@@ -234,6 +200,7 @@ describe('Declarations -> AJV Custom Keywords', () => {
                 class: 'Telemetry',
                 My_Poller: {
                     class: 'Telemetry_System_Poller',
+                    username: 'test_user_1',
                     passphrase: {
                         environmentVar: ''
                     }

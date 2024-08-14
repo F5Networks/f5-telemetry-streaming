@@ -447,7 +447,7 @@ F5 BIG-IP Telemetry Streaming 1.19 and later includes the **compressionType** pr
 Why is BIG-IP TS not showing up in UCS archive?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to include it to UCS archive. You may see following log entries in **/var/log/ltm**:
+Due the fact that F5 BIG-IP Telemetry Streaming has a quite high number of dependencies and sub-dependecies the BIG-IP unable to include it to UCS archive. You may see following log entries in **/var/log/ltm**:
 
 .. code-block:: bash
 
@@ -486,7 +486,7 @@ For more information see `K51300313 <https://my.f5.com/manage/s/article/K5130031
 Why is BIG-IP TS not syncing across HA group?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to sync it across all devices in HA group.
+Due the fact that F5 BIG-IP Telemetry Streaming has a quite high number of dependencies and sub-dependecies the BIG-IP unable to sync it across all devices in HA group.
 
 For more details and workaround see :ref:`bigucshasync`
 
@@ -497,9 +497,48 @@ For more details and workaround see :ref:`bigucshasync`
 Why is BIG-IP TS not showing up after BIG-IP upgrade?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Due the fact that F5 BIG-IP TS has a quite high number of dependencies and sub-dependecies the BIG-IP unable to back it up then restore to new volume with upgraded version of software.
+Due the fact that F5 BIG-IP Telemetry Streaming has a quite high number of dependencies and sub-dependecies the BIG-IP unable to back it up then restore to new volume with upgraded version of software.
 
 For more details and workaround see :ref:`bigucshasync`
+
+|
+
+.. _pullconsumertimeout:
+
+Why do I getting a TimeoutException from Telemetry Streaming when using a Pull Consumer?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When F5 BIG-IP configuration has a lot of objects it may take a lot of time to pull all stats, as result a request to Pull Consumer may end up with TimeoutException.
+
+To mitigate the issue F5 BIG-IP Telemetry Streaming allows to update the runtime's configuration (:ref:`runtimeconfigoptions`) to increase HTTP timeout value (in seconds) via declaration:
+
+.. code-block:: json
+   :emphasize-lines: 6
+
+   {
+        "class": "Telemetry",
+        "controls": {
+            "class": "Controls",
+            "runtime": {
+                "httpTimeout": 60
+            }
+        }
+    }
+
+.. NOTE:: You need to update **restjavad.timeout** value too. See `K94602685 <https://my.f5.com/manage/s/article/K94602685>`_ for more info.
+
+For more information see:
+
+-  :ref:`runtimeconfigoptions`
+
+- `K26408354 <https://my.f5.com/manage/s/article/K26408354>`_
+
+- `K94602685 <https://my.f5.com/manage/s/article/K94602685>`_
+
+- `Bug ID 858189 <https://cdn.f5.com/product/bugtracker/ID858189.html>`_
+
+- `Bug ID 1602033 <https://cdn.f5.com/product/bugtracker/ID1602033.html>`_
+
 
 .. |br| raw:: html
 

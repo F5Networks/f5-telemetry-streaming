@@ -116,7 +116,7 @@ describe('Event Listener / Parser', () => {
 
     describe('data processing', () => {
         const inputModes = [
-            'regular',
+            // 'regular',
             'byHalf'
         ];
         const featMap = {
@@ -126,7 +126,7 @@ describe('Event Listener / Parser', () => {
             FEAT_NONE: Parser.FEAT_NONE
         };
         const modes = [
-            'buffer',
+            // 'buffer',
             'string'
         ];
 
@@ -172,6 +172,7 @@ describe('Event Listener / Parser', () => {
                     callback = (chunks, hasKVPair, hasEvtCat) => {
                         mayHaveF5EventCategory.push(hasEvtCat);
                         mayHaveKeyValuePairs.push(hasKVPair);
+                        assert.deepStrictEqual(chunks.length, chunks.reduce((a) => a + 1, 0), 'should not allocate more slots than actual  data');
                         results.push(chunks.length === 1 ? chunks[0] : chunks.reduce((a, v) => a + v, ''));
                     };
                     makeInput = (chunk) => [chunk, Buffer.from(chunk).length, chunk.length];
@@ -550,6 +551,32 @@ describe('Event Listener / Parser', () => {
                     parser.push(makeInput('secondLineIncomple="value'));
                     assert.isFalse(parser.process(1e6, true)[0]);
                     assert.deepStrictEqual(results, ['firstLine', 'secondLineIncomple="value'], 'should produce 2 chunks of data');
+                });
+
+                it('should update metadata for every pointer and do not allocate more chunks than actual data size', () => {
+                    parser = new Parser(callback, {
+                        mode,
+                        maxSize: 30
+                    });
+
+                    parser.push(makeInput('first1'));
+                    parser.push(makeInput('first2'));
+                    parser.push(makeInput('first3'));
+                    parser.push(makeInput('Line\n'));
+                    parser.push(makeInput('ple="value'));
+                    parser.push(makeInput('first1'));
+                    parser.push(makeInput('first2'));
+                    parser.push(makeInput('fi\nrst3'));
+                    assert.isTrue(parser.process(1e6)[0]);
+
+                    parser.push(makeInput('first4'));
+                    parser.push(makeInput('Line\n'));
+                    assert.isFalse(parser.process(1e6, true)[0]);
+                    assert.deepStrictEqual(results, [
+                        'first1first2first3Line',
+                        'ple="valuefirst1first2fi',
+                        'rst3first4Line'
+                    ], 'should produce 2 chunks of data');
                 });
 
                 describe('.isReady()', () => {

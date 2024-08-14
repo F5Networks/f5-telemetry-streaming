@@ -78,6 +78,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -107,18 +109,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {}
                     },
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -148,12 +147,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {}
                     }
@@ -215,6 +209,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -244,12 +240,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             endpoint1: {
@@ -277,6 +268,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -306,12 +299,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             endpoint1: {
@@ -667,6 +655,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'f5telemetry_default::My_System_1::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -696,12 +686,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {
@@ -722,6 +707,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'f5telemetry_default::My_System_2::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -751,12 +738,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {
@@ -816,6 +798,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'f5telemetry_default::My_System_3::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -845,12 +829,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {
@@ -884,6 +863,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'My_Namespace::My_System_1::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -913,12 +894,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {
@@ -939,6 +915,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'My_Namespace::My_System_2::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -968,12 +946,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {
@@ -1033,6 +1006,8 @@ module.exports = {
                     {
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         class: 'Telemetry_System_Poller',
                         id: 'My_Namespace::My_System_3::SystemPoller_1',
                         name: 'SystemPoller_1',
@@ -1062,12 +1037,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         endpoints: {
                             enabledEndpoint1: {

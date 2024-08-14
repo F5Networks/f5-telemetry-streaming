@@ -18,6 +18,8 @@
 
 /** @module timers */
 
+const NotImplementedError = require('../errors').NotImplementedError;
+
 /**
  * Interface for classes that represents a recurring timer
  *
@@ -28,7 +30,7 @@ class TimerInterface {
      * @returns {boolean} true if instance is active
      */
     isActive() {
-        throw new Error('Not implemented');
+        throw new NotImplementedError();
     }
 
     /**
@@ -37,7 +39,7 @@ class TimerInterface {
      * @returns {Promise} resolved once scheduled
      */
     start() {
-        throw new Error('Not implemented');
+        throw new NotImplementedError();
     }
 
     /**
@@ -46,7 +48,7 @@ class TimerInterface {
      * @returns {Promise} resolved once updated and scheduled
      */
     update() {
-        throw new Error('Not implemented');
+        throw new NotImplementedError();
     }
 
     /**
@@ -55,7 +57,7 @@ class TimerInterface {
      * @returns {Promise} resolved once stopped
      */
     stop() {
-        throw new Error('Not implemented');
+        throw new NotImplementedError();
     }
 }
 

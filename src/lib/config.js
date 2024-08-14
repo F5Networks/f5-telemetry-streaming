@@ -16,17 +16,21 @@
 
 'use strict';
 
+const assert = require('./utils/assert');
 const CONFIG_CLASSES = require('./constants').CONFIG_CLASSES;
 const CONFIG_WORKER = require('./constants').CONFIG_WORKER;
 const configUtil = require('./utils/config');
 const errors = require('./errors');
 const logger = require('./logger');
-const persistentStorage = require('./persistentStorage').persistentStorage;
 const SafeEventEmitter = require('./utils/eventEmitter');
-const TeemReporter = require('./teemReporter').TeemReporter;
 const util = require('./utils/misc');
 
-/** @module config */
+/**
+ * @module config
+ *
+ * @typedef {import('./utils/config').Component} Component
+ * @typedef {import('./utils/config').FilterOptions} FilterOptions
+ */
 
 const BASE_CONFIG = {
     components: [],
@@ -47,7 +51,6 @@ const BASE_STORAGE_DATA = {};
  *
  * @property {configUtil.Configuration} currentConfig - copy of current configuration
  * @property {logger.Logger} logger - logger instance
- * @property {TeemReporter} teemReporter - TeemReporter instance
  * @property {object} validators - AJV validators
  */
 class ConfigWorker extends SafeEventEmitter {
@@ -73,18 +76,6 @@ class ConfigWorker extends SafeEventEmitter {
 
     /**
      * @public
-     * @returns {TeemReporter} instance
-     */
-    get teemReporter() {
-        // lazy initialization
-        Object.defineProperty(this, 'teemReporter', {
-            value: new TeemReporter()
-        });
-        return this.teemReporter;
-    }
-
-    /**
-     * @public
      * @returns {object} AJV validators
      */
     get validators() {
@@ -99,11 +90,14 @@ class ConfigWorker extends SafeEventEmitter {
      * Cleanup current state
      *
      * @public
-     * @returns {Promise} resolved once data removed from storage
+     * @returns {void} once data removed from storage
      */
-    cleanup() {
+    async cleanup() {
         delete this._currentConfig;
-        return persistentStorage.remove(CONFIG_WORKER.STORAGE_KEY);
+
+        await new Promise((resolve) => {
+            this.emitAsync('storage.remove', CONFIG_WORKER.STORAGE_KEY, resolve);
+        });
     }
 
     /**
@@ -239,6 +233,13 @@ class ConfigWorker extends SafeEventEmitter {
                 // ensure that 'validatedConfig' is a copy
                 validatedConfig = util.deepCopy(config);
                 storageData.raw = util.deepCopy(config);
+                return this.safeEmitAsync('prevalidationSucceed', {
+                    declaration: util.deepCopy(validatedConfig),
+                    metadata: util.deepCopy(options.metadata),
+                    transactionID
+                });
+            })
+            .then(() => {
                 this.logger.debug('Expanding configuration');
                 return expandDeclaration.call(this, declaration);
             })
@@ -285,28 +286,32 @@ class ConfigWorker extends SafeEventEmitter {
                 return Promise.resolve();
             })
             .then(() => notifyConfigChange.call(this, this.currentConfig, setConfigOpts))
-            .then(() => {
-                this.teemReporter.process(validatedConfig);
-                return options.expanded ? expandedConfig : validatedConfig;
-            });
+            .then(() => (options.expanded ? expandedConfig : validatedConfig));
     }
 }
 
 /**
  * @this ConfigWorker
- * @returns {Promise<object>} resolved with data loaded from Persistent Storage
+ * @returns {object} data loaded from Persistent Storage
  */
-function getStorageData() {
-    // persistentStorage.get returns data copy
-    return persistentStorage.get(CONFIG_WORKER.STORAGE_KEY)
-        .then((data) => {
-            // NOTE: starting from 1.19 '.raw' stored only
-            if (typeof data === 'undefined') {
-                data = util.deepCopy(BASE_STORAGE_DATA);
-                this.logger.debug(`persistentStorage did not have a value for ${CONFIG_WORKER.STORAGE_KEY}`);
+async function getStorageData() {
+    let data = await new Promise((resolve, reject) => {
+        this.emitAsync('storage.get', CONFIG_WORKER.STORAGE_KEY, (error, value) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(value);
             }
-            return data;
         });
+    });
+
+    if (typeof data === 'undefined') {
+        data = util.deepCopy(BASE_STORAGE_DATA);
+        this.logger.debug('No pre-existing configuration. Using the default one.');
+    }
+
+    // the storage returns data copy
+    return data;
 }
 
 /**
@@ -362,18 +367,18 @@ function notifyConfigChange(newConfig, options) {
 
 /**
  * @this ConfigWorker
+ *
  * @param {object} storageData - data to save to Persistent Storage
  *
- * @returns {Promise} resolved once config is saved
+ * @returns {void} once config is saved
  */
-function saveToStorage(storageData) {
-    // persistentStorage.set will make copy of data
-    return persistentStorage.set(CONFIG_WORKER.STORAGE_KEY, storageData)
-        .then(() => this.logger.debug('Application config saved'))
-        .catch((err) => {
-            this.logger.exception('Unexpected error on attempt to save application state', err);
-            return Promise.reject(err);
-        });
+async function saveToStorage(storageData) {
+    // the storage will make copy of data
+    await new Promise((resolve) => {
+        this.emitAsync('storage.set', CONFIG_WORKER.STORAGE_KEY, storageData, resolve);
+    });
+
+    this.logger.debug('Application config saved');
 }
 
 /**
@@ -395,9 +400,53 @@ function validate(declaration, options) {
     if (typeof validatorFunc !== 'undefined') {
         // AJV validators mutates 'declaration'
         return configUtil.validate(validatorFunc, declaration, options.context)
-            .catch((err) => Promise.reject(new errors.ValidationError(err)));
+            .catch((err) => Promise.reject(new errors.ValidationError(err.message)));
     }
     return Promise.reject(new Error('Validator is not available'));
+}
+
+/**
+ * NOTE: mutates `config`
+ *
+ * @param {Component | Component[]} config
+ * @param {function(error, config: Component | Component[])} callback
+ */
+async function onDecryptConfig(config, callback) {
+    try {
+        callback(null, await configUtil.decryptSecrets(config));
+    } catch (error) {
+        callback(error);
+    }
+}
+
+/**
+ * @param {function(result: Component[])} callback
+ * @param {FilterOptions} [filter] filtering options. 'filter' property ignored.
+ */
+function onGetConfig(callback, filter = {}) {
+    delete filter.filter;
+    // currentConfig returns a copy every time
+    callback(configUtil.getComponents(this.currentConfig, filter));
+}
+
+/**
+ * @param {Component | Component[]} config
+ * @param {function(error, hash: string | string[])} callback
+ */
+async function onGetHash(config, callback) {
+    const isArray = Array.isArray(config);
+    config = isArray ? config : [config];
+
+    try {
+        assert.not.empty(config, 'config');
+        const hash = config.map((c) => {
+            assert.object(c, 'config');
+            return configUtil.getComponentHash(c);
+        });
+        callback(null, isArray ? hash : hash[0]);
+    } catch (error) {
+        callback(error);
+    }
 }
 
 // initialize singleton
@@ -419,7 +468,26 @@ configWorker.on('error', (err) => {
     configWorker.logger.exception('Unhandled error in ConfigWorker', err);
 });
 
+function initialize(appEvents) {
+    const namespace = 'config';
+    appEvents.register(configWorker, namespace, [
+        { change: 'change' },
+        { prevalidationSucceed: 'prevalidated' },
+        { received: 'received' },
+        { validationFailed: 'validationFailed' },
+        { validationSucceed: 'validationSucceed' },
+        'storage.get',
+        'storage.remove',
+        'storage.set'
+    ]);
+
+    appEvents.on(`*.${namespace}.decrypt`, onDecryptConfig.bind(configWorker), { objectify: true });
+    appEvents.on(`*.${namespace}.getConfig`, onGetConfig.bind(configWorker), { objectify: true });
+    appEvents.on(`*.${namespace}.getHash`, onGetHash.bind(configWorker), { objectify: true });
+}
+
 module.exports = configWorker;
+module.exports.initialize = initialize;
 
 /**
  * Config changed event.

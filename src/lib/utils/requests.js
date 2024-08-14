@@ -17,12 +17,14 @@
 'use strict';
 
 const request = require('request');
+
 const constants = require('../constants');
+const logger = require('../logger').getChild('requests');
 const util = require('./misc');
 
 /** @module requestsUtil */
-/* Helper functions for making requests
- */
+
+const LOG_LEVEL = 'verbose';
 
 // cleanup options. Update tests (test/unit/utils/requestsTests.js) when adding new value
 const MAKE_REQUEST_OPTS_TO_REMOVE = [
@@ -183,10 +185,34 @@ const makeRequest = function () {
     });
 
     return new Promise((resolve, reject) => {
+        let reqID;
+        let ts;
+        if (logger.isLevelAllowed(LOG_LEVEL)) {
+            reqID = util.generateUuid().slice(0, 5);
+            ts = Date.now();
+            // log now to show what was passed to the lib
+            logger[LOG_LEVEL]({
+                reqID,
+                options: Object.assign({}, options, { agent: typeof options.agent !== 'undefined' }),
+                timestamp: ts
+            });
+        }
+
         // using request.get, request.post, etc. - useful during unit test mocking
         request[options.method.toLowerCase()](options, (err, res, body) => {
+            if (logger.isLevelAllowed(LOG_LEVEL)) {
+                logger[LOG_LEVEL]({
+                    body,
+                    duration: Date.now() - ts,
+                    error: `${err}`,
+                    reqID,
+                    statusCode: res ? res.statusCode : null
+                });
+            }
+
             if (err) {
-                reject(new Error(`HTTP error: ${err}`));
+                err.message = `HTTP Error: ${err.message || err}`;
+                reject(err);
             } else {
                 if (!rawResponseBody) {
                     try {

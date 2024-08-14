@@ -171,7 +171,7 @@ function setup() {
                         // OpenTelemetry Exporter consumer is supported on bigip 14.1 and above
                         SHOULD_SKIP_DUE_VERSION[bigip.hostname] = srcMiscUtils.compareVersionStrings(version, '<', '14.0');
 
-                        logger.info('DUT\' version', {
+                        logger.info('DUT version', {
                             hostname: bigip.hostname,
                             shouldSkipTests: SHOULD_SKIP_DUE_VERSION[bigip.hostname],
                             version
@@ -227,7 +227,7 @@ function test() {
                 : null));
 
             testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => (isValidDut(bigip)
-                ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`
+                ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${F5_CLOUD_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"\n`
                 : null));
         });
 

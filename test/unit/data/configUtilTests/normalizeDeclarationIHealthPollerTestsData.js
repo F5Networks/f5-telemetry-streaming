@@ -34,6 +34,10 @@ module.exports = {
                     class: 'Telemetry_System',
                     host: 'host1',
                     enable: true,
+                    username: 'test_user_1',
+                    passphrase: {
+                        cipherText: 'test_passphrase_1'
+                    },
                     iHealthPoller: {
                         username: 'test_user_1',
                         passphrase: {
@@ -44,10 +48,17 @@ module.exports = {
                                 start: '23:15',
                                 end: '02:15'
                             }
+                        },
+                        proxy: {
+                            host: 'proxyhost',
+                            port: 5555,
+                            protocol: 'https'
                         }
                     },
                     systemPoller: {
-                        interval: 60
+                        interval: 60,
+                        workers: 6,
+                        chunkSize: 60
                     }
                 },
                 My_Consumer: {
@@ -70,10 +81,22 @@ module.exports = {
                                     start: '23:15',
                                     end: '02:15'
                                 }
+                            },
+                            proxy: {
+                                host: 'proxyhost',
+                                port: 5555,
+                                protocol: 'https',
+                                allowSelfSignedCert: true,
+                                username: 'test_user_1',
+                                passphrase: {
+                                    cipherText: 'test_passphrase_2'
+                                }
                             }
                         },
                         systemPoller: {
-                            interval: 60
+                            interval: 60,
+                            workers: 6,
+                            chunkSize: 60
                         }
                     },
                     My_Consumer: {
@@ -99,8 +122,12 @@ module.exports = {
                             protocol: 'http'
                         },
                         credentials: {
-                            passphrase: undefined,
-                            username: undefined
+                            passphrase: {
+                                cipherText: '$M$test_passphrase_1',
+                                class: 'Secret',
+                                protected: 'SecureVault'
+                            },
+                            username: 'test_user_1'
                         },
                         dataOpts: {
                             actions: [
@@ -112,12 +139,13 @@ module.exports = {
                                     }
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
+                            noTMStats: true
                         },
                         enable: true,
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         interval: 60,
+                        workers: 6,
+                        chunkSize: 60,
                         name: 'SystemPoller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
@@ -151,9 +179,8 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
@@ -162,33 +189,32 @@ module.exports = {
                             },
                             proxy: {
                                 connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
+                                    host: 'proxyhost',
+                                    port: 5555,
+                                    protocol: 'https',
                                     allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
                                 }
                             }
                         },
                         system: {
-                            host: 'host1',
                             name: 'My_System',
                             connection: {
+                                host: 'host1',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
                             },
                             credentials: {
-                                username: undefined,
-                                passphrase: undefined
+                                passphrase: {
+                                    cipherText: '$M$test_passphrase_1',
+                                    class: 'Secret',
+                                    protected: 'SecureVault'
+                                },
+                                username: 'test_user_1'
                             }
                         },
                         id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System',
                         traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
@@ -216,10 +242,6 @@ module.exports = {
                             port: 8100,
                             protocol: 'http'
                         },
-                        credentials: {
-                            passphrase: undefined,
-                            username: undefined
-                        },
                         dataOpts: {
                             actions: [
                                 {
@@ -230,12 +252,13 @@ module.exports = {
                                     }
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
+                            noTMStats: true
                         },
                         enable: true,
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         interval: 60,
+                        workers: 6,
+                        chunkSize: 60,
                         name: 'SystemPoller_1',
                         namespace: 'My_Namespace',
                         systemName: 'My_System',
@@ -269,9 +292,8 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
@@ -280,32 +302,31 @@ module.exports = {
                             },
                             proxy: {
                                 connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
+                                    host: 'proxyhost',
+                                    port: 5555,
+                                    protocol: 'https',
+                                    allowSelfSignedCert: true
                                 },
                                 credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
+                                    username: 'test_user_1',
+                                    passphrase: {
+                                        cipherText: '$M$test_passphrase_2',
+                                        class: 'Secret',
+                                        protected: 'SecureVault'
+                                    }
                                 }
                             }
                         },
                         system: {
-                            host: 'host2',
                             name: 'My_System',
                             connection: {
+                                host: 'host2',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System::iHealthPoller_1'
                     },
@@ -349,6 +370,10 @@ module.exports = {
                             start: '23:15',
                             end: '02:15'
                         }
+                    },
+                    proxy: {
+                        host: 'proxyhost',
+                        username: 'test_user_1'
                     }
                 },
                 My_Consumer: {
@@ -407,9 +432,8 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
@@ -418,33 +442,27 @@ module.exports = {
                             },
                             proxy: {
                                 connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
+                                    host: 'proxyhost',
+                                    port: 80,
+                                    protocol: 'http',
                                     allowSelfSignedCert: false
                                 },
                                 credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
+                                    username: 'test_user_1'
                                 }
                             }
                         },
                         system: {
-                            host: 'host1',
                             name: 'My_System',
                             connection: {
+                                host: 'host1',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_System::My_iHealth_Poller'
                     },
@@ -485,44 +503,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host2',
                             name: 'My_System',
                             connection: {
+                                host: 'host2',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System::My_iHealth_Poller'
                     },
@@ -646,45 +646,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host1',
                             name: 'My_System_1',
                             connection: {
+                                host: 'host1',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System_1::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System_1',
                         traceName: 'f5telemetry_default::My_System_1::My_iHealth_Poller'
                     },
                     {
@@ -707,45 +689,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host2',
                             name: 'My_System_2',
                             connection: {
+                                host: 'host2',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System_2',
                         traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
                     {
@@ -785,45 +749,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host3',
                             name: 'My_System_1',
                             connection: {
+                                host: 'host3',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System_1::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'My_Namespace',
-                        systemName: 'My_System_1',
                         traceName: 'My_Namespace::My_System_1::My_iHealth_Poller'
                     },
                     {
@@ -846,45 +792,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host4',
                             name: 'My_System_2',
                             connection: {
+                                host: 'host4',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
                         namespace: 'My_Namespace',
-                        systemName: 'My_System_2',
                         traceName: 'My_Namespace::My_System_2::My_iHealth_Poller'
                     },
                     {
@@ -1070,44 +998,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System',
                         traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
@@ -1130,44 +1040,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System_2',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
@@ -1192,43 +1084,25 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System::iHealthPoller_1'
                     },
@@ -1252,44 +1126,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System_2',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System_2::My_iHealth_Poller'
                     }
@@ -1455,44 +1311,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host1',
                             name: 'My_System',
                             connection: {
+                                host: 'host1',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System',
                         traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
@@ -1515,44 +1353,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host2',
                             name: 'My_System_2',
                             connection: {
+                                host: 'host2',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
@@ -1594,43 +1414,25 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host3',
                             name: 'My_System',
                             connection: {
+                                host: 'host3',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System::iHealthPoller_1'
                     },
@@ -1654,44 +1456,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host4',
                             name: 'My_System_2',
                             connection: {
+                                host: 'host4',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System_2::My_iHealth_Poller'
                     },
@@ -1733,43 +1517,25 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host5',
                             name: 'My_System',
                             connection: {
+                                host: 'host5',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace_2::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace_2',
                         traceName: 'My_Namespace_2::My_System::iHealthPoller_1'
                     },
@@ -1793,44 +1559,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'host6',
                             name: 'My_System_2',
                             connection: {
+                                host: 'host6',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace_2::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'My_Namespace_2',
                         traceName: 'My_Namespace_2::My_System_2::My_iHealth_Poller'
                     },
@@ -1870,7 +1618,8 @@ module.exports = {
                             timeWindow: {
                                 start: '23:15',
                                 end: '02:15'
-                            }
+                            },
+                            frequency: 'daily'
                         }
                     }
                 },
@@ -1884,7 +1633,9 @@ module.exports = {
                         timeWindow: {
                             start: '23:15',
                             end: '02:15'
-                        }
+                        },
+                        frequency: 'weekly',
+                        day: 7
                     }
                 },
                 My_System_2: {
@@ -1913,7 +1664,9 @@ module.exports = {
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
-                                }
+                                },
+                                frequency: 'weekly',
+                                day: 'wednesday'
                             }
                         }
                     },
@@ -1927,7 +1680,9 @@ module.exports = {
                             timeWindow: {
                                 start: '23:15',
                                 end: '02:15'
-                            }
+                            },
+                            frequency: 'monthly',
+                            day: 30
                         }
                     },
                     My_System_2: {
@@ -2019,44 +1774,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System::iHealthPoller_1',
                         namespace: 'f5telemetry_default',
-                        systemName: 'My_System',
                         traceName: 'f5telemetry_default::My_System::iHealthPoller_1'
                     },
                     {
@@ -2079,44 +1816,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
-                                frequency: 'daily',
+                                day: 7,
+                                frequency: 'weekly',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System_2',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'f5telemetry_default::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'f5telemetry_default',
                         traceName: 'f5telemetry_default::My_System_2::My_iHealth_Poller'
                     },
@@ -2175,43 +1895,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
-                                frequency: 'daily',
+                                day: 'wednesday',
+                                frequency: 'weekly',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System::iHealthPoller_1'
                     },
@@ -2235,44 +1938,27 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
-                                frequency: 'daily',
+                                day: 30,
+                                frequency: 'monthly',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System_2',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'My_Namespace',
                         traceName: 'My_Namespace::My_System_2::My_iHealth_Poller'
                     },
@@ -2331,43 +2017,25 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace_2::My_System::iHealthPoller_1',
-                        systemName: 'My_System',
                         namespace: 'My_Namespace_2',
                         traceName: 'My_Namespace_2::My_System::iHealthPoller_1'
                     },
@@ -2391,44 +2059,26 @@ module.exports = {
                                     protected: 'SecureVault'
                                 }
                             },
-                            downloadFolder: undefined,
+                            downloadFolder: '/shared/tmp',
                             interval: {
-                                day: undefined,
                                 frequency: 'daily',
                                 timeWindow: {
                                     start: '23:15',
                                     end: '02:15'
                                 }
-                            },
-                            proxy: {
-                                connection: {
-                                    host: undefined,
-                                    port: undefined,
-                                    protocol: undefined,
-                                    allowSelfSignedCert: false
-                                },
-                                credentials: {
-                                    username: undefined,
-                                    passphrase: undefined
-                                }
                             }
                         },
                         system: {
-                            host: 'localhost',
                             name: 'My_System_2',
                             connection: {
+                                host: 'localhost',
                                 port: 8100,
                                 protocol: 'http',
                                 allowSelfSignedCert: false
-                            },
-                            credentials: {
-                                username: undefined,
-                                passphrase: undefined
                             }
                         },
                         id: 'My_Namespace_2::My_System_2::My_iHealth_Poller',
                         name: 'My_iHealth_Poller',
-                        systemName: 'My_System_2',
                         namespace: 'My_Namespace_2',
                         traceName: 'My_Namespace_2::My_System_2::My_iHealth_Poller'
                     },

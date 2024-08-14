@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -13,47 +21,39 @@
 
 const APP_THRESHOLDS = require('../constants').APP_THRESHOLDS;
 const configUtil = require('../utils/config');
-const logger = require('../logger').getChild('resourceMonitor');
 const miscUtil = require('../utils/misc');
 const rmUtil = require('./utils');
 
 const MemoryMonitor = require('./memoryMonitor');
+const psBuilder = require('./processingState');
 const Service = require('../utils/service');
 
-/** @module resourceMonitor */
+/**
+ * @module resourceMonitor
+ *
+ * @typedef {import('../appEvents').ApplicationEvents} ApplicationEvents
+ * @typedef {import('../utils/config').Configuration} Configuration
+ * @typedef {import('./memoryMonitor').MemoryCheckStatus} MemoryCheckStatus
+ * @typedef {import('./processingState').ProcessingState} ProcessingState
+ */
 
 class ServiceError extends Error {}
 
-const MEM_MON_STOP_EVT = 'memoryMonitorStop';
+const EE_NAMESPACE = 'resmon';
 
 /**
  * Resource Monitor Class
  *
- * @property {logger.Logger} logger
+ * NOTE:
+ * instance will restore its configuration when destroy -> start/restart happened
+ *
+ * @fires config.applied
+ * @fires pstate
  */
-class ResourceMonitor extends Service {
+class ResourceMonitorService extends Service {
     constructor() {
         super();
-
-        /** define static read-only props that should not be overriden */
-        Object.defineProperties(this, {
-            logger: {
-                value: logger.getChild(this.constructor.name)
-            }
-        });
-
-        this._memoryMonitorState = {
-            config: {},
-            enabled: false,
-            instance: null,
-            logging: {
-                freq: APP_THRESHOLDS.MEMORY.DEFAULT_LOG_FREQ, // logging requence (in ms.)
-                lastMessage: 0, // last logged message timestamp (in ms.)
-                level: APP_THRESHOLDS.MEMORY.DEFAULT_LOG_LEVEL
-            },
-            recentUsage: null
-        };
-        this.restartsEnabled = true;
+        this._memoryMonitorState = initialMemoryMonitorState();
     }
 
     /** @returns {boolean} true if Memory Monitor is running */
@@ -71,7 +71,7 @@ class ResourceMonitor extends Service {
         };
     }
 
-    /** @returns {memoryMonitor.MemoryCheckStatus} most recent data about memory usage */
+    /** @returns {MemoryCheckStatus} most recent data about memory usage */
     get memoryState() {
         // making a copy ensures that any other piece of code to be able to modify this data
         return miscUtil.deepCopy(this._memoryMonitorState.recentUsage);
@@ -80,174 +80,163 @@ class ResourceMonitor extends Service {
     /**
      * Configure and start the service
      *
+     * @fires pstate
+     *
      * @param {function} onFatalError - function to call on fatal error to restart the service
+     * @param {object} info - additional info
+     * @param {boolean} info.coldStart - true if the service was started first time after creating or once destroyed
+     * @param {boolean} info.restart - true if the service was started due calling `.restart()`.
+     *  NOTE: set to `false` on cold start.
      */
-    _onStart() {
-        return new Promise((resolve, reject) => {
+    _onStart(onFatalError, info) {
+        return (new Promise((resolve, reject) => {
             const memState = this._memoryMonitorState;
             if (memState.instance) {
                 reject(new ServiceError('_memoryMonitorState.instance exists already!'));
             } else if (memState.enabled) {
-                this.logger.verbose('_onStart: Memory Monitor enabled, starting...');
+                this.logger.debug('_onStart: Memory Monitor enabled, starting...');
                 memState.instance = new MemoryMonitor(
                     memoryMonitorCb.bind(this),
                     Object.assign(miscUtil.deepCopy(memState.config), {
-                        logger: this.logger.getChild('Memory Monitor')
+                        logger: this.logger
                     })
                 );
                 memState.instance.start()
                     .then(resolve, reject);
             } else {
                 memState.recentUsage = null;
-                this.logger.verbose('_onStart: Memory Monitor disabled!');
+                this.logger.debug('_onStart: Memory Monitor disabled!');
                 resolve();
             }
-        });
+        }))
+            // emit only once on cold start (application start)
+            .then(() => info.coldStart && this.ee.safeEmitAsync(
+                'pstate',
+                (onEnable, onDisable) => psBuilder(this, onEnable, onDisable)
+            ));
     }
 
     /**
      * Stop the service
      *
-     * @param {boolean} [restart] - true if service going to be restarted
+     * @param {object} info - additional info
+     * @param {boolean} info.destroy - true if the service was stopped due calling `.destroy()`.
+     * @param {boolean} info.restart - true if the service was started due calling `.restart()`.
      */
-    _onStop(restart) {
-        return new Promise((resolve, reject) => {
-            const memState = this._memoryMonitorState;
-            if (memState.instance) {
-                this.logger.verbose(
+    _onStop(info) {
+        const memState = this._memoryMonitorState;
+        let stopRet;
+
+        return Promise.resolve()
+            .then(() => {
+                const memMon = memState.instance;
+                if (memMon === null) {
+                    return Promise.resolve();
+                }
+
+                memState.instance = null;
+                if (info.destroy) {
+                    this.logger.debug('Destroying Memory Monitor.');
+                    return memMon.destroy();
+                }
+
+                this.logger.debug(
                     '_onStop: '
-                    + ((restart && memState.enabled)
+                    + ((info.restart && memState.enabled)
                         ? 'Restarting Memory Monitor to apply configuration.'
                         : 'Stopping Memory Monitor.')
                 );
-                memState.instance.stop()
-                    .then(() => {
-                        memState.instance = null;
-                        if (!memState.enabled) {
-                            memState.recentUsage = null;
-                            this.ee.safeEmit(MEM_MON_STOP_EVT);
-                        }
-                    })
-                    .then(resolve, reject);
-            } else {
-                resolve();
-            }
-        });
+                return memMon.stop();
+            })
+            .then((success) => ({ success }), (error) => ({ error }))
+            .then((ret) => {
+                stopRet = ret;
+
+                if (info.destroy || !memState.enabled) {
+                    // clear recent usage stats when monitor disabled
+                    memState.recentUsage = null;
+                } // otherwise keep recent usage stats to provide seamless service
+
+                if (info.destroy) {
+                    return this.ee.safeEmitAsync('pstate.destroy');
+                }
+                if (!memState.enabled) {
+                    // memory monitor disabled, need to re-enable processing (default state)
+                    this.logger.warning('Re-enabling processing (memory monitor disabled).');
+                    return this.ee.safeEmitAsync(APP_THRESHOLDS.MEMORY.STATE.OK, null);
+                }
+                // otherwise monitor will be restarted, keep current state
+                return Promise.resolve();
+            })
+            .then(() => (
+                stopRet.error
+                    ? Promise.reject(stopRet.error)
+                    : Promise.resolve(stopRet.success)));
     }
 
     /** @returns {Promise<boolean>} resolved with true when service destroyed or if it was destroyed already */
     destroy() {
-        // disabled Memory Monitor to emit `MEM_MON_STOP_EVT` later
-        this._memoryMonitorState.enabled = false;
         this._offConfigUpdates
             && this._offConfigUpdates.off()
             && (this._offConfigUpdates = null);
 
         return super.destroy()
-            .then(() => {
+            .then((ret) => {
+                this._memoryMonitorState = initialMemoryMonitorState();
+
                 // all listeners notified already, safe to remove
+                this._offMyEvents
+                    && this._offMyEvents.off()
+                    && (this._offMyEvents = null);
+
+                // free all pstate refts
                 this.ee.removeAllListeners(APP_THRESHOLDS.MEMORY.STATE.NOT_OK);
                 this.ee.removeAllListeners(APP_THRESHOLDS.MEMORY.STATE.OK);
-                this.ee.removeAllListeners(MEM_MON_STOP_EVT);
-                this.logger.info('Destroyed! Data processing enabled!');
+                this.ee.removeAllListeners('pstate.destroy');
+
+                this.logger.warning('Destroyed! Data processing enabled!');
+
+                return ret;
             });
     }
 
-    /** @param {restWorker.ApplicationContext} appCtx - application context */
-    initialize(appCtx) {
-        if (appCtx.configMgr) {
-            this._offConfigUpdates = appCtx.configMgr.on('change', onConfigEvent.bind(this), { objectify: true });
-            this.logger.debug('Subscribed to configuration updates.');
-        } else {
-            this.logger.warning('Unable to subscribe to configuration updates!');
-        }
-    }
+    /** @param {ApplicationEvents} appEvents - application events */
+    initialize(appEvents) {
+        this._offConfigUpdates = appEvents.on('config.change', onConfigEvent.bind(this), { objectify: true });
+        this.logger.debug('Subscribed to Configuration updates.');
 
-    /**
-     * @param {function} onEnable
-     * @param {function} onDisable
-     *
-     * @returns {ProcessingState} instance
-     */
-    initializePState(onEnable, onDisable) {
-        return (new ProcessingState(this)).initialize(onEnable, onDisable);
+        this._offMyEvents = appEvents.register(this.ee, EE_NAMESPACE, [
+            { 'config.applied': 'config.applied' },
+            { pstate: 'pstate' }
+        ]);
     }
 
     /** @return {boolean} true if processing allowed by most recent memory status check */
     isProcessingEnabled() {
         const recentUsage = this._memoryMonitorState.recentUsage;
-        return recentUsage
-            ? recentUsage.thresholdStatus === APP_THRESHOLDS.MEMORY.STATE.OK
-            : true;
+        return recentUsage === null || recentUsage.thresholdStatus === APP_THRESHOLDS.MEMORY.STATE.OK;
     }
 }
 
-/** Processing State Class */
-class ProcessingState {
-    /** @param {ResourceMonitor} resourceMonitor */
-    constructor(resourceMonitor) {
-        this._enabled = true;
-        this._listeners = [];
-        this._onDisable = null;
-        this._onEnable = null;
-        this._resMonitor = resourceMonitor;
-    }
-
-    /** @returns {boolean} if processing allowed to continue */
-    get enabled() {
-        return this._enabled;
-    }
-
-    /** @returns {memoryMonitor.MemoryCheckStatus} most recent data about memory usage */
-    get memoryState() {
-        return this._resMonitor.memoryState;
-    }
-
-    /** Destroy instance and unsubscribe from all events */
-    destroy() {
-        this._enabled = true;
-        this._listeners.forEach((listener) => listener.off());
-        this._listeners.length = 0;
-        this._resMonitor = null;
-    }
-
-    /**
-     * @param {function} onEnable
-     * @param {function} onDisable
-     *
-     * @returns {ProcessingState} instance
-     */
-    initialize(onEnable, onDisable) {
-        // save prev state
-        const isEnabled = this._enabled;
-        const resMonitor = this._resMonitor;
-
-        this.destroy();
-
-        // restore prev state
-        this._enabled = isEnabled;
-        this._resMonitor = resMonitor;
-
-        // assign callbacks and subscribe to events
-        this._onEnable = onEnable;
-        this._onDisable = onDisable;
-
-        const updateEventCb = updateProcessingState.bind(this, true);
-        this._listeners = [
-            APP_THRESHOLDS.MEMORY.STATE.NOT_OK,
-            APP_THRESHOLDS.MEMORY.STATE.OK,
-            MEM_MON_STOP_EVT
-        ].map((evt) => this._resMonitor.ee.on(evt, updateEventCb, { objectify: true }));
-
-        updateProcessingState.call(this, false);
-        return this;
-    }
+/** @returns {object} initial Memory Monitor state */
+function initialMemoryMonitorState() {
+    return {
+        config: {},
+        enabled: false,
+        instance: null,
+        logging: {
+            freq: APP_THRESHOLDS.MEMORY.DEFAULT_LOG_FREQ, // logging requence (in ms.)
+            lastMessage: 0, // last logged message timestamp (in ms.)
+            level: APP_THRESHOLDS.MEMORY.DEFAULT_LOG_LEVEL
+        },
+        recentUsage: null
+    };
 }
 
 /**
- * @this ResourceMonitor
+ * @this ResourceMonitorService
  *
- * @param {memoryMonitor.MemoryCheckStatus} checkStatus
+ * @param {MemoryCheckStatus} checkStatus
  */
 function memoryMonitorCb(checkStatus) {
     const memState = this._memoryMonitorState;
@@ -299,31 +288,9 @@ function memoryMonitorCb(checkStatus) {
 }
 
 /**
- * Event handler for memore usage state updates
- *
- * @this ProcessingState
- *
- * @param {boolean} fireCallbacks - if true then callbacks will be fired
- */
-function updateProcessingState(fireCallbacks) {
-    const prevEnabled = this._enabled;
-    this._enabled = this._resMonitor.isProcessingEnabled();
-
-    if (arguments.length === 1) {
-        // monitor stopped, re-enable all
-        !prevEnabled && this._onEnable && this._onEnable();
-    } else if (fireCallbacks && (prevEnabled !== this._enabled)) {
-        // call all callbacks in same event loop
-        this.enabled
-            ? (this._onEnable && this._onEnable())
-            : (this._onDisable && this._onDisable());
-    }
-}
-
-/**
  * Create a Memory Monitor configuration
  *
- * @this ResourceMonitor
+ * @this ResourceMonitorService
  *
  * @param {Configuration} config
 */
@@ -402,26 +369,26 @@ function updateMemoryMonitorConfig(config) {
 }
 
 /**
- * @this ResourceMonitor
+ * @this ResourceMonitorService
  *
  * @param {Configuration} config
- *
- * @returns {Promise} resolved once config applied to the instance
  */
 function onConfigEvent(config) {
-    return Promise.resolve()
+    Promise.resolve()
         .then(() => {
-            this.logger.verbose('Config "change" event');
+            this.logger.debug('Config "change" event');
             return setConfig.call(this, config);
         }).catch((err) => {
             this.logger.exception('Error caught on attempt to apply configuration to Resource Monitor:', err);
-        });
+        })
+        // emit in any case to show we are done with config processing
+        .then(() => this.ee.safeEmitAsync('config.applied'));
 }
 
 /**
  * Upate Resource Monitor configuration
  *
- * @this ResourceMonitor
+ * @this ResourceMonitorService
  *
  * @param {Configuration} config - configuration to apply
  *
@@ -446,7 +413,7 @@ function setConfig(config) {
     return Promise.resolve(needRestart && this.restart());
 }
 
-module.exports = ResourceMonitor;
+module.exports = ResourceMonitorService;
 
 /**
  * @typedef MemoryMontorLiveConfig
@@ -454,4 +421,17 @@ module.exports = ResourceMonitor;
  * @property {object} config - config
  * @property {boolean} enabled - true if Memory Monitor enabled
  * @property {object} logging - logging config
+ */
+/**
+ * @callback PStateBuilder
+ * @param {function} onEnable
+ * @param {function} onDisable
+ *
+ * @returns {ProcessingState}
+ */
+/**
+ * @event pstate
+ * @param {PStateBuilder} getPState - function to create Processing State instance
+ *
+ * Event fired only once on service very first start
  */

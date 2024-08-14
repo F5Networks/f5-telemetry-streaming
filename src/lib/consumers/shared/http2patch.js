@@ -19,6 +19,10 @@
 const miscUtil = require('../../utils/misc');
 const logger = require('../../logger').getChild('http2patch');
 
+/**
+ * NOTE: HTTP2 + grpc is broken on node 8.11.1 again
+ */
+
 // returns same Symbol every time
 const kPatched = Symbol.for('tsPatchedHttp2');
 
@@ -266,9 +270,7 @@ function patchHttp2Lib() {
     return http2[kPatched];
 }
 const nodeVersion = process.version.slice(1);
-if (miscUtil.compareVersionStrings(nodeVersion, '<', '8.11.1')) {
-    logger.debug('Don\'t need to patch "http2" module - minimal node.js version is 8.11.1!');
-} else if (miscUtil.compareVersionStrings(nodeVersion, '>', '8.13')) {
+if (miscUtil.compareVersionStrings(nodeVersion, '>', '8.13')) {
     logger.debug('Don\'t need to patch "http2" module - is up-to-date already!');
 } else {
     logger.warning('Patching "http2" module');

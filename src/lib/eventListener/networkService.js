@@ -26,9 +26,17 @@ const logger = require('../logger');
 const promiseUtil = require('../utils/promise');
 const Service = require('../utils/service');
 
-/** @module eventListener/networkService */
+/**
+ * @private
+ *
+ * @module eventListener/networkService
+ */
 
 class SocketServiceError extends Error {}
+
+// TODO:
+// - fix address binding
+// - allow to specify via declaration
 
 /**
  * Base Network Service for TCP and UDP protocols
@@ -51,14 +59,15 @@ class BaseNetworkService extends Service {
      * @param {logger.Logger} [options.logger] - logger to use instead of default one
      */
     constructor(callback, port, options) {
-        super();
-
         options = options || {};
+        const address = options.address;
+
+        super(options.logger || logger.getChild(`[${address}::${port}]`));
 
         /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
             address: {
-                value: options.address
+                value: address
             },
             callback: {
                 value: callback
@@ -67,12 +76,6 @@ class BaseNetworkService extends Service {
                 value: port
             }
         });
-        Object.defineProperties(this, {
-            logger: {
-                value: options.logger || logger.getChild(`${this.constructor.name}::${this.address}::${port}`)
-            }
-        });
-        this.restartsEnabled = true;
     }
 
     /**
@@ -514,6 +517,7 @@ module.exports = {
  *
  * @callback ReceiverCallback
  * @param {ConnInfo} connInfo
+ *
  * @returns {MessageStream}
  */
 /**

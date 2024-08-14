@@ -42,7 +42,7 @@ F5 BIG-IP Telemetry Streaming is available on |github| and is F5-supported.
 
 **Which TMOS versions does F5 BIG-IP Telemetry Streaming support?**
 
-F5 BIG-IP Telemetry Streaming supports TMOS 13.x and later.
+F5 BIG-IP Telemetry Streaming supports TMOS 15.1.x and later.
 
 |
 
@@ -69,7 +69,7 @@ F5 BIG-IP Telemetry Streaming releases are intended to be delivered on a 6-week 
 
 **What if I upgrade my BIG-IP system, how to I migrate my F5 BIG-IP Telemetry Streaming configuration?**
 
-When you upgrade your BIG-IP system, you simply install F5 BIG-IP Telemetry Streaming on the upgraded BIG-IP system and re-deploy your declaration.  For example, you installed BIG-IP Telemetry Streaming on your BIG-IP running version 13.1 and deployed a declaration.  You decide to upgrade your BIG-IP system to 14.1. Once the upgrade to 14.1 is complete, you must install BIG-IP Telemetry Streaming on the BIG-IP.  After you install BIG-IP Telemetry Streaming, you send the same declaration you used pre-upgrade to the 13.1 BIG-IP system. Your upgraded BIG-IP will then have the same configuration as the previous version.
+When you upgrade your BIG-IP system, you simply install F5 BIG-IP Telemetry Streaming on the upgraded BIG-IP system and re-deploy your declaration.  For example, you installed BIG-IP Telemetry Streaming on your BIG-IP running version 14.1 and deployed a declaration.  You decide to upgrade your BIG-IP system to 15.1. Once the upgrade to 15.1 is complete, you must install BIG-IP Telemetry Streaming on the BIG-IP.  After you install BIG-IP Telemetry Streaming, you send the same declaration you used pre-upgrade to the 15.1 BIG-IP system. Your upgraded BIG-IP will then have the same configuration as the previous version.
 
 |
 

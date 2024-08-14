@@ -24,7 +24,11 @@ const CircularLinkedList = require('../utils/structures').CircularLinkedList;
 const constants = require('../constants').EVENT_LISTENER;
 const hrtimestamp = require('../utils/datetime').hrtimestamp;
 
-/** @module eventListener/stream */
+/**
+ * @private
+ *
+ * @module eventListener/stream
+ */
 
 // keeping a buffer that comes from V8 C/C++ layer for a long time
 // is too expensive because it cause memory fragmentation.

@@ -219,7 +219,7 @@ function testVer(elsVer) {
             return decl;
         });
 
-        testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`);
+        testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${ES_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"\n`);
     });
 
     /**

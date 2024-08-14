@@ -37,6 +37,8 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     trace: true,
                     interval: 600,
+                    workers: 6,
+                    chunkSize: 60,
                     port: 8102,
                     host: 'host2',
                     enable: true,
@@ -61,13 +63,12 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         trace: true,
                         interval: 600,
+                        workers: 6,
+                        chunkSize: 60,
                         host: 'host4',
                         port: 8102,
                         enable: true,
                         username: 'username2',
-                        passphrase: {
-                            cipherText: 'passphrase2'
-                        },
                         tag: {
                             tag: 'tag2'
                         }
@@ -96,6 +97,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'My_Poller_1',
                         id: 'f5telemetry_default::My_Poller_1::My_Poller_1',
@@ -118,12 +121,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            tags: undefined,
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -136,6 +134,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 600,
+                        workers: 6,
+                        chunkSize: 60,
                         enable: true,
                         name: 'My_Poller_2',
                         id: 'f5telemetry_default::My_Poller_2::My_Poller_2',
@@ -199,6 +199,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'My_Poller_1',
                         id: 'My_Namespace::My_Poller_1::My_Poller_1',
@@ -221,12 +223,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            tags: undefined,
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -239,6 +236,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 600,
+                        workers: 6,
+                        chunkSize: 60,
                         enable: true,
                         name: 'My_Poller_2',
                         id: 'My_Namespace::My_Poller_2::My_Poller_2',
@@ -267,12 +266,7 @@ module.exports = {
                             noTMStats: true
                         },
                         credentials: {
-                            username: 'username2',
-                            passphrase: {
-                                cipherText: '$M$passphrase2',
-                                class: 'Secret',
-                                protected: 'SecureVault'
-                            }
+                            username: 'username2'
                         }
                     },
                     {
@@ -317,6 +311,8 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     trace: true,
                     interval: 500,
+                    workers: 5,
+                    chunkSize: 50,
                     enable: true
                 },
                 My_Consumer_1: {
@@ -343,6 +339,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         trace: true,
                         interval: 500,
+                        workers: 5,
+                        chunkSize: 50,
                         enable: true
                     },
                     My_Consumer_1: {
@@ -367,6 +365,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 500,
+                        workers: 5,
+                        chunkSize: 50,
                         enable: false, // system value kept
                         name: 'My_Poller_1',
                         id: 'f5telemetry_default::My_System_1::My_Poller_1',
@@ -389,12 +389,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         }
                     },
                     {
@@ -407,6 +402,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 500,
+                        workers: 5,
+                        chunkSize: 50,
                         enable: true,
                         name: 'My_Poller_1',
                         id: 'f5telemetry_default::My_System_2::My_Poller_1',
@@ -429,12 +426,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         }
                     },
                     {
@@ -464,6 +456,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 500,
+                        workers: 5,
+                        chunkSize: 50,
                         enable: false, // system value kept
                         name: 'My_Poller_1',
                         id: 'My_Namespace::My_System_1::My_Poller_1',
@@ -486,12 +480,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         }
                     },
                     {
@@ -504,6 +493,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 500,
+                        workers: 5,
+                        chunkSize: 50,
                         enable: true,
                         name: 'My_Poller_1',
                         id: 'My_Namespace::My_System_2::My_Poller_1',
@@ -526,12 +517,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         }
                     },
                     {
@@ -570,6 +556,8 @@ module.exports = {
                     host: 'host1',
                     port: 443,
                     interval: 10,
+                    workers: 10,
+                    chunkSize: 10,
                     protocol: 'https',
                     tag: {
                         tag: 'tag'
@@ -616,6 +604,8 @@ module.exports = {
                         host: 'host2',
                         port: 443,
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         protocol: 'https',
                         tag: {
                             tag: 'tag'
@@ -659,6 +649,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         endpoints: {
                             endpoint1: {
                                 path: '/endpoint1',
@@ -743,6 +735,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         endpoints: {
                             endpoint1: {
                                 path: '/endpoint1',
@@ -834,6 +828,8 @@ module.exports = {
                     host: 'host2',
                     port: 443,
                     interval: 10,
+                    workers: 10,
+                    chunkSize: 10,
                     protocol: 'https',
                     tag: {
                         tag: 'tag'
@@ -881,6 +877,8 @@ module.exports = {
                         host: 'host4',
                         port: 443,
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         protocol: 'https',
                         tag: {
                             tag: 'tag'
@@ -924,6 +922,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         endpoints: {
                             endpoint1: {
                                 path: '/endpoint1',
@@ -963,10 +963,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -997,6 +993,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 10,
+                        workers: 10,
+                        chunkSize: 10,
                         endpoints: {
                             endpoint1: {
                                 path: '/endpoint1',
@@ -1036,10 +1034,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1153,6 +1147,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'Poller_With_Actions',
                         id: 'f5telemetry_default::My_System::Poller_With_Actions',
                         namespace: 'f5telemetry_default',
@@ -1165,7 +1161,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     excludeData: {},
@@ -1189,10 +1184,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1223,6 +1214,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'Poller_With_Actions',
                         id: 'My_Namespace::My_System::Poller_With_Actions',
                         namespace: 'My_Namespace',
@@ -1235,7 +1228,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     excludeData: {},
@@ -1259,10 +1251,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1372,6 +1360,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'SystemPoller_1',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -1384,7 +1374,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     excludeData: {},
@@ -1408,10 +1397,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1442,6 +1427,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         namespace: 'My_Namespace',
@@ -1454,7 +1441,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     excludeData: {},
@@ -1478,10 +1464,6 @@ module.exports = {
                                 }
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1513,7 +1495,9 @@ module.exports = {
                     enable: true,
                     host: 'host1',
                     systemPoller: {
-                        interval: 234
+                        interval: 234,
+                        workers: 2,
+                        chunkSize: 34
                     }
                 },
                 My_Consumer_1: {
@@ -1527,7 +1511,9 @@ module.exports = {
                         enable: true,
                         host: 'host2',
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     },
                     My_Consumer_1: {
@@ -1553,6 +1539,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -1565,7 +1553,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -1577,10 +1564,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1611,6 +1594,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         namespace: 'My_Namespace',
@@ -1623,7 +1608,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -1635,10 +1619,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -1680,7 +1660,9 @@ module.exports = {
                     systemPoller: [
                         {
                             // should set name to SystemPoller_1
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         },
                         'My_Poller_2'
                     ]
@@ -1711,7 +1693,9 @@ module.exports = {
                         systemPoller: [
                             {
                                 // should set name to SystemPoller_1
-                                interval: 234
+                                interval: 234,
+                                workers: 2,
+                                chunkSize: 34
                             },
                             'My_Poller_2'
                         ]
@@ -1743,7 +1727,9 @@ module.exports = {
                         systemPoller: [
                             {
                                 // should set name to SystemPoller_1
-                                interval: 234
+                                interval: 234,
+                                workers: 2,
+                                chunkSize: 34
                             },
                             'My_Poller_2'
                         ]
@@ -1840,6 +1826,8 @@ module.exports = {
                     },
                     {
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         enable: true,
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
@@ -1869,12 +1857,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'f5telemetry_default::My_System::SystemPoller_1'
                     },
@@ -1882,6 +1865,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_2',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_System',
@@ -1909,17 +1894,14 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'f5telemetry_default::My_System::My_Poller_2'
                     },
                     {
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         enable: true,
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
@@ -1949,12 +1931,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'My_Namespace::My_System::SystemPoller_1'
                     },
@@ -1962,6 +1939,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_2',
                         namespace: 'My_Namespace',
                         systemName: 'My_System',
@@ -1989,17 +1968,14 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'My_Namespace::My_System::My_Poller_2'
                     },
                     {
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         enable: true,
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
@@ -2029,12 +2005,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace_2::My_System::SystemPoller_1'
                     },
@@ -2042,6 +2013,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_2',
                         namespace: 'My_Namespace_2',
                         systemName: 'My_System',
@@ -2069,12 +2042,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace_2::My_System::My_Poller_2'
                     },
@@ -2082,6 +2050,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_1',
                         namespace: 'f5telemetry_default',
                         systemName: 'My_Poller_1',
@@ -2109,12 +2079,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'f5telemetry_default::My_Poller_1::My_Poller_1'
                     },
@@ -2122,6 +2087,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_1',
                         namespace: 'My_Namespace',
                         systemName: 'My_Poller_1',
@@ -2149,12 +2116,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: false,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: false
                         },
                         id: 'My_Namespace::My_Poller_1::My_Poller_1'
                     },
@@ -2162,6 +2124,8 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         enable: true,
                         interval: 300,
+                        workers: 5,
+                        chunkSize: 30,
                         name: 'My_Poller_1',
                         namespace: 'My_Namespace_2',
                         systemName: 'My_Poller_1',
@@ -2189,12 +2153,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace_2::My_Poller_1::My_Poller_1'
                     }
@@ -2209,7 +2168,9 @@ module.exports = {
                     class: 'Telemetry_System',
                     enable: true,
                     systemPoller: {
-                        interval: 234
+                        interval: 234,
+                        workers: 2,
+                        chunkSize: 34
                     }
                 },
                 My_Namespace: {
@@ -2218,7 +2179,9 @@ module.exports = {
                         class: 'Telemetry_System',
                         enable: true,
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     }
                 }
@@ -2237,6 +2200,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -2249,7 +2214,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2261,10 +2225,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2278,6 +2238,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         namespace: 'My_Namespace',
@@ -2290,7 +2252,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2302,10 +2263,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     }
                 ]
@@ -2320,7 +2277,9 @@ module.exports = {
                     enable: true,
                     host: 'host1',
                     systemPoller: {
-                        interval: 234
+                        interval: 234,
+                        workers: 2,
+                        chunkSize: 34
                     }
                 },
                 My_System_2: {
@@ -2328,7 +2287,9 @@ module.exports = {
                     enable: true,
                     host: 'host2',
                     systemPoller: {
-                        interval: 234
+                        interval: 234,
+                        workers: 2,
+                        chunkSize: 34
                     }
                 },
                 My_Consumer_1: {
@@ -2346,7 +2307,9 @@ module.exports = {
                         enable: true,
                         host: 'host3',
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     },
                     My_System_2: {
@@ -2354,7 +2317,9 @@ module.exports = {
                         enable: true,
                         host: 'host4',
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     },
                     My_Consumer_1: {
@@ -2373,7 +2338,9 @@ module.exports = {
                         enable: true,
                         host: 'host5',
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     },
                     My_System_2: {
@@ -2381,7 +2348,9 @@ module.exports = {
                         enable: true,
                         host: 'host6',
                         systemPoller: {
-                            interval: 234
+                            interval: 234,
+                            workers: 2,
+                            chunkSize: 34
                         }
                     },
                     My_Consumer_1: {
@@ -2415,6 +2384,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'f5telemetry_default::My_System::SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -2427,7 +2398,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2439,10 +2409,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2456,6 +2422,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'f5telemetry_default::My_System_2::SystemPoller_1',
                         namespace: 'f5telemetry_default',
@@ -2468,7 +2436,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2480,10 +2447,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2531,6 +2494,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace::My_System::SystemPoller_1',
                         namespace: 'My_Namespace',
@@ -2543,7 +2508,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2555,10 +2519,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2572,6 +2532,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace::My_System_2::SystemPoller_1',
                         namespace: 'My_Namespace',
@@ -2584,7 +2546,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2596,10 +2557,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2647,6 +2604,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace_2::My_System::SystemPoller_1',
                         namespace: 'My_Namespace_2',
@@ -2659,7 +2618,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2671,10 +2629,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {
@@ -2688,6 +2642,8 @@ module.exports = {
                             type: 'output'
                         },
                         interval: 234,
+                        workers: 2,
+                        chunkSize: 34,
                         name: 'SystemPoller_1',
                         id: 'My_Namespace_2::My_System_2::SystemPoller_1',
                         namespace: 'My_Namespace_2',
@@ -2700,7 +2656,6 @@ module.exports = {
                             allowSelfSignedCert: false
                         },
                         dataOpts: {
-                            tags: undefined,
                             actions: [
                                 {
                                     enable: true,
@@ -2712,10 +2667,6 @@ module.exports = {
 
                             ],
                             noTMStats: true
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
                         }
                     },
                     {

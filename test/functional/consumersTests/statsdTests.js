@@ -265,9 +265,9 @@ function test() {
 
             harness.bigip.forEach((bigip) => it(
                 `should fetch system poller data via debug endpoint - ${bigip.name}`,
-                () => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME)
+                () => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1')
                     .then((data) => {
-                        sysPollerMetricNames[bigip.hostname] = getMetricNames(data[0]);
+                        sysPollerMetricNames[bigip.hostname] = getMetricNames(data);
                     })
             ));
 

@@ -23,520 +23,341 @@
  * - UUID
  */
 
+const allIDs = [
+    {
+        class: 'Telemetry_System_Poller',
+        id: 'f5telemetry_default::poller::poller'
+    },
+    {
+        class: 'Telemetry_System_Poller',
+        id: 'namespace::poller::poller'
+    },
+    {
+        class: 'Telemetry_Consumer',
+        id: 'f5telemetry_default::consumer'
+    },
+    {
+        class: 'Telemetry_Consumer',
+        id: 'namespace::consumer'
+    },
+    {
+        class: 'Telemetry_System_Poller',
+        id: 'f5telemetry_default::poller2::poller2'
+    },
+    {
+        class: 'Telemetry_System_Poller',
+        id: 'namespace::poller2::poller2'
+    },
+    {
+        class: 'Telemetry_Consumer',
+        id: 'f5telemetry_default::consumer2'
+    },
+    {
+        class: 'Telemetry_Consumer',
+        id: 'namespace::consumer2'
+    },
+    {
+        class: 'Telemetry_Listener',
+        id: 'f5telemetry_default::listener'
+    },
+    {
+        class: 'Telemetry_Listener',
+        id: 'namespace::listener'
+    }
+];
+
 module.exports = {
     name: '.getComponents()',
-    tests: [
-        {
-            name: 'should return all components',
-            declaration: {
-                class: 'Telemetry',
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
-            },
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'My_Namespace::Consumer_1',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+    allIDs,
+    declaration: {
+        class: 'Telemetry',
+        consumer: {
+            class: 'Telemetry_Consumer',
+            type: 'default'
         },
-        {
-            name: 'should filter components by class (string)',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
-            },
-            classFilter: 'Telemetry_Consumer',
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_2',
-                    name: 'Consumer_2',
-                    traceName: 'f5telemetry_default::Consumer_2',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'My_Namespace::Consumer_1',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_2',
-                    name: 'Consumer_2',
-                    traceName: 'My_Namespace::Consumer_2',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+        consumer2: {
+            class: 'Telemetry_Consumer',
+            type: 'default'
         },
-        {
-            name: 'should filter components by class (function)',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
-            },
-            classFilter: (c) => c.name === 'Consumer_1',
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'My_Namespace::Consumer_1',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+        listener: {
+            class: 'Telemetry_Listener'
         },
-        {
-            name: 'should filter components by namespace (string)',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
-            },
-            namespaceFilter: 'f5telemetry_default',
-            expected: [
-                {
-                    class: 'Telemetry_Listener',
-                    actions: [
-                        {
-                            enable: true,
-                            setTag: {
-                                application: '`A`',
-                                tenant: '`T`'
-                            }
-                        }
-                    ],
-                    enable: true,
-                    id: 'f5telemetry_default::Listener1',
-                    match: '',
-                    name: 'Listener1',
-                    namespace: 'f5telemetry_default',
-                    port: 6514,
-                    tag: {},
-                    traceInput: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 9999,
-                        path: '/var/tmp/telemetry/INPUT.Telemetry_Listener.f5telemetry_default::Listener1',
-                        type: 'input'
-                    },
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Listener.f5telemetry_default::Listener1',
-                        type: 'output'
-                    },
-                    traceName: 'f5telemetry_default::Listener1'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_2',
-                    name: 'Consumer_2',
-                    traceName: 'f5telemetry_default::Consumer_2',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+        poller: {
+            class: 'Telemetry_System_Poller'
         },
-        {
-            name: 'should filter components by namespace (function)',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
-            },
-            namespaceFilter: (c) => c.namespace === 'My_Namespace',
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'My_Namespace::Consumer_1',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_2',
-                    name: 'Consumer_2',
-                    traceName: 'My_Namespace::Consumer_2',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_2',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+        poller2: {
+            class: 'Telemetry_System_Poller'
         },
-        {
-            name: 'should filter components by namespace and class',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
+        namespace: {
+            class: 'Telemetry_Namespace',
+            consumer: {
+                class: 'Telemetry_Consumer',
+                type: 'default'
             },
-            classFilter: 'Telemetry_Consumer',
-            namespaceFilter: (c) => c.namespace === 'f5telemetry_default',
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_2',
-                    name: 'Consumer_2',
-                    traceName: 'f5telemetry_default::Consumer_2',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_2',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
-        },
-        {
-            name: 'should filter components using arbitrary function',
-            declaration: {
-                class: 'Telemetry',
-                Listener1: {
-                    class: 'Telemetry_Listener'
-                },
-                Consumer_1: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                Consumer_2: {
-                    class: 'Telemetry_Consumer',
-                    type: 'default'
-                },
-                My_Namespace: {
-                    class: 'Telemetry_Namespace',
-                    Consumer_1: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    },
-                    Consumer_2: {
-                        class: 'Telemetry_Consumer',
-                        type: 'default'
-                    }
-                }
+            consumer2: {
+                class: 'Telemetry_Consumer',
+                type: 'default'
             },
-            filter: (c) => c.name === 'Consumer_1',
-            expected: [
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'f5telemetry_default::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'f5telemetry_default::Consumer_1',
-                    namespace: 'f5telemetry_default',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.f5telemetry_default::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                },
-                {
-                    allowSelfSignedCert: false,
-                    class: 'Telemetry_Consumer',
-                    enable: true,
-                    id: 'My_Namespace::Consumer_1',
-                    name: 'Consumer_1',
-                    traceName: 'My_Namespace::Consumer_1',
-                    namespace: 'My_Namespace',
-                    trace: {
-                        enable: false,
-                        encoding: 'utf8',
-                        maxRecords: 10,
-                        path: '/var/tmp/telemetry/Telemetry_Consumer.My_Namespace::Consumer_1',
-                        type: 'output'
-                    },
-                    type: 'default'
-                }
-            ]
+            listener: {
+                class: 'Telemetry_Listener'
+            },
+            poller: {
+                class: 'Telemetry_System_Poller'
+            },
+            poller2: {
+                class: 'Telemetry_System_Poller'
+            }
         }
-    ]
+    },
+    params: {
+        class: [
+            {
+                filter: undefined,
+                expected: allIDs
+            },
+            {
+                filter: 'Telemetry_Consumer',
+                expected: [
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer2'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer2'
+                    }
+                ]
+            },
+            {
+                filter: ['Telemetry_Consumer', 'Telemetry_System_Poller'],
+                expected: [
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'f5telemetry_default::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'namespace::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'f5telemetry_default::poller2::poller2'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'namespace::poller2::poller2'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer2'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer2'
+                    }
+                ]
+            },
+            {
+                filter: (name) => name.endsWith('Listener'),
+                expected: [
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'f5telemetry_default::listener'
+                    },
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'namespace::listener'
+                    }
+                ]
+            },
+            {
+                filter: 'something',
+                expected: []
+            },
+            {
+                filter: ['something'],
+                expected: []
+            },
+            {
+                filter: (v) => v === 'something',
+                expected: []
+            }
+        ],
+        name: [
+            {
+                filter: undefined,
+                expected: allIDs
+            },
+            {
+                filter: 'consumer',
+                expected: [
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    }
+                ]
+            },
+            {
+                filter: ['consumer', 'poller'],
+                expected: [
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'f5telemetry_default::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'namespace::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    }
+                ]
+            },
+            {
+                filter: (name) => name === 'listener',
+                expected: [
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'f5telemetry_default::listener'
+                    },
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'namespace::listener'
+                    }
+                ]
+            },
+            {
+                filter: 'something',
+                expected: []
+            },
+            {
+                filter: ['something'],
+                expected: []
+            },
+            {
+                filter: (v) => v === 'something',
+                expected: []
+            }
+        ],
+        namespace: [
+            {
+                filter: undefined,
+                expected: allIDs
+            },
+            {
+                filter: 'f5telemetry_default',
+                expected: [
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'f5telemetry_default::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'f5telemetry_default::poller2::poller2'
+                    },
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'f5telemetry_default::listener'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer2'
+                    }
+                ]
+            },
+            {
+                filter: ['f5telemetry_default', 'namespace'],
+                expected: allIDs
+            },
+            {
+                filter: (name) => name === 'namespace',
+                expected: [
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'namespace::poller::poller'
+                    },
+                    {
+                        class: 'Telemetry_System_Poller',
+                        id: 'namespace::poller2::poller2'
+                    },
+                    {
+                        class: 'Telemetry_Listener',
+                        id: 'namespace::listener'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer2'
+                    }
+                ]
+            },
+            {
+                filter: 'something',
+                expected: []
+            },
+            {
+                filter: ['something'],
+                expected: []
+            },
+            {
+                filter: (v) => v === 'something',
+                expected: []
+            }
+        ],
+        filter: [
+            {
+                filter: undefined,
+                expected: allIDs
+            },
+            {
+                filter: (c) => c.name === 'consumer',
+                expected: [
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'f5telemetry_default::consumer'
+                    },
+                    {
+                        class: 'Telemetry_Consumer',
+                        id: 'namespace::consumer'
+                    }
+                ]
+            },
+            {
+                filter: (c) => c.name === 'consumer-something',
+                expected: []
+            }
+        ]
+    }
 };

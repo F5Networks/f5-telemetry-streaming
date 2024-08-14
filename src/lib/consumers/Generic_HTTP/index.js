@@ -16,11 +16,9 @@
 
 'use strict';
 
-const http = require('http');
-const https = require('https');
 const zlib = require('zlib');
 
-const httpUtil = require('../shared/httpUtil');
+const httpUtil = require('../../utils/http');
 const util = require('../../utils/misc');
 
 /**
@@ -57,42 +55,14 @@ const maybeCompress = (compression, data) => {
     return compressData(compression, data);
 };
 
-/**
- * Fetch custom options for HTTP transport from config
- *
- * @param {Array} customOpts - options from config
- *
- * @returns {Object}
- */
-const fetchHttpCustomOpts = (customOpts) => {
-    const allowedKeys = [
-        'keepAlive',
-        'keepAliveMsecs',
-        'maxSockets',
-        'maxFreeSockets'
-    ];
-    const ret = {};
-    customOpts.filter((opt) => allowedKeys.indexOf(opt.name) !== -1)
-        .forEach((opt) => {
-            ret[opt.name] = opt.value;
-        });
-    return ret;
-};
-
 const httpAgentsMap = {};
-const createHttpAgentOptsKey = (opts) => {
-    const keys = Object.keys(opts);
-    keys.sort();
-    return JSON.stringify(keys.map((k) => [k, opts[k]]));
-};
 
 const getHttpAgent = (config) => {
-    const customOpts = fetchHttpCustomOpts(config.customOpts || []);
-    const optsKey = createHttpAgentOptsKey(customOpts);
-    if (!httpAgentsMap[config.id] || httpAgentsMap[config.id].key !== optsKey) {
+    const agentFromConf = httpUtil.getAgent(config);
+    if (!httpAgentsMap[config.id] || httpAgentsMap[config.id].key !== agentFromConf.agentKey) {
         httpAgentsMap[config.id] = {
-            agent: new (config.protocol === 'https' ? https.Agent : http.Agent)(Object.assign({}, customOpts)),
-            key: optsKey
+            key: agentFromConf.agentKey,
+            agent: agentFromConf.agent
         };
     }
     return httpAgentsMap[config.id].agent;
@@ -169,7 +139,7 @@ module.exports = function (context) {
 
     return maybeCompress(compressionType, body)
         .then((data) => httpUtil.sendToConsumer({
-            agent: getHttpAgent(context.config),
+            agent: getHttpAgent(Object.assign({ connection: { protocol } }, context.config)),
             allowSelfSignedCert,
             body: data,
             hosts: [host].concat(fallbackHosts),

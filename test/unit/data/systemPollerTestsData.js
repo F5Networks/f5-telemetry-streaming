@@ -297,13 +297,17 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 321
+                    interval: 321,
+                    workers: 5,
+                    chunkSize: 30
                 },
                 The_Other_System_Poller: {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 123
+                    interval: 123,
+                    workers: 5,
+                    chunkSize: 30
                 }
             },
             sysOrPollerName: 'My_System',
@@ -473,13 +477,17 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 300
+                    interval: 300,
+                    workers: 2,
+                    chunkSize: 10
                 }
             },
             expected: [{
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 300,
+                workers: 2,
+                chunkSize: 10,
                 name: 'My_System_Poller',
                 id: 'f5telemetry_default::My_System_Poller::My_System_Poller',
                 namespace: 'f5telemetry_default',
@@ -500,8 +508,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -527,7 +534,9 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         actions: [],
                         enable: true,
-                        interval: 90
+                        interval: 90,
+                        workers: 3,
+                        chunkSize: 50
                     }
                 }
             },
@@ -535,6 +544,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 90,
+                workers: 3,
+                chunkSize: 50,
                 name: 'My_System_Poller',
                 id: 'My_Namespace::My_System_Poller::My_System_Poller',
                 namespace: 'My_Namespace',
@@ -555,8 +566,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -584,13 +594,17 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 300
+                    interval: 300,
+                    workers: 5,
+                    chunkSize: 30
                 }
             },
             expected: [{
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 300,
+                workers: 5,
+                chunkSize: 30,
                 name: 'My_System_Poller',
                 id: 'f5telemetry_default::My_System::My_System_Poller',
                 namespace: 'f5telemetry_default',
@@ -611,8 +625,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -656,7 +669,9 @@ module.exports = {
                         class: 'Telemetry_System_Poller',
                         actions: [],
                         enable: true,
-                        interval: 90
+                        interval: 90,
+                        workers: 1,
+                        chunkSize: 100
                     }
                 }
             },
@@ -664,6 +679,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 90,
+                workers: 1,
+                chunkSize: 100,
                 name: 'My_System_Poller',
                 id: 'My_Namespace::My_System::My_System_Poller',
                 namespace: 'My_Namespace',
@@ -684,8 +701,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -720,6 +736,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 300,
+                workers: 5,
+                chunkSize: 30,
                 name: 'My_System_Poller',
                 id: 'f5telemetry_default::My_System::My_System_Poller',
                 systemName: 'My_System',
@@ -740,8 +758,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -769,7 +786,9 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 300
+                    interval: 300,
+                    workers: 5,
+                    chunkSize: 30
                 },
                 My_Namespace: {
                     class: 'Telemetry_Namespace',
@@ -794,6 +813,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 90,
+                workers: 5,
+                chunkSize: 30,
                 name: 'My_System_Poller',
                 id: 'My_Namespace::My_System::My_System_Poller',
                 namespace: 'My_Namespace',
@@ -814,8 +835,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -853,13 +873,17 @@ module.exports = {
                     class: 'Telemetry_System_Poller',
                     actions: [],
                     enable: true,
-                    interval: 300
+                    interval: 300,
+                    workers: 2,
+                    chunkSize: 100
                 }
             },
             expected: [{
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 300,
+                workers: 2,
+                chunkSize: 100,
                 name: 'My_Desired_Poller',
                 id: 'f5telemetry_default::My_System::My_Desired_Poller',
                 systemName: 'My_System',
@@ -880,8 +904,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -1006,7 +1029,9 @@ module.exports = {
                     systemPoller: {
                         actions: [],
                         enable: true,
-                        interval: 300
+                        interval: 300,
+                        workers: 5,
+                        chunkSize: 30
                     }
                 }
             },
@@ -1014,6 +1039,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 300,
+                workers: 5,
+                chunkSize: 30,
                 name: 'SystemPoller_1',
                 id: 'f5telemetry_default::My_System::SystemPoller_1',
                 systemName: 'My_System',
@@ -1034,8 +1061,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,
@@ -1062,7 +1088,9 @@ module.exports = {
                         systemPoller: {
                             actions: [],
                             enable: true,
-                            interval: 300
+                            interval: 300,
+                            workers: 5,
+                            chunkSize: 30
                         }
                     }
                 },
@@ -1078,7 +1106,9 @@ module.exports = {
                         systemPoller: {
                             actions: [],
                             enable: true,
-                            interval: 90
+                            interval: 90,
+                            workers: 8,
+                            chunkSize: 10
                         }
                     }
                 }
@@ -1087,6 +1117,8 @@ module.exports = {
                 class: 'Telemetry_System_Poller',
                 enable: true,
                 interval: 90,
+                workers: 8,
+                chunkSize: 10,
                 name: 'SystemPoller_1',
                 id: 'My_Namespace_Two::My_System::SystemPoller_1',
                 systemName: 'My_System',
@@ -1107,8 +1139,7 @@ module.exports = {
                 },
                 dataOpts: {
                     actions: [],
-                    noTMStats: true,
-                    tags: undefined
+                    noTMStats: true
                 },
                 credentials: {
                     username: undefined,

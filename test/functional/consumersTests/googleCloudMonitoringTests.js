@@ -93,6 +93,8 @@ function test() {
             });
 
             testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
+
+            it('sleep for 60sec while Google Cloud Monitoring consumer is not ready', () => promiseUtils.sleep(60000));
         });
 
         describe('System Poller data', () => {
