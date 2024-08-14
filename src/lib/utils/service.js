@@ -44,6 +44,9 @@ const SafeEventEmitter = require('./eventEmitter');
  * retarting ------|
  *                 +--> stopping
  * stopping ----------> stopped
+ *                 +--> restarting
+ * destroyed ------|
+ *                 +--> starting
  *
  * `stopped` allowed to `start` or `restart`
  * `running` allowed to `stop`  or `restart`
@@ -61,6 +64,14 @@ const serviceFsm = new machina.BehavioralFsm({
             _onEnter(service) {
                 service.logger.debug('destroyed.');
                 service.ee.emitAsync('destroyed');
+            },
+            restart(service, options) {
+                this.deferUntilTransition(service);
+                this.transition(service, 'stopped', options);
+            },
+            start(service) {
+                this.deferUntilTransition(service);
+                this.transition(service, 'stopped');
             }
         },
         restarting: {
@@ -78,25 +89,38 @@ const serviceFsm = new machina.BehavioralFsm({
 
                     Promise.resolve()
                         .then(() => {
-                            if (!service._stopRequested) {
+                            if (!(service.__stopRequested || service.__firstStart)) {
                                 return Promise.resolve()
                                     .then(() => {
+                                        // call ._onStop in any case to allow instance cleanup prev state
                                         service.logger.debug(`stopping... ${attemptsStr}`);
-                                        return service._onStop(true);
+                                        return service._onStop({ destroy: false, restart: true });
                                     })
+                                    // catch and log error without crashing to let service start
+                                    // and do no stuck in restart loop
                                     .catch((error) => service.logger.debugException(`caught error on attempt to stop ${attemptsStr}:`, error));
                             }
                             return null;
                         })
                         .then(() => new Promise((resolve) => {
-                            if (!service._stopRequested) {
+                            if (!service.__stopRequested) {
                                 service.logger.debug(`starting... ${attemptsStr}`);
-                                service._fatalErrorHandler = this._createFatalErroFn((fatalError) => {
+                                service.__fatalErrorHandler = this._createFatalErroFn((fatalError) => {
                                     resolve(fatalError);
                                     resolve = null;
                                 });
+
+                                const coldStart = service.__firstStart;
+                                service.__firstStart = false;
+
                                 Promise.resolve()
-                                    .then(() => service._onStart(service._fatalErrorHandler.onError))
+                                    .then(() => service._onStart(
+                                        service.__fatalErrorHandler.onError,
+                                        {
+                                            coldStart,
+                                            restart: !coldStart
+                                        }
+                                    ))
                                     .then(
                                         () => resolve && resolve(),
                                         (err) => resolve && resolve(err)
@@ -107,20 +131,21 @@ const serviceFsm = new machina.BehavioralFsm({
                         }))
                         .catch((error) => error)
                         .then((error) => {
-                            if (service._fatalErrorHandler && !error) {
-                                error = service._fatalErrorHandler.error();
+                            if (service.__fatalErrorHandler && !error) {
+                                error = service.__fatalErrorHandler.error();
                             }
-                            if (!error && service._stopRequested) {
+                            if (!error && service.__stopRequested) {
                                 error = new Error('Service stop requested!');
                             }
                             if (error) {
-                                service._fatalErrorHandler.cancel();
+                                service.__fatalErrorHandler.cancel();
                                 service.logger.debugException(`failed to start due error ${attemptsStr}:`, error);
                             }
 
-                            if (service._stopRequested || (error && currentAttempt >= attempts)) {
+                            if (service.__stopRequested || (error && currentAttempt >= attempts)) {
                                 error.$restartFailed = true;
-                                this.transition(service, 'stopping', error);
+                                error.$restartFailed = true; // pass-through to `.stop()`
+                                this.transition(service, 'stopping', error, !!service.__destroyRequested);
                             } else if (error) {
                                 setTimeout(inner, delay || 0);
                             } else {
@@ -135,16 +160,19 @@ const serviceFsm = new machina.BehavioralFsm({
                 setImmediate(inner);
             },
             _onExit(service) {
-                service._stopRequested = undefined;
+                service.__destroyRequested = undefined;
+                service.__stopRequested = undefined;
             },
             destroy(service) {
                 service.logger.debug(`termination requested [state=${this.getState(service)}]`);
+                service.__destroyRequested = true;
+
                 this.deferUntilTransition(service);
                 this.handle(service, 'stop');
             },
             stop(service) {
                 service.logger.debug(`stop requested [state=${this.getState(service)}]`);
-                service._stopRequested = true;
+                service.__stopRequested = true;
             }
         },
         running: {
@@ -152,12 +180,12 @@ const serviceFsm = new machina.BehavioralFsm({
                 service.ee.emitAsync('running');
             },
             _onExit(service) {
-                service._fatalErrorHandler.cancel();
+                service.__fatalErrorHandler.cancel();
             },
             destroy(service) {
                 service.logger.debug(`termination requested [state=${this.getState(service)}]`);
                 this.deferUntilTransition(service);
-                this.handle(service, 'stop');
+                this.handle(service, 'stop', null, true);
             },
             fatalError(service, error) {
                 if (service.restartsEnabled) {
@@ -176,22 +204,29 @@ const serviceFsm = new machina.BehavioralFsm({
                 }
                 this.transition(service, 'restarting', options);
             },
-            stop(service, error) {
+            stop(service, error, destroy) {
                 service.logger.debug(`stop requested [state=${this.getState(service)}]`);
-                this.transition(service, 'stopping', error);
+                this.transition(service, 'stopping', error, destroy);
             }
         },
         starting: {
             _onEnter(service) {
                 // unique ID to prevent situations when the service entered `starting`
                 // state while the prev `starting` promise not resolved yet (e.g. fatalError occured)
-                const startID = service._startTimestamp = hrtimestamp();
+                const startID = service.__startTimestamp = hrtimestamp();
                 Promise.resolve()
                     .then(() => {
-                        service._fatalErrorHandler = this._createFatalErroFn(
+                        service.__fatalErrorHandler = this._createFatalErroFn(
                             (fatalError) => this.handle(service, 'fatalError', fatalError)
                         );
-                        return service._onStart(service._fatalErrorHandler.onError);
+
+                        const coldStart = service.__firstStart;
+                        service.__firstStart = false;
+
+                        return service._onStart(
+                            service.__fatalErrorHandler.onError,
+                            { coldStart, restart: false }
+                        );
                     })
                     .then(
                         // call handler here to avoid unnecessary transition
@@ -202,12 +237,12 @@ const serviceFsm = new machina.BehavioralFsm({
                     );
             },
             _onExit(service) {
-                service._startTimestamp = undefined;
+                service.__startTimestamp = undefined;
             },
             destroy(service) {
                 service.logger.debug(`termination requested [state=${this.getState(service)}]`);
                 this.deferUntilTransition(service);
-                this.handle(service, 'stop');
+                this.handle(service, 'stop', true);
             },
             fatalError(service, error) {
                 // at that time the Promise in _onEnter still might be not resolved/rejected yet
@@ -216,36 +251,41 @@ const serviceFsm = new machina.BehavioralFsm({
                 this.handle(service, 'startingFailed', error);
             },
             startingDone(service, startID) {
-                if (startID === service._startTimestamp) {
+                if (startID === service.__startTimestamp) {
                     this.transition(service, 'running');
                 } else {
                     service.logger.debug('ignoring successfull start that happened out of order');
                 }
             },
             startingFailed(service, error, startID) {
-                if (!startID || startID === service._startTimestamp) {
-                    service._fatalErrorHandler.cancel();
+                if (!startID || startID === service.__startTimestamp) {
+                    service.__fatalErrorHandler.cancel();
                     service.logger.debug(`failed to start due error [state=${this.getState(service)}]`);
                     this.transition(service, 'stopping', error);
                 } else {
                     service.logger.debugException('ignoring failed start that happened out of order due error:', error);
                 }
             },
-            stop(service) {
-                service._fatalErrorHandler.cancel();
+            stop(service, destroy) {
+                service.__fatalErrorHandler.cancel();
                 service.logger.debug(`stop requested [state=${this.getState(service)}]`);
-                this.transition(service, 'stopping');
+                this.transition(service, 'stopping', null, destroy);
             }
         },
         stopped: {
             _onEnter(service, error) {
-                if (this.getPriorState(service) !== 'stopped') {
-                    if (error) {
-                        service.logger.debugException(`stopped due error [state=${this.getState(service)}]:`, error);
-                        service.ee.emitAsync('failed', error);
-                    } else {
-                        service.ee.emitAsync('stopped');
-                    }
+                if (this.needsInitialization(service)) {
+                    // initial state
+                    service.__destroyRequested = undefined;
+                    service.__fatalErrorHandler = undefined;
+                    service.__firstStart = true;
+                    service.__startTimestamp = undefined;
+                    service.__stopRequested = undefined;
+                } else if (error) {
+                    service.logger.debugException(`stopped due error [state=${this.getState(service)}]:`, error);
+                    service.ee.emitAsync('failed', error);
+                } else {
+                    service.ee.emitAsync('stopped');
                 }
             },
             destroy(service) {
@@ -262,13 +302,11 @@ const serviceFsm = new machina.BehavioralFsm({
             }
         },
         stopping: {
-            _onEnter(service, error) {
+            _onEnter(service, error, destroy) {
                 Promise.resolve()
-                    .then(() => service._onStop(false))
-                    .then(
-                        () => this.transition(service, 'stopped', error),
-                        (stopError) => this.transition(service, 'stopped', stopError)
-                    );
+                    .then(() => service._onStop({ destroy: !!destroy, restart: false }))
+                    .then(() => error, (stopError) => stopError)
+                    .then((reason) => this.transition(service, 'stopped', reason));
             },
             destroy(service) {
                 service.logger.debug(`termination requested [state=${this.getState(service)}]`);
@@ -352,6 +390,7 @@ const serviceFsm = new machina.BehavioralFsm({
      * @returns {Promise<boolean>} resolved with `true` if action succeed or rejected with error
      */
     _promisifyActionHandle(service, action, successEvents, failureEvents) {
+        // promise body executes in sync way, according to standard
         return new Promise((resolve, reject) => {
             successEvents = Array.isArray(successEvents) ? successEvents : [successEvents];
             failureEvents = Array.isArray(failureEvents) ? failureEvents : [failureEvents];
@@ -426,6 +465,16 @@ const serviceFsm = new machina.BehavioralFsm({
     /**
      * @param {Service} service
      *
+     * @returns {boolean} true if service need initialization
+     */
+    needsInitialization(service) {
+        const prevState = this.getPriorState(service);
+        return prevState === 'destroyed' || prevState === 'stopped';
+    },
+
+    /**
+     * @param {Service} service
+     *
      * @returns {boolean} true if service is restarting
      */
     isRestarting(service) {
@@ -459,6 +508,7 @@ const serviceFsm = new machina.BehavioralFsm({
      * @returns {Promise<boolean>} resolve with `true` if service restarted or `false` if restart not allowed
      */
     restart(service, options) {
+        // the whole func is sync, even `_promisifyActionHandle`. So, no concurrent `restarts` allowed
         options = options || {};
         const retryOpts = {
             attempts: (Number.isSafeInteger(options.attempts) && Math.abs(options.attempts)) || 1,
@@ -511,23 +561,22 @@ serviceFsm.on('transition', (data) => data.client.ee.emitAsync('transition', dat
  */
 class Service {
     /**
-     * @param {logger.Logger} [logger] - logger instance
+     * @param {logger.Logger} [logger] - parent logger instance
      */
-    constructor(_logger) {
-        // create read-only properties
+    constructor(parentLogger) {
+        /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
             ee: {
                 value: new SafeEventEmitter()
+            },
+            logger: {
+                value: (parentLogger || logger).getChild(this.constructor.name)
             }
         });
 
-        this.logger = _logger || logger;
-        this.restartsEnabled = true;
+        this.ee.logger = this.logger.getChild('ee');
         this.ee.on('transition', (data) => this.logger.debug(`transition from "${data.fromState}" to "${data.toState}" (action=${data.action})`));
-
-        this._fatalErrorHandler = undefined;
-        this._startTimestamp = undefined;
-        this._stopRequested = undefined;
+        this.restartsEnabled = true;
     }
 
     /** @returns {Promise<boolean>} resolved with true when service destroyed or if it was destroyed already */
@@ -586,6 +635,10 @@ class Service {
      * Configure and start the service (should be overriden by child class)
      *
      * @param {function} onFatalError - function to call on fatal error to restart the service
+     * @param {object} info - additional info
+     * @param {boolean} info.coldStart - true if the service was started first time after creating or once destroyed
+     * @param {boolean} info.restart - true if the service was started due calling `.restart()`.
+     *  NOTE: set to `false` on cold start.
      */
     _onStart() {
         this.logger.debug('running...');
@@ -594,7 +647,9 @@ class Service {
     /**
      * Stop the service (should be overriden by child class)
      *
-     * @param {boolean} [restart] - true if service going to be restarted
+     * @param {object} info - additional info
+     * @param {boolean} info.destroy - true if the service was stopped due calling `.destroy()`.
+     * @param {boolean} info.restart - true if the service was started due calling `.restart()`.
      */
     _onStop() {
         this.logger.debug('stopping...');

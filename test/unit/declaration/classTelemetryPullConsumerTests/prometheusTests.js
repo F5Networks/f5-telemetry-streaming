@@ -27,15 +27,19 @@ const shared = require('./shared');
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_Pull_Consumer -> Prometheus', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

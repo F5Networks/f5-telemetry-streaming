@@ -1,6 +1,6 @@
 .. _memorymanagement:
 
-Memory Mamangement - BETA
+Memory Management - BETA
 ==========================
 .. NOTE:: Using F5 BIG-IP Telemetry Streaming **Memory Monitor** is supported as of BIG-IP TS 1.35. 
 
@@ -42,7 +42,7 @@ The "memoryMonitor" property of Controls class is where you define your memory u
   
       * - **provisionedMemory**
         - No
-        - Defines the total amount of memory available for application. The **allowed** amount of memory is calculated by multiplying **provisionedMemory** and **memoryThresholdPercent**. The default is **1400** MB. The minimal value is **1** and maximum **1400**.
+        - Defines the total amount of memory available for application. The **allowed** amount of memory is calculated by multiplying **provisionedMemory** and **memoryThresholdPercent**. Defaults to the value of **runtime.maxHeapSize**. The minimal value is **1** and maximum should not exceed **runtime.maxHeapSize**.
 
       * - **thresholdReleasePercent**
         - No
@@ -222,6 +222,9 @@ will be enabled and back to its activity.
 
 .. NOTE:: It is not recommended to set **thresholdReleasePercent** to **100** because it may result in **flapping** behavior: processing state will switch its states rapidly without a delay.
 
+| 
+
+.. _runtimeconfigoptions:
 
 Runtime Configuration options - BETA
 ------------------------------------
@@ -229,7 +232,7 @@ The "runtime" property of Controls class is where you define your runtime config
 
 .. NOTE:: Using F5 BIG-IP Telemetry Streaming **runtime** is supported as of BIG-IP TS 1.35 (currently experimental).
 
-.. IMPORTANT:: **THOSE CONFIGURATION OPTIONS SHOULD BE USED ONLY WHEN YOU ARE OBSERVING/EXPERIENCING MEMORY USAGE ISSUES**
+.. IMPORTANT:: **RUNTIME CONFIGURATION OPTIONS SHOULD BE USED ONLY WHEN YOU ARE OBSERVING/EXPERIENCING MEMORY USAGE ISSUES**
 
 .. list-table::
       :widths: 25 25 200
@@ -242,10 +245,14 @@ The "runtime" property of Controls class is where you define your runtime config
       * - **enableGC**
         - No
         - **EXPERIMENTAL**: Enables the built-in Garbage Collector and makes it available for F5 BIG-IP Telemetry Streaming to clean up freed memory blocks. The default is **false**.
+
+      * - **httpTimeout**
+        - No
+        - **EXPERIMENTAL**: Defines the HTTP timeout value in seconds for F5 BIG-IP Telemetry Streaming incoming REST API requests. Allows F5 BIG-IP Telemetry Streaming to avoid TimeoutException error for long lasting operations. The default value set to **60** seconds. The minimal value is **60** seconds and the maximum value is **600**.
   
       * - **maxHeapSize**
         - No
-        - **EXPERIMENTAL**: Defines the upper limit of V8's heap size that allows F5 BIG-IP Telemetry Streaming to utilize more memory before being killed due to a Heap-Out-Of-Memory error. The default value set to **1400** seconds. The minimal value is **1400**.
+        - **EXPERIMENTAL**: Defines the upper limit of V8's heap size that allows F5 BIG-IP Telemetry Streaming to utilize more memory before being killed due to a Heap-Out-Of-Memory error. The default value set to **1400** MB. The minimal value is **1400** MB.
 
 .. IMPORTANT:: Changes in the runtime's configuration may require the **restnoded** service to be restarted. F5 BIG-IP Telemetry Streaming will schedule the **restnoded** restart when changes in configuration are made.
 
@@ -260,10 +267,6 @@ The good starting point of using **runtime** may looks like following:
             "runtime": {
                 "enableGC": true
             }
-        },
-        "listener": {
-            "class": "Telemetry_Listener",
-            "enable": false
         }
     }
 
@@ -279,11 +282,8 @@ Declaration with all **runtime** properties specified:
             "class": "Controls",
             "runtime": {
                 "enableGC": false,
+                "httpTimeout": 60,
                 "maxHeapSize": 1400
             }
-        },
-        "listener": {
-            "class": "Telemetry_Listener",
-            "enable": false
         }
     }

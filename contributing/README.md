@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.35.0"
+        "schemaVersion": "1.36.0"
     }
 }
 ```
@@ -121,13 +121,13 @@ What happens in the system internals between request and response?
 - LX worker receives request which validates URI, etc.
     - ref: [restWorker.js](../src/nodejs/restWorker.js)
 - The appropriate handler processes the request
-    - ref: [router.js](../src/lib/requestHandlers/router.js)
+    - ref: [REST API](../src/lib/restAPI)
 - Request is validated using JSON schema and AJV, config event fires
     - ref: [config.js](../src/lib/config.js)
 - System poller, event listener, etc. configures system resources
-    - ref: [systemPoller.js](../src/lib/systemPoller.js), [eventListener.js](../src/lib/eventListener.js), etc.
+    - ref: [systemPoller.js](../src/lib/systemPoller), [eventListener](../src/lib/eventListener/), etc.
 - Client response sent with validated config
-    - ref: [declareHandler](../src/lib/requestHandlers/declareHandler.js)
+    - ref: [declareHandler](../src/lib/restAPI/handlers/declare.js)
     ```javascript
         return promise.then((config) => {
             this.code = 200;
@@ -160,16 +160,14 @@ All core modules are included inside `../src/lib/`
     - Purpose: Hook for incoming HTTP requests
 - [config.js](../src/lib/config.js)
     - Purpose: Handle configuration actions... such as validation, persistent storage, etc.
-- [systemPoller.js](../src/lib/systemPoller.js)
+- [systemPoller](../src/lib/systemPoller/)
     - Purpose: Handles CRUD-like actions for any system pollers required based on client configuration
-    - Related: See [iHealthPoller.js](../src/lib/iHealthPoller.js)
-- [eventListener.js](../src/lib/eventListener/index.js)
+    - Related: See [iHealthPoller.js](../src/lib/ihealth/)
+- [eventListener](../src/lib/eventListener/)
     - Purpose: Handles CRUD-like actions for any event listeners required based on client configuration.
-- [systemStats.js](../src/lib/systemStats.js)
-    - Purpose: Called by system poller to create stats object based on the static JSON configuration files available in `config/` directory such as [properties.json](../src/lib/properties.json)
-- [consumers.js](../src/lib/consumers.js)
+- [consumers](../src/lib/consumers/)
     - Purpose: Handles load/unload actions for any consumers required based on client configuration. Consumers must exist in `consumers` directory, see [Adding a New Consumer](#adding-a-new-consumer)
-- [forwarder.js](../src/lib/forwarder.js)
+- [dataPipeline](../src/lib/dataPipeline/)
     - Purpose: Handles calling each loaded consumer when an event is ready for forwarding (system poller event, event listener event, etc.)
 
 ---
@@ -198,12 +196,16 @@ Collect the raw data from the device by adding a new endpoint to the paths confi
     "path": "/mgmt/tm/sys/someEndpoint", // REST endpoint
     "includeStats": true, // Certain data is only available via /mgmt/tm/sys/someEndpoint as opposed to /mgmt/tm/sys/someEndpoint/stats, this property accommodates for this by making call to /stats (for each item) and adding that data to the original object
     "expandReferences": { "membersReference": { "endpointSuffix": "/stats" } }, // Certain data requires getting a list of objects and then in each object expanding/following references to a child object.  'membersReference' is the name of that key (currently looking under 'items' in the data returned) and will result in self link data being retrieved and 'membersReference' key being replaced with that data. If 'endpointSuffix' is supplied, a suffix is added to each self link prior to retrieval, otherwise, the value of self link as is will be used. In cases like gslb where both config and stats are needed, both the `link` and `link/stats` need to be fetched, hence, the resulting config is "expandReferences": { "membersReference": { "includeStats": true } }, which is equivalent to "expandReferences": { "membersReference": { "endpointSuffix": "", "includeStats": true } }. TODO: revisit keywords/ naming here to consolidate and avoid confusion
-    "endpointFields": [ "name", "fullPath", "selfLink", "ipProtocol", "mask" ], // Will collect only these fields from the endpoint. Useful when using includeStats and the same property exists in both endpoints. Also can be used instead of a large exclude/include statement in properties.json
     "body": "{ \"command\": \"run\", \"utilCmdArgs\": \"-c \\\"/bin/df -P | /usr/bin/tr -s ' ' ','\\\"\" }", // Certain information may require using POST instead of GET and require an HTTP body, if body is defined that gets used along with a POST. Body can be either string or object
     "name": "someStatRef", // Alternate name to reference in properties.json, default is to use the endpoint
     "ignoreCached": true // Invalidate cached response of previous request to endpoint
 }
 ```
+
+*Response caching:* When endpoint validates against at least one of the following constraints then response will not be cached:
+- **pagination** property set to `true`
+- **body** property used to specify a body for HTTP POST request
+- **ignoreCached** property omitted or not equals to `false`
 
 ---
 #### Adding System Poller Stats - Properties.json

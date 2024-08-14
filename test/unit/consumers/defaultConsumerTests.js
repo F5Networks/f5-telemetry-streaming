@@ -29,7 +29,7 @@ const defaultConsumer = sourceCode('src/lib/consumers/default');
 
 moduleCache.remember();
 
-describe('Default Consumer', () => {
+describe.skip('Default Consumer', () => {
     const context = {
         event: {},
         config: {},

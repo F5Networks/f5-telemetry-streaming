@@ -20,12 +20,11 @@
 
 'use strict';
 
-const https = require('https');
 const zlib = require('zlib');
 
 const DEFAULT_HOSTNAME = require('../../constants').DEFAULT_HOSTNAME;
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
-const httpUtil = require('../shared/httpUtil');
+const httpUtil = require('../../utils/http');
 const metricsUtil = require('../shared/metricsUtil');
 const miscUtil = require('../../utils/misc');
 const promiseUtil = require('../../utils/promise');
@@ -128,42 +127,14 @@ const wrapChunks = (chunks, ddType) => {
     return chunks.map((c) => `{"series":[${c.join('')}]}`);
 };
 
-/**
- * Fetch custom options for HTTP transport from config
- *
- * @param {Array} customOpts - options from config
- *
- * @returns {Object}
- */
-const fetchHttpCustomOpts = (customOpts) => {
-    const allowedKeys = [
-        'keepAlive',
-        'keepAliveMsecs',
-        'maxSockets',
-        'maxFreeSockets'
-    ];
-    const ret = {};
-    customOpts.filter((opt) => allowedKeys.indexOf(opt.name) !== -1)
-        .forEach((opt) => {
-            ret[opt.name] = opt.value;
-        });
-    return ret;
-};
-
 const httpAgentsMap = {};
-const createHttpAgentOptsKey = (opts) => {
-    const keys = Object.keys(opts);
-    keys.sort();
-    return JSON.stringify(keys.map((k) => [k, opts[k]]));
-};
 
 const getHttpAgent = (config) => {
-    const customOpts = fetchHttpCustomOpts(config.customOpts || []);
-    const optsKey = createHttpAgentOptsKey(customOpts);
-    if (!httpAgentsMap[config.id] || httpAgentsMap[config.id].key !== optsKey) {
+    const agentFromConf = httpUtil.getAgent(config);
+    if (!httpAgentsMap[config.id] || httpAgentsMap[config.id].key !== agentFromConf.agentKey) {
         httpAgentsMap[config.id] = {
-            agent: new https.Agent(Object.assign({}, customOpts)),
-            key: optsKey
+            key: agentFromConf.agentKey,
+            agent: agentFromConf.agent
         };
     }
     return httpAgentsMap[config.id].agent;
@@ -192,7 +163,8 @@ module.exports = function (context) {
         result[tag.name] = tag.value;
         return result;
     }, {});
-    const httpAgentOpts = fetchHttpCustomOpts(context.config.customOpts || []);
+    const httpAgentOpts = httpUtil.getAgentOpts(context.config);
+    const httpAgent = getHttpAgent(Object.assign({ connection: { protocol: DATA_DOG_PROTOCOL } }, context.config));
     // for now use current time, ideally should try to fetch it from event data
     const timestamp = Math.floor(Date.now() / 1000);
     const maxChunkSize = needGzip ? DATA_DOG_MAX_GZIP_CHUNK_SIZE : DATA_DOG_MAX_CHUNK_SIZE;
@@ -350,7 +322,7 @@ module.exports = function (context) {
     return promiseUtil.allSettled([
         promiseUtil.loopForEach(ddData, (dataChunk) => compressDataFn(dataChunk)
             .then((compressedData) => httpUtil.sendToConsumer({
-                agent: getHttpAgent(context.config),
+                agent: httpAgent,
                 allowSelfSignedCert,
                 body: compressedData,
                 expectedResponseCode: [200, 202],
@@ -373,7 +345,7 @@ module.exports = function (context) {
             })),
         promiseUtil.loopForEach(ddAuxData, (dataChunk) => compressAuxDataFn(dataChunk)
             .then((compressedData) => httpUtil.sendToConsumer({
-                agent: getHttpAgent(context.config),
+                agent: httpAgent,
                 allowSelfSignedCert,
                 body: compressedData,
                 expectedResponseCode: [200, 202],

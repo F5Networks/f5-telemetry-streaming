@@ -1,11 +1,14 @@
 {
     "name": "f5-telemetry",
-    "version": "1.35.0-1",
+    "version": "1.36.0-1",
     "author": "F5, Inc.",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/F5Networks/f5-telemetry-streaming.git"
+    },
+    "engines": {
+        "node": ">=8.11.1"
     },
     "scripts": {
         "install-production": "npm ci --production --no-optional",
@@ -16,10 +19,12 @@
         "test-functional-cloud-azure": "mocha \"./test/functional/cloud/azureTests.js\" --opts ./test/functional/.mocha.opts",
         "test-functional-cloud-aws": "mocha \"./test/functional/cloud/awsTests.js\" --opts ./test/functional/.mocha.opts",
         "test-mutation": "stryker run",
-        "test-only": "mocha --recursive --opts ./test/unit/.mocha.opts \"./test/unit/**/*.js\"",
+        "test-only-all": "./scripts/tests/unit-tests.sh",
+        "test-only": "SMOKE_TESTING=1 ./scripts/tests/unit-tests.sh",
         "test-specific": "mocha --opts ./test/unit/.mocha.opts",
         "test-specific-coverage": "nyc --all npm run test-specific",
-        "test": "nyc --all npm run test-only",
+        "test": "SMOKE_TESTING=1 ./scripts/tests/unit-tests.sh coverage",
+        "test-all": "./scripts/tests/unit-tests.sh coverage",
         "build": "./scripts/build/buildRpm.sh"
     },
     "nyc": {
@@ -28,15 +33,8 @@
             "text",
             "json-summary"
         ],
-        "exclude": [
-            "coverage/**",
-            "opensource/**",
-            "docs/**",
-            "test/**",
-            "scripts/**",
-            "examples/**",
-            "**/node_modules/**",
-            "stryker.conf.js"
+        "include": [
+            "src/**"
         ]
     },
     "dependencies": {
@@ -52,45 +50,50 @@
         "ajv-keywords": "^3.5.2",
         "applicationinsights": "^1.8.10",
         "aws-sdk": "2.1018.0",
-        "eventemitter2": "^6.4.9",
+        "eventemitter2": "6.4.9",
         "google-auth-library": "^6.1.6",
+        "heap": "^0.2.7",
         "jmespath": "^0.16.0",
         "json-duplicate-key-handle": "file:opensource/json-duplicate-key-handle",
-        "jsonwebtoken": "^8.5.1",
-        "kafka-node": "^2.6.1",
+        "jsonwebtoken": "^8",
+        "kafka-node": "^5.0.0",
         "lodash": "^4.17.21",
         "machina": "^4.0.2",
         "mustache": "^4.2.0",
+        "pako": "^1.0.11",
         "prom-client": "11.0.0",
         "request": "^2.88.2",
         "statsd-client": "^0.4.7",
         "tiny-request-router": "^1.2.2",
-        "uuid": "^3.4.0"
+        "uuid": "^9"
     },
     "devDependencies": {
         "@f5devcentral/eslint-config-f5-atg": "^0.1.8",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",
         "deep-diff": "^1.0.2",
-        "eslint": "^8.45.0",
+        "eslint": "^8.57.0",
         "eslint-config-airbnb-base": "^15.0.0",
-        "eslint-plugin-import": "^2.27.5",
+        "eslint-plugin-import": "^2.29.1",
         "icrdk": "git+https://git@github.com/f5devcentral/f5-icontrollx-dev-kit.git#master",
-        "memfs": "3.5.0",
-        "mocha": "^5.2.0",
-        "nock": "10.0.0",
+        "memfs": "^4",
+        "mocha": "^7.2.0",
+        "nock": "^11",
         "nyc": "^14.1.1",
-        "object.values": "^1.1.6",
         "proxyquire": "^2.1.3",
-        "sinon": "^7.5.0",
+        "sinon": "^15",
         "ssh2": "^0.8.9",
-        "winston": "^2.4.7"
+        "winston": "^2"
     },
     "eslintConfig": {
         "extends": "@f5devcentral/eslint-config-f5-atg",
+        "parserOptions": {
+            "ecmaVersion": 2018
+        },
         "rules": {
             "func-names": "off",
             "max-classes-per-file": "off",
+            "no-await-in-loop": "off",
             "prefer-exponentiation-operator": "off",
             "prefer-spread": "off"
         }
@@ -104,21 +107,19 @@
             "commander": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
             "google-auth-library": "This package is used for GRPC connection, supports node v10 and above, but fromJSON function works in node v8.11.1 - should use v6.1.X only",
             "json-duplicate-key-handle": "This package is included locally to track updates and/or vulnerabilities. Included version is v1.0.0",
-            "jsonwebtoken": "This package dropped support for older node versions. Use v8.5.1 for Node v4.",
+            "jsonwebtoken": "This package dropped support for older node versions. Use v8.5.1 for Node v8.",
             "kafka-node": "This package dropped support for older node versions. Use v2.X.Y for Node v4.",
-            "prom-client": "This package dropped support for older node versions. Use v11.X.Y for Node v4. Cannot go higher than 11.0.0 because of syntax failures on test_node4.",
-            "uuid": "This package dropped support for older node versions starting v7.0.0. Their policy is supported node versions + one legacy version."
+            "prom-client": "This package dropped support for older node versions. Use v11.X.Y for Node v4. Cannot go higher than 11.0.0 because of syntax failures on test_node4."
         },
         "devDependencies": {
             "@f5devcentral/eslint-config-f5-atg": "This package is updated on as-needed basis due to the work overhead.",
-            "chai": "This package dropped support for older node versions. Use v4.X.Y for Node v4.",
-            "memfs": "This package dropped support for older node versions. Use v3.5.0 for Node v4.",
-            "mocha": "This package should use v7.X.Y. CI installs node specific mocha version for node 4 and node 6.",
-            "nock": "This package dropped support for older node versions. Use v10.0.0 for Node v4.",
-            "nyc": "This package dropped support for older node versions. Use v14.X.Y for Node v4.",
-            "sinon": "This package dropped support for older node versions. Use v7.X.Y for Node v4.",
+            "chai": "This package dropped support for older node versions. Use v4.X.Y for Node v8.",
+            "mocha": "This package dropped support for older node versions. Use v7.2.0 for Node v8.",
+            "nock": "This package dropped support for older node versions. Use v11.X.Y for Node v8.",
+            "nyc": "This package dropped support for older node versions. Use v14.X.Y for Node v8.",
+            "sinon": "This package dropped support for older node versions. Use v15.X.Y for Node v8.",
             "ssh2": "This packaged dropped support for older node versions. Use v0.X.Y for Node >= v5.2 and <= v10.16",
-            "winston": "This package dropped support for older node versions. Use v2.4.7 for Node v4."
+            "winston": "This package dropped support for older node versions. Use v3.5.1 for Node v8."
         }
     },
     "buildtimestamp": "buildtimestamp",

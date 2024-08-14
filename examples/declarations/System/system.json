@@ -16,7 +16,13 @@
         "systemPoller": {
             "enable": true,
             "trace": false,
-            "interval": 60
+            "interval": 60,
+            "httpAgentOpts": [
+                { "name": "keepAlive", "value": true },
+                { "name": "keepAliveMsecs", "value": 600000 },
+                { "name": "maxFreeSockets", "value": 5 },
+                { "name": "maxSockets", "value": 5 }
+            ]
         },
         "iHealthPoller": {
             "username": "username",

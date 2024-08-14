@@ -22,21 +22,22 @@ const moduleCache = require('./shared/restoreCache')();
 const sinon = require('sinon');
 
 const assert = require('./shared/assert');
+const restUtils = require('./restAPI/utils');
 const sourceCode = require('./shared/sourceCode');
 const stubs = require('./shared/stubs');
 const testUtil = require('./shared/util');
 
-const configWorker = sourceCode('src/lib/config');
-const deviceUtil = sourceCode('src/lib/utils/device');
 const RestWorker = sourceCode('src/nodejs/restWorker');
-const requestRouter = sourceCode('src/lib/requestHandlers/router');
+const SafeEventEmitter = sourceCode('src/lib/utils/eventEmitter');
 
 moduleCache.remember();
 
 describe('restWorker', () => {
+    let appEvents;
+    let configWorker;
     let coreStub;
+    let deviceVersionStub;
     let restWorker;
-    let gatherHostDeviceInfoStub;
 
     const baseState = {
         _data_: {
@@ -51,31 +52,43 @@ describe('restWorker', () => {
     before(() => {
         moduleCache.restore();
 
-        RestWorker.prototype.loadState = function (first, cb) {
+        RestWorker.prototype.loadState = sinon.stub();
+        RestWorker.prototype.saveState = sinon.stub();
+        RestWorker.prototype.loadState.callsFake((first, cb) => {
             cb(null, testUtil.deepCopy(baseState));
-        };
-        RestWorker.prototype.saveState = function (first, state, cb) {
+        });
+        RestWorker.prototype.saveState.callsFake((first, state, cb) => {
             cb(null);
-        };
-
-        // remove all existing listeners as consumers, systemPoller and
-        // prev instances of RestWorker
-        configWorker.removeAllListeners();
+        });
     });
 
     beforeEach(() => {
-        coreStub = stubs.default.coreStub();
+        coreStub = stubs.default.coreStub({
+            appEvents: true,
+            configWorker: true,
+            tracer: true,
+            utilMisc: true
+        });
         coreStub.utilMisc.generateUuid.numbersOnly = false;
 
+        configWorker = coreStub.configWorker.configWorker;
+        configWorker.removeAllListeners();
+
+        coreStub.localhostBigIp.mockDeviceType();
+        deviceVersionStub = coreStub.localhostBigIp.mockDeviceVersion();
+
+        appEvents = coreStub.appEvents.appEvents;
+
         restWorker = new RestWorker();
-        gatherHostDeviceInfoStub = sinon.stub(deviceUtil, 'gatherHostDeviceInfo');
-        gatherHostDeviceInfoStub.resolves();
+        restWorker.initialize(appEvents);
     });
 
-    afterEach(() => (restWorker.activityRecorder
-        ? restWorker.activityRecorder.stop()
-        : Promise.resolve())
-        .then(() => sinon.restore()));
+    afterEach(async () => {
+        await restWorker.tsDestroy();
+
+        testUtil.nockCleanup();
+        sinon.restore();
+    });
 
     describe('constructor', () => {
         it('should set WORKER_URI_PATH to shared/telemetry', () => {
@@ -106,81 +119,341 @@ describe('restWorker', () => {
             assert.ok(/onStartCompleted error/.test(fakeFailure.args[0][0]));
         });
 
-        it('should call failure callback if unable to start application when promise chain failed', () => {
+        it('should call failure callback if unable to start application when promise chain failed', async () => {
             const loadConfigStub = sinon.stub(configWorker, 'load');
             loadConfigStub.rejects(new Error('loadConfig error'));
-            return new Promise((resolve, reject) => {
+
+            await new Promise((resolve, reject) => {
                 restWorker.onStartCompleted(
                     () => reject(new Error('should not call success callback')),
                     () => resolve()
                 );
-            })
-                .then(() => {
-                    assert.notStrictEqual(loadConfigStub.callCount, 0);
-                });
+            });
+
+            assert.notStrictEqual(loadConfigStub.callCount, 0);
         });
 
-        it('should gather host device info', () => new Promise((resolve, reject) => {
-            restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
-        })
-            .then(() => new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    try {
-                        // should be 1 because gatherHostDeviceInfo resolves on first attempt
-                        assert.strictEqual(gatherHostDeviceInfoStub.callCount, 1);
-                        resolve();
-                    } catch (err) {
-                        reject(err);
-                    }
-                }, 200);
-            })));
+        it('should gather host device info', async () => {
+            await new Promise((resolve, reject) => {
+                restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
+            });
 
-        it('should not fail when unable to gather host device info', () => {
-            gatherHostDeviceInfoStub.rejects(new Error('expected error'));
-            return new Promise((resolve, reject) => {
+            await testUtil.sleep(200);
+            assert.strictEqual(deviceVersionStub.stub.callCount, 1);
+        });
+
+        it('should not fail when unable to gather host device info', async () => {
+            deviceVersionStub.stub.returns([404, '', 'Not Found']);
+
+            await new Promise((resolve, reject) => {
                 restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
             });
         });
 
-        it('should start activity recorder', () => {
-            coreStub.persistentStorage.loadData = { config: { raw: { class: 'Telemetry_Test' } } };
-            return new Promise((resolve, reject) => {
+        it('should start activity recorder', async () => {
+            baseState._data_ = { config: { raw: { class: 'Telemetry_Test' } } };
+
+            await new Promise((resolve, reject) => {
                 restWorker.onStartCompleted(resolve, reject);
-            })
-                .then(() => testUtil.sleep(100))
-                .then(() => coreStub.tracer.waitForData())
-                .then(() => {
-                    const data = coreStub.tracer.data[declarationTracerFile];
-                    assert.lengthOf(data, 4, 'should write 4 events');
-                    assert.sameDeepMembers(
-                        data.map((d) => d.data.event),
-                        ['received', 'received', 'validationSucceed', 'validationFailed']
-                    );
-                });
+            });
+            await testUtil.sleep(100);
+            await coreStub.tracer.waitForData();
+
+            const data = coreStub.tracer.data[declarationTracerFile];
+            assert.lengthOf(data, 4, 'should write 4 events');
+            assert.sameDeepMembers(
+                data.map((d) => d.data.event),
+                ['config.received', 'config.received', 'config.validationSucceed', 'config.validationFailed']
+            );
         });
     });
 
     describe('requests processing', () => {
-        let requestsProcessStub;
+        let ee;
+        let requestHandler;
+        let unregHandler;
+
+        function sendRequest() {
+            return restUtils.waitRequestComplete(
+                restWorker,
+                restUtils.buildRequest.apply(restUtils, arguments)
+            );
+        }
+
         beforeEach(() => {
-            requestsProcessStub = sinon.stub(requestRouter, 'processRestOperation');
-            requestsProcessStub.callsFake();
+            unregHandler = null;
+            ee = new SafeEventEmitter();
+
+            appEvents.register(ee, 'example', [
+                'requestHandler.created'
+            ]);
+
+            ee.emit('requestHandler.created', async (restOp) => {
+                await requestHandler(restOp);
+            }, (unreg) => {
+                unregHandler = unreg;
+            });
         });
 
-        const httpMethodsMapping = {
-            DELETE: 'onDelete',
-            GET: 'onGet',
-            POST: 'onPost'
-        };
-        Object.keys(httpMethodsMapping).forEach((httpMethod) => {
-            it(`should pass ${httpMethod} request to requests router`, () => new Promise((resolve, reject) => {
-                restWorker.onStartCompleted(resolve, (msg) => reject(new Error(msg || 'no message provided')));
-            })
-                .then(() => {
-                    assert.notOk(requestsProcessStub.called, 'should not be called yet');
-                    restWorker[httpMethodsMapping[httpMethod]]({});
-                    assert.ok(requestsProcessStub.called, 'should pass request to router');
-                }));
+        afterEach(() => unregHandler());
+
+        [
+            'DELETE',
+            'GET',
+            'POST'
+        ].forEach((method) => describe(method, () => {
+            it('should response with 503 on request when no request handlers', async () => {
+                unregHandler();
+                const restOp = await sendRequest({ method });
+
+                assert.deepStrictEqual(restOp.statusCode, 503);
+                assert.deepStrictEqual(restOp.contentType, 'application/json');
+                assert.deepStrictEqual(restOp.body, {
+                    code: 503,
+                    message: 'Service Unavailable'
+                });
+            });
+
+            it('should forward request to handlers', async () => {
+                requestHandler = sinon.spy(async (restOp) => {
+                    assert.deepStrictEqual(restOp.getMethod(), method);
+                    restOp.setStatusCode(200);
+                    restOp.setContentType('test');
+                    restOp.setBody({ data: true });
+                    restOp.complete();
+                });
+                const restOp = await sendRequest({ method });
+
+                assert.deepStrictEqual(requestHandler.callCount, 1);
+                assert.deepStrictEqual(restOp.statusCode, 200);
+                assert.deepStrictEqual(restOp.contentType, 'test');
+                assert.deepStrictEqual(restOp.body, {
+                    data: true
+                });
+            });
+
+            it('should return 500 on error', async () => {
+                requestHandler = sinon.spy(async () => {
+                    throw new Error('test');
+                });
+                const restOp = await sendRequest({ method });
+
+                assert.deepStrictEqual(requestHandler.callCount, 1);
+                assert.deepStrictEqual(restOp.statusCode, 500);
+                assert.deepStrictEqual(restOp.contentType, 'application/json');
+                assert.deepStrictEqual(restOp.body, {
+                    code: 500,
+                    message: 'Internal Server Error'
+                });
+            });
+
+            it('should process multiple requests at a time', async () => {
+                let code = 200;
+                requestHandler = sinon.spy(async (restOp) => {
+                    await testUtil.sleep(10);
+
+                    if (code === 203) {
+                        throw new Error('expected error');
+                    }
+
+                    restOp.setStatusCode(code);
+                    restOp.setContentType(`test${code}`);
+                    restOp.setBody({ code, path: restOp.getUri().pathname });
+                    restOp.complete();
+
+                    code += 1;
+                });
+
+                const results = await Promise.all([
+                    sendRequest({ path: '/1', method }),
+                    sendRequest({ path: '/2', method }),
+                    sendRequest({ path: '/3', method }),
+                    sendRequest({ path: '/4', method })
+                ]);
+
+                assert.deepStrictEqual(requestHandler.callCount, 4);
+                assert.sameMembers(
+                    results.map((r) => r.statusCode),
+                    [200, 201, 202, 500]
+                );
+                assert.sameMembers(
+                    results.map((r) => r.contentType),
+                    ['test200', 'test201', 'test202', 'application/json']
+                );
+                assert.sameDeepMembers(
+                    results.map((r) => r.body),
+                    [
+                        { code: 200, path: '/mgmt/shared/telemetry/1' },
+                        { code: 201, path: '/mgmt/shared/telemetry/2' },
+                        { code: 202, path: '/mgmt/shared/telemetry/3' },
+                        { code: 500, message: 'Internal Server Error' }
+                    ]
+                );
+            });
+        }));
+
+        it('should process multiple requests at a time', async () => {
+            let code = 200;
+
+            requestHandler = sinon.spy(async (restOp) => {
+                await testUtil.sleep(10);
+
+                if (code === 203) {
+                    throw new Error('expected error');
+                }
+
+                restOp.setStatusCode(code);
+                restOp.setContentType(`test${code}`);
+                restOp.setBody({
+                    code,
+                    method: restOp.getMethod(),
+                    path: restOp.getUri().pathname
+                });
+                restOp.complete();
+
+                code += 1;
+            });
+
+            const results = await Promise.all([
+                sendRequest({ path: '/1', method: 'DELETE' }),
+                sendRequest({ path: '/2', method: 'GET' }),
+                sendRequest({ path: '/3', method: 'POST' }),
+                sendRequest({ path: '/4', method: 'GET' })
+            ]);
+
+            assert.deepStrictEqual(requestHandler.callCount, 4);
+            assert.sameMembers(
+                results.map((r) => r.statusCode),
+                [200, 201, 202, 500]
+            );
+            assert.sameMembers(
+                results.map((r) => r.contentType),
+                ['test200', 'test201', 'test202', 'application/json']
+            );
+            assert.sameDeepMembers(
+                results.map((r) => r.body),
+                [
+                    { code: 200, method: 'DELETE', path: '/mgmt/shared/telemetry/1' },
+                    { code: 201, method: 'GET', path: '/mgmt/shared/telemetry/2' },
+                    { code: 202, method: 'POST', path: '/mgmt/shared/telemetry/3' },
+                    { code: 500, message: 'Internal Server Error' }
+                ]
+            );
+        });
+
+        it('should not rotate request handlers when failed', async () => {
+            const primaryHandler = sinon.spy(async (restOp) => {
+                if (primaryHandler.callCount === 1) {
+                    throw new Error('expected error');
+                }
+
+                restOp.setStatusCode(200);
+                restOp.setContentType('test200');
+                restOp.setBody({
+                    code: 200,
+                    method: restOp.getMethod(),
+                    path: restOp.getUri().pathname
+                });
+                restOp.complete();
+            });
+            ee.emit('requestHandler.created', primaryHandler);
+
+            requestHandler = sinon.spy(async (restOp) => {
+                restOp.setStatusCode(404);
+                restOp.setContentType('test404');
+                restOp.setBody({
+                    code: 404,
+                    method: restOp.getMethod(),
+                    path: restOp.getUri().pathname
+                });
+                restOp.complete();
+            });
+
+            let restOp = await sendRequest({ path: '/1', method: 'DELETE' });
+
+            assert.deepStrictEqual(restOp.statusCode, 500);
+            assert.deepStrictEqual(restOp.contentType, 'application/json');
+            assert.deepStrictEqual(restOp.body, {
+                code: 500,
+                message: 'Internal Server Error'
+            });
+
+            assert.deepStrictEqual(primaryHandler.callCount, 1);
+            assert.deepStrictEqual(requestHandler.callCount, 0);
+
+            restOp = await sendRequest({ path: '/1', method: 'DELETE' });
+
+            assert.deepStrictEqual(restOp.statusCode, 200);
+            assert.deepStrictEqual(restOp.contentType, 'test200');
+            assert.deepStrictEqual(restOp.body, {
+                code: 200,
+                method: 'DELETE',
+                path: '/mgmt/shared/telemetry/1'
+            });
+        });
+
+        it('should fallback to next handler from the list', async () => {
+            let unregPrimary = null;
+            const primaryHandler = sinon.spy(async (restOp) => {
+                restOp.setStatusCode(200);
+                restOp.setContentType('test200');
+                restOp.setBody({
+                    code: 200,
+                    method: restOp.getMethod(),
+                    path: restOp.getUri().pathname
+                });
+                restOp.complete();
+            });
+            ee.emit('requestHandler.created', primaryHandler, (unreg) => {
+                unregPrimary = unreg;
+            });
+
+            requestHandler = sinon.spy(async (restOp) => {
+                restOp.setStatusCode(404);
+                restOp.setContentType('test404');
+                restOp.setBody({
+                    code: 404,
+                    method: restOp.getMethod(),
+                    path: restOp.getUri().pathname
+                });
+                restOp.complete();
+            });
+
+            let restOp = await sendRequest({ path: '/1', method: 'DELETE' });
+
+            assert.deepStrictEqual(restOp.statusCode, 200);
+            assert.deepStrictEqual(restOp.contentType, 'test200');
+            assert.deepStrictEqual(restOp.body, {
+                code: 200,
+                method: 'DELETE',
+                path: '/mgmt/shared/telemetry/1'
+            });
+
+            assert.deepStrictEqual(primaryHandler.callCount, 1);
+            assert.deepStrictEqual(requestHandler.callCount, 0);
+
+            unregPrimary();
+
+            restOp = await sendRequest({ path: '/1', method: 'DELETE' });
+
+            assert.deepStrictEqual(restOp.statusCode, 404);
+            assert.deepStrictEqual(restOp.contentType, 'test404');
+            assert.deepStrictEqual(restOp.body, {
+                code: 404,
+                method: 'DELETE',
+                path: '/mgmt/shared/telemetry/1'
+            });
+
+            unregHandler();
+
+            restOp = await sendRequest({ path: '/1', method: 'DELETE' });
+
+            assert.deepStrictEqual(restOp.statusCode, 503);
+            assert.deepStrictEqual(restOp.contentType, 'application/json');
+            assert.deepStrictEqual(restOp.body, {
+                code: 503,
+                message: 'Service Unavailable'
+            });
         });
     });
 });

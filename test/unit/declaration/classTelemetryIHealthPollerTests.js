@@ -28,15 +28,19 @@ const declValidator = require('./common').validate;
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_iHealth_Poller', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -197,6 +201,28 @@ describe('Declarations -> Telemetry_iHealth_Poller', () => {
                         timeWindow: {
                             start: '00:00',
                             end: '03:00'
+                        }
+                    }
+                }
+            };
+            return assert.isFulfilled(declValidator(data));
+        });
+
+        it('should allow to specify single-digit minutes', () => {
+            const data = {
+                class: 'Telemetry',
+                My_iHealth: {
+                    class: 'Telemetry_iHealth_Poller',
+                    username: 'username',
+                    passphrase: {
+                        cipherText: 'cipherText'
+                    },
+                    interval: {
+                        frequency: 'weekly',
+                        day: 'Sunday',
+                        timeWindow: {
+                            start: '00:0',
+                            end: '03:9'
                         }
                     }
                 }

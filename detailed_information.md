@@ -371,7 +371,7 @@ Website: [https://kafka.apache.org/](https://kafka.apache.org/).
 
 Required information:
 
-- Host: The address of the Kafka system.
+- Host: The address of the Kafka system. This can be a string with a single host or an array containing multiple addresses.
 - Protocol: The port of the Kafka system. Options: ```binaryTcp``` or ```binaryTcpTls```. Default is ```binaryTcpTls```.
 - Port: The port of the Kafka system.
 - Topic: The topic where data should go within the Kafka system.
@@ -379,7 +379,34 @@ Required information:
 - Username: The username for authentication.
 - Passphrase: The passphrase for authentication.
 
-Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
+Optional parameters:
+- Format: Toggles formatting of data. Options: ```default``` (no additional formatting as with TS versions < 1.36) and ```split``` (splits system information into multiple smaller messages).
+- Partitioner Type: Allows the message to be sent using a chosen partitioning strategy. Options:
+    - ```default``` uses the default or partition at index 0
+    - ```random``` pick from available partitions randomly
+    - ```cyclic``` will cycle through the available partitions
+    - ```keyed``` use a specific partition with key (a value for```partitionKey``` must be provided)
+- Partition Key: Key used to lookup a partition. Required when Partitioner Type is ```keyed```. Must not be specified if using other partitioner types.
+- CustomOpts: Custom settings to pass to KafkaClient if using TS versions >= 1.36. These are a subset of what the [kafka-node library](https://github.com/SOHU-Co/kafka-node) supports. Please see the following example containing valid options:
+  ```json
+    "customOpts": [
+        { "name": "connectTimeout", "value": 10000 },
+        { "name": "requestTimeout", "value": 10000 },
+        { "name": "idleConnection", "value": 10 },
+        { "name": "maxAsyncRequests", "value": 50 },
+        { "name": "connectRetryOptions.retries", "value": 10 },
+        { "name": "connectRetryOptions.factor", "value": 3 },
+        { "name": "connectRetryOptions.minTimeout", "value": 3000 },
+        { "name": "connectRetryOptions.maxTimeout", "value": 10000 },
+        { "name": "connectRetryOptions.randomize", "value": false },
+    ]
+  ```
+
+#### TS, Kafka and Kafka Client (kafka-node) Compatibility
+
+##### TS versions prior to v1.36
+
+Use TS versions prior to v1.36 with ZooKeeper deployments. The previous TS releases use an older version of kafka-node library, which has dropped support for ZooKeeper apis for new versions. ZooKeeper itself has been marked as deprecated since the Kafka 3.5.0 release and will be removed in Apache Kafka 4.0. For more information, please see the documentation for [ZooKeeper Deprecation](https://kafka.apache.org/documentation/#zk_depr)
 
 ```json
 {
@@ -389,16 +416,39 @@ Note: More information about installing Kafka can be found [here](https://kafka.
         "host": "192.168.2.1",
         "protocol": "binaryTcpTls",
         "port": 9092,
+        "topic": "f5-telemetry"
+    }
+}
+```
+
+##### TS versions v1.36 or later
+
+Use with Kafka Raft (KRaft) mode deployments. Requires BIG-IP versions with Node >= 8.11.1. Supports option to split System Poller data into multiple smaller messages. Also supports multiple hosts and additional Kafka client customization.
+
+```json
+{
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Kafka",
+        "host": ["192.168.2.10", "192.168.2.11"],
+        "protocol": "binaryTcpTls",
+        "port": 9092,
         "topic": "f5-telemetry",
         "authenticationProtocol": "SASL-PLAIN",
         "username": "username",
         "passphrase": {
         	"cipherText": "secretkey"
-        }
-    }
+        },
+        "format": "split",
+        "partitionerType": "cyclic",
+        "customOpts": [
+            { "name": "connectTimeout", "value": 10000 }
+        ]
     }
 }
 ```
+
+Note: More information about installing Kafka can be found [here](https://kafka.apache.org/quickstart).
 
 ### ElasticSearch
 
@@ -698,7 +748,7 @@ Note: available only when `debug` is turned on.
 {
     "system": {
         "hostname": "telemetry.bigip.com",
-        "version": "14.0.0",
+        "version": "15.1.0",
         "versionBuild": "0.0.2",
         "location": "Seattle",
         "description": "Telemetry BIG-IP",
@@ -1741,7 +1791,7 @@ Output
     "dest_port":"80",
     "device_product":"Advanced Firewall Module",
     "device_vendor":"F5",
-    "device_version":"14.0.0",
+    "device_version":"15.1.0",
     "drop_reason":"Policy",
     "errdefs_msgno":"23003137",
     "errdefs_msg_name":"Network Event",
@@ -1899,9 +1949,7 @@ Output
 Configuration
 
 - Modify AVR streaming configuration
-  - BIG-IP 13.x:
-    - TMSH: ```modify analytics global-settings { ecm-address 127.0.0.1 ecm-port 6514 use-ecm enabled use-offbox enabled }```
-  - BIG-IP 14.x:
+  - BIG-IP 15.1.x:
     - TMSH: ```modify analytics global-settings { offbox-protocol tcp offbox-tcp-addresses add { 127.0.0.1 } offbox-tcp-port 6514 use-offbox enabled }```
 Output
 

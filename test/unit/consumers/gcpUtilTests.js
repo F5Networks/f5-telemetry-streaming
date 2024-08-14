@@ -25,6 +25,7 @@ const sinon = require('sinon');
 
 const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
+const testUtil = require('../shared/util');
 
 const gcpUtil = sourceCode('src/lib/consumers/shared/gcpUtil');
 
@@ -48,11 +49,12 @@ describe('Google Cloud Util Tests', () => {
 
         afterEach(() => {
             jwtSignStub.restore();
+            testUtil.nockCleanup();
         });
 
         it('should get an Access Token from a signed JWT', () => {
-            nock('https://oauth2.googleapis.com/token')
-                .post('')
+            nock('https://oauth2.googleapis.com')
+                .post('/token')
                 .reply(200, (_, body) => {
                     assert.isTrue(/&assertion=somejsonwebtoken/.test(body));
                     return accessTokenResponse;
@@ -70,8 +72,8 @@ describe('Google Cloud Util Tests', () => {
         });
 
         it('should cache multiple tokens', () => {
-            nock('https://oauth2.googleapis.com/token')
-                .post('')
+            nock('https://oauth2.googleapis.com')
+                .post('/token')
                 .times(2)
                 .reply(200, accessTokenResponse);
 

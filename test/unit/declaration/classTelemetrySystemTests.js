@@ -29,15 +29,19 @@ const generateInputActionsTests = require('./generators/inputDataActions');
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_System', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -46,7 +50,9 @@ describe('Declarations -> Telemetry_System', () => {
         My_System: {
             class: 'Telemetry_System',
             systemPoller: {
-                interval: 90
+                interval: 90,
+                workers: 9,
+                chunkSize: 9
             }
         }
     }, ['My_System', 'systemPoller']));
@@ -56,8 +62,8 @@ describe('Declarations -> Telemetry_System', () => {
         My_System: {
             class: 'Telemetry_System',
             systemPoller: [
-                { interval: 90 },
-                { interval: 100 }
+                { interval: 90, workers: 9, chunkSize: 90 },
+                { interval: 100, workers: 1, chunkSize: 10 }
             ]
         }
     }, ['My_System', 'systemPoller', '0']));
@@ -155,7 +161,9 @@ describe('Declarations -> Telemetry_System', () => {
                             }
                         ],
                         enable: true,
-                        interval: 100
+                        interval: 100,
+                        workers: 5,
+                        chunkSize: 30
                     }
                 ]);
             });
@@ -295,6 +303,22 @@ describe('Declarations -> Telemetry_System', () => {
                 assert.strictEqual(poller.username, undefined);
                 assert.strictEqual(poller.passphrase, undefined);
             });
+    });
+
+    it('should not allow set passphrase without username', async () => {
+        const data = {
+            class: 'Telemetry',
+            My_System: {
+                class: 'Telemetry_System',
+                passphrase: {
+                    cipherText: 'test_passphrase_1'
+                },
+                systemPoller: {
+                    interval: 60
+                }
+            }
+        };
+        return assert.isRejected(declValidator(data), /passphrase.*should have property username when property passphrase is present/);
     });
 
     it('should not allow to attach inline System Poller declaration with additional properties', () => {
@@ -508,10 +532,12 @@ describe('Declarations -> Telemetry_System', () => {
                 systemPoller: [
                     {
                         interval: 1440,
-                        trace: true
+                        trace: true,
+                        workers: 10
                     },
                     {
-                        interval: 90
+                        interval: 90,
+                        chunkSize: 50
                     }
                 ]
             }
@@ -529,6 +555,8 @@ describe('Declarations -> Telemetry_System', () => {
                             }],
                             trace: true,
                             interval: 1440,
+                            workers: 10,
+                            chunkSize: 30,
                             enable: true
                         },
                         {
@@ -537,6 +565,8 @@ describe('Declarations -> Telemetry_System', () => {
                                 setTag: { application: '`A`', tenant: '`T`' }
                             }],
                             interval: 90,
+                            workers: 5,
+                            chunkSize: 50,
                             enable: true
                         }
                     ]
@@ -556,7 +586,9 @@ describe('Declarations -> Telemetry_System', () => {
             },
             Poller_1: {
                 class: 'Telemetry_System_Poller',
-                interval: 80
+                interval: 80,
+                workers: 5,
+                chunkSize: 20
             },
             Poller_2: {
                 class: 'Telemetry_System_Poller',

@@ -1,0 +1,88 @@
+{
+    "sha1": "830daac4f548464fbada533075524bfa",
+    "version": {
+        "version": "17.1.0",
+        "product": "BIG-IP",
+        "built": "230823101811",
+        "edition": "Point Release 3"
+    },
+    "diagnostics": {
+        "diagnostic": [
+            {
+                "name": "D00",
+                "output": [],
+                "run_data": {
+                    "h_importance": "HIGH",
+                    "match": true
+                },
+                "results": {
+                    "h_action": "For additional information, refer to the linked article.",
+                    "h_name": "D00",
+                    "solution": [
+                        {
+                            "id": "K00",
+                            "value": "https://my.f5.com/manage/s/article/K00"
+                        }
+                    ],
+                    "h_cve_ids": [
+                        "CVE-XXXX-YYYYY"
+                    ],
+                    "h_header": "BIG-IP vulnerability CVE-XXXX-YYYYY",
+                    "h_summary": "BIG-IP vulnerability CVE-XXXX-YYYYY description."
+                },
+                "fixedInVersions": {
+                    "version": [
+                        {
+                            "major": 99,
+                            "minor": 98,
+                            "maintenance": 96,
+                            "point": 2,
+                            "fix": ""
+                        },
+                        {
+                            "major": 99,
+                            "minor": 98,
+                            "maintenance": 97,
+                            "point": 1,
+                            "fix": ""
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "D01",
+                "output": [],
+                "run_data": {
+                    "h_importance": "HIGH",
+                    "match": true
+                },
+                "results": {
+                    "h_action": "For additional information, refer to the linked article.",
+                    "h_name": "D01",
+                    "solution": [
+                        {
+                            "id": "K01",
+                            "value": "https://my.f5.com/manage/s/article/K01"
+                        }
+                    ],
+                    "h_cve_ids": [
+                        "CVE-XXXX-YYYYY"
+                    ],
+                    "h_header": "BIG-IP vulnerability CVE-XXXX-YYYYY",
+                    "h_summary": "BIG-IP vulnerability CVE-XXXX-YYYYY description."
+                },
+                "fixedInVersions": {
+                    "version": []
+                }
+            }
+        ],
+        "hit_count": 37,
+        "miss_count": 210,
+        "filter": "hit"
+    },
+    "system_information": {
+        "bigip_chassis_serial_num": "830daac4-f548-464f-bada-533075524bfa",
+        "hostname": "bigip-ts-small.localdomain",
+        "platform": "Z100"
+    }
+}

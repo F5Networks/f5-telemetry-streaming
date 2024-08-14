@@ -30,7 +30,6 @@ const testUtil = require('../shared/util');
 
 const cloudMonitoringIndex = sourceCode('src/lib/consumers/Google_Cloud_Monitoring/index');
 const logger = sourceCode('src/lib/logger');
-const tracer = sourceCode('src/lib/utils/tracer');
 const tracerMgr = sourceCode('src/lib/tracerManager');
 
 moduleCache.remember();
@@ -161,8 +160,10 @@ describe('Google_Cloud_Monitoring', () => {
         // Increment persistent time before each test, so any cached tokens are are expired
         incrementPersistentTime();
 
-        loggerStub = stubs.logger(logger);
-        tracerStub = stubs.tracer(tracer);
+        const coreStubs = stubs.default.coreStub({ logger: true, tracer: true });
+
+        loggerStub = coreStubs.logger;
+        tracerStub = coreStubs.tracer;
         // Returned signed JWT in format: privateKeyId::privateKey
         sinon.stub(jwt, 'sign').callsFake((_, secret, options) => `${options.header.kid}::${secret}`);
 
@@ -173,8 +174,8 @@ describe('Google_Cloud_Monitoring', () => {
 
     afterEach(() => tracerMgr.unregisterAll()
         .then(() => {
-            testUtil.checkNockActiveMocks(nock);
-            nock.cleanAll();
+            testUtil.checkNockActiveMocks();
+            testUtil.nockCleanup();
             sinon.restore();
         }));
 
@@ -190,32 +191,32 @@ describe('Google_Cloud_Monitoring', () => {
     });
 
     it('should process systemInfo data', () => {
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .reply(200, {});
 
         return cloudMonitoringIndex(context)
@@ -238,32 +239,32 @@ describe('Google_Cloud_Monitoring', () => {
             };
         });
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', expectedTimeSeries)
+            .post('/v3/projects/theProject/timeSeries', expectedTimeSeries)
             .reply(200, {});
 
         context.config.reportInstanceMetadata = true;
@@ -276,32 +277,32 @@ describe('Google_Cloud_Monitoring', () => {
     });
 
     it('should process systemInfo data, when metadata reporting disabled', () => {
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', getOriginTimeSeries())
+            .post('/v3/projects/theProject/timeSeries', getOriginTimeSeries())
             .reply(200, {});
 
         context.config.reportInstanceMetadata = false;
@@ -314,35 +315,35 @@ describe('Google_Cloud_Monitoring', () => {
     });
 
     it('should process systemInfo data, with a cached access token', () => {
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .times(3)
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .times(3)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .times(2)
             .reply(200, {});
 
@@ -351,12 +352,12 @@ describe('Google_Cloud_Monitoring', () => {
             .then(() => {
                 // Increment the clock, to expire token
                 incrementPersistentTime();
-                nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+                nock('https://monitoring.googleapis.com', {
                     reqheaders: {
                         authorization: 'Bearer aToken'
                     }
                 })
-                    .post('', testUtil.deepCopy(getOriginTimeSeries()))
+                    .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
                     .times(1)
                     .reply(200, {});
                 return cloudMonitoringIndex(context);
@@ -372,66 +373,66 @@ describe('Google_Cloud_Monitoring', () => {
 
     it('should process systemInfo data, with multiple cached access tokens', () => {
         // Private Key 1 nocks
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === 'privateKey1::firstKey')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === 'privateKey1::firstKey')
             .reply(200, { access_token: 'accessTokenOne', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenOne'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .times(2)
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenOne'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .times(2)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenOne'
             }
         })
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .times(2)
             .reply(200, {});
 
         // Private Key 2 nocks
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === 'privateKey2::secondKey')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === 'privateKey2::secondKey')
             .reply(200, { access_token: 'accessTokenTwo', expires_in: tokenDuration });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenTwo'
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .times(2)
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenTwo'
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .times(2)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer accessTokenTwo'
             }
         })
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .times(2)
             .reply(200, {});
 
@@ -454,40 +455,40 @@ describe('Google_Cloud_Monitoring', () => {
     it('should invalidate token if Unauthorized error on sending data', () => {
         let tokenCounter = 0;
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, () => {
                 tokenCounter += 1;
                 return { access_token: `token:${tokenCounter}`, expires_in: tokenDuration };
             });
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: (a) => a === `Bearer token:${tokenCounter}`
             }
         })
-            .get('')
+            .get('/v3/projects/theProject/metricDescriptors')
             .times(2)
             .reply(200, metricDescriptors.onGet);
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/metricDescriptors', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: (a) => a === `Bearer token:${tokenCounter}`
             }
         })
-            .post('', metricDescriptors.onPost)
+            .post('/v3/projects/theProject/metricDescriptors', metricDescriptors.onPost)
             .times(2)
             .reply(200, {});
 
-        nock('https://monitoring.googleapis.com/v3/projects/theProject/timeSeries', {
+        nock('https://monitoring.googleapis.com', {
             reqheaders: {
                 authorization: (a) => a === `Bearer token:${tokenCounter}`
             }
         })
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .reply(401, 'Unauthorized')
-            .post('', testUtil.deepCopy(getOriginTimeSeries()))
+            .post('/v3/projects/theProject/timeSeries', testUtil.deepCopy(getOriginTimeSeries()))
             .reply(200, {});
 
         return cloudMonitoringIndex(context)

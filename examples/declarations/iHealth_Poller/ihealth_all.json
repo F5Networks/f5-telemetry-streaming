@@ -53,7 +53,7 @@
                 "end":   "03:15"
             }
         },
-        "downloadFolder": "example_download_folder"
+        "downloadFolder": "/example_download_folder"
     },
     "Daily_iHealth": {
         "class": "Telemetry_iHealth_Poller",

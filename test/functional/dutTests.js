@@ -521,14 +521,11 @@ function test() {
                         // wait 0.5s in case if config was not applied yet
                         return promiseUtils.sleep(500);
                     })
-                    .then(() => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                    .then(() => bigip.telemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'My_System_Poller'))
                     .then((data) => {
                         bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                        assert.isArray(data, 'should be array');
                         assert.isNotEmpty(data, 'should have at least one element');
                         // verify that 'system' key and child objects are included
-                        data = data[0];
-
                         const snmpName = 'hrDeviceStatus.196608';
 
                         assert.isString(data.hrDeviceStatusOrigin[snmpName], 'should not convert SNMP enum to metric');
@@ -609,13 +606,11 @@ function test() {
 
                         // wait 500ms in case if config was not applied yet
                         it('should get response from systempoller endpoint', () => promiseUtils.sleep(500)
-                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1'))
                             .then((data) => {
                                 bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                                assert.isArray(data, 'should be array');
                                 assert.isNotEmpty(data, 'should have at least one element');
                                 // read schema and validate data
-                                data = data[0];
                                 const schema = miscUtils.readJsonFile(constants.DECL.SYSTEM_POLLER_SCHEMA);
                                 const valid = miscUtils.validateAgainstSchema(data, schema);
                                 if (valid !== true) {
@@ -633,13 +628,11 @@ function test() {
                                 // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
-                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1'))
                             .then((data) => {
                                 bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                                assert.isArray(data, 'should be array');
                                 assert.isNotEmpty(data, 'should have at least one element');
                                 // verify that certain data was filtered out, while other data was preserved
-                                data = data[0];
                                 assert.deepStrictEqual(Object.keys(data.system).indexOf('provisioning'), -1);
                                 assert.deepStrictEqual(Object.keys(data.system.diskStorage).indexOf('/usr'), -1);
                                 assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/'), -1);
@@ -655,13 +648,11 @@ function test() {
                                 // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
-                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1'))
                             .then((data) => {
                                 bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                                assert.isArray(data, 'should be array');
                                 assert.isNotEmpty(data, 'should have at least one element');
                                 // verify /var is included with, with 1_tagB removed
-                                data = data[0];
                                 assert.notStrictEqual(Object.keys(data.system.diskStorage).indexOf('/var'), -1);
                                 assert.deepStrictEqual(data.system.diskStorage['/var']['1_tagB'], { '1_valueB_1': 'value1' });
                                 // verify /var/log is included with, with 1_tagB included
@@ -677,13 +668,11 @@ function test() {
                                 // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
-                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1'))
                             .then((data) => {
                                 bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                                assert.isArray(data, 'should be array');
                                 assert.isNotEmpty(data, 'should have at least one element');
                                 // verify that 'system' key and child objects are included
-                                data = data[0];
                                 assert.deepStrictEqual(Object.keys(data), ['system']);
                                 assert.ok(Object.keys(data.system).length > 1);
                                 // verify that 'system.diskStorage' is NOT excluded
@@ -698,17 +687,16 @@ function test() {
                                 // wait 0.5s in case if config was not applied yet
                                 return promiseUtils.sleep(500);
                             })
-                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME))
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_1'))
                             .then((data) => {
                                 bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
-                                assert.isArray(data, 'should be array');
-                                assert.deepStrictEqual(data.length, 2, 'should have two elements');
-
-                                const pollerOneData = data[0];
-                                const pollerTwoData = data[1];
-                                assert.notStrictEqual(pollerOneData.custom_ipOther, undefined);
-                                assert.notStrictEqual(pollerOneData.custom_dns, undefined);
-                                assert.ok(pollerTwoData.custom_provisioning.items.length > 0);
+                                assert.notStrictEqual(data.custom_ipOther, undefined);
+                                assert.notStrictEqual(data.custom_dns, undefined);
+                            })
+                            .then(() => namespaceTelemetry.getSystemPollerData(constants.DECL.SYSTEM_NAME, 'SystemPoller_2'))
+                            .then((data) => {
+                                bigip.logger.info(`SystemPoller "${constants.DECL.SYSTEM_NAME}" response:`, { data });
+                                assert.ok(data.custom_provisioning.items.length > 0);
                             }));
                     });
                 });

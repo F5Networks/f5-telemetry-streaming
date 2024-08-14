@@ -143,6 +143,7 @@ describe('AWS Util Tests', () => {
         describe('getMetrics', () => {
             const testSet = awsUtilTestsData.getMetrics;
             testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
+                clock.restore();
                 clock = sinon.useFakeTimers(new Date(testSet.timestamp));
                 const actualMetrics = awsUtil.getMetrics(testConf.input.data, testConf.input.defDimensions);
                 return assert.deepStrictEqual(actualMetrics, testConf.expected);
@@ -168,6 +169,7 @@ describe('AWS Util Tests', () => {
 
             const testSet = awsUtilTestsData.sendMetrics;
             testSet.tests.forEach((testConf) => testUtil.getCallableIt(testConf)(testConf.name, () => {
+                clock.restore();
                 clock = sinon.useFakeTimers(testSet.timestamp);
                 const context = testUtil.buildConsumerContext({
                     eventType: 'systemInfo',

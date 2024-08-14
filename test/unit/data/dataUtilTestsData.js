@@ -1079,6 +1079,17 @@ module.exports = {
     getMatches: [
         // TEST RELATED DATA STARTS HERE
         {
+            name: 'should convert * to .*',
+            data: {
+                system: {},
+                httpProfiles: {},
+                virtualServers: {}
+            },
+            propertyCtx: '*',
+            expectedCtx: ['httpProfiles', 'system', 'virtualServers']
+        },
+        // TEST RELATED DATA STARTS HERE
+        {
             name: 'should return what matches the property when it is a literal string',
             data: {
                 system: {},

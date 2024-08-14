@@ -1,0 +1,50 @@
+[
+    {
+        "importance": "HIGH",
+        "action": "For additional information, refer to the linked article.",
+        "name": "D00",
+        "solution": [
+            {
+                "id": "K00",
+                "value": "https://my.f5.com/manage/s/article/K00"
+            }
+        ],
+        "cveIds": [
+            "CVE-XXXX-YYYYY"
+        ],
+        "header": "BIG-IP vulnerability CVE-XXXX-YYYYY",
+        "summary": "BIG-IP vulnerability CVE-XXXX-YYYYY description.",
+        "version": [
+            {
+                "major": 99,
+                "minor": 98,
+                "maintenance": 96,
+                "point": 2,
+                "fix": ""
+            },
+            {
+                "major": 99,
+                "minor": 98,
+                "maintenance": 97,
+                "point": 1,
+                "fix": ""
+            }
+        ]
+    },
+    {
+        "importance": "HIGH",
+        "action": "For additional information, refer to the linked article.",
+        "name": "D01",
+        "solution": [
+            {
+                "id": "K01",
+                "value": "https://my.f5.com/manage/s/article/K01"
+            }
+        ],
+        "cveIds": [
+            "CVE-XXXX-YYYYY"
+        ],
+        "header": "BIG-IP vulnerability CVE-XXXX-YYYYY",
+        "summary": "BIG-IP vulnerability CVE-XXXX-YYYYY description."
+    }
+]

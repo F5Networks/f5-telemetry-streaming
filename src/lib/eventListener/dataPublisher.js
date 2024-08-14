@@ -40,8 +40,10 @@ function sendDataToListener(data, listenerName, options) {
     const opts = options || {};
     return Promise.resolve()
         .then(() => {
-            const eventListener = configUtil.getTelemetryListeners(configWorker.currentConfig, opts.namespace)
-                .find((el) => el.name === listenerName);
+            const eventListener = configUtil.getTelemetryListeners(configWorker.currentConfig, {
+                name: listenerName,
+                namespace: opts.namespace
+            })[0];
 
             let error;
             const namespaceSuffix = `${opts.namespace ? ` in Namespace: ${opts.namespace}` : ''}.`;

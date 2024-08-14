@@ -38,9 +38,7 @@ describe('Service', () => {
     });
 
     beforeEach(() => {
-        coreStub = stubs.default.coreStub({
-            logger: true
-        });
+        coreStub = stubs.default.coreStub({ logger: true });
     });
 
     function shouldUseDebugOnly() {
@@ -83,6 +81,12 @@ describe('Service', () => {
         });
 
         afterEach(() => sinon.restore());
+
+        it('should use parent logger', () => {
+            service = new Service(coreStub.logger.logger.getChild('parentLogger'));
+            service.logger.info('test');
+            shouldLogMsg('info', /parentLogger\.Service.*test/);
+        });
 
         it('should return correct statuses for service', () => {
             checkState(service, 'stopped');
@@ -172,17 +176,40 @@ describe('Service', () => {
                 shouldLogMsg(/destroyed\./);
             }));
 
-        it('should not be able to start/stop/restart destroyed service', () => service.destroy()
+        it('should be able to start/restart destroyed service', () => service.destroy()
             .then((retVal) => {
                 assert.isTrue(retVal, 'should return true on attempt to destroy service');
                 checkState(service, 'destroyed');
                 shouldUseDebugOnly();
                 shouldLogMsg(/termination requested/);
                 shouldLogMsg(/destroyed\./);
+                return service.start();
             })
-            .then(() => assert.becomes(service.start(), false, 'should not be able to start destroyed service'))
+            .then((retVal) => {
+                assert.isTrue(retVal, 'should return true on attempt to start service');
+                checkState(service, 'running');
+                shouldUseDebugOnly();
+                shouldLogMsg(/running\./);
+                coreStub.logger.removeAllMessages();
+                return service.destroy();
+            })
+            .then((retVal) => {
+                assert.isTrue(retVal, 'should return true on attempt to destroy service');
+                checkState(service, 'destroyed');
+                shouldUseDebugOnly();
+                shouldLogMsg(/termination requested/);
+                shouldLogMsg(/destroyed\./);
+                return service.restart();
+            })
+            .then((retVal) => {
+                assert.isTrue(retVal, 'should return true on attempt to restart service');
+                checkState(service, 'running');
+                shouldUseDebugOnly();
+                shouldLogMsg(/running\./);
+                coreStub.logger.removeAllMessages();
+                return service.destroy();
+            })
             .then(() => assert.becomes(service.stop(), false, 'should not be able to stop destroyed service'))
-            .then(() => assert.becomes(service.restart(), false, 'should not be able to restart destroyed service'))
             .then(() => assert.becomes(service.destroy(), false, 'should not be able to destroy destroyed service')));
 
         it('should be able to destroy running service', () => service.start()
@@ -204,20 +231,27 @@ describe('Service', () => {
     });
 
     describe('Custom Service', () => {
-        class CustomService extends Service {
-            _onStart(onError) {
-                return this._onStartCb(onError);
-            }
-
-            _onStop(restart) {
-                return this._onStopCb(restart);
-            }
-        }
-
+        let onStartInfos;
+        let onStopInfos;
         let onErrorCb;
         let service;
 
+        class CustomService extends Service {
+            _onStart(onError, info) {
+                onStartInfos.push(info);
+                return this._onStartCb(onError);
+            }
+
+            _onStop(info) {
+                onStopInfos.push(info);
+                return this._onStopCb(info);
+            }
+        }
+
         beforeEach(() => {
+            onStartInfos = [];
+            onStopInfos = [];
+
             service = new CustomService();
             service._onStartCb = (onError) => {
                 service.logger.debug('running-msg...');
@@ -234,6 +268,7 @@ describe('Service', () => {
             service._onStartCb = () => { throw new Error('onStartError'); };
             return assert.isRejected(service.start(), /onStartError/)
                 .then(() => {
+                    assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                     checkState(service, 'stopped');
                     shouldLogMsg(/stopped due error[\S\s]*onStartError/gm);
                 });
@@ -243,43 +278,88 @@ describe('Service', () => {
             service._onStartCb = () => Promise.reject(new Error('onStartError'));
             return assert.isRejected(service.start(), /onStartError/)
                 .then(() => {
+                    assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                     checkState(service, 'stopped');
                     shouldLogMsg(/stopped due error[\S\s]*onStartError/gm);
                 });
         });
 
-        it('should resolve on attempt to restart non-active service even when not able to stop (sync)', () => {
-            service._onStopCb = (restart) => {
-                assert.isTrue(restart, 'should be set to true');
-                throw new Error('onStopError');
-            };
+        it('should not call stop callback on attempt to restart non-active service (sync)', () => {
+            service._onStopCb = sinon.spy();
             return service.restart()
                 .then((retVal) => {
+                    assert.isEmpty(onStopInfos);
+                    assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
+                    assert.deepStrictEqual(service._onStopCb.callCount, 0);
                     assert.isTrue(retVal, 'should return true on attempt to restart service');
                     checkState(service, 'running');
-                    shouldLogMsg(/caught error on attempt to stop[\S\s]*onStopError/gm);
                 });
         });
 
-        it('should resolve on attempt to restart non-active service even when not able to stop (async)', () => {
-            service._onStopCb = (restart) => {
-                assert.isTrue(restart, 'should be set to true');
-                return Promise.reject(new Error('onStopError'));
-            };
-            return service.restart()
-                .then((retVal) => {
-                    assert.isTrue(retVal, 'should return true on attempt to restart service');
-                    checkState(service, 'running');
-                    shouldLogMsg(/caught error on attempt to stop[\S\s]*onStopError/gm);
-                });
-        });
+        it('should correcrly set coldStart, restart and destroy flags', () => service.start()
+            .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
+                assert.isTrue(retVal, 'should return true on attempt to start service');
+                checkState(service, 'running');
+
+                return service.destroy();
+            })
+            .then((retVal) => {
+                assert.deepStrictEqual(onStopInfos, [{ destroy: true, restart: false }]);
+                assert.isTrue(retVal, 'should return true on attempt to destroy service');
+                checkState(service, 'destroyed');
+
+                onStartInfos = [];
+                onStopInfos = [];
+
+                return service.start();
+            })
+            .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
+                assert.isTrue(retVal, 'should return true on attempt to start service');
+                checkState(service, 'running');
+
+                return service.destroy();
+            })
+            .then((retVal) => {
+                assert.deepStrictEqual(onStopInfos, [{ destroy: true, restart: false }]);
+                assert.isTrue(retVal, 'should return true on attempt to destroy service');
+                checkState(service, 'destroyed');
+
+                onStartInfos = [];
+                onStopInfos = [];
+
+                return service.restart();
+            })
+            .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
+                assert.deepStrictEqual(onStopInfos, []);
+                assert.isTrue(retVal, 'should return true on attempt to restart service');
+                checkState(service, 'running');
+
+                return service.restart()
+                    .then(() => service.restart());
+            })
+            .then(() => {
+                assert.deepStrictEqual(onStartInfos, [
+                    { coldStart: true, restart: false },
+                    { coldStart: false, restart: true },
+                    { coldStart: false, restart: true }
+                ]);
+                assert.deepStrictEqual(onStopInfos, [
+                    { destroy: false, restart: true },
+                    { destroy: false, restart: true }
+                ]);
+                checkState(service, 'running');
+            }));
 
         it('should reject when not able to stop (sync)', () => service.start()
             .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                 assert.isTrue(retVal, 'should return true on attempt to start service');
                 checkState(service, 'running');
-                service._onStopCb = (restart) => {
-                    assert.isFalse(restart, 'should be set to false');
+                service._onStopCb = (info) => {
+                    assert.isFalse(info.restart, 'should be set to false');
                     throw new Error('onStopError');
                 };
                 return assert.isRejected(service.stop(), /onStopError/);
@@ -291,10 +371,11 @@ describe('Service', () => {
 
         it('should reject when not able to stop (async)', () => service.start()
             .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                 assert.isTrue(retVal, 'should return true on attempt to start service');
                 checkState(service, 'running');
-                service._onStopCb = (restart) => {
-                    assert.isFalse(restart, 'should be set to false');
+                service._onStopCb = (info) => {
+                    assert.isFalse(info.restart, 'should be set to false');
                     return Promise.reject(new Error('onStopError'));
                 };
                 return assert.isRejected(service.stop(), /onStopError/);
@@ -306,6 +387,7 @@ describe('Service', () => {
 
         it('should ignore multiple errors when service is running and do restart', () => service.start()
             .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                 assert.isTrue(retVal, 'should return true on attempt to start service');
                 checkState(service, 'running');
                 service.getRestartOptions = () => ({ delay: 10 });
@@ -314,9 +396,11 @@ describe('Service', () => {
                 onErrorCb(new Error('onRunningError1'));
                 onErrorCb(new Error('onRunningError2'));
 
+                onStartInfos = [];
                 return testUtil.sleep(50);
             })
             .then(() => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: false, restart: true }]);
                 checkState(service, 'running');
                 shouldLogMsg(/restarting\.\.\./);
                 shouldLogMsg('error', /restart requested due error[\S\s]*onRunningError1/gm);
@@ -340,6 +424,7 @@ describe('Service', () => {
                 }, 1)
             ])
                 .then(() => {
+                    assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                     shouldNotLogMsg(/running/);
                     checkState(service, 'destroyed');
                     shouldLogMsg(/termination requested/);
@@ -356,6 +441,7 @@ describe('Service', () => {
 
         it('should destroy stopping service', () => service.start()
             .then((retVal) => {
+                assert.deepStrictEqual(onStartInfos, [{ coldStart: true, restart: false }]);
                 assert.isTrue(retVal, 'should return true on attempt to start service');
                 checkState(service, 'running');
 
@@ -457,6 +543,10 @@ describe('Service', () => {
                 });
             })
             .then(() => {
+                assert.deepStrictEqual(onStopInfos.slice(-2), [
+                    { destroy: false, restart: true },
+                    { destroy: true, restart: false }
+                ]);
                 checkState(service, 'destroyed');
                 shouldLogMsg(/stop requested.*restarting/);
             }));
@@ -521,8 +611,8 @@ describe('Service', () => {
                 checkState(service, 'running');
 
                 service._onStart = (onError) => {
-                    const originCancel = service._fatalErrorHandler.cancel;
-                    service._fatalErrorHandler.cancel = () => {
+                    const originCancel = service.__fatalErrorHandler.cancel;
+                    service.__fatalErrorHandler.cancel = () => {
                         // call origin to avoid infinite loop
                         originCancel();
                         throw new Error('onUncaughtError');

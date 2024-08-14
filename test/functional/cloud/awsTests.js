@@ -176,9 +176,9 @@ describe('AWS Cloud-based Tests', () => {
 
                 harness.bigip.forEach((bigip) => it(
                     `should fetch system poller data via debug endpoint - ${bigip.name}`,
-                    () => bigip.telemetry.getSystemPollerData('My_System')
+                    () => bigip.telemetry.getSystemPollerData('My_System', 'SystemPoller_1')
                         .then((data) => {
-                            metricDimensions[bigip.hostname] = awsSrcUtil.getDefaultDimensions(data[0]);
+                            metricDimensions[bigip.hostname] = awsSrcUtil.getDefaultDimensions(data);
                         })
                 ));
 

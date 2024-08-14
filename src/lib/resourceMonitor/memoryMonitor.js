@@ -1,9 +1,17 @@
-/*
- * Copyright 2022. F5 Networks, Inc. See End User License Agreement ("EULA") for
- * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
- * may copy and modify this software product for its internal business purposes.
- * Further, Licensee may upload, publish and distribute the modified version of
- * the software product on devcentral.f5.com.
+/**
+ * Copyright 2024 F5, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 'use strict';
@@ -12,13 +20,16 @@
 
 const APP_THRESHOLDS = require('../constants').APP_THRESHOLDS;
 const hrtimestamp = require('../utils/datetime').hrtimestamp;
-const logger = require('../logger').getChild('memoryMonitor');
 const miscUtil = require('../utils/misc');
 const rmUtil = require('./utils');
 const Service = require('../utils/service');
 const timers = require('../utils/timers');
 
-/** @module resourceMonitor/memoryMonitor */
+/**
+ * @private
+ *
+ * @module resourceMonitor/memoryMonitor
+ */
 
 class ServiceError extends Error {}
 
@@ -48,44 +59,39 @@ class ServiceError extends Error {}
  *
  * @property {number} freeMemoryLimit - OS free memory limit (in MB)
  * @property {boolean} gcEnabled - true if GC enabled otherwise false
- * @property {Logger} logger - logger
  * @property {number} provisioned - max number of MB available for the process
- *      (can be configured via --max_old_space_size CLI option)
+ *      (can be configured via --max-old-space-size CLI option)
  * @property {number} releaseThreshold - amount of memory to release threshold lock (in MB)
  * @property {number} releasePercent - amount of memory to release threshold lock (in %)
  * @property {number} threshold - V8's RSS usage threshold (in MB)
  * @property {number} thresholdPercent - V8's RSS usage threshold (in %)
  */
-class MemoryMonitor extends Service {
+class MemoryMonitorService extends Service {
     /**
      * Constructor
      *
      * @param {function(MemoryCheckStatus)} cb - callback
      * @param {object} [options] - options
      * @param {number} [options.freeMemoryLimit] - OS free memory limit (in MB)
-     * @param {object} [options.fs] - FS module, by default 'fs' from './misc'
      * @param {Interval[]} [options.intervals] - memory check intervals
      * @param {Logger} [options.logger] - logger
      * @param {number} [options.provisioned] - amount of provisioned memory in MB
      * @param {number} [options.thresholdPercent] - application memory threshold percent to use for alerts
      */
     constructor(cb, options) {
-        super();
-
         options = Object.assign({
             freeMemoryLimit: APP_THRESHOLDS.MEMORY.DEFAULT_MIN_FREE_MEM,
-            fs: miscUtil.fs,
             intervals: miscUtil.deepCopy(APP_THRESHOLDS.MEMORY.DEFAULT_CHECK_INTERVALS),
-            logger: logger.getChild(this.constructor.name),
             provisioned: miscUtil.getRuntimeInfo().maxHeapSize,
             releasePercent: APP_THRESHOLDS.MEMORY.DEFAULT_RELEASE_PERCENT,
             thresholdPercent: APP_THRESHOLDS.MEMORY.DEFAULT_LIMIT_PERCENT
         }, options || {});
 
+        super(options.logger);
+
         this._lastKnownIntervalIdx = -1;
         this._lastKnownState = APP_THRESHOLDS.MEMORY.STATE.OK;
         this._timerPromise = Promise.resolve();
-        this.restartsEnabled = true;
 
         /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
@@ -99,16 +105,13 @@ class MemoryMonitor extends Service {
                 value: miscUtil.deepFreeze(enrichMemoryCheckIntervals(options.intervals))
             },
             _readOSFreeMem: {
-                value: () => options.fs.readFileSync('/proc/meminfo')
+                value: () => miscUtil.fs.readFileSync('/proc/meminfo')
             },
             freeMemoryLimit: {
                 value: options.freeMemoryLimit
             },
             gcEnabled: {
                 value: typeof global.gc === 'function'
-            },
-            logger: {
-                value: options.logger
             },
             provisioned: {
                 value: options.provisioned
@@ -248,7 +251,7 @@ function enrichMemoryCheckIntervals(intervals) {
 /**
  * Get interval index according to memory usage
  *
- * @this MemoryMonitor
+ * @this MemoryMonitorService
  *
  * @param {number} usagePercent - memory usage percent
  *
@@ -263,7 +266,7 @@ function getIntervalIdx(usagePercent) {
 /**
  * Perform memory check
  *
- * @this MemoryMonitor
+ * @this MemoryMonitorService
  *
  * @param {timers.BasicTimer} timer - origin time (used to verify that timer is still active)
  *
@@ -326,7 +329,7 @@ function memoryMonitorCheck(timer) {
 /**
  * Set new interval for the timer
  *
- * @this MemoryMonitor
+ * @this MemoryMonitorService
  *
  * @param {number} interval - interval in seconds
  * @param {timers.BasicTimer} timer - origin time (used to verify that timer is still active)
@@ -340,7 +343,7 @@ function updateTimerInterval(interval, timer) {
             () => timer === this._timer
                 && this._timer
                     .update(memoryMonitorCheck.bind(this, this._timer), interval)
-                    .then(() => this.logger.info(`Interval updated to ${interval}s.`)),
+                    .then(() => this.logger.debug(`Interval updated to ${interval}s.`)),
             (err) => this.logger.exception('Uncaught error on attempt to update interval:', err)
         );
     return this._timerPromise;
@@ -349,7 +352,7 @@ function updateTimerInterval(interval, timer) {
 /**
  * Application's memory usage stats
  *
- * @this MemoryMonitor
+ * @this MemoryMonitorService
  *
  * @returns {MemoryUsage}
  */
@@ -393,7 +396,7 @@ function getOverallUtilization(usage) {
         : usage.thresholdUtilzationPercent;
 }
 
-module.exports = MemoryMonitor;
+module.exports = MemoryMonitorService;
 
 /**
  * @typedef InternalInterval

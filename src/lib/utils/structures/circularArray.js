@@ -130,7 +130,6 @@ class CircularArray {
         }
 
         if (!(this._storage && this._storage.length === prealloc)) {
-            // TODO: provide option for TypedArray
             this._storage = new Array(prealloc);
         }
         if (this._holeSet) {

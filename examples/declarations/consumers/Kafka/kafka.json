@@ -1,9 +1,9 @@
 {
     "class": "Telemetry",
-    "My_Consumer": {
+    "My_Consumer_Default_Format": {
         "class": "Telemetry_Consumer",
         "type": "Kafka",
-        "host": "192.168.2.1",
+        "host": "192.168.3.1",
         "protocol": "binaryTcpTls",
         "port": 9092,
         "topic": "f5-telemetry"
@@ -11,7 +11,7 @@
     "My_Consumer_SASL_PLAIN_auth": {
         "class": "Telemetry_Consumer",
         "type": "Kafka",
-        "host": "192.168.2.1",
+        "host": ["192.168.2.1", "192.168.2.2"],
         "protocol": "binaryTcpTls",
         "port": 9092,
         "topic": "f5-telemetry",
@@ -19,12 +19,18 @@
         "username": "username",
         "passphrase": {
         	"cipherText": "passphrase"
-        }
+        },
+        "format": "split",
+        "partitionerType": "random",
+        "customOpts": [
+            { "name": "maxAsyncRequests", "value": 30 },
+            { "name": "connectRetryOptions.retries", "value": 10}
+        ]
     },
     "My_Consumer_TLS_client_auth": {
         "class": "Telemetry_Consumer",
         "type": "Kafka",
-        "host": "kafka.example.com",
+        "host": ["kafka.example.com"],
         "protocol": "binaryTcpTls",
         "port": 9092,
         "topic": "f5-telemetry",
@@ -37,6 +43,9 @@
         },
         "rootCertificate": {
             "cipherText": "-----BEGIN CERTIFICATE-----\nMIID...\n-----END CERTIFICATE-----"
-        }
+        },
+        "format": "split",
+        "partitionerType": "keyed",
+        "partitionKey": "p1"
     }
 }

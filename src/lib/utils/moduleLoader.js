@@ -16,7 +16,7 @@
 
 'use strict';
 
-const logger = require('../logger');
+const logger = require('../logger').getChild('ModuleLoader');
 
 /**
  * ModuleLoader class - reusable functions for loading/unloading Node packages

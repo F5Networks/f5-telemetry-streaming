@@ -27,15 +27,19 @@ const common = require('./common');
 moduleCache.remember();
 
 describe('Declarations -> Telemetry_Namespace', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -143,7 +147,9 @@ describe('Declarations -> Telemetry_Namespace', () => {
                     host: 'localhost',
                     port: 8100,
                     protocol: 'http',
-                    interval: 60
+                    interval: 60,
+                    workers: 5,
+                    chunkSize: 30
                 },
                 My_NS_Consumer: {
                     class: 'Telemetry_Consumer',

@@ -39,7 +39,6 @@ let TRACER_ID = 0;
  *  cache: Array,
  *  dataActions: Array,
  *  fd: number,
- *  fs: object
  *  lastWriteTimestamp: number,
  *  state: string,
  *  taskPromise: Promise,
@@ -134,13 +133,11 @@ class Tracer {
         PRIVATES.set(this, {
             cache: [],
             dataActions: [],
-            fs: options.fs || utils.fs,
             lastWriteTimestamp: Date.now(),
             taskPromise: Promise.resolve()
         });
-        /**
-         * read-only properties below that should never be changed
-         */
+
+        /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
             disabled: {
                 get() {
@@ -217,16 +214,17 @@ class Tracer {
      *
      * @async
      * @public
-     * @returns {Promise<Error?>} resolved once tracer stopped
+     * @returns {Error | undefined} once tracer stopped
      */
-    stop() {
-        return new Promise((resolve, reject) => {
-            this.logger.debug(`Stopping stream to file '${this.path}'`);
-            PRIVATES.get(this).state = STATES.DISABLED;
-            tpm.safeClose.call(this)
-                .then(resolve, reject);
-        })
-            .catch((err) => err);
+    async stop() {
+        this.logger.debug(`Stopping stream to file '${this.path}'`);
+        PRIVATES.get(this).state = STATES.DISABLED;
+        try {
+            await tpm.safeClose.call(this);
+        } catch (error) {
+            return error;
+        }
+        return undefined;
     }
 
     /**
@@ -234,13 +232,10 @@ class Tracer {
      *
      * @async
      * @public
-     * @returns {Promise} resolved once tracer suspended
+     * @returns {void} once tracer suspended
      */
-    suspend() {
-        return new Promise((resolve, reject) => {
-            tpm.suspend.call(this, true)
-                .then(resolve, reject);
-        });
+    async suspend() {
+        await tpm.suspend.call(this, true);
     }
 
     /**
@@ -252,14 +247,15 @@ class Tracer {
      * @public
      * @param {any} data - data to write to tracer (should be JSON serializable)
      *
-     * @returns {Promise<Error?>} resolved once data written to file
+     * @returns {Error | undefined} once data written to file
      */
-    write(data) {
-        return new Promise((resolve, reject) => {
-            tpm.write.call(this, data)
-                .then(resolve, reject);
-        })
-            .catch((err) => err);
+    async write(data) {
+        try {
+            await tpm.write.call(this, data);
+        } catch (error) {
+            return error;
+        }
+        return undefined;
     }
 }
 
@@ -325,25 +321,21 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved once file closed
+     * @returns {void} once file closed
      */
-    close() {
-        return new Promise((resolve, reject) => {
-            if (typeof this.fd === 'undefined') {
-                resolve();
-            } else {
-                this.logger.debug(`Closing stream to file '${this.path}'`);
-                const privates = PRIVATES.get(this);
-                privates.fs.close(this.fd)
-                    .catch((closeErr) => {
-                        this.logger.debugException(`Unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
-                    })
-                    .then(() => {
-                        privates.fd = undefined;
-                    })
-                    .then(resolve, reject);
+    async close() {
+        if (typeof this.fd !== 'undefined') {
+            this.logger.debug(`Closing stream to file '${this.path}'`);
+            const privates = PRIVATES.get(this);
+
+            try {
+                await utils.fs.close(this.fd);
+            } catch (closeErr) {
+                this.logger.debugException(`Unable to close file '${this.path}' with fd '${this.fd}'`, closeErr);
+            } finally {
+                privates.fd = undefined;
             }
-        });
+        }
     },
 
     /**
@@ -382,25 +374,27 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved once destination directory created
+     * @returns {void} once destination directory created
      */
-    mkdir() {
-        return new Promise((resolve, reject) => {
-            const baseDir = pathUtil.dirname(this.path);
-            const fs = PRIVATES.get(this).fs;
+    async mkdir() {
+        const baseDir = pathUtil.dirname(this.path);
 
-            fs.access(baseDir, (fs.constants || fs).R_OK)
-                .then(() => true, () => false)
-                .then((exist) => {
-                    if (exist) {
-                        return Promise.resolve();
-                    }
-                    this.logger.debug(`Creating dir '${baseDir}'`);
-                    return fs.mkdir(baseDir);
-                })
-                .catch((mkdirError) => (mkdirError.code === 'EEXIST' ? Promise.resolve() : Promise.reject(mkdirError)))
-                .then(resolve, reject);
-        });
+        try {
+            await utils.fs.access(baseDir, utils.fs.constants.R_OK);
+            return;
+        } catch (error) {
+            this.logger.debugException('fs.access error:', error);
+        }
+
+        this.logger.debug(`Creating dir '${baseDir}'`);
+        try {
+            await utils.fs.mkdir(baseDir);
+        } catch (error) {
+            if (error.code === 'EEXIST') {
+                return;
+            }
+            throw error;
+        }
     },
 
     /**
@@ -408,22 +402,14 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} Promise resolved when new stream created or exists already
+     * @returns {void} once new stream created or exists already
      */
-    open() {
-        return new Promise((resolve, reject) => {
-            if (typeof this.fd !== 'undefined') {
-                resolve();
-            } else {
-                this.logger.debug(`Creating file '${this.path}'`);
-                tpm.mkdir.call(this)
-                    .then(() => PRIVATES.get(this).fs.open(this.path, 'a+'))
-                    .then((openRet) => {
-                        PRIVATES.get(this).fd = openRet[0];
-                    })
-                    .then(resolve, reject);
-            }
-        });
+    async open() {
+        if (typeof this.fd === 'undefined') {
+            this.logger.debug(`Creating file '${this.path}'`);
+            await tpm.mkdir.call(this);
+            PRIVATES.get(this).fd = await utils.fs.open(this.path, 'a+');
+        }
     },
 
     /**
@@ -455,26 +441,15 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved when data was read
+     * @returns {string} once data was read
      */
-    read() {
-        return new Promise((resolve, reject) => {
-            const fs = PRIVATES.get(this).fs;
-            fs.fstat(this.fd)
-                .then((statRet) => {
-                    const fileSize = statRet[0].size;
-                    if (!fileSize) {
-                        return Promise.resolve('');
-                    }
-                    return fs.read(this.fd, Buffer.alloc(fileSize), 0, fileSize, 0)
-                        .then((readRet) => {
-                            const buffer = readRet[1];
-                            const bytesRead = readRet[0];
-                            return buffer.slice(0, bytesRead).toString(this.encoding);
-                        });
-                })
-                .then(resolve, reject);
-        });
+    async read() {
+        const fileSize = (await utils.fs.fstat(this.fd)).size;
+        if (!fileSize) {
+            return '';
+        }
+        const { buffer, bytesRead } = await utils.fs.read(this.fd, Buffer.alloc(fileSize), 0, fileSize, 0);
+        return buffer.slice(0, bytesRead).toString(this.encoding);
     },
 
     /**
@@ -495,32 +470,30 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved once file closed
+     * @returns {void} once file closed
      */
-    safeClose() {
-        return new Promise((resolve, reject) => {
-            if (this.disabled || this.suspended) {
-                const privates = PRIVATES.get(this);
+    async safeClose() {
+        if (this.disabled || this.suspended) {
+            const privates = PRIVATES.get(this);
 
-                if (typeof privates.timer !== 'undefined') {
-                    privates.timer.stop()
-                        .then(() => {
-                            this.logger.debug('Inactivity timer deactivated.');
-                            privates.timer = undefined;
-                        })
-                        .catch((err) => this.logger.debugException('Error on attempt to deactivate the inactivity timer:', err));
-                }
-
-                this.logger.debug(`Stopping stream to file '${this.path}'`);
-                // schedule file closing right after last scheduled writing attempt
-                // but data that awaits for writing will be lost
-                privates.taskPromise = privates.taskPromise
-                    .then(tpm.close.bind(this))
-                    .then(resolve, reject);
-            } else {
-                resolve();
+            if (typeof privates.timer !== 'undefined') {
+                privates.timer.stop()
+                    .then(() => {
+                        this.logger.debug('Inactivity timer deactivated.');
+                        privates.timer = undefined;
+                    })
+                    .catch((err) => this.logger.debugException('Error on attempt to deactivate the inactivity timer:', err));
             }
-        });
+
+            this.logger.debug(`Stopping stream to file '${this.path}'`);
+
+            // schedule file closing right after last scheduled writing attempt
+            // but data that awaits for writing will be lost
+            privates.taskPromise = privates.taskPromise
+                .then(tpm.close.bind(this));
+
+            await privates.taskPromise;
+        }
     },
 
     /**
@@ -528,40 +501,37 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved once timer configured
+     * @returns {void} once timer configured
      */
-    setupSuspendTimeout() {
-        return new Promise((resolve, reject) => {
-            const privates = PRIVATES.get(this);
-            /**
-             * set interval to check when last attempt to write data was made.
-             * Do not care to be accurate here, this is debug tool only.
-             * Main idea of this approach is to close a file descriptor to save resources
-             * when last attempt to write data was made more than 15m (by default)
-             * minutes ago.
-             */
-            if (!this.disabled) {
-                PRIVATES.get(this).state = STATES.READY;
-            }
-            if (this.inactivityTimeout && typeof privates.timer === 'undefined') {
-                privates.timer = new timers.BasicTimer(tpm.suspend.bind(this), {
-                    abortOnFailure: false,
-                    intervalInS: this.inactivityTimeout
-                });
-                privates.timer.start()
-                    .then(() => this.logger.debug(`Inactivity timeout set to ${this.inactivityTimeout} s.`))
-                    .catch((err) => {
-                        this.logger.debugException('Unable to start inactivity timer:', err);
+    async setupSuspendTimeout() {
+        const privates = PRIVATES.get(this);
+        /**
+         * set interval to check when last attempt to write data was made.
+         * Do not care to be accurate here, this is debug tool only.
+         * Main idea of this approach is to close a file descriptor to save resources
+         * when last attempt to write data was made more than 15m (by default)
+         * minutes ago.
+         */
+        if (!this.disabled) {
+            PRIVATES.get(this).state = STATES.READY;
+        }
+        if (this.inactivityTimeout && typeof privates.timer === 'undefined') {
+            privates.timer = new timers.BasicTimer(tpm.suspend.bind(this), {
+                abortOnFailure: false,
+                intervalInS: this.inactivityTimeout
+            });
 
-                        const timer = privates.timer;
-                        privates.timer = undefined;
-                        return timer.stop();
-                    })
-                    .then(resolve, reject);
-            } else {
-                resolve();
+            try {
+                await privates.timer.start();
+                this.logger.debug(`Inactivity timeout set to ${this.inactivityTimeout} s.`);
+            } catch (error) {
+                this.logger.debugException('Unable to start inactivity timer:', error);
+
+                const timer = privates.timer;
+                privates.timer = undefined;
+                await timer.stop();
             }
-        });
+        }
     },
 
     /**
@@ -571,27 +541,22 @@ const tpm = {
      * @this Tracer
      * @param {boolean} [ignoreTimeout = false] - ignore inactivity timeout check
      *
-     * @returns {Promise} resolved once tracer suspended
+     * @returns {void} once tracer suspended
      */
-    suspend(ignoreTimeout) {
-        return new Promise((resolve, reject) => {
-            const privates = PRIVATES.get(this);
-            const delta = (Date.now() - privates.lastWriteTimestamp) / 1000.0; // in seconds
+    async suspend(ignoreTimeout) {
+        const privates = PRIVATES.get(this);
+        const idleTime = (Date.now() - privates.lastWriteTimestamp) / 1000.0; // in seconds
 
-            if (this.disabled) {
-                resolve();
-            } else if (this.inactivityTimeout <= delta || ignoreTimeout) {
-                if (ignoreTimeout) {
-                    this.logger.debug(`Suspending stream to file '${this.path}' (.suspend())`);
-                } else {
-                    this.logger.debug(`Suspending stream to file '${this.path}' due inactivity (${this.inactivityTimeout} s. timeout)`);
-                }
-
-                PRIVATES.get(this).state = STATES.SUSPENDED;
-                tpm.safeClose.call(this)
-                    .then(resolve, reject);
+        if (!this.disabled && (this.inactivityTimeout <= idleTime || ignoreTimeout)) {
+            if (ignoreTimeout) {
+                this.logger.debug(`Suspending stream to file '${this.path}' (.suspend())`);
+            } else {
+                this.logger.debug(`Suspending stream to file '${this.path}' due inactivity (${this.inactivityTimeout} s. timeout)`);
             }
-        });
+
+            PRIVATES.get(this).state = STATES.SUSPENDED;
+            await tpm.safeClose.call(this);
+        }
     },
 
     /**
@@ -599,44 +564,42 @@ const tpm = {
      *
      * @async
      * @this Tracer
-     * @returns {Promise} resolved once data written to file
+     * @returns {void} once data written to file
      */
-    tryWriteData() {
-        return new Promise((resolve, reject) => {
-            const privates = PRIVATES.get(this);
+    async tryWriteData() {
+        const privates = PRIVATES.get(this);
+        const writePromise = privates.writePromise;
 
-            const writePromise = privates.writePromise;
-            tpm.setupSuspendTimeout.call(this)
-                .then(tpm.open.bind(this))
-                .then(() => {
-                    // don't need to read and parse data when cache has a lot of data already
-                    if (privates.cache.length >= this.maxRecords) {
-                        return [];
-                    }
-                    return tpm.read.call(this)
-                        .then(tpm.parse.bind(this));
-                })
-                .then((readData) => {
-                    privates.writePromise = null;
-                    return tpm.mergeAndResetCache.call(this, readData);
-                })
-                .then((data) => utils.stringify(data, true))
-                .then((dataToWrite) => privates.fs.ftruncate(this.fd, 0)
-                    .then(() => privates.fs.write(this.fd, dataToWrite, 0, this.encoding)))
-                .catch((err) => {
-                    // close trace, lost data
-                    this.logger.debugException(`Unable to write data to '${this.path}'`, err);
-                    return tpm.close.call(this); // should not reject
-                })
-                .then(() => {
-                    if (writePromise === privates.writePromise) {
-                        // error might happened before
-                        privates.writePromise = null;
-                    }
-                    return this.disabled ? tpm.close.call(this) : Promise.resolve();
-                })
-                .then(resolve, reject);
-        });
+        try {
+            await tpm.setupSuspendTimeout.call(this);
+            await tpm.open.call(this);
+
+            let readData;
+            // don't need to read and parse data when cache has a lot of data already
+            if (privates.cache.length >= this.maxRecords) {
+                readData = [];
+            } else {
+                readData = tpm.parse.call(this, await tpm.read.call(this));
+            }
+
+            privates.writePromise = null;
+
+            const data = utils.stringify(tpm.mergeAndResetCache.call(this, readData), true);
+
+            await utils.fs.ftruncate(this.fd, 0);
+            await utils.fs.write(this.fd, data, 0, this.encoding);
+        } catch (error) {
+            // close trace, lost data
+            this.logger.debugException(`Unable to write data to '${this.path}'`, error);
+            await tpm.close.call(this);
+        }
+        if (writePromise === privates.writePromise) {
+            // error might happened before
+            privates.writePromise = null;
+        }
+        if (this.disabled) {
+            await tpm.close.call(this);
+        }
     },
 
     /**
@@ -646,29 +609,25 @@ const tpm = {
      * @this Tracer
      * @param {any} data - data to write
      *
-     * @returns {Promise} resolved once data written to file
+     * @returns {void} once data written to file
      */
-    write(data) {
-        return new Promise((resolve, reject) => {
-            if (this.disabled) {
-                resolve();
-            } else {
-                PRIVATES.get(this).lastWriteTimestamp = Date.now();
-                tpm.cacheData.call(this, data);
+    async write(data) {
+        if (!this.disabled) {
+            PRIVATES.get(this).lastWriteTimestamp = Date.now();
+            tpm.cacheData.call(this, data);
 
-                // check if cache was flushed to file already or not
-                const privates = PRIVATES.get(this);
-                if (!privates.writePromise) {
-                    // add current attempt to main task queue
-                    privates.taskPromise = privates.taskPromise
-                        .then(tpm.tryWriteData.bind(this));
-                    // re-use current 'write' promise as separate queue
-                    // to be able to batch multiple 'write' requests into one
-                    privates.writePromise = privates.taskPromise;
-                }
-                privates.writePromise.then(resolve, reject);
+            // check if cache was flushed to file already or not
+            const privates = PRIVATES.get(this);
+            if (!privates.writePromise) {
+                // add current attempt to main task queue
+                privates.taskPromise = privates.taskPromise
+                    .then(tpm.tryWriteData.bind(this));
+                // re-use current 'write' promise as separate queue
+                // to be able to batch multiple 'write' requests into one
+                privates.writePromise = privates.taskPromise;
             }
-        });
+            await privates.writePromise;
+        }
     }
 };
 
@@ -708,7 +667,6 @@ module.exports = {
  * @typedef TracerOptions
  * @type {object}
  * @property {string} [encoding = 'utf8'] - data encoding
- * @property {object} [fs] - FS module, by default 'fs' from './misc'
  * @property {number} [inactivityTimeout = 900] - inactivity timeout (in s.) after which Tracer will be suspended
  * @property {number} [maxRecords = 10] - max records to store
  */

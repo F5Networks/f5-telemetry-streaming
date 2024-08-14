@@ -506,51 +506,6 @@ module.exports = {
     },
 
     /**
-     * Normalize iHealth data
-     *
-     * @param {Object} data - data to normalize
-     *
-     * @param {Object} options                       - options
-     * @param {Object} [options.renameKeysByPattern] - contains map or array of keys to rename by pattern
-     *                                                 object example: { patterns: {}, options: {}}
-     * @param {Array}  [options.filterByKeys]        - array contains map of keys to filter data further
-     *                                                 example: { exclude: [], include: []}
-     *
-     * @returns {Object} Returns normalized event
-     */
-    ihealth(data, options) {
-        options = options || {};
-
-        const normalized = {
-            system: {
-                hostname: data.system_information.hostname
-            },
-            diagnostics: []
-        };
-        const diagnostics = ((data.diagnostics || {}).diagnostic || []);
-
-        diagnostics.forEach((diagnostic) => {
-            let ret = options.filterByKeys ? normalizeUtil._filterDataByKeys(diagnostic, options.filterByKeys)
-                : diagnostic;
-
-            ret = options.renameKeys
-                ? normalizeUtil._renameKeys(ret, options.renameKeys.patterns, options.renameKeys.options) : ret;
-
-            const reduced = {};
-            Object.assign(reduced, ret.run_data);
-            Object.assign(reduced, ret.results);
-            Object.assign(reduced, ret.fixedInVersions);
-
-            if (reduced.version && reduced.version.length === 0) {
-                delete reduced.version;
-            }
-            normalized.diagnostics.push(reduced);
-        });
-
-        return normalized;
-    },
-
-    /**
      * Normalize data - standardize and reduce complexity
      *
      * @param {Object} data                           - data to normalize

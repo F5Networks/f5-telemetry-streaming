@@ -83,8 +83,8 @@ describe('Google_Cloud_Logging', () => {
     });
 
     afterEach(() => {
-        testUtil.checkNockActiveMocks(nock);
-        nock.cleanAll();
+        testUtil.checkNockActiveMocks();
+        testUtil.nockCleanup();
         sinon.restore();
     });
 
@@ -94,16 +94,16 @@ describe('Google_Cloud_Logging', () => {
             config: getDefaultConsumerConfig()
         });
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, getExpectedData([{
                 jsonPayload: testUtil.deepCopy(
                     context.event.data
@@ -119,16 +119,16 @@ describe('Google_Cloud_Logging', () => {
             config: getDefaultConsumerConfig()
         });
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, getExpectedData([{
                 jsonPayload: testUtil.deepCopy(
                     context.event.data
@@ -156,16 +156,16 @@ describe('Google_Cloud_Logging', () => {
             }
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
         return cloudLoggingIndex(context);
@@ -180,16 +180,16 @@ describe('Google_Cloud_Logging', () => {
             [{ jsonPayload: testUtil.deepCopy(context.event.data) }]
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
         return cloudLoggingIndex(context)
@@ -230,16 +230,16 @@ describe('Google_Cloud_Logging', () => {
             }
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
         return cloudLoggingIndex(context);
@@ -260,16 +260,16 @@ describe('Google_Cloud_Logging', () => {
             [{ jsonPayload: testUtil.deepCopy(context.event.data) }]
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
         return cloudLoggingIndex(context);
@@ -285,17 +285,17 @@ describe('Google_Cloud_Logging', () => {
             [{ jsonPayload: testUtil.deepCopy(context.event.data) }]
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, { access_token: 'aToken', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer aToken'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .times(3)
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
@@ -333,29 +333,29 @@ describe('Google_Cloud_Logging', () => {
             [{ jsonPayload: testUtil.deepCopy(contextA.event.data) }]
         );
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === 'privateKey1::firstKey')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === 'privateKey1::firstKey')
             .reply(200, { access_token: 'tokenA', expires_in: tokenDuration });
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === 'privateKey2::secondKey')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === 'privateKey2::secondKey')
             .reply(200, { access_token: 'tokenB', expires_in: tokenDuration });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer tokenA'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .times(2)
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: 'Bearer tokenB'
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .times(2)
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
@@ -376,25 +376,25 @@ describe('Google_Cloud_Logging', () => {
         );
         let tokenCounter = 0;
 
-        nock('https://oauth2.googleapis.com/token')
-            .post('', (body) => body.assertion === '12345::theprivatekeyvalue')
+        nock('https://oauth2.googleapis.com')
+            .post('/token', (body) => body.assertion === '12345::theprivatekeyvalue')
             .times(2)
             .reply(200, () => {
                 tokenCounter += 1;
                 return { access_token: `token:${tokenCounter}`, expires_in: tokenDuration };
             });
 
-        nock('https://logging.googleapis.com/v2/entries:write', {
+        nock('https://logging.googleapis.com', {
             reqheaders: {
                 authorization: (a) => a === `Bearer token:${tokenCounter}`
             }
         })
-            .post('')
+            .post('/v2/entries:write')
             .reply(401, (_, req) => {
                 assert.deepStrictEqual(req, expectedData);
                 return 'Unauthorized';
             })
-            .post('')
+            .post('/v2/entries:write')
             .reply(200, (_, req) => assert.deepStrictEqual(req, expectedData));
 
         return cloudLoggingIndex(context)

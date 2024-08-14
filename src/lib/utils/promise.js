@@ -242,6 +242,23 @@ const promiseUtils = module.exports = {
             return false;
         };
         return promise;
+    },
+
+    /** @returns {{ promise: Promise, reject: function, resolve: function}} object with Promise and resolvers */
+    withResolvers() {
+        let resolve;
+        let reject;
+
+        const ret = {
+            promise: new Promise((_resolve, _reject) => {
+                resolve = _resolve;
+                reject = _reject;
+            })
+        };
+        ret.resolve = resolve;
+        ret.reject = reject;
+
+        return ret;
     }
 };
 

@@ -31,6 +31,7 @@ If you need to update docs for the most recent publicly available release:
 
 If you need to update docs for the LST release:
 - create `docs` (any name allowed) branch off `docs-X.Y.Z`, where X.Y.Z is the LTS release version
+- update CI file to look like the one from `docs-1.27.1` branch (do not forget to change the target version in the file)
 - do docs changes
 - once the work done, create MR to merge `docs` branch to `docs-X.Y.Z-staging`
 - review your changes once deployed to GitLab Pages

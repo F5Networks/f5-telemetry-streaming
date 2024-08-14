@@ -24,9 +24,6 @@ const sinon = require('sinon');
 const assert = require('../shared/assert');
 const common = require('./common');
 const declValidator = require('./common').validate;
-const sourceCode = require('../shared/sourceCode');
-
-const constants = sourceCode('src/lib/constants');
 
 moduleCache.remember();
 
@@ -37,11 +34,13 @@ describe('Declarations -> Validator', () => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
         coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -104,7 +103,7 @@ describe('Declarations -> Validator', () => {
         };
 
         coreStub.utilMisc.networkCheck.rejects(new Error('failed network check'));
-        coreStub.deviceUtil.getDeviceType.resolves(constants.DEVICE_TYPE.CONTAINER);
+        coreStub.deviceUtil.getDeviceType.resolves('container');
 
         const decl1 = {
             class: 'Telemetry',
@@ -152,6 +151,7 @@ describe('Declarations -> Validator', () => {
             class: 'Telemetry',
             My_Poller: {
                 class: 'Telemetry_System_Poller',
+                username: 'test_user_1',
                 passphrase: {
                     cipherText: 'mycipher'
                 }

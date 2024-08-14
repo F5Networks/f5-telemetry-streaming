@@ -198,7 +198,7 @@ class Logger {
      */
     debugException(msg, err) {
         if (LOG_LEVELS.DEBUG >= CURRENT_LOG_LEVEL) {
-            this.logger.debug(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
+            this.logger.debug(processMessage(this.prefix, `${msg}\n${formatErr(err)}`));
         }
     }
 
@@ -217,7 +217,7 @@ class Logger {
      */
     exception(msg, err) {
         if (LOG_LEVELS.ERROR >= CURRENT_LOG_LEVEL) {
-            this.logger.error(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
+            this.logger.error(processMessage(this.prefix, `${msg}\n${formatErr(err)}`));
         }
     }
 
@@ -245,7 +245,7 @@ class Logger {
      */
     verboseException(msg, err) {
         if (LOG_LEVELS.VERBOSE >= CURRENT_LOG_LEVEL) {
-            this.logger.debug(processMessage(this.prefix, `${msg}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`));
+            this.logger.debug(processMessage(this.prefix, `${msg}\n${formatErr(err)}`));
         }
     }
 
@@ -257,6 +257,15 @@ class Logger {
             this.logger.warning(processMessage(this.prefix, msg));
         }
     }
+}
+
+/**
+ * @param {Error} [err]
+ *
+ * @returns {string} formatted message
+ */
+function formatErr(err) {
+    return `Message: ${(err && err.message) || err || 'no message available'}\nTraceback:\n${(err && err.stack) || 'no traceback available'}`;
 }
 
 const mainLogger = new Logger('telemetry');

@@ -17,6 +17,7 @@
 'use strict';
 
 const pathUtil = require('path');
+const crypto = require('crypto');
 
 const constants = require('../constants');
 const declValidator = require('../declarationValidator');
@@ -68,7 +69,7 @@ function getAllowSelfSignedCertVal(config) {
  * @param {Configuration} convertedConfig - object to save normalized config to
  */
 function cleanupComponents(convertedConfig) {
-    _module.removeComponents(convertedConfig, { class: CLASSES.NAMESPACE_CLASS_NAME });
+    removeComponents(convertedConfig, { class: CLASSES.NAMESPACE_CLASS_NAME });
 }
 
 /**
@@ -135,9 +136,9 @@ function componentizeConfig(originConfig, convertedConfig) {
  * These are for components that are omitted from the declaration
  * but we need to explicitly create later on for mapping
  *
- * @returns {Promise<object>} once got default values from the schema
+ * @returns {object} once got default values from the schema
  */
-function getComponentDefaults() {
+async function getComponentDefaults() {
     const defaultDecl = {
         class: 'Telemetry',
         Telemetry_System: {
@@ -233,10 +234,56 @@ function getTracerConfig(component, traceConfig) {
  * @returns {void} when unique ID generated for each Component within Configuration
  */
 function generateComponentsIDs(convertedConfig) {
-    _module.getComponents(convertedConfig).forEach((component) => {
-        // ATTENTION: have to call 'generateUuid' with 'component' as context to be able to generate
-        // predictable IDs for testing
-        component.id = util.generateUuid.call(component);
+    _module.getComponents(convertedConfig)
+        .forEach((component) => {
+            // ATTENTION: have to call 'generateUuid' with 'component' as context to be able to generate
+            // predictable IDs for testing
+            component.id = util.generateUuid.call(component);
+        });
+}
+
+/**
+ * Get Telemetry_Endpoints objects
+ *
+ * @param {Configuration} config - config
+ * @param {FilterOptions} [filter] - filtering options
+ *
+ * @returns {Component[]} array of Telemetry_Endpoints objects
+ */
+function getTelemetryEndpoints(config, filter = {}) {
+    return _module.getComponents(config, {
+        ...filter,
+        ...{
+            class: CLASSES.ENDPOINTS_CLASS_NAME
+        }
+    });
+}
+
+/**
+ * Get Telemetry_System objects
+ *
+ * @param {Configuration} config - config
+ *
+ * @returns {Component[]} array of Telemetry_System objects
+ */
+function getTelemetrySystems(config) {
+    return _module.getComponents(config, { class: CLASSES.SYSTEM_CLASS_NAME });
+}
+
+/**
+ * Get Telemetry_Pull_Consumer_System_Poller_Group objects
+ *
+ * @param {Configuration} config - config
+ * @param {FilterOptions} [filter] - filtering options
+ *
+ * @returns {Component[]} array of Telemetry_Pull_Consumer_System_Poller_Group objects
+ */
+function getTelemetryPullConsumerSystemPollerGroups(config, filter = {}) {
+    return _module.getComponents(config, {
+        ...filter,
+        ...{
+            class: CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME
+        }
     });
 }
 
@@ -247,8 +294,10 @@ function generateComponentsIDs(convertedConfig) {
  * @returns {boolean} true when Splunk consumer configured with "legacy" format
  */
 function hasSplunkLegacy(config, namespace) {
-    return _module.getTelemetryConsumers(config, namespace)
-        .some((c) => c.type === 'Splunk' && c.format === 'legacy');
+    return _module.getTelemetryConsumers(config, {
+        filter: (c) => c.type === 'Splunk' && c.format === 'legacy',
+        namespace
+    }).length > 0;
 }
 
 /**
@@ -268,11 +317,12 @@ function mapComponents(convertedConfig) {
         if (useForMapping(component.class) && component.enable) {
             const receivers = [];
             if (component.class === CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME) {
-                const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, component.namespace)
-                    .find((pc) => pc.id === component.pullConsumer);
-                receivers.push(pullConsumer);
+                receivers.push(_module.getTelemetryPullConsumers(convertedConfig, {
+                    id: component.pullConsumer,
+                    namespace: component.namespace
+                })[0]);
             } else if (!(component.class === CLASSES.SYSTEM_POLLER_CLASS_NAME && component.interval === 0)) {
-                _module.getTelemetryConsumers(convertedConfig, component.namespace)
+                _module.getTelemetryConsumers(convertedConfig, { namespace: component.namespace })
                     .forEach((c) => receivers.push(c));
             }
 
@@ -296,23 +346,21 @@ function mapComponents(convertedConfig) {
  *
  * @param {Configuration} convertedConfig - object to save normalized config to
  *
- * @returns {Promise} resolved once configuration normalized
+ * @returns {void} once configuration normalized
  */
-function normalizeComponents(convertedConfig) {
+async function normalizeComponents(convertedConfig) {
     // ensure we're getting our "base" config for missing components based on schema
-    return getComponentDefaults()
-        .then((defaults) => {
-            normalizeTelemetrySystems(convertedConfig);
-            normalizeTelemetrySystemPollers(convertedConfig, defaults);
-            normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig);
-            normalizeTelemetryIHealthPollers(convertedConfig, defaults);
-            normalizeTelemetryEndpoints(convertedConfig);
-            normalizeTelemetryListeners(convertedConfig);
-            normalizeTelemetryConsumers(convertedConfig);
-            normalizeTelemetryPullConsumers(convertedConfig);
-            generateComponentsIDs(convertedConfig);
-            postProcessTelemetryPullConsumerSystemPollerGroups(convertedConfig);
-        });
+    const defaults = await getComponentDefaults();
+    normalizeTelemetrySystems(convertedConfig);
+    normalizeTelemetrySystemPollers(convertedConfig, defaults);
+    normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig);
+    normalizeTelemetryIHealthPollers(convertedConfig, defaults);
+    normalizeTelemetryEndpoints(convertedConfig);
+    normalizeTelemetryListeners(convertedConfig);
+    normalizeTelemetryConsumers(convertedConfig);
+    normalizeTelemetryPullConsumers(convertedConfig);
+    generateComponentsIDs(convertedConfig);
+    postProcessTelemetryPullConsumerSystemPollerGroups(convertedConfig);
 }
 
 /**
@@ -404,7 +452,7 @@ function normalizeTelemetryEndpoints(convertedConfig) {
     }
 
     telemetrySystemPollers.forEach((poller) => {
-        telemetryEndpoints = _module.getTelemetryEndpoints(convertedConfig, poller.namespace);
+        telemetryEndpoints = getTelemetryEndpoints(convertedConfig, { namespace: poller.namespace });
         if (Object.prototype.hasOwnProperty.call(poller, 'endpointList')) {
             const endpoints = {};
             processEndpoint(poller.endpointList, (endpoint) => {
@@ -426,7 +474,7 @@ function normalizeTelemetryEndpoints(convertedConfig) {
     });
 
     // remove those endpoints - we don't need them any more
-    _module.removeComponents(convertedConfig, { class: CLASSES.ENDPOINTS_CLASS_NAME });
+    removeComponents(convertedConfig, { class: CLASSES.ENDPOINTS_CLASS_NAME });
 }
 
 /**
@@ -448,10 +496,11 @@ function normalizeTelemetryIHealthPollers(convertedConfig) {
      *   - Telemetry_iHealth_Poller has no ability to configure host, port and etc.
      *     and should be attached to Telemetry_System instead
      */
-    const pollersWithoutSystem = _module.getTelemetryIHealthPollers(convertedConfig)
-        .filter((poller) => !poller.systemName);
+    const pollersWithoutSystem = _module
+        .getTelemetryIHealthPollers(convertedConfig, { filter: (p) => typeof p.system === 'undefined' });
+
     // remove those pollers - we don't need them any more
-    _module.removeComponents(convertedConfig, {
+    removeComponents(convertedConfig, {
         class: CLASSES.IHEALTH_POLLER_CLASS_NAME,
         filter: (c) => pollersWithoutSystem.indexOf(c) !== -1
     });
@@ -548,12 +597,13 @@ function normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
      *   without checking for existence
      * - safe to refer to a pull consumer by name within namespace scope
      */
-    const systemPollerGroups = _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig);
-    const pullConsumers = _module.getTelemetryPullConsumers(convertedConfig);
+    const systemPollerGroups = getTelemetryPullConsumerSystemPollerGroups(convertedConfig);
 
     systemPollerGroups.forEach((pollerGroup) => {
-        const pullConsumer = pullConsumers
-            .find((pc) => pc.namespace === pollerGroup.namespace && pc.name === pollerGroup.pullConsumer);
+        const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, {
+            name: pollerGroup.pullConsumer,
+            namespace: pollerGroup.namespace
+        })[0];
 
         pollerGroup.enable = pullConsumer.enable;
         pollerGroup.name = `${pollerGroup.class}_${pullConsumer.name}`;
@@ -581,12 +631,12 @@ function normalizeTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
  * @returns {void} once Telemetry_System objects normalized
  */
 function normalizeTelemetrySystems(convertedConfig) {
-    const telemetrySystems = _module.getTelemetrySystems(convertedConfig);
+    const telemetrySystems = getTelemetrySystems(convertedConfig);
     const preExistingTelemetrySystemPollers = _module.getTelemetrySystemPollers(convertedConfig);
     const preExistingTelemetryIHealthPollers = _module.getTelemetryIHealthPollers(convertedConfig);
 
     // remove Telemetry_Systems from the array of components
-    _module.removeComponents(convertedConfig, { class: CLASSES.SYSTEM_CLASS_NAME });
+    removeComponents(convertedConfig, { class: CLASSES.SYSTEM_CLASS_NAME });
 
     let nameID;
     let existingNames;
@@ -623,10 +673,10 @@ function normalizeTelemetrySystems(convertedConfig) {
                 // systemPoller is a nested object, so extract out into separate component
                 pollerObj = systemPoller;
                 // refresh list of existing name within system
-                existingNames = _module.getTelemetrySystemPollers(
-                    convertedConfig,
-                    (p) => p.namespace === system.namespace && p.systemName === system.name
-                ).map((p) => p.name);
+                existingNames = _module.getTelemetrySystemPollers(convertedConfig, {
+                    namespace: system.namespace,
+                    filter: (p) => p.systemName === system.name
+                }).map((p) => p.name);
                 assignPollerName('SystemPoller', pollerObj);
             }
             pollerObj = updateSystemPollerConfig(system, util.deepCopy(pollerObj), fetchTMStats);
@@ -650,13 +700,11 @@ function normalizeTelemetrySystems(convertedConfig) {
                 }
                 pollerObj.usedAsRef = true;
             } else {
-                // systemPoller is a nested object, so extract out into separate component
+                // iHealth is a nested object, so extract out into separate component
                 pollerObj = iHealthPoller;
-                // refresh list of existing name within system
-                existingNames = _module.getTelemetryIHealthPollers(
-                    convertedConfig,
-                    (p) => p.namespace === system.namespace && p.systemName === system.name
-                ).map((p) => p.name);
+                // set to empty list becuase only 1 iHealth Poller per System allowed to be configured
+                // no need to search for other iHealth pollers withing the system's scope
+                existingNames = [];
                 assignPollerName('iHealthPoller', pollerObj);
             }
             pollerObj = updateIHealthPollerConfig(system, util.deepCopy(pollerObj));
@@ -679,10 +727,13 @@ function normalizeTelemetrySystems(convertedConfig) {
  * @returns {void} once Telemetry_System_Poller objects normalized
  */
 function normalizeTelemetrySystemPollers(convertedConfig, componentDefaults) {
-    const pollersWithoutSystem = _module.getTelemetrySystemPollers(convertedConfig)
-        .filter((poller) => !poller.systemName);
+    const pollersWithoutSystem = _module
+        .getTelemetrySystemPollers(convertedConfig, {
+            filter: (poller) => !poller.systemName
+        });
+
     // remove those pollers - we don't need them any more
-    _module.removeComponents(convertedConfig, {
+    removeComponents(convertedConfig, {
         class: CLASSES.SYSTEM_POLLER_CLASS_NAME,
         filter: (c) => pollersWithoutSystem.indexOf(c) !== -1
     });
@@ -720,18 +771,71 @@ function normalizeTelemetrySystemPollers(convertedConfig, componentDefaults) {
  */
 function postProcessTelemetryPullConsumerSystemPollerGroups(convertedConfig) {
     // at that point IDs should be generated already
-    _module.getTelemetryPullConsumerSystemPollerGroups(convertedConfig)
+    getTelemetryPullConsumerSystemPollerGroups(convertedConfig)
         .forEach((pg) => {
             // updating pull consumer info
-            const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, pg.namespace)
-                .find((pc) => pc.name === pg.pullConsumer);
+            const pullConsumer = _module.getTelemetryPullConsumers(convertedConfig, {
+                name: pg.pullConsumer,
+                namespace: pg.namespace
+            })[0];
 
             // convert all names/refs to IDs
             pg.pullConsumer = pullConsumer.id;
-            pg.systemPollers = _module.getTelemetrySystemPollers(convertedConfig, pg.namespace)
-                .filter((sp) => sp.enable && pg.systemPollers.indexOf(sp.name) !== -1)
+            pg.pullConsumerName = pullConsumer.traceName;
+            pg.systemPollers = _module.getTelemetrySystemPollers(convertedConfig, {
+                filter: (sp) => sp.enable,
+                name: pg.systemPollers,
+                namespace: pg.namespace
+            })
                 .map((sp) => sp.id);
         });
+}
+
+/**
+ * Remove components from .components and .mappings
+ *
+ * Note: This method mutates 'config'.
+ *
+ * @param {Configuration} config - config
+ * @param {FilterOptions} [filter] - filterting options
+ *
+ * @returns {void} once components removed
+ */
+function removeComponents(config, filter) {
+    if (!config || !config.components) {
+        return;
+    }
+    const componentsToRemove = _module.getComponents(config, filter);
+    if (componentsToRemove.length === 0) {
+        return;
+    }
+    if (config.components.length === componentsToRemove.length) {
+        config.components = [];
+        config.mappings = {};
+        return;
+    }
+    config.components = config.components.filter((c) => componentsToRemove.indexOf(c) === -1);
+    if (util.isObjectEmpty(config.mappings)) {
+        return;
+    }
+    componentsToRemove.forEach((component) => {
+        if (util.isObjectEmpty(config.mappings)) {
+            return;
+        }
+        if (config.mappings[component.id]) {
+            delete config.mappings[component.id];
+        } else {
+            Object.keys(config.mappings).forEach((id) => {
+                const index = config.mappings[id].indexOf(component.id);
+                if (index !== -1) {
+                    config.mappings[id].splice(index, 1);
+                }
+                if (config.mappings[id].length === 0) {
+                    delete config.mappings[id];
+                }
+            });
+        }
+    });
 }
 
 /**
@@ -751,20 +855,27 @@ function updateSystemPollerConfig(systemConfig, pollerConfig, fetchTMStats) {
     pollerConfig.trace = getPollerTraceValue(systemConfig.trace, pollerConfig.trace);
     pollerConfig.traceName = `${getTracePrefix(pollerConfig)}${systemConfig.name}::${pollerConfig.name}`;
     pollerConfig.connection = {
-        host: systemConfig.host,
-        port: systemConfig.port,
-        protocol: systemConfig.protocol,
+        host: systemConfig.host, // has default value from the schema
+        port: systemConfig.port, // has default value from the schema
+        protocol: systemConfig.protocol, // has default value from the schema
         allowSelfSignedCert: getAllowSelfSignedCertVal(systemConfig)
     };
     pollerConfig.dataOpts = {
-        tags: pollerConfig.tag,
         actions: pollerConfig.actions,
         noTMStats: !fetchTMStats
     };
-    pollerConfig.credentials = {
-        username: systemConfig.username,
-        passphrase: systemConfig.passphrase
-    };
+    if (typeof pollerConfig.tag === 'object') {
+        pollerConfig.dataOpts.tags = pollerConfig.tag;
+    }
+
+    if (typeof systemConfig.username !== 'undefined') {
+        pollerConfig.credentials = {
+            username: systemConfig.username
+        };
+        if (typeof systemConfig.passphrase !== 'undefined') {
+            pollerConfig.credentials.passphrase = systemConfig.passphrase;
+        }
+    }
     pollerConfig.trace = getTracerConfig(pollerConfig);
     POLLER_KEYS.toDelete.forEach((key) => {
         delete pollerConfig[key];
@@ -784,55 +895,71 @@ function updateIHealthPollerConfig(systemConfig, pollerConfig) {
     pollerConfig.class = CLASSES.IHEALTH_POLLER_CLASS_NAME;
     pollerConfig.enable = !!systemConfig.enable && !!pollerConfig.enable;
     pollerConfig.namespace = systemConfig.namespace;
-    pollerConfig.systemName = systemConfig.name;
     pollerConfig.trace = getPollerTraceValue(systemConfig.trace, pollerConfig.trace);
     pollerConfig.traceName = `${getTracePrefix(pollerConfig)}${systemConfig.name}::${pollerConfig.name}`;
+
     pollerConfig.iHealth = {
         name: pollerConfig.name,
         credentials: {
             username: pollerConfig.username,
             passphrase: pollerConfig.passphrase
         },
-        downloadFolder: pollerConfig.downloadFolder,
+        downloadFolder: pollerConfig.downloadFolder || constants.DEVICE_TMP_DIR,
         interval: {
             timeWindow: {
                 start: pollerConfig.interval.timeWindow.start,
                 end: pollerConfig.interval.timeWindow.end
             },
-            frequency: pollerConfig.interval.frequency,
-            day: pollerConfig.interval.day
+            frequency: pollerConfig.interval.frequency
         }
     };
-    const ihProxy = pollerConfig.proxy || {};
-    pollerConfig.iHealth.proxy = {
-        connection: {
-            host: ihProxy.host,
-            port: ihProxy.port,
-            protocol: ihProxy.protocol,
-            allowSelfSignedCert: getAllowSelfSignedCertVal(ihProxy)
-        },
-        credentials: {
-            username: ihProxy.username,
-            passphrase: ihProxy.passphrase
+    if (typeof pollerConfig.interval.day !== 'undefined') {
+        pollerConfig.iHealth.interval.day = pollerConfig.interval.day;
+    }
+
+    if (typeof pollerConfig.proxy === 'object') {
+        const ihProxy = pollerConfig.proxy;
+        pollerConfig.iHealth.proxy = {
+            connection: {
+                host: ihProxy.host, // required by the schema
+                port: ihProxy.port, // has default value from the schema
+                protocol: ihProxy.protocol, // has default value from the schema
+                allowSelfSignedCert: getAllowSelfSignedCertVal(ihProxy)
+            }
+        };
+        if (typeof ihProxy.username === 'string') {
+            pollerConfig.iHealth.proxy.credentials = {
+                username: ihProxy.username
+            };
+            if (typeof ihProxy.passphrase !== 'undefined') {
+                pollerConfig.iHealth.proxy.credentials.passphrase = ihProxy.passphrase;
+            }
         }
-    };
+    }
+
     pollerConfig.system = {
         name: systemConfig.name,
-        host: systemConfig.host,
         connection: {
-            port: systemConfig.port,
-            protocol: systemConfig.protocol,
+            host: systemConfig.host, // has default value from the schema
+            port: systemConfig.port, // has default value from the schema
+            protocol: systemConfig.protocol, // has default value from the schema
             allowSelfSignedCert: getAllowSelfSignedCertVal(systemConfig)
-        },
-        credentials: {
-            username: systemConfig.username,
-            passphrase: systemConfig.passphrase
         }
     };
+    if (typeof systemConfig.username !== 'undefined') {
+        pollerConfig.system.credentials = {
+            username: systemConfig.username
+        };
+        if (typeof systemConfig.passphrase !== 'undefined') {
+            pollerConfig.system.credentials.passphrase = systemConfig.passphrase;
+        }
+    }
     pollerConfig.trace = getTracerConfig(pollerConfig);
+
     IHEALTH_POLLER_KEYS.toDelete.forEach((key) => {
         delete pollerConfig[key];
     });
+
     return pollerConfig;
 }
 
@@ -860,7 +987,6 @@ _module = module.exports = {
      *
      * Note: this method mutates 'data'
      *
-     * @public
      * @param {object} data - declaration or configuration to decrypt
      *
      * @returns {Promise<object>} resolved with decrypted secrets
@@ -875,49 +1001,95 @@ _module = module.exports = {
      * Note: 'className' or/and 'namespace' might be functions that will
      * be passed directly to Array.prototype.filter
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {object} [options] - options
-     * @param {string | function} [options.class] - class name or function to use as filter
-     * @param {function} [options.filter] - function to use as filter
-     * @param {string | function} [options.namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of components
+     * @returns {Component[]} array of components
      */
-    getComponents(config, options) {
+    getComponents(config, filter = {}) {
         if (!config || !config.components) {
             return [];
         }
         let components = config.components;
-        options = options || {};
-        if (options.class) {
-            let filter = options.class;
-            if (typeof filter !== 'function') {
-                filter = (c) => c.class === options.class;
+
+        ['class', 'id', 'name', 'namespace'].forEach((prop) => {
+            const fprop = filter[prop];
+            let fn;
+            if (typeof fprop === 'string') {
+                fn = (c) => c[prop] === fprop;
+            } else if (typeof fprop === 'function') {
+                fn = (c) => fprop(c[prop]);
+            } else if (Array.isArray(fprop)) {
+                fn = (c) => fprop.includes(c[prop]);
             }
-            components = components.filter(filter);
-        }
-        if (options.namespace) {
-            let filter = options.namespace;
-            if (typeof filter !== 'function') {
-                filter = (c) => c.namespace === options.namespace;
+            if (fn) {
+                components = components.filter(fn);
             }
-            components = components.filter(filter);
+        });
+
+        if (typeof filter.filter === 'function') {
+            components = components.filter(filter.filter);
         }
-        if (options.filter) {
-            components = components.filter(options.filter);
-        }
+
         return components;
+    },
+
+    /**
+     * Generates SHA256 hash for the Component object
+     *
+     * Sorts keys in A-Z order and uses values as an input data.
+     * Repeats the process recursevly.
+     *
+     * NOTE:
+     * - use decrypted config for determenistic results
+     * - currently tested and verfied for following classes
+     *   - Telemetry_iHealth_Poller
+     * - IGNORES following top-level properties (not sensitive data):
+     *   - id
+     *   - enable
+     *   - trace
+     * - IGNORES folloving values:
+     *   - null
+     *   - undefined
+     *
+     * @param {Component} config
+     *
+     * @returns {string} SHA256 hash
+     */
+    getComponentHash(config) {
+        const values = [];
+        const ignoreKeys = ['enable', 'id', 'trace'];
+        const ignoreValues = [null, undefined]; // should never appear in the config, not allowed by the schema
+
+        function grab(data, pkey = '', level = 0) {
+            if (Array.isArray(data)) {
+                data.forEach((item, idx) => grab(item, `${pkey}.${idx}`, level + 1));
+            } else if (typeof data === 'object' && data !== null) {
+                let keys = Object.keys(data);
+                if (level === 0) {
+                    keys = keys.filter((k) => !ignoreKeys.includes(k));
+                }
+                keys.sort()
+                    .forEach((key) => grab(data[key], `${pkey}.${key}`, level + 1));
+            } else if (!ignoreValues.includes(data)) {
+                values.push(pkey, data);
+            }
+        }
+
+        grab(config);
+
+        const hash = crypto.createHash('sha256');
+        hash.update(values.join(''));
+        return hash.digest('hex');
     },
 
     /**
      * Get configured and enabled receivers for component
      *
-     * @public
      * @param {Configuration} config - config
      * @param {Component} component - component
      *
-     * @returns {Array<Component>} array of receivers
+     * @returns {Component[]} array of receivers
      */
     getReceivers(config, component) {
         const ids = config.mappings[component.id];
@@ -925,29 +1097,7 @@ _module = module.exports = {
             return [];
         }
         return _module.getComponents(config, {
-            filter: (c) => ids.indexOf(c.id) !== -1,
-            namespace: component.namespace
-        });
-    },
-
-    /**
-     * Get configured and enabled data sources for component
-     *
-     * @public
-     * @param {Configuration} config - config
-     * @param {Component} component - component
-     *
-     * @returns {Array<Component>} array of data sources
-     */
-    getSources(config, component) {
-        const ids = Object.keys(config.mappings)
-            .filter((id) => config.mappings[id].indexOf(component.id) !== -1);
-
-        if (ids.length === 0) {
-            return [];
-        }
-        return _module.getComponents(config, {
-            filter: (c) => ids.indexOf(c.id) !== -1,
+            id: ids,
             namespace: component.namespace
         });
     },
@@ -955,20 +1105,23 @@ _module = module.exports = {
     /**
      * Get Telemetry_Consumer objects
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of Telemetry_Consumer objects
+     * @returns {Component[]} array of Telemetry_Consumer objects
      */
-    getTelemetryConsumers(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.CONSUMER_CLASS_NAME, namespace });
+    getTelemetryConsumers(config, filter = {}) {
+        return _module.getComponents(config, {
+            ...filter,
+            ...{
+                class: CLASSES.CONSUMER_CLASS_NAME
+            }
+        });
     },
 
     /**
      * Get controls object from config
      *
-     * @public
      * @param {Configuration} config  - the config to lookup the controls from
      *
      * @returns {Component} the controls object if exists, otherwise {}
@@ -984,121 +1137,96 @@ _module = module.exports = {
     /**
      * Get Telemetry_iHealth_Poller objects
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of Telemetry_iHealth_Poller objects
+     * @returns {Component[]} array of Telemetry_iHealth_Poller objects
      */
-    getTelemetryIHealthPollers(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.IHEALTH_POLLER_CLASS_NAME, namespace });
-    },
-
-    /**
-     * Get Telemetry_Endpoints objects
-     *
-     * @public
-     * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
-     *
-     * @returns {Array<Component>} array of Telemetry_Endpoints objects
-     */
-    getTelemetryEndpoints(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.ENDPOINTS_CLASS_NAME, namespace });
+    getTelemetryIHealthPollers(config, filter = {}) {
+        return _module.getComponents(config, {
+            ...filter,
+            ...{
+                class: CLASSES.IHEALTH_POLLER_CLASS_NAME
+            }
+        });
     },
 
     /**
      * Get Telemetry_Listener objects
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of Telemetry_Listener objects
+     * @returns {Component[]} array of Telemetry_Listener objects
      */
-    getTelemetryListeners(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.EVENT_LISTENER_CLASS_NAME, namespace });
+    getTelemetryListeners(config, filter = {}) {
+        return _module.getComponents(config, {
+            ...filter,
+            ...{
+                class: CLASSES.EVENT_LISTENER_CLASS_NAME
+            }
+        });
     },
 
     /**
      * Get Telemetry_Pull_Consumer objects
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of Telemetry_Pull_Consumer objects
+     * @returns {Component[]} array of Telemetry_Pull_Consumer objects
      */
-    getTelemetryPullConsumers(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.PULL_CONSUMER_CLASS_NAME, namespace });
-    },
-
-    /**
-     * Get Telemetry_System objects
-     *
-     * @public
-     * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
-     *
-     * @returns {Array<Component>} array of Telemetry_System objects
-     */
-    getTelemetrySystems(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.SYSTEM_CLASS_NAME, namespace });
+    getTelemetryPullConsumers(config, filter = {}) {
+        return _module.getComponents(config, {
+            ...filter,
+            ...{
+                class: CLASSES.PULL_CONSUMER_CLASS_NAME
+            }
+        });
     },
 
     /**
      * Get Telemetry_System_Poller objects
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
+     * @param {FilterOptions} [filter] - filtering options
      *
-     * @returns {Array<Component>} array of Telemetry_System_Poller objects
+     * @returns {Component[]} array of Telemetry_System_Poller objects
      */
-    getTelemetrySystemPollers(config, namespace) {
-        return _module.getComponents(config, { class: CLASSES.SYSTEM_POLLER_CLASS_NAME, namespace });
+    getTelemetrySystemPollers(config, filter = {}) {
+        return _module.getComponents(config, {
+            ...filter,
+            ...{
+                class: CLASSES.SYSTEM_POLLER_CLASS_NAME
+            }
+        });
     },
 
     /**
      * Get Telemetry_System_Poller objects for Telemetry_Pull_Consumer_System_Poller_Group
      *
-     * @public
      * @param {Configuration} config - config
      * @param {Component} pollerGroup - Telemetry_Pull_Consumer_System_Poller_Group object
      *
-     * @returns {Array<Component>} array of Telemetry_System_Poller objects
+     * @returns {Component[]} array of Telemetry_System_Poller objects
      */
     getTelemetrySystemPollersForGroup(config, pollerGroup) {
-        return _module.getTelemetrySystemPollers(config, pollerGroup.namespace)
-            .filter((sp) => pollerGroup.systemPollers.indexOf(sp.id) !== -1);
-    },
-
-    /**
-     * Get Telemetry_Pull_Consumer_System_Poller_Group objects
-     *
-     * @public
-     * @param {Configuration} config - config
-     * @param {string | function} [namespace] - namespace name or function to use as filter
-     *
-     * @returns {Array<Component>} array of Telemetry_Pull_Consumer_System_Poller_Group objects
-     */
-    getTelemetryPullConsumerSystemPollerGroups(config, namespace) {
-        return _module.getComponents(config, {
-            class: CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME, namespace
+        return _module.getTelemetrySystemPollers(config, {
+            id: pollerGroup.systemPollers,
+            namespace: pollerGroup.namespace
         });
     },
 
     /**
      * Get Telemetry_Pull_Consumer_System_Poller_Group object for Telemetry_Pull_Consumer
      *
-     * @public
      * @param {Configuration} config - config
      * @param {Component} pullConsumer - Telemetry_Pull_Consumer object
      *
      * @returns {Component | undefined} Telemetry_Pull_Consumer_System_Poller_Group object
      */
-    getTelemetryPullConsumerSystemPollerGroupForPullConsumer(config, pullConsumer) {
-        return _module.getTelemetryPullConsumerSystemPollerGroups(config, pullConsumer.namespace)
+    getTelemetryPullConsumerSystemPollerGroup(config, pullConsumer) {
+        return getTelemetryPullConsumerSystemPollerGroups(config, { namespace: pullConsumer.namespace })
             .filter((pg) => pg.pullConsumer === pullConsumer.id && config.mappings[pg.id])
             .find((pg) => config.mappings[pg.id].indexOf(pullConsumer.id) !== -1);
     },
@@ -1106,7 +1234,6 @@ _module = module.exports = {
     /**
      * Get JSON Schema validation functions
      *
-     * @public
      * @param {boolean} [rebuildCache = false] - re-build cached validators
      *
      * @returns {SchemaValidatorFunctions} available config validation functions
@@ -1121,17 +1248,14 @@ _module = module.exports = {
     /**
      * Check if config has "enabled" components
      *
-     * @public
      * @param {Configuration} config - config
-     * @param {object} [options] - options
-     * @param {string | function} [options.class] - class name or function to use as filter
-     * @param {function} [options.filter] - function to use as filter
-     * @param {string | function} [options.namespace] - namespace name or function to use as filter
      *
      * @returns {boolean} true if config has "enabled" components
      */
-    hasEnabledComponents(config, options) {
-        return _module.getComponents(config, options).some((c) => c.class !== CLASSES.CONTROLS_CLASS_NAME && c.enable);
+    hasEnabledComponents(config) {
+        return _module.getComponents(config, {
+            filter: (c) => c.class !== CLASSES.CONTROLS_CLASS_NAME && c.enable
+        }).length > 0;
     },
 
     /**
@@ -1140,26 +1264,24 @@ _module = module.exports = {
      *
      * Note: This method mutates 'config'.
      *
-     * @public
      * @param {object} declaration - declaration to merge
      * @param {Configuration} config - config to use to merge to
      *
-     * @returns {Promise<Configuration>} resolve with merged normalized config
+     * @returns {Configuration} resolve with merged normalized config
      */
-    mergeDeclaration(declaration, config) {
-        return _module.normalizeDeclaration(declaration, true)
-            .then((newNormalizedConfig) => {
-                // all objects have .namespace property - get all namespaces in new config
-                const namespaces = _module.getComponents(newNormalizedConfig)
-                    .map((c) => c.namespace)
-                    .filter((val, index, self) => self.indexOf(val) === index);
-                // remove namespaces from existing config
-                _module.removeComponents(config, { namespace: (c) => namespaces.indexOf(c.namespace) !== -1 });
-                cleanupComponents(newNormalizedConfig);
-                config.mappings = Object.assign(config.mappings, newNormalizedConfig.mappings);
-                config.components = config.components.concat(newNormalizedConfig.components);
-                return config;
-            });
+    async mergeDeclaration(declaration, config) {
+        const newNormalizedConfig = await _module.normalizeDeclaration(declaration, true);
+        // all objects have .namespace property - get all namespaces in new config
+        const namespaces = _module.getComponents(newNormalizedConfig)
+            .map((c) => c.namespace)
+            .filter((val, index, self) => self.indexOf(val) === index);
+        // remove namespaces from existing config
+        removeComponents(config, { namespace: namespaces });
+        cleanupComponents(newNormalizedConfig);
+        config.mappings = Object.assign(config.mappings, newNormalizedConfig.mappings);
+        config.components = config.components.concat(newNormalizedConfig.components);
+
+        return config;
     },
 
     /**
@@ -1167,77 +1289,27 @@ _module = module.exports = {
      * - polymorphic components like poller, systems and endpoints are normalized
      * - mappings for components are added for easy lookup
      *
-     * @public
      * @param {object} declaration - the config to normalize (declared components must be expanded)
      * @param {boolean} [noCleanup = false] - ignore cleanup
      *
      * @returns {Promise<Configuration>} normalized config
      */
-    normalizeDeclaration(declaration, noCleanup) {
+    async normalizeDeclaration(declaration, noCleanup = false) {
         const convertedConfig = {
             mappings: {},
             components: []
         };
-        if (util.isObjectEmpty(declaration) || Array.isArray(declaration) || typeof declaration !== 'object') {
-            return Promise.resolve(convertedConfig);
-        }
-        return Promise.resolve()
-            .then(() => componentizeConfig(declaration, convertedConfig))
-            .then(() => normalizeComponents(convertedConfig))
-            .then(() => mapComponents(convertedConfig))
-            .then(() => (noCleanup ? null : cleanupComponents(convertedConfig)))
-            .then(() => convertedConfig);
-    },
+        if (!(util.isObjectEmpty(declaration) || Array.isArray(declaration) || typeof declaration !== 'object')) {
+            componentizeConfig(declaration, convertedConfig);
+            await normalizeComponents(convertedConfig);
+            mapComponents(convertedConfig);
 
-    /**
-     * Remove components from .components and .mappings
-     *
-     * Note: This method mutates 'config'.
-     *
-     * @public
-     * @param {Configuration} config - config
-     * @param {object} [options] - options
-     * @param {string | function} [options.class] - class name or function to use as filter
-     * @param {function} [options.filter] - function to use as filter
-     * @param {string | function} [options.namespace] - namespace name or function to use as filter
-     *
-     * @returns {void} once components removed
-     */
-    removeComponents(config, options) {
-        if (!config || !config.components) {
-            return;
-        }
-        const componentsToRemove = _module.getComponents(config, options);
-        if (componentsToRemove.length === 0) {
-            return;
-        }
-        if (config.components.length === componentsToRemove.length) {
-            config.components = [];
-            config.mappings = {};
-            return;
-        }
-        config.components = config.components.filter((c) => componentsToRemove.indexOf(c) === -1);
-        if (util.isObjectEmpty(config.mappings)) {
-            return;
-        }
-        componentsToRemove.forEach((component) => {
-            if (util.isObjectEmpty(config.mappings)) {
-                return;
+            if (!noCleanup) {
+                cleanupComponents(convertedConfig);
             }
-            if (config.mappings[component.id]) {
-                delete config.mappings[component.id];
-            } else {
-                Object.keys(config.mappings).forEach((id) => {
-                    const index = config.mappings[id].indexOf(component.id);
-                    if (index !== -1) {
-                        config.mappings[id].splice(index, 1);
-                    }
-                    if (config.mappings[id].length === 0) {
-                        delete config.mappings[id];
-                    }
-                });
-            }
-        });
+        }
+
+        return convertedConfig;
     },
 
     /**
@@ -1245,29 +1317,32 @@ _module = module.exports = {
      *
      * Note: this method mutates 'data'
      *
-     * @public
      * @param {object} validator - the validator function to use
      * @param {object} data      - data to validate against config schema
      * @param {object} [context] - context to pass to validator
      *
-     * @returns {Promise<object>} Promise which is resolved with the validated schema
+     * @returns {object} the validated data
     */
-    validate(validator, data, context) {
+    async validate(validator, data, context) {
         return declValidator.validate(validator, data, context);
     }
 };
 
 /**
- * @typedef Component
- * @type {object}
+ * @typedef {object} AdditionalOption
+ * @property {string} name
+ * @property {any} value
+ */
+/**
+ * @typedef {object} Component
  * @property {string} class - class name a component belongs to
+ * @property {boolean} enable - true if component enabled
  * @property {string} id - unique ID for config's current life span
  * @property {string} name - name
  * @property {string} namespace - namespace a component belongs to
+ * @property {TraceConfig} trace - tracer's cofnig
  * @property {string} traceName - unique name computed using namespace and object's name,
  *     should be used for logging and etc.
- * @property {boolean} [enable] - true if component enabled
- * @property {TraceConfig} [trace] - true if 'trace' enabled
  *
  * Note:
  * - component will have newly generated 'id' every time when:
@@ -1280,10 +1355,9 @@ _module = module.exports = {
  *   - if poller has 0 interval it will not be mapped to Telemetry_Consumer
  */
 /**
- * @typedef Configuration
- * @type {object}
- * @property {Array<Component>} components - configuration components
- * @property {Object<string, Array<string>} mappings - data routing/mapping between different components using their IDs
+ * @typedef {object} Configuration
+ * @property {Component[]} components - configuration components
+ * @property {object<string, string[]>} mappings - data routing/mapping between different components using their IDs
  *
  * {
  *     mappings: {
@@ -1302,13 +1376,28 @@ _module = module.exports = {
  * }
  */
 /**
- * @typedef ConsumerComponent
- * @type {Component}
+ * @typedef {object} Connection
+ * @property {string} host - host
+ * @property {boolean} allowSelfSignedCert - allow self signed certs
+ * @property {number} port - port
+ * @property {'http' | 'https'} protocol - protocol
+ */
+/**
+ * @typedef {Component} ConsumerComponent
  * @property {string} type - consumer's type
  */
 /**
- * @typedef DataAction
- * @type {object}
+ * @typedef {object} Credentials
+ * @property {string} username - username
+ * @property {Secret | string} passphrase - passphrase
+ */
+/**
+ * @typedef {object} CredentialsPartial
+ * @property {string} username - username
+ * @property {PassphraseSecret | string} [passphrase] - passphrase
+ */
+/**
+ * @typedef {object} DataAction
  * @property {boolean} enable - enable/disable
  */
 /**
@@ -1316,71 +1405,105 @@ _module = module.exports = {
  * @type {Array<ExcludeDataAction | IncludeDataAction | SetTagDataAction>}
  */
 /**
- * @typedef ExcludeDataAction
- * @type {DataAction}
+ * @typedef {DataAction} ExcludeDataAction
+ * @property {object} excludeData
+ * @property {object} locations
+ * @property {object} [ifAllMatch]
+ * @property {object} [ifAnyMatch]
+ */
+/**
+ * @typedef {object} FilterOptions
+ * @param {StringFilter} [class] - class name(s) or function to use as filter
+ * @param {function(obj: Component): boolean} [filter] - function to use as filter
+ * @param {StringFilter} [id] - id(s) or function to use as filter
+ * @param {StringFilter} [name] - name(s) or function to use as filter
+ * @param {StringFilter} [namespace] - namespace name(s) or function to use as filter
+ */
+/**
+ * @typedef {AdditionalOption} HttpAgentOption
+ * @property {'keepAlive' | 'keepAliveMsecs' | 'maxSockets' | 'maxFreeSockets'} name - HTTP agent's option name
+ * @property {boolean | number} value
+ */
+/**
+ * @typedef {Component} IHealthPollerCompontent
+ * @property {object} iHealth - iHealth poller config
+ * @property {string} iHealth.name - poller's name
+ * @property {Credentials} iHealth.credentials - F5 iHealth Service credentials
+ * @property {string} iHealth.downloadFolder - Qkview download directory
+ * @property {object} iHealth.interval - polling interval
+ * @property {object} iHealth.interval.timeWindow - polli ng time window
+ * @property {string} iHealth.interval.start - start time
+ * @property {string} iHealth.interval.end - end time
+ * @property {string} iHealth.interval.frequency - polling frequency
+ * @property {number | string} iHealth.interval.day - day of week/month
+ * @property {Proxy} [iHealth.proxy] - proxy configuration
+ * @property {object} system - F5 Device config
+ * @property {Connection} system.connection - connectivity config
+ * @property {CredentialsPartial} [system.credentials] - credentials
+ * @property {string} system.name - system's name
+ */
+/**
+ * @typedef {DataAction} IncludeDataAction
  * @property {object} includeData
  * @property {object} locations
  * @property {object} [ifAllMatch]
  * @property {object} [ifAnyMatch]
  */
 /**
- * @typedef IncludeDataAction
- * @type {DataAction}
- * @property {object} includeData
- * @property {object} locations
- * @property {object} [ifAllMatch]
- * @property {object} [ifAnyMatch]
+ * @typedef {object} Proxy
+ * @property {Connection} connection - connectivity config
+ * @property {string} connection.host - proxy host
+ * @property {ProxyCredentials} [credentials] - authentiction data
  */
 /**
- * @typedef PassphraseSecret
- * @type {object}
+ * @typedef {CredentialsPartial} ProxyCredentials
+ * @property {string} username - username
+ * @property {Secret | string} [passphrase] - passphrase
+ */
+/**
+ * @typedef {Component} PullConsumerSystemPollerGroup
+ * @property {string[]} systemPollers - list of System Pollers IDs (enabled only)
+ * @property {string} pullConsumer - pull consumer ID
+ * @property {string} pullConsumerName - pull consumer name (traceName)
+ */
+/**
+ * @typedef {object} Secret
  * @property {string} cipherText - encrypted secret
  * @property {string} class - class name
  * @property {string} protected - type of protection
  */
 /**
- * @typedef PullConsumerSystemPollerGroup
- * @type {Component}
- * @property {Array<string>} systemPollers - list of System Pollers IDs (enabled only)
- * @property {string} pullConsumer - pull consumer ID
- */
-/**
- * @typedef SetTagDataAction
- * @type {DataAction}
+ * @typedef {DataAction} SetTagDataAction
  * @property {object} setTag - tags to set
  * @property {object} [locations]
  * @property {object} [ifAllMatch]
  * @property {object} [ifAnyMatch]
  */
 /**
- * @typedef SystemPollerComponent
- * @type {Component}
- * @property {object} connection - connection config
- * @property {boolean} connection.allowSelfSignedCert
- * @property {string} connection.host - host
- * @property {number} connection.port - port
- * @property {string} connection.protocol - protocol (http or https)
- * @property {object} credentials - auth config
- * @property {string} credentials.username
- * @property {PassphraseSecret | string} credentials.passphrase
+ * @typedef {(function(s: string): boolean) | string | string[]} StringFilter
+ */
+/**
+ * @typedef {Component} SystemPollerComponent
+ * @property {Connection} connection - connectivity config
+ * @property {CredentialsPartial} [credentials] - credentials
  * @property {object} dataOpts - data modifications config
  * @property {DataActions} dataOpts.actions
  * @property {boolean} dataOpts.noTMStats - if 'true' then exclude 'tmstats' from stats
  * @property {object<string, string>} dataOpts.tags - old-style tagging
  * @property {Object<string, SystemPollerEndpoint>} endpoints - endpoints to poll data from
+ * @property {HttpAgentOption[]} httpAgentOpts - additional options for HTTP agent
  * @property {number} interval - polling interval in seconds
  * @property {string} systemName - system's names it belongs to
  */
 /**
- * @typedef SystemPollerEndpoint
- * @type {object}
+ * @typedef {object} SystemPollerEndpoint
  * @property {boolean} enable - enabled/disabled
  * @property {string} name - endpoint name
  * @property {string} path - endpoint path
+ * @property {'http' | 'snmp'} protocol - data retrieval protocol
  */
 /**
- * @typedef TraceConfig
- * @type {object}
+ * @typedef {object} TraceConfig
  * @property {boolean} enable - enabled/disabled
  * @property {string} encoding - output encoding
  * @property {number} maxRecords - max records to store

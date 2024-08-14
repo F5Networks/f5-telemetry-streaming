@@ -31,6 +31,15 @@ class BaseError extends Error {}
 class ConfigLookupError extends BaseError {}
 
 /**
+ * Not Implemented Error
+ */
+class NotImplementedError extends Error {
+    constructor() {
+        super('Not implemented!');
+    }
+}
+
+/**
  * Object not found in Config Error
  */
 class ObjectNotFoundInConfigError extends ConfigLookupError {}
@@ -43,6 +52,7 @@ class ValidationError extends BaseError {}
 module.exports = {
     BaseError,
     ConfigLookupError,
+    NotImplementedError,
     ObjectNotFoundInConfigError,
     ValidationError
 };

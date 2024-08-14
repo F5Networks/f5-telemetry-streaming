@@ -26,9 +26,9 @@ const EventEmitter2 = require('eventemitter2');
  *
  * @returns {Error} error
  */
-function logSafeEmitException(event, error) {
+function logSafeEmitException(event, error, isAsync) {
     if (this.logger) {
-        this.logger.exception(`${this.constructor.name}.safeEmit(Async), event "${event}", uncaught error`, error);
+        this.logger.exception(`${this.constructor.name}.safeEmit${isAsync ? 'Async' : ''}, event "${event}", uncaught error`, error);
     }
     return error;
 }
@@ -38,33 +38,48 @@ function logSafeEmitException(event, error) {
  */
 class SafeEventEmitter extends EventEmitter2 {
     /**
+     * @inheritdoc
+     *
+     * NOTE: makes the function trully async. Original implementation is sync
+     */
+    async emitAsync() {
+        return super.emitAsync.apply(this, arguments);
+    }
+
+    /**
      * Emit event
      *
-     * @returns {Boolean | Error} true if the event had listeners, false otherwise or Error if caught one
+     * @returns {boolean | Error} true if the event had listeners, false otherwise or Error if caught one
      */
     safeEmit() {
         try {
             return this.emit.apply(this, arguments);
         } catch (emitErr) {
-            return logSafeEmitException.call(this, arguments[0], emitErr);
+            return logSafeEmitException.call(this, arguments[0], emitErr, false);
         }
     }
 
     /**
      * Emit async event
      *
-     * @async
-     * @returns {Promise<Array<any> | Error>} promise resolved with array of responses or
+     * @returns {Promise<any[]> | Error>} promise resolved with array of responses or
      *      Error if caught one (no rejection)
      */
-    safeEmitAsync() {
+    async safeEmitAsync() {
         try {
-            return this.emitAsync.apply(this, arguments)
-                .catch((error) => logSafeEmitException.call(this, arguments[0], error));
+            return await this.emitAsync.apply(this, arguments);
         } catch (emitErr) {
-            return Promise.resolve(logSafeEmitException.call(this, arguments[0], emitErr));
+            return logSafeEmitException.call(this, arguments[0], emitErr, true);
         }
     }
 }
 
 module.exports = SafeEventEmitter;
+
+/**
+ * @typedef CallOnceOnly
+ * @type {function}
+ * @property {boolean} calledOnce - true when function was called already
+ *
+ * When .calledOnce returns true and callee trying to call a function then error will be thrown
+ */

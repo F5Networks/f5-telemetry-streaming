@@ -19,9 +19,7 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const fs = require('fs');
 const os = require('os');
-const path = require('path');
 const sinon = require('sinon');
 
 const assert = require('../shared/assert');
@@ -40,27 +38,12 @@ describe('Tracer', () => {
     const tracerFile = `${tracerDir}/tracerTest`;
     const fakeDate = new Date();
     let coreStub;
-    let customFS;
     let tracerInst;
 
-    const readTraceFile = (filePath, encoding) => JSON.parse(fs.readFileSync(filePath, encoding || tracerEncoding));
-    const emptyDir = (dirPath) => {
-        fs.readdirSync(dirPath).forEach((item) => {
-            item = path.join(dirPath, item);
-            if (fs.statSync(item).isDirectory()) {
-                emptyDir(item);
-                fs.rmdirSync(item);
-            } else {
-                fs.unlinkSync(item);
-            }
-        });
-    };
-    const removeDir = (dirPath) => {
-        if (fs.existsSync(dirPath)) {
-            emptyDir(dirPath);
-            fs.rmdirSync(dirPath);
-        }
-    };
+    const readTraceFile = (filePath, encoding) => JSON.parse(
+        utilMisc.fs.readFileSync(filePath, encoding || tracerEncoding)
+    );
+
     const addTimestamps = (data) => data.map((item) => ({ data: item, timestamp: new Date().toISOString() }));
 
     before(() => {
@@ -69,39 +52,20 @@ describe('Tracer', () => {
 
     beforeEach(() => {
         coreStub = stubs.coreStub({
-            logger
+            logger,
+            utilMisc
         });
         stubs.clock({ fakeTimersOpts: fakeDate });
 
-        if (fs.existsSync(tracerDir)) {
-            emptyDir(tracerDir);
-        }
-
         tracerInst = tracer.create(tracerFile);
         coreStub.logger.removeAllMessages();
-
-        customFS = sinon.spy({
-            R_OK: 1,
-            access() { return Promise.reject(new Error('not exist')); },
-            close() { return Promise.resolve(); },
-            ftruncate() { return Promise.resolve(); },
-            fstat() {
-                return Promise.resolve([{
-                    size: 2
-                }]);
-            },
-            mkdir() { return Promise.resolve(); },
-            open() { return Promise.resolve([1]); },
-            read() { return Promise.resolve([2, Buffer.from('[]')]); },
-            write() { return Promise.resolve(); }
-        });
     });
 
-    afterEach(() => (tracerInst ? tracerInst.stop() : Promise.resolve())
-        .then(() => sinon.restore()));
-
-    after(() => {
-        removeDir(tracerDir);
+    afterEach(async () => {
+        if (tracerInst) {
+            await tracerInst.stop();
+        }
+        sinon.restore();
     });
 
     describe('.create', () => {
@@ -198,23 +162,6 @@ describe('Tracer', () => {
                     });
             });
 
-            it('should allow to specify custom FS module', () => {
-                tracerInst = new tracer.Tracer('tracerFile', {
-                    fs: customFS
-                });
-                return tracerInst.write('somethings')
-                    .then(() => tracerInst.stop())
-                    .then(() => {
-                        assert.isAbove(customFS.access.callCount, 0, 'should call customFS.access');
-                        assert.isAbove(customFS.close.callCount, 0, 'should call customFS.close');
-                        assert.isAbove(customFS.fstat.callCount, 0, 'should call customFS.fstat');
-                        assert.isAbove(customFS.mkdir.callCount, 0, 'should call customFS.mkdir');
-                        assert.isAbove(customFS.open.callCount, 0, 'should call customFS.open');
-                        assert.isAbove(customFS.read.callCount, 0, 'should call customFS.read');
-                        assert.isAbove(customFS.write.callCount, 0, 'should call customFS.write');
-                    });
-            });
-
             it('should not set inactivity timeout when 0 passed', () => {
                 const fakeClock = stubs.clock();
 
@@ -306,7 +253,6 @@ describe('Tracer', () => {
 
         describe('.write()', () => {
             it('should try to create parent directory', () => {
-                sinon.stub(utilMisc.fs, 'mkdir').resolves();
                 tracerInst = tracer.create('/test/inaccessible/directory/file');
                 return tracerInst.write('foobar')
                     .then(() => {
@@ -321,8 +267,8 @@ describe('Tracer', () => {
             });
 
             it('should not try to create parent directory if exist already (concurrent requests)', () => {
-                sinon.stub(utilMisc.fs, 'access').rejects(new Error('access error'));
-                sinon.stub(utilMisc.fs, 'mkdir').callsFake(() => {
+                utilMisc.fs.access.rejects(new Error('access error'));
+                utilMisc.fs.mkdir.callsFake(() => {
                     const error = new Error('folder exists');
                     error.code = 'EEXIST';
                     return Promise.reject(error);
@@ -340,7 +286,7 @@ describe('Tracer', () => {
             });
 
             it('should not reject when unable to create parent directory', () => {
-                sinon.stub(utilMisc.fs, 'mkdir').rejects(new Error('mkdir error'));
+                utilMisc.fs.mkdir.rejects(new Error('mkdir error'));
                 tracerInst = tracer.create('/test/inaccessible/directory/file');
                 return tracerInst.write('foobar')
                     .then((err) => {
@@ -445,8 +391,8 @@ describe('Tracer', () => {
             it('should not fail if unable to parse existing data', () => tracerInst.write('item1')
                 .then((err) => {
                     assert.isUndefined(err, 'should return no error');
-                    fs.truncateSync(tracerFile, 0);
-                    fs.writeFileSync(tracerFile, '{test');
+                    utilMisc.fs.truncateSync(tracerFile, 0);
+                    utilMisc.fs.writeFileSync(tracerFile, '{test');
                     return tracerInst.write('item1');
                 })
                 .then((err) => {
@@ -574,7 +520,7 @@ describe('Tracer', () => {
 
             it('should create new write request when current one in progress already', () => {
                 const dataHistory = [];
-                const fsWriteStub = sinon.stub(utilMisc.fs, 'write');
+                const fsWriteStub = utilMisc.fs.write;
                 let writePromise;
 
                 fsWriteStub.callsFake(function () {
@@ -614,8 +560,8 @@ describe('Tracer', () => {
             });
 
             it('should batch multiple .write attempts into one', () => {
-                const readSpy = sinon.spy(fs, 'read');
-                const writeSpy = sinon.spy(fs, 'write');
+                const readSpy = utilMisc.fs.read;
+                const writeSpy = utilMisc.fs.write;
 
                 const p1 = tracerInst.write('test1');
                 tracerInst.write('test2');
@@ -671,7 +617,7 @@ describe('Tracer', () => {
 
         describe('.stop()', () => {
             it('should not fail when unable to close file using descriptor', () => {
-                sinon.stub(utilMisc.fs, 'close').rejects(new Error('close error'));
+                utilMisc.fs.close.rejects(new Error('close error'));
                 coreStub.logger.removeAllMessages();
                 return tracerInst.write('test')
                     .then(() => tracerInst.stop())
@@ -880,7 +826,7 @@ describe('Tracer', () => {
 
         describe('suspend due inactivity', () => {
             it('should suspend tracer due inactivity and resume it on attempt to write data', () => {
-                const closeSpy = sinon.spy(utilMisc.fs, 'close');
+                const closeSpy = utilMisc.fs.close;
                 const fakeClock = stubs.clock();
                 tracerInst = tracer.create(tracerFile);
                 assert.deepStrictEqual(tracerInst.inactivityTimeout, 900, 'should set default inactivity timeout');

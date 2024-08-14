@@ -28,15 +28,19 @@ const declValidator = require('./common').validate;
 moduleCache.remember();
 
 describe('Declarations -> Base Schema objects', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 

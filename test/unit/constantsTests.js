@@ -28,17 +28,7 @@ const packageInfo = sourceCode('package.json');
 moduleCache.remember();
 
 describe('Constants', () => {
-    before(() => {
-        moduleCache.restore();
-    });
-
-    /**
-     * ATTENTION:
-     *
-     * If this test failed it worth to check other tests and source code
-     * that uses that constant(s)
-     */
-    it('constants verification', () => {
+    function getExpected() {
         const versionInfo = packageInfo.version.split('-');
         if (versionInfo.length === 1) {
             versionInfo.push('1');
@@ -47,8 +37,7 @@ describe('Constants', () => {
         assert.isNotEmpty(versionInfo[0]);
         assert.isNotEmpty(versionInfo[1]);
 
-        // TODO: add other constants later
-        assert.deepStrictEqual(constants, {
+        return {
             ACTIVITY_RECORDER: {
                 DECLARATION_TRACER: {
                     MAX_RECORDS: 60,
@@ -57,14 +46,7 @@ describe('Constants', () => {
             },
             APP_NAME: 'Telemetry Streaming',
             APP_THRESHOLDS: {
-                MONITOR_DISABLED: 'MONITOR_DISABLED', // TODO: delete
                 MEMORY: {
-                    /** TODO: DELETE */
-                    DEFAULT_MB: 1433,
-                    OK: 'MEMORY_USAGE_OK',
-                    NOT_OK: 'MEMORY_USAGE_HIGH',
-                    /** TODO: DELETE END */
-
                     ARGRESSIVE_CHECK_INTERVALS: [
                         { usage: 50, interval: 0.5 },
                         { usage: 60, interval: 0.4 },
@@ -126,6 +108,11 @@ describe('Constants', () => {
             CONFIG_WORKER: {
                 STORAGE_KEY: 'config'
             },
+            DATA_PIPELINE: {
+                PULL_EVENT: 0b01,
+                PUSH_EVENT: 0b10,
+                PUSH_PULL_EVENT: 0b11
+            },
             DAY_NAME_TO_WEEKDAY: {
                 monday: 1,
                 tuesday: 2,
@@ -136,16 +123,13 @@ describe('Constants', () => {
                 sunday: 0
             },
             DEVICE_REST_API: {
+                CHUNK_SIZE: 512 * 1024,
                 PORT: 8100,
                 PROTOCOL: 'http',
                 TRANSFER_FILES: {
                     BULK: {
                         DIR: '/var/config/rest/bulk',
                         URI: '/mgmt/shared/file-transfer/bulk/'
-                    },
-                    MADM: {
-                        DIR: '/var/config/rest/madm',
-                        URI: '/mgmt/shared/file-transfer/madm/'
                     }
                 },
                 USER: 'admin'
@@ -186,10 +170,13 @@ describe('Constants', () => {
                 IHEALTH_POLLER: 'ihealthInfo'
             },
             HTTP_REQUEST: {
+                ALLOWED_PROTOCOLS: ['http', 'https'],
                 DEFAULT_PORT: 80,
                 DEFAULT_PROTOCOL: 'http'
             },
             IHEALTH: {
+                DEMO_CLEANUP_TIMEOUT: 5 * 60 * 1000, // 5 min.
+                MAX_HISTORY_LEN: 20,
                 POLLER_CONF: {
                     QKVIEW_COLLECT: {
                         DELAY: 2 * 60 * 1000, // 2 min.
@@ -208,10 +195,12 @@ describe('Constants', () => {
                         MAX_PAST_DUE: 2 * 60 * 60 * 1000 // 2 hours
                     }
                 },
+                SECRETS_TIMEOUT: 60 * 1000, // 1 min.
                 SERVICE_API: {
-                    LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
-                    UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews'
+                    LOGIN: 'https://identity.account.f5.com/oauth2/ausp95ykc80HOU7SQ357/v1/token',
+                    UPLOAD: 'https://ihealth2-api.f5.com/qkview-analyzer/api/qkviews'
                 },
+                SLEEP_INTERVAL: 120 * 1000, // max sleep interval per iteration for `waiting` state
                 STORAGE_KEY: 'ihealth'
             },
             LOCAL_HOST: 'localhost',
@@ -234,6 +223,18 @@ describe('Constants', () => {
             },
             STATS_KEY_SEP: '::',
             STRICT_TLS_REQUIRED: true,
+            SYSTEM_POLLER: {
+                CHUNK_SIZE: 30,
+                DEMO_CLEANUP_TIMEOUT: 300000,
+                MAX_HISTORY_LEN: 40,
+                SECRETS_TIMEOUT: 60000,
+                SLEEP_INTERVAL: 120000,
+                WORKERS: 5
+            },
+            TASK: {
+                HIGH_PRIORITY: 1,
+                LOW_PRIORITY: 10
+            },
             TRACER: {
                 DIR: '/var/tmp/telemetry',
                 ENCODING: 'utf8',
@@ -252,6 +253,20 @@ describe('Constants', () => {
                 6: 'saturday',
                 7: 'sunday'
             }
-        });
+        };
+    }
+
+    before(() => {
+        moduleCache.restore();
+    });
+
+    /**
+     * ATTENTION:
+     *
+     * If this test failed it worth to check other tests and source code
+     * that uses that constant(s)
+     */
+    it('constants verification', () => {
+        assert.deepStrictEqual(constants, getExpected());
     });
 });

@@ -25,7 +25,9 @@ const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
+const srcAssert = sourceCode('src/lib/utils/assert');
 const configWorker = sourceCode('src/lib/config');
+const constants = sourceCode('src/lib/constants');
 
 // eslint-disable-next-line no-multi-assign
 const _module = module.exports = {
@@ -66,6 +68,23 @@ const _module = module.exports = {
         // TODO: remove later when logger mock will be updated
         fileLogger.debug('Validating declaration', decl);
         return configWorker.processDeclaration(decl, options)
+            .then((ret) => {
+                const components = configWorker.currentConfig.components;
+                assert.isDefined(components);
+
+                components.forEach((comp) => {
+                    if (comp.class === constants.CONFIG_CLASSES.IHEALTH_POLLER_CLASS_NAME) {
+                        srcAssert.config.ihealthPoller(comp, 'iHealth Poller Component');
+                    }
+                    if (comp.class === constants.CONFIG_CLASSES.SYSTEM_POLLER_CLASS_NAME) {
+                        srcAssert.config.systemPoller(comp, 'System Poller Component');
+                    }
+                    if (comp.class === constants.CONFIG_CLASSES.PULL_CONSUMER_SYSTEM_POLLER_GROUP_CLASS_NAME) {
+                        srcAssert.config.pullConsumerPollerGroup(comp, 'Pull Consumer System Poller Group Component');
+                    }
+                });
+                return ret;
+            })
             .catch((err) => {
                 fileLogger.debug('Error caught on attempt to validate declaration', err);
                 return Promise.reject(err);

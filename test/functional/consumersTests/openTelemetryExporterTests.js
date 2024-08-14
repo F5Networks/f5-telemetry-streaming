@@ -39,7 +39,7 @@ const assert = chai.assert;
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const OTEL_EXPORTERS = [
-    'grpc',
+    // 'grpc', // disable - HTTP2 + grpc is broken on node 8.11.1 again
     'json',
     'protobuf'
 ];
@@ -75,7 +75,7 @@ service:
       exporters: [prometheus]
   telemetry:
     logs:
-      level: "verbose"
+      level: "debug"
 `;
 
 const DOCKER_CONTAINERS = {
@@ -159,7 +159,7 @@ function setup() {
                         // OpenTelemetry Exporter consumer is supported on bigip 14.1 and above
                         SHOULD_SKIP_DUE_VERSION[bigip.hostname] = srcMiscUtils.compareVersionStrings(version, '<', '14.1');
 
-                        logger.info('DUT\' version', {
+                        logger.info('DUT version', {
                             hostname: bigip.hostname,
                             shouldSkipTests: SHOULD_SKIP_DUE_VERSION[bigip.hostname],
                             version
@@ -217,7 +217,7 @@ function test() {
                     : null));
 
                 testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => (isValidDut(bigip)
-                    ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${OTEL_COLLECTOR_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}",exporter="${exporter}"`
+                    ? `functionalTestMetric="147",EOCTimestamp="1231232",hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${OTEL_COLLECTOR_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}",exporter="${exporter}"\n`
                     : null));
             });
 

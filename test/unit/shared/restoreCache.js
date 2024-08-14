@@ -43,12 +43,11 @@
 */
 
 // preload popular libs here for optimization
-/* eslint-disable no-unused-vars */
-const pathUtil = require('path');
-const sinon = require('sinon');
 
-const assert = require('./assert');
-const fileLogger = require('../../winstonLogger');
+const pathUtil = require('path');
+require('sinon');
+require('./assert');
+require('../../winstonLogger');
 
 const BASE_DIR = process.cwd();
 const SRC_DIR = pathUtil.join(BASE_DIR, 'src');

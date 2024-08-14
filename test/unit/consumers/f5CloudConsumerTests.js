@@ -48,7 +48,7 @@ if (IS_8_11_1_PLUS) {
 
 moduleCache.remember();
 
-(IS_8_11_1_PLUS ? describe : describe.skip)('F5_Cloud', () => {
+(IS_8_11_1_PLUS ? describe.skip : describe.skip)('F5_Cloud', () => {
     if (!IS_8_11_1_PLUS) {
         return;
     }

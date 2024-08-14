@@ -16,20 +16,29 @@
 
 'use strict';
 
-const assert = require('assert');
 const getKey = require('lodash/get');
+const isEqual = require('lodash/isEqual');
 const machina = require('machina');
 const pathUtil = require('path');
 const uuid = require('uuid').v4;
 
 const constants = require('../constants');
+const dacli = require('../utils/dacli');
 const deviceUtil = require('../utils/device');
 const logger = require('../logger').getChild('runtimeConfig').getChild('Task');
 const miscUtil = require('../utils/misc');
 const SafeEventEmitter = require('../utils/eventEmitter');
 const updater = require('./updater');
 
-/** @module runtimeConfig/task */
+/**
+ * @private
+ *
+ * @module runtimeConfig/task
+ *
+ * @typedef {import('./updater').AppContext} AppContext
+ * @typedef {import('../logger').Logger} Logger
+ * @typedef {import('./updater').ScriptConfig} ScriptConfig
+ */
 
 const DACLI_SCRIPT_NAME = 'telemetry_delete_me__async_restnoded_updater';
 const UPDATER_SCRIPT = pathUtil.join(__dirname, 'updater.js');
@@ -53,31 +62,17 @@ const UPDATER_SCRIPT = pathUtil.join(__dirname, 'updater.js');
 /**
  * @private
  *
- * @returns {Promise<boolean>} resolved with true if `bash` enabled or false otherwise
- */
-function isShellEnabled() {
-    return Promise.resolve()
-        .then(() => deviceUtil.makeDeviceRequest(
-            constants.LOCAL_HOST,
-            '/mgmt/tm/sys/db/systemauth.disablebash'
-        ))
-        .then((retval) => retval.value, () => false);
-}
-
-/**
- * @private
- *
  * @param {string} cmd - command to execute
  *
- * @returns {Promise<boolean>} true if command succeed or false otherwise
+ * @returns {boolean} true if command succeed or false otherwise
  */
-function runRemoteCmd(cmd) {
-    return Promise.resolve()
-        .then(() => (
-            new deviceUtil.DeviceAsyncCLI({
-                scriptName: DACLI_SCRIPT_NAME
-            })).execute(cmd))
-        .then(() => true, () => false);
+async function runRemoteCmd(cmd) {
+    try {
+        await dacli(cmd, { scriptName: DACLI_SCRIPT_NAME });
+    } catch (err) {
+        return false;
+    }
+    return true;
 }
 
 const taskFsm = new machina.BehavioralFsm({
@@ -101,11 +96,7 @@ const taskFsm = new machina.BehavioralFsm({
                 if (scriptConfig === null) {
                     task.logger.error('Unable to read configuration from the startup script.');
                 } else {
-                    try {
-                        assert.deepStrictEqual(config, scriptConfig);
-                    } catch (error) {
-                        configApplied = false;
-                    }
+                    configApplied = isEqual(config, scriptConfig);
                 }
                 if (!configApplied) {
                     task.logger.error('Configuration was not applied to the script!');
@@ -126,11 +117,7 @@ const taskFsm = new machina.BehavioralFsm({
                     delete scriptConfig.id;
                     delete config.id;
 
-                    try {
-                        assert.deepStrictEqual(config, scriptConfig);
-                    } catch (error) {
-                        hasChanges = true;
-                    }
+                    hasChanges = !isEqual(config, scriptConfig);
 
                     if (!hasChanges) {
                         task.logger.debug('No changes found between running configuration and the new one.');
@@ -165,38 +152,41 @@ const taskFsm = new machina.BehavioralFsm({
             }
         },
         'restart-service': {
-            _onEnter(task) {
+            async _onEnter(task) {
                 task.logger.warning('Restarting service to apply new changes for the runtime configuraiton!');
-                runRemoteCmd('bigstart restart restnoded')
-                    .then((success) => {
-                        if (success) {
-                            task.logger.warning('Service will be restarted in a moment to apply changes in the configuration!');
-                            task._restartRequested = true;
-                        } else {
-                            task.logger.error('Unable to restart service via bigstart. Calling process.exit(0) instead to restart it');
-                        }
-                        this._doTransition(task, success ? 'done' : 'restart-service-force');
-                    });
+                const success = await runRemoteCmd('bigstart restart restnoded');
+
+                if (success) {
+                    task.logger.warning('Service will be restarted in a moment to apply changes in the configuration!');
+                    task._restartRequested = true;
+                } else {
+                    task.logger.error('Unable to restart service via bigstart. Calling process.exit(0) instead to restart it');
+                }
+                this._doTransition(task, success ? 'done' : 'restart-service-force');
             }
         },
         'restart-service-delay': {
-            _onEnter(task) {
+            async _onEnter(task) {
                 task.logger.warning('New configuration was successfully applied to the startup script! Scheduling service restart in 1 min.');
-                miscUtil.sleep(60 * 1000)
-                    .then(() => this._doTransition(task, 'restart-service'));
+                await miscUtil.sleep(60 * 1000);
+                this._doTransition(task, 'restart-service');
             }
         },
         'shell-check': {
-            _onEnter(task) {
-                isShellEnabled()
-                    .then((enabled) => {
-                        if (enabled) {
-                            task.logger.debug('Shell available, proceeding with task execution.');
-                        } else {
-                            task.logger.debug('Shell not available, unable to proceed with task execution.');
-                        }
-                        this._doTransition(task, enabled ? 'updater-run' : 'done');
-                    });
+            async _onEnter(task) {
+                let enabled = false;
+                try {
+                    enabled = await deviceUtil.isShellEnabled(constants.LOCAL_HOST);
+                } catch (err) {
+                    task.logger.exception('Error on attempt to check shell status:', err);
+                }
+
+                if (enabled) {
+                    task.logger.debug('Shell available, proceeding with task execution.');
+                } else {
+                    task.logger.debug('Shell not available, unable to proceed with task execution.');
+                }
+                this._doTransition(task, enabled ? 'updater-run' : 'done');
             }
         },
         stopped: {
@@ -211,21 +201,20 @@ const taskFsm = new machina.BehavioralFsm({
             }
         },
         'updater-run': {
-            _onEnter(task) {
+            async _onEnter(task) {
                 task.logger.debug('Trying to execute "updater" script');
-                runRemoteCmd(`${process.argv[0]} ${UPDATER_SCRIPT}`)
-                    .then((success) => {
-                        let logs = updater.readLogsFile(task.appCtx);
-                        if (logs === null) {
-                            logs = 'no logs available!';
-                        }
-                        task.logger.debug(`Device Async CLI logs:\n${logs}`);
+                const success = await runRemoteCmd(`${process.argv[0]} ${UPDATER_SCRIPT}`);
 
-                        if (!success) {
-                            task.logger.error('Attempt to update the runtime configuration failed! See logs for more details.');
-                        }
-                        this._doTransition(task, 'config-post-check');
-                    });
+                let logs = updater.readLogsFile(task.appCtx);
+                if (logs === null) {
+                    logs = 'no logs available!';
+                }
+                task.logger.debug(`Device Async CLI logs:\n${logs}`);
+
+                if (!success) {
+                    task.logger.error('Attempt to update the runtime configuration failed! See logs for more details.');
+                }
+                this._doTransition(task, 'config-post-check');
             }
         }
     },
@@ -379,17 +368,16 @@ taskFsm.on('transition', (data) => data.client.ee.emitAsync('transition', data))
  * - transition(data) - state transition
  *
  * @property {SafeEventEmitter} ee - event emitter
- * @property {logger.Logger} logger - logger
- * @property {boolean} restartsEnabled - true if restarts on fatal error at `running` state are enabled
+ * @property {Logger} logger - logger
  */
 class Task {
     /**
-     * @param {updater.ScriptConfig} config
-     * @param {updater.AppContext} appCtx
-     * @param {logger.Logger} [logger] - logger instance
+     * @param {ScriptConfig} config
+     * @param {AppContext} appCtx
+     * @param {Logger} [logger] - logger instance
      */
     constructor(config, appCtx, _logger) {
-        // create read-only properties
+        /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
             ee: {
                 value: new SafeEventEmitter()
@@ -402,6 +390,7 @@ class Task {
         this.logger = _logger || logger;
         this.runtimeConfig = config;
 
+        this.ee.logger = this.logger.getChild('ee');
         this.ee.on('transition', (data) => this.logger.debug(`transition from "${data.fromState}" to "${data.toState}" (action=${data.action})`));
     }
 

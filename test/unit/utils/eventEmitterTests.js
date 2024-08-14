@@ -19,14 +19,18 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
+const sinon = require('sinon');
+
 const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
+const stubs = require('../shared/stubs');
 
 const SafeEventEmitter = sourceCode('src/lib/utils/eventEmitter');
 
 moduleCache.remember();
 
 describe('Safe Event Emitter', () => {
+    let coreStub;
     const eventName = 'eventName';
     let emitter;
 
@@ -35,33 +39,108 @@ describe('Safe Event Emitter', () => {
     });
 
     beforeEach(() => {
+        coreStub = stubs.default.coreStub({ logger: true });
         emitter = new SafeEventEmitter();
     });
 
     afterEach(() => {
         emitter.removeAllListeners(eventName);
+        sinon.restore();
     });
 
-    describe('safeEmit', () => {
-        it('should catch listener error', () => {
+    describe('.emitAsync()', () => {
+        it('should reject with listener error (sync error)', async () => {
+            const error = new Error('test error');
+            emitter.on(eventName, () => { throw error; });
+            await assert.isRejected(
+                emitter.emitAsync(eventName),
+                /test error/,
+                'should reject with error'
+            );
+        });
+
+        it('should reject with listener error (async error)', async () => {
+            const error = new Error('test error');
+            emitter.on(eventName, () => new Promise((resolve, reject) => {
+                setTimeout(() => reject(error), 10);
+            }));
+            await assert.isRejected(
+                emitter.emitAsync(eventName),
+                /test error/,
+                'should reject with error'
+            );
+        });
+    });
+
+    describe('.safeEmit()', () => {
+        it('should catch listener error', async () => {
             const error = new Error('test error');
             emitter.on(eventName, () => { throw error; });
             const ret = emitter.safeEmit(eventName);
             assert.isTrue(error === ret, 'should return error');
         });
-    });
 
-    describe('safeEmitAsync', () => {
-        it('should catch listener error in sync part', () => {
+        it('should log error', async () => {
+            emitter.logger = coreStub.logger.logger.getChild('emitter');
+
+            coreStub.logger.removeAllMessages();
+            assert.isEmpty(coreStub.logger.messages.all);
+
             const error = new Error('test error');
             emitter.on(eventName, () => { throw error; });
-            return assert.becomes(emitter.safeEmitAsync(eventName), error);
+            const ret = emitter.safeEmit(eventName);
+            assert.isTrue(error === ret, 'should return error');
+
+            assert.includeMatch(
+                coreStub.logger.messages.error,
+                /test error/
+            );
+        });
+    });
+
+    describe('.safeEmitAsync()', () => {
+        it('should catch listener error in sync part', async () => {
+            const error = new Error('test error');
+            emitter.on(eventName, () => { throw error; });
+            await assert.becomes(emitter.safeEmitAsync(eventName), error);
         });
 
-        it('should catch listener error in async part', () => {
+        it('should log error (sync)', async () => {
+            emitter.logger = coreStub.logger.logger.getChild('emitter');
+
+            coreStub.logger.removeAllMessages();
+            assert.isEmpty(coreStub.logger.messages.all);
+
+            const error = new Error('test error');
+            emitter.on(eventName, () => { throw error; });
+            await assert.becomes(emitter.safeEmitAsync(eventName), error);
+
+            assert.includeMatch(
+                coreStub.logger.messages.error,
+                /test error/
+            );
+        });
+
+        it('should catch listener error in async part', async () => {
             const error = new Error('test error');
             emitter.on(eventName, () => new Promise((resolve, reject) => { reject(error); }));
-            return assert.becomes(emitter.safeEmitAsync(eventName), error);
+            await assert.becomes(emitter.safeEmitAsync(eventName), error);
+        });
+
+        it('should log error (async)', async () => {
+            emitter.logger = coreStub.logger.logger.getChild('emitter');
+
+            coreStub.logger.removeAllMessages();
+            assert.isEmpty(coreStub.logger.messages.all);
+
+            const error = new Error('test error');
+            emitter.on(eventName, () => new Promise((resolve, reject) => { reject(error); }));
+            await assert.becomes(emitter.safeEmitAsync(eventName), error);
+
+            assert.includeMatch(
+                coreStub.logger.messages.error,
+                /test error/
+            );
         });
     });
 });

@@ -60,14 +60,7 @@ module.exports = {
     },
     APP_NAME: 'Telemetry Streaming',
     APP_THRESHOLDS: {
-        MONITOR_DISABLED: 'MONITOR_DISABLED', // TODO: delete
         MEMORY: {
-            /** TODO: DELETE */
-            DEFAULT_MB: 1433,
-            OK: 'MEMORY_USAGE_OK',
-            NOT_OK: 'MEMORY_USAGE_HIGH',
-            /** TODO: DELETE END */
-
             ARGRESSIVE_CHECK_INTERVALS: [
                 { usage: 50, interval: 0.5 },
                 { usage: 60, interval: 0.4 },
@@ -130,18 +123,20 @@ module.exports = {
     CONFIG_WORKER: {
         STORAGE_KEY: 'config'
     },
+    DATA_PIPELINE: {
+        PULL_EVENT: 0b01,
+        PUSH_EVENT: 0b10,
+        PUSH_PULL_EVENT: 0b11
+    },
     DAY_NAME_TO_WEEKDAY,
     DEVICE_REST_API: {
+        CHUNK_SIZE: 512 * 1024,
         PORT: 8100,
         PROTOCOL: 'http',
         TRANSFER_FILES: {
             BULK: {
                 DIR: '/var/config/rest/bulk',
                 URI: '/mgmt/shared/file-transfer/bulk/'
-            },
-            MADM: {
-                DIR: '/var/config/rest/madm',
-                URI: '/mgmt/shared/file-transfer/madm/'
             }
         },
         USER: 'admin'
@@ -182,10 +177,13 @@ module.exports = {
         IHEALTH_POLLER: 'ihealthInfo'
     },
     HTTP_REQUEST: {
+        ALLOWED_PROTOCOLS: ['http', 'https'],
         DEFAULT_PORT: 80,
         DEFAULT_PROTOCOL: 'http'
     },
     IHEALTH: {
+        DEMO_CLEANUP_TIMEOUT: 5 * 60 * 1000, // 5 min.
+        MAX_HISTORY_LEN: 20,
         POLLER_CONF: {
             QKVIEW_COLLECT: {
                 DELAY: 2 * 60 * 1000, // 2 min.
@@ -204,10 +202,12 @@ module.exports = {
                 MAX_PAST_DUE: 2 * 60 * 60 * 1000 // 2 hours
             }
         },
+        SECRETS_TIMEOUT: 60 * 1000, // 1 min.
         SERVICE_API: {
-            LOGIN: 'https://api.f5.com/auth/pub/sso/login/ihealth-api',
-            UPLOAD: 'https://ihealth-api.f5.com/qkview-analyzer/api/qkviews'
+            LOGIN: 'https://identity.account.f5.com/oauth2/ausp95ykc80HOU7SQ357/v1/token',
+            UPLOAD: 'https://ihealth2-api.f5.com/qkview-analyzer/api/qkviews'
         },
+        SLEEP_INTERVAL: 120 * 1000, // max sleep interval per iteration for `waiting` state
         STORAGE_KEY: 'ihealth'
     },
     LOCAL_HOST: 'localhost',
@@ -226,6 +226,18 @@ module.exports = {
     },
     STATS_KEY_SEP: '::',
     STRICT_TLS_REQUIRED: true,
+    SYSTEM_POLLER: {
+        CHUNK_SIZE: 30,
+        DEMO_CLEANUP_TIMEOUT: 5 * 60 * 1000, // 5 min.
+        MAX_HISTORY_LEN: 40,
+        SECRETS_TIMEOUT: 60 * 1000, // 1 min.
+        SLEEP_INTERVAL: 120 * 1000, // max sleep interval per iteration for `waiting` state
+        WORKERS: 5
+    },
+    TASK: {
+        LOW_PRIORITY: 10,
+        HIGH_PRIORITY: 1
+    },
     TRACER: {
         DIR: '/var/tmp/telemetry',
         ENCODING: 'utf8',

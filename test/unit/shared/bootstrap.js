@@ -16,12 +16,7 @@
 
 'use strict';
 
-const values = require('object.values');
 require('./restoreCache');
-
-if (!Object.values) {
-    values.shim();
-}
 
 /* eslint-disable no-console */
 
@@ -30,10 +25,4 @@ process.on('unhandledRejection', (reason, promise) => {
     throw reason;
 });
 
-// because we're restoring cache
-// it instantiates monitor that's supposed to be singleton
-// so set these to work around tests
-process.setMaxListeners(15);
-// tests needing the monitor should manually enable these
-// constants.APP_THRESHOLDS.MONITOR_DISABLED
-process.env.MONITOR_DISABLED = true;
+console.log((!!process.env.SMOKE_TESTING && 'SMOKE TESTING ENABLED') || 'ALL UNIT TESTS');

@@ -27,15 +27,19 @@ const schemaValidationUtil = require('../shared/schemaValidation');
 moduleCache.remember();
 
 describe('Declarations -> Controls', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -52,7 +56,7 @@ describe('Declarations -> Controls', () => {
                     notAllowed: ['my-log-level', 'warning']
                 },
                 defaultValueTests: {
-                    defaultValue: 'debug'
+                    defaultValue: 'info'
                 }
             },
             {
@@ -173,8 +177,11 @@ describe('Declarations -> Controls', () => {
                     defaultValue: undefined
                 },
                 numberRangeTests: {
-                    minimum: 1,
-                    maximum: 1400
+                    minimum: 1
+                },
+                valueTests: {
+                    invalid: 1401,
+                    valid: 1400
                 }
             },
             {
@@ -185,6 +192,37 @@ describe('Declarations -> Controls', () => {
                 numberRangeTests: {
                     minimum: 1,
                     maximum: 100
+                }
+            }
+        ]
+    );
+
+    schemaValidationUtil.generateSchemaBasicTests(
+        (decl) => validateMinimal(decl),
+        {
+            class: 'Controls',
+            runtime: {
+                maxHeapSize: 1500
+            },
+            memoryMonitor: {
+                memoryThresholdPercent: 10
+            }
+        },
+        [
+            {
+                property: 'memoryMonitor.provisionedMemory',
+                ignoreOther: true,
+                valueTests: {
+                    invalid: 1501,
+                    valid: 1401
+                }
+            },
+            {
+                property: 'memoryMonitor.provisionedMemory',
+                ignoreOther: true,
+                valueTests: {
+                    invalid: 1601,
+                    valid: 1500
                 }
             }
         ]
@@ -229,11 +267,18 @@ describe('Declarations -> Controls', () => {
             },
             {
                 property: 'runtime.maxHeapSize',
-                defaultValueTests: {
-                    defaultValue: 1400
-                },
                 numberRangeTests: {
                     minimum: 1400
+                }
+            },
+            {
+                property: 'runtime.httpTimeout',
+                defaultValueTests: {
+                    defaultValue: 60
+                },
+                numberRangeTests: {
+                    minimum: 60,
+                    maximum: 600
                 }
             }
         ]

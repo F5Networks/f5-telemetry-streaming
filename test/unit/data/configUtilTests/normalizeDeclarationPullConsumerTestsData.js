@@ -67,7 +67,9 @@ module.exports = {
                         'Pull_Poller_1',
                         'Pull_Poller_2',
                         {
-                            interval: 90
+                            interval: 90,
+                            workers: 9,
+                            chunkSize: 9
                         },
                         'Regular_Poller_1'
                     ]
@@ -136,7 +138,9 @@ module.exports = {
                             'Pull_Poller_1',
                             'Pull_Poller_2',
                             {
-                                interval: 90
+                                interval: 90,
+                                workers: 9,
+                                chunkSize: 9
                             },
                             'Regular_Poller_1'
                         ]
@@ -204,6 +208,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'f5telemetry_default::My_Pull_Consumer',
+                        pullConsumerName: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
                             'f5telemetry_default::My_System::Pull_Poller_1',
                             'f5telemetry_default::My_System_2::Pull_Poller_2',
@@ -239,6 +244,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'f5telemetry_default::My_Disabled_Pull_Consumer',
+                        pullConsumerName: 'f5telemetry_default::My_Disabled_Pull_Consumer',
                         systemPollers: [
                             'f5telemetry_default::My_System::Pull_Poller_1',
                             'f5telemetry_default::My_System_2::Pull_Poller_2',
@@ -274,6 +280,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'My_Namespace::My_Pull_Consumer',
+                        pullConsumerName: 'My_Namespace::My_Pull_Consumer',
                         systemPollers: [
                             'My_Namespace::My_System::Pull_Poller_1',
                             'My_Namespace::My_System_2::Pull_Poller_2',
@@ -309,6 +316,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'My_Namespace::My_Disabled_Pull_Consumer',
+                        pullConsumerName: 'My_Namespace::My_Disabled_Pull_Consumer',
                         systemPollers: [
                             'My_Namespace::My_System::Pull_Poller_1',
                             'My_Namespace::My_System_2::Pull_Poller_2',
@@ -321,6 +329,8 @@ module.exports = {
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'f5telemetry_default',
@@ -349,18 +359,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_2',
                         namespace: 'f5telemetry_default',
@@ -389,18 +396,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System_2::Pull_Poller_2'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'f5telemetry_default',
@@ -429,18 +433,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System_3::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_2',
                         namespace: 'f5telemetry_default',
@@ -469,17 +470,14 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System_3::Pull_Poller_2'
                     },
                     {
                         interval: 90,
+                        workers: 9,
+                        chunkSize: 9,
                         enable: true,
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
@@ -509,18 +507,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System_3::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Regular_Poller_1',
                         namespace: 'f5telemetry_default',
@@ -549,18 +544,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::My_System_3::Regular_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'My_Namespace',
@@ -589,18 +581,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_2',
                         namespace: 'My_Namespace',
@@ -629,18 +618,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System_2::Pull_Poller_2'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'My_Namespace',
@@ -669,18 +655,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System_3::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_2',
                         namespace: 'My_Namespace',
@@ -709,17 +692,14 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System_3::Pull_Poller_2'
                     },
                     {
                         interval: 90,
+                        workers: 9,
+                        chunkSize: 9,
                         enable: true,
                         name: 'SystemPoller_1',
                         class: 'Telemetry_System_Poller',
@@ -749,18 +729,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System_3::SystemPoller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Regular_Poller_1',
                         namespace: 'My_Namespace',
@@ -789,18 +766,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::My_System_3::Regular_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_3',
                         namespace: 'f5telemetry_default',
@@ -829,18 +803,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::Pull_Poller_3::Pull_Poller_3'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_4',
                         namespace: 'f5telemetry_default',
@@ -869,18 +840,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::Pull_Poller_4::Pull_Poller_4'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_3',
                         namespace: 'My_Namespace',
@@ -909,18 +877,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::Pull_Poller_3::Pull_Poller_3'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_4',
                         namespace: 'My_Namespace',
@@ -949,12 +914,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::Pull_Poller_4::Pull_Poller_4'
                     }
@@ -1023,6 +983,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'f5telemetry_default::My_Pull_Consumer',
+                        pullConsumerName: 'f5telemetry_default::My_Pull_Consumer',
                         systemPollers: [
                             'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
                         ],
@@ -1054,6 +1015,7 @@ module.exports = {
                             enable: false
                         },
                         pullConsumer: 'My_Namespace::My_Pull_Consumer',
+                        pullConsumerName: 'My_Namespace::My_Pull_Consumer',
                         systemPollers: [
                             'My_Namespace::Pull_Poller_1::Pull_Poller_1'
                         ],
@@ -1062,6 +1024,8 @@ module.exports = {
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'f5telemetry_default',
@@ -1090,18 +1054,15 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'f5telemetry_default::Pull_Poller_1::Pull_Poller_1'
                     },
                     {
                         class: 'Telemetry_System_Poller',
                         interval: 0,
+                        workers: 5,
+                        chunkSize: 30,
                         enable: true,
                         name: 'Pull_Poller_1',
                         namespace: 'My_Namespace',
@@ -1130,12 +1091,7 @@ module.exports = {
                                     enable: true
                                 }
                             ],
-                            noTMStats: true,
-                            tags: undefined
-                        },
-                        credentials: {
-                            username: undefined,
-                            passphrase: undefined
+                            noTMStats: true
                         },
                         id: 'My_Namespace::Pull_Poller_1::Pull_Poller_1'
                     }

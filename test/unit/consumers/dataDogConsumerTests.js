@@ -19,7 +19,6 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const nock = require('nock');
 const sinon = require('sinon');
 const zlib = require('zlib');
 
@@ -30,7 +29,7 @@ const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
 const dataDogIndex = sourceCode('src/lib/consumers/DataDog/index');
-const httpUtil = sourceCode('src/lib/consumers/shared/httpUtil');
+const httpUtil = sourceCode('src/lib/utils/http');
 
 moduleCache.remember();
 
@@ -219,7 +218,7 @@ describe('DataDog', () => {
     });
 
     afterEach(() => {
-        nock.cleanAll();
+        testUtil.nockCleanup();
         sinon.restore();
     });
 

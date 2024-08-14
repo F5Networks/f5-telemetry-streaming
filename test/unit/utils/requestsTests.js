@@ -19,12 +19,14 @@
 /* eslint-disable import/order */
 const moduleCache = require('../shared/restoreCache')();
 
-const sinon = require('sinon');
+const http = require('http');
 const nock = require('nock');
 const request = require('request');
+const sinon = require('sinon');
 
 const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
+const stubs = require('../shared/stubs');
 const testUtil = require('../shared/util');
 
 const requestsUtil = sourceCode('src/lib/utils/requests');
@@ -32,18 +34,32 @@ const requestsUtil = sourceCode('src/lib/utils/requests');
 moduleCache.remember();
 
 describe('Requests Util', () => {
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
     describe('.makeRequest()', () => {
-        afterEach(() => {
-            testUtil.checkNockActiveMocks(nock);
-            sinon.restore();
-            nock.cleanAll();
+        beforeEach(() => {
+            coreStub = stubs.default.coreStub({
+                logger: true,
+                utilMisc: true
+            }, {
+                logger: {
+                    setToVerbose: true,
+                    ignoreLevelChange: false
+                }
+            });
         });
 
-        it('should make request with non-defaults', () => {
+        afterEach(() => {
+            testUtil.checkNockActiveMocks();
+            testUtil.nockCleanup();
+            sinon.restore();
+        });
+
+        it('should make request with non-defaults', async () => {
             nock('https://example.com:443', {
                 reqheaders: {
                     'User-Agent': /f5-telemetry/,
@@ -51,6 +67,7 @@ describe('Requests Util', () => {
                 }
             })
                 .post('/')
+                .times(2)
                 .reply(200, { key: 'value' });
 
             const originGet = request.get;
@@ -60,6 +77,7 @@ describe('Requests Util', () => {
             });
 
             const opts = {
+                agent: new http.Agent(),
                 port: 443,
                 protocol: 'https',
                 method: 'POST',
@@ -68,10 +86,37 @@ describe('Requests Util', () => {
                 },
                 allowSelfSignedCert: true
             };
-            return assert.becomes(
+            await assert.becomes(
+                requestsUtil.makeRequest('example.com', testUtil.deepCopy(opts)),
+                { key: 'value' }
+            );
+
+            const messages = coreStub.logger.messages.verbose
+                .filter((msg) => msg.includes('reqID'))
+                .map((msg) => JSON.parse(msg.slice(msg.indexOf('{'))));
+
+            assert.lengthOf(messages, 2);
+            assert.deepStrictEqual(
+                messages[0].reqID,
+                messages[1].reqID
+            );
+            assert.isTrue(messages[0].options.agent);
+            assert.isAbove(messages[0].timestamp, 0);
+            assert.isAbove(messages[1].duration, 0);
+
+            coreStub.logger.logger.setLogLevel('info');
+            coreStub.logger.removeAllMessages();
+
+            assert.isEmpty(coreStub.logger.messages.all);
+
+            await assert.becomes(
                 requestsUtil.makeRequest('example.com', opts),
                 { key: 'value' }
             );
+
+            assert.isEmpty(coreStub.logger.messages.verbose
+                .filter((msg) => msg.includes('reqID'))
+                .map((msg) => JSON.parse(msg.slice(msg.indexOf('{')))));
         });
 
         it('should make request with defaults (response code 200)', () => {
@@ -134,7 +179,7 @@ describe('Requests Util', () => {
 
             return assert.isRejected(
                 requestsUtil.makeRequest('example.com'),
-                /HTTP error:.*error message.*/
+                /HTTP Error: error message/
             );
         });
 

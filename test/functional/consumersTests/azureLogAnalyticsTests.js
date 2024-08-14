@@ -91,7 +91,10 @@ function test() {
             });
 
             testUtils.shouldConfigureTS(harness.bigip, () => miscUtils.deepCopy(consumerDeclaration));
-            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${AZURE_LA_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"`);
+
+            it('sleep for 60sec while Azure LA consumer is not ready', () => promiseUtils.sleep(60000));
+
+            testUtils.shouldSendListenerEvents(harness.bigip, (bigip, proto, port, idx) => `hostname="${bigip.hostname}",testDataTimestamp="${testDataTimestamp}",test="true",testType="${AZURE_LA_CONSUMER_NAME}",protocol="${proto}",msgID="${idx}"\n`);
         });
 
         describe('Event Listener data', () => {

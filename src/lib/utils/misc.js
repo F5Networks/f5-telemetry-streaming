@@ -17,20 +17,19 @@
 'use strict';
 
 const assignDefaults = require('lodash/defaultsDeep');
+const childProcess = require('child_process');
 const cloneDeep = require('lodash/cloneDeep');
 const clone = require('lodash/clone');
-const hasKey = require('lodash/has');
-const mergeWith = require('lodash/mergeWith');
-const trim = require('lodash/trim');
-const objectGet = require('lodash/get');
-const childProcess = require('child_process');
 const fs = require('fs');
-const net = require('net');
-const v8 = require('v8');
-
-// deep require support is deprecated for versions 7+ (requires node8+)
-const uuidv4 = require('uuid/v4');
+const hasKey = require('lodash/has');
 const jsonDuplicateKeyHandle = require('json-duplicate-key-handle');
+const mergeWith = require('lodash/mergeWith');
+const net = require('net');
+const objectGet = require('lodash/get');
+const trim = require('lodash/trim');
+const nodeUtil = require('util');
+const { v4: uuidv4 } = require('uuid');
+const v8 = require('v8');
 
 const constants = require('../constants');
 
@@ -41,58 +40,6 @@ const constants = require('../constants');
  */
 
 const VERSION_COMPARATORS = ['==', '===', '<', '<=', '>', '>=', '!=', '!=='];
-
-/**
- * Convert async callback function to promise-based funcs
- *
- * Note: when error passed to callback then all other args will be attached
- * to it and can be access via 'error.callbackArgs' property
- *
- * @sync
- * @public
- *
- * @property {Object} module - origin module
- * @property {String} funcName - function name
- *
- * @returns {Function<Promise>} proxy function
- */
-function proxyForNodeCallbackFuncs(module, funcName) {
-    return function () {
-        return new Promise((resolve, reject) => {
-            const args = Array.from(arguments);
-            args.push(function () {
-                const cbArgs = Array.from(arguments);
-                // error usually is first arg
-                if (cbArgs[0]) {
-                    cbArgs[0].callbackArgs = cbArgs.slice(1);
-                    reject(cbArgs[0]);
-                } else {
-                    resolve(cbArgs.slice(1));
-                }
-            });
-            module[funcName].apply(module, args);
-        });
-    };
-}
-
-/**
- * Promisify FS module
- *
- * @sync
- * @public
- * @param {Object} fsModule - FS module
- *
- * @returns {Object} node FS module
- */
-function promisifyNodeFsModule(fsModule) {
-    const newFsModule = Object.create(fsModule);
-    Object.keys(fsModule).forEach((key) => {
-        if (typeof fsModule[`${key}Sync`] !== 'undefined') {
-            newFsModule[key] = proxyForNodeCallbackFuncs(fsModule, key);
-        }
-    });
-    return newFsModule;
-}
 
 /**
  * 'traverseJSON' block - START
@@ -557,6 +504,7 @@ class Chunks {
             throw new Error(`'maxChunkSize' should be > 0, got '${options.maxChunkSize}' (${typeof options.maxChunkSize})`);
         }
 
+        /** define static read-only props that should not be overriden */
         Object.defineProperties(this, {
             currentChunkSize: {
                 get() { return this._current ? this._current.size : 0; }
@@ -644,8 +592,6 @@ module.exports = {
     Chunks,
     createJSONObjectSecretsMaskFunc,
     createJSONStringSecretsMaskFunc,
-    proxyForNodeCallbackFuncs,
-    promisifyNodeFsModule,
     traverseJSON,
 
     /**
@@ -935,7 +881,8 @@ module.exports = {
         return Promise.all([connectPromise, timeoutPromise])
             .then(() => true)
             .catch((e) => {
-                throw new Error(`networkCheck: ${e}`);
+                e.message = `networkCheck: ${e.message || e}`;
+                throw e;
             });
     },
 
@@ -1091,13 +1038,18 @@ module.exports = {
      *
      * @param {function} cb - callback to register
      *
-     * @returns {void} once registered
+     * @returns {function} callback to call to deregister
      */
     onApplicationExit(cb) {
-        process.on('SIGINT', cb);
-        process.on('SIGTERM', cb);
-        process.on('SIGHUP', cb);
-        process.on('exit', cb);
+        const events = [
+            'SIGINT',
+            'SIGTERM',
+            'SIGHUP',
+            'exit'
+        ];
+        events.forEach((evt) => process.on(evt, cb));
+
+        return () => events.forEach((evt) => process.removeListener(evt, cb));
     },
 
     /**
@@ -1108,7 +1060,7 @@ module.exports = {
     childProcess: (function promisifyNodeChildProcessModule(cpModule) {
         const newCpModule = Object.create(cpModule);
         ['exec', 'execFile'].forEach((key) => {
-            newCpModule[key] = proxyForNodeCallbackFuncs(cpModule, key);
+            newCpModule[key] = nodeUtil.promisify(cpModule[key]);
         });
         return newCpModule;
     }(childProcess)),
@@ -1118,7 +1070,15 @@ module.exports = {
      *
      * @see fs
      */
-    fs: promisifyNodeFsModule(fs)
+    fs: (function promisifyNodeFsModule(fsModule) {
+        const newFsModule = Object.create(fsModule);
+        Object.keys(fsModule).forEach((key) => {
+            if (typeof fsModule[`${key}Sync`] !== 'undefined') {
+                newFsModule[key] = nodeUtil.promisify(fsModule[key]);
+            }
+        });
+        return newFsModule;
+    }(fs))
 };
 
 /**

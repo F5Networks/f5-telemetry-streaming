@@ -16,7 +16,7 @@
 
 'use strict';
 
-const httpUtil = require('../shared/httpUtil');
+const httpUtil = require('../../utils/http');
 const util = require('../../utils/misc');
 const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 

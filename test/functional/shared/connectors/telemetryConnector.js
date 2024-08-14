@@ -171,7 +171,9 @@ class TelemetryStreamingConnector {
         }
         poller = poller ? `/${poller}` : '';
         return this.icontrol.makeRequestWithAuth({
-            method: 'GET',
+            body: {},
+            json: true,
+            method: 'POST',
             retry,
             uri: this.buildURI(`systempoller/${system}${poller}`)
         });

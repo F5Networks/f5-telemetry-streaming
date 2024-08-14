@@ -25,7 +25,11 @@ const constants = require('../constants').EVENT_LISTENER;
 const hrtimestamp = require('../utils/datetime').hrtimestamp;
 const CircularArray = require('../utils/structures').CircularArray;
 
-/** @module eventListener/parser */
+/**
+ * @private
+ *
+ * @module eventListener/parser
+ */
 
 /**
  * TODO: perf tests
@@ -767,7 +771,10 @@ function splitLines(timeLimit, flush) {
     var parseTime;
     var state = this._state;
     var pLeft = state.pLeft;
+    var pNewLine = state.pNewLine;
+    var pQuote = state.pQuote;
     var pRight = state.pRight;
+    var pValidNewLine = state.pValidNewLine;
 
     // do -1 to start time just to show the data was processed (e.g delta will be 1)
     var startTs = hrtimestamp() - 1;
@@ -805,6 +812,10 @@ function splitLines(timeLimit, flush) {
         this._state.erase();
     } else if (pLeft.bufferNo) {
         pRight.bufferNo -= pLeft.bufferNo;
+        !pNewLine.isFree && (pNewLine.bufferNo -= pLeft.bufferNo);
+        !pQuote.isFree && (pQuote.bufferNo -= pLeft.bufferNo);
+        !pValidNewLine.isFree && (pValidNewLine.bufferNo -= pLeft.bufferNo);
+
         freeNodes.call(this, pLeft.bufferNo);
         pLeft.bufferNo = 0;
     }
@@ -883,6 +894,10 @@ function freeNodes(nodes) {
     var length = -0;
     var i = 0;
     var payload;
+
+    if (nodes >= cArr.length) {
+        throw new Error(`Number of nodes (${nodes}) to remove is greater than actual size of buffer (${cArr.length})`);
+    }
 
     while (i++ < nodes) {
         payload = cArr.pop();

@@ -15,6 +15,7 @@
         },
         "runtime": {
             "enableGC": true,
+            "httpTimeout": 60,
             "maxHeapSize": 1400
         }
     },

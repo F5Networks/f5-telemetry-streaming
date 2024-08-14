@@ -1,0 +1,20 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Splunk",
+        "host": "192.168.2.1",
+        "protocol": "https",
+        "port": 8088,
+        "passphrase": {
+            "cipherText": "apikey"
+        },
+        "compressionType": "gzip",
+        "customOpts": [
+            { "name": "keepAlive", "value": true },
+            { "name": "keepAliveMsecs", "value": 600000 },
+            { "name": "maxFreeSockets", "value": 5 },
+            { "name": "maxSockets", "value": 5 }
+        ]
+    }
+}

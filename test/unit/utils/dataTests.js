@@ -41,7 +41,7 @@ describe('Data Util', () => {
                     testConf.propertyCtx,
                     testConf.propertyRegexCtx
                 );
-                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
+                assert.sameDeepMembers(resultCtx, testConf.expectedCtx);
             });
         });
     });
@@ -53,7 +53,7 @@ describe('Data Util', () => {
                     testConf.data,
                     testConf.propertiesCtx
                 );
-                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
+                assert.sameDeepMembers(resultCtx, testConf.expectedCtx);
             });
         });
     });
@@ -99,7 +99,7 @@ describe('Data Util', () => {
                     testConf.propertiesCtx,
                     callback
                 );
-                assert.deepStrictEqual(resultCtx, testConf.expectedCtx);
+                assert.sameDeepMembers(resultCtx, testConf.expectedCtx);
             });
         });
     });

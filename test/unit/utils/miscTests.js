@@ -1975,45 +1975,41 @@ describe('Misc Util', () => {
         });
     });
 
-    describe('.proxyForNodeCallbackFuncs', () => {
-        it('should wrap origin function into promise-based function', () => {
-            const successFunc = (a, b, cb) => {
-                assert.deepStrictEqual(a, 10, 'should pass expected arg');
-                assert.deepStrictEqual(b, 20, 'should pass expected arg');
-                assert.isFunction(cb, 'should pass expected arg');
-                cb(null, a + b);
-            };
-            const promisified = util.proxyForNodeCallbackFuncs({ successFunc }, 'successFunc');
-            return assert.becomes(promisified(10, 20), [30], 'should resolve with expected value');
-        });
-
-        it('should reject when callback received error as first arg', () => {
-            const funcWithError = (a, b, cb) => {
-                assert.deepStrictEqual(a, 10, 'should pass expected arg');
-                assert.deepStrictEqual(b, 20, 'should pass expected arg');
-                assert.isFunction(cb, 'should pass expected arg');
-                cb(new Error('expected error'), a + b);
-            };
-            const promisified = util.proxyForNodeCallbackFuncs({ funcWithError }, 'funcWithError');
-            return assert.isRejected(promisified(10, 20), /expected error/, 'should reject on error');
-        });
-    });
-
     describe('.onApplicationExit', () => {
         afterEach(() => {
             sinon.restore();
         });
 
         it('should register callback', () => {
-            const stub = sinon.stub(process, 'on');
-            stub.callsFake();
+            const listeners = [];
+            const getIdx = (evt, cb) => listeners.findIndex(([e, c]) => evt === e && cb === c);
 
-            util.onApplicationExit(() => {});
-            assert.sameDeepMembers(
-                stub.args.map((args) => args[0]),
-                ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'],
-                'should register callback'
-            );
+            sinon.stub(process, 'on').callsFake((event, cb) => {
+                assert.deepStrictEqual(getIdx(event, cb), -1, 'should not register twice');
+                listeners.push([event, cb]);
+            });
+            sinon.stub(process, 'removeListener').callsFake((event, cb) => {
+                const idx = getIdx(event, cb);
+                assert.isAbove(idx, -1, 'should be registered');
+                listeners.splice(idx, 1);
+            });
+            sinon.stub(process, 'emit').callsFake((event, ...args) => {
+                listeners.forEach(([e, cb]) => {
+                    if (e === event) {
+                        cb(...args);
+                    }
+                });
+            });
+
+            const cbSpy = sinon.spy();
+            const off = util.onApplicationExit(cbSpy);
+            ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'].forEach((evt) => process.emit(evt));
+
+            assert.deepStrictEqual(cbSpy.callCount, 4);
+
+            off();
+            ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'].forEach((evt) => process.emit(evt));
+            assert.deepStrictEqual(cbSpy.callCount, 4);
         });
     });
 

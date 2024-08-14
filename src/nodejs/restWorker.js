@@ -15,6 +15,7 @@
  */
 
 /* jshint ignore: start */
+/* eslint-disable no-unused-expressions */
 
 'use strict';
 
@@ -25,23 +26,29 @@ const appInfo = require('../lib/appInfo');
 const logger = require('../lib/logger');
 const util = require('../lib/utils/misc');
 
-const ActivityRecorder = require('../lib/activityRecorder');
-const DataPipeline = require('../lib/dataPipeline');
-const EventListener = require('../lib/eventListener');
-const deviceUtil = require('../lib/utils/device');
-const retryPromise = require('../lib/utils/promise').retry;
-const persistentStorage = require('../lib/persistentStorage');
+const ApplicationEvents = require('../lib/appEvents');
 const configWorker = require('../lib/config');
-const requestRouter = require('../lib/requestHandlers/router');
+const Consumers = require('../lib/consumers');
+const DataPipeline = require('../lib/dataPipeline');
+const DeclarationHistory = require('../lib/declarationHistory');
+const deviceUtil = require('../lib/utils/device');
+const EventEmitter = require('../lib/utils/eventEmitter');
+const EventListener = require('../lib/eventListener');
+const IHealthService = require('../lib/ihealth');
+const promiseUtil = require('../lib/utils/promise');
+const PullConsumers = require('../lib/pullConsumers');
 const ResourceMonitor = require('../lib/resourceMonitor');
+const RESTAPIService = require('../lib/restAPI');
 const RuntimeConfig = require('../lib/runtimeConfig');
-const SystemPoller = require('../lib/systemPoller');
+const StorageService = require('../lib/storage');
+const SystemPollerService = require('../lib/systemPoller');
+const TeemReporter = require('../lib/teemReporter');
+
+/**
+ * @module restWorker
+ */
 
 const configListenerModulesToLoad = [
-    '../lib/consumers',
-    '../lib/pullConsumers',
-    '../lib/ihealth',
-    '../lib/requestHandlers/connections',
     '../lib/tracerManager.js'
 ];
 
@@ -60,11 +67,21 @@ configListenerModulesToLoad.forEach((module) => {
  * application state/stop. See more details on F5 DevCentral.
  *
  * @class
+ *
+ * @listens *.requestHandler.created
  */
 function RestWorker() {
     this.WORKER_URI_PATH = 'shared/telemetry';
     this.isPassThrough = true;
     this.isPublic = true;
+
+    // TS properties
+    this.appEvents = new ApplicationEvents();
+    this.logger = logger.getChild('restWorker');
+    this.ee = new EventEmitter();
+    this.ee.logger = this.logger;
+    this._requestHandlers = [];
+    this.services = [];
 }
 
 /**
@@ -101,7 +118,7 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
         this._initializeApplication(success, failure);
     } catch (err) {
         const msg = `onStartCompleted error: ${err}`;
-        logger.exception(msg, err);
+        this.logger.exception(msg, err);
         failure(msg);
     }
 };
@@ -116,62 +133,60 @@ RestWorker.prototype.onStartCompleted = function (success, failure, state, errMs
 // eslint-disable-next-line no-unused-vars
 RestWorker.prototype._initializeApplication = function (success, failure) {
     // Log system info on service start
-    logger.info(`Application version: ${appInfo.fullVersion}`);
-    logger.info(`Node version: ${process.version}`);
+    this.logger.info(`Application version: ${appInfo.fullVersion}`);
+    this.logger.info(`Node version: ${process.version}`);
 
-    // register REST endpoints
-    this.router = requestRouter;
-    this.router.registerAllHandlers(false);
+    // order matter :-)
+    this.services.push(
+        EventListener,
+        new Consumers(),
+        new PullConsumers(),
+        new SystemPollerService(),
+        new StorageService(),
+        new RuntimeConfig(),
+        new ResourceMonitor(),
+        new RESTAPIService(this.WORKER_URI_PATH),
+        new TeemReporter(),
+        new DeclarationHistory(),
+        new IHealthService(),
+        new DataPipeline(),
+        configWorker
+    );
 
-    this.activityRecorder = new ActivityRecorder();
-    this.activityRecorder.recordDeclarationActivity(configWorker);
+    this.services.forEach((service) => {
+        if (service instanceof StorageService) {
+            service.initialize(this.appEvents, this);
+        } else {
+            service.initialize(this.appEvents);
+        }
+    });
 
-    const appCtx = {
-        configMgr: configWorker,
-        resourceMonitor: new ResourceMonitor(),
-        runtimeConfig: new RuntimeConfig()
-    };
-
-    appCtx.resourceMonitor.initialize(appCtx);
-    appCtx.runtimeConfig.initialize(appCtx);
-
-    DataPipeline.initialize(appCtx);
-    EventListener.initialize(appCtx);
-    SystemPoller.initialize(appCtx);
+    this.initialize(this.appEvents);
 
     // configure global socket maximum
     http.globalAgent.maxSockets = 5;
     https.globalAgent.maxSockets = 5;
 
-    appCtx.runtimeConfig.start()
-        .then(() => appCtx.resourceMonitor.start())
-        .then(() => {
-            // try to load pre-existing configuration
-            const ps = persistentStorage.persistentStorage;
-            // only RestStorage is supported for now
-            ps.storage = new persistentStorage.RestStorage(this);
-            return ps.load();
-        })
-        .then((loadedState) => {
-            logger.debug(`Loaded state ${util.stringify(loadedState)}`);
-        })
+    promiseUtil.loopForEach(this.services, (service) => service.start && service.start())
         .then(() => configWorker.load())
         .then(() => success())
         .catch((err) => {
-            logger.exception('Startup Failed', err);
+            this.logger.exception('Startup Failed', err);
             failure();
         });
 
     // Gather info about host device. Running it as decoupled process
     // to do not slow down application startup due REST API or other
     // service may be not started yet.
-    retryPromise(() => deviceUtil.gatherHostDeviceInfo(), { maxTries: 100, delay: 30 })
+    promiseUtil.retry(() => deviceUtil.gatherHostDeviceInfo(), { maxTries: 100, delay: 30 })
         .then(() => {
-            logger.info('Host Device Info gathered');
+            this.logger.info('Host Device Info gathered');
         })
         .catch((err) => {
-            logger.exception('Unable to gather Host Device Info', err);
+            this.logger.exception('Unable to gather Host Device Info', err);
         });
+
+    this._onAppExitOff = util.onApplicationExit(() => this.tsDestroy());
 };
 
 /**
@@ -179,10 +194,10 @@ RestWorker.prototype._initializeApplication = function (success, failure) {
  *
  * @param {Object} restOperation
  *
- * @returns {void}
+ * @returns {Promise} resolved once request processed
  */
 RestWorker.prototype.onDelete = function (restOperation) {
-    this.onPost(restOperation);
+    return this.onPost(restOperation);
 };
 
 /**
@@ -190,10 +205,10 @@ RestWorker.prototype.onDelete = function (restOperation) {
  *
  * @param {Object} restOperation
  *
- * @returns {void}
+ * @returns {Promise} resolved once request processed
  */
 RestWorker.prototype.onGet = function (restOperation) {
-    this.onPost(restOperation);
+    return this.onPost(restOperation);
 };
 
 /**
@@ -201,10 +216,76 @@ RestWorker.prototype.onGet = function (restOperation) {
  *
  * @param {Object} restOperation
  *
- * @returns {void}
+ * @returns {Promise} resolved once request processed
  */
-RestWorker.prototype.onPost = function (restOperation) {
-    this.router.processRestOperation(restOperation, this.WORKER_URI_PATH);
+RestWorker.prototype.onPost = async function (restOperation) {
+    if (this._requestHandlers.length > 0) {
+        try {
+            await (this._requestHandlers[0].handler(restOperation));
+        } catch (reqError) {
+            requestError.call(this, restOperation, 500, 'Internal Server Error', reqError);
+        }
+    } else {
+        requestError.call(this, restOperation, 503, 'Service Unavailable', new Error('No request handlers to process request!'));
+    }
 };
 
+/** @param {ApplicationEvents} appEvents - application events */
+RestWorker.prototype.initialize = function (appEvents) {
+    appEvents.on('*.requestHandler.created', (handler, cb) => {
+        const item = { handler };
+        this._requestHandlers.splice(0, 0, item);
+
+        cb && cb(() => {
+            const idx = this._requestHandlers.indexOf(item);
+            (idx !== -1) && this._requestHandlers.splice(idx, 1);
+        });
+    });
+};
+
+/**
+ * Destroy instance and its services
+ *
+ * @returns {Promise} resolved once all serivces destroyed
+ */
+RestWorker.prototype.tsDestroy = function () {
+    this._onAppExitOff && this._onAppExitOff();
+    this._requestHandlers = [];
+
+    return promiseUtil.loopForEach(
+        this.services, (service) => service.destroy && service.destroy()
+            .catch((err) => this.logger.exception(`Unable to destroy service "${service.constructor.name}"`, err))
+    )
+        .then(() => {
+            this.services = [];
+            this.appEvents.stop();
+
+            this.logger.warning('All services destroyed!');
+        });
+};
+
+/**
+ * @param {RestOperation} restOperation
+ * @param {integer} code
+ * @param {string} message
+ * @param {Error} error
+ */
+function requestError(restOperation, code, message, error) {
+    this.logger.exception('Uncaught exception on attempt to process REST API request', error);
+    restOperation.setStatusCode(code);
+    restOperation.setContentType('application/json');
+    restOperation.setBody({ code, message });
+    restOperation.complete();
+}
+
 module.exports = RestWorker;
+
+/**
+ * @event *.requestHandler.created
+ * @param {function:Promise} handler - request handler that returns Promise resovled once request processed
+ * @param {function(function)} unregCb - callback to pass back an deregister function for the request handler
+ */
+/**
+ * @typedef RestOperation
+ * @type {Object}
+ */

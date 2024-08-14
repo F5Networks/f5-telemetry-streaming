@@ -37,20 +37,16 @@ The following is an example of an Action chain with a description after the exam
             },
             {
                 "setTag": {
-                    "vsInfo": {
-                        "app": "`A`"
-                    }
+                    "serviceApp": "`A`"
                 }
             },
             {
                 "includeData": {},
                 "locations": {
                     "virtualServers": {
-                        ".*": {
-                            "vsInfo": true,
+                        ".*": 
                             "name": true,
-                            "bits.in": true
-                        }
+                            "clientside.bitsIn": true
                     }
                 }
             }
@@ -60,7 +56,7 @@ The following is an example of an Action chain with a description after the exam
 
 
 1. First BIG-IP Telemetry Streaming will exclude **system**.
-2. Next BIG-IP Telemetry Streaming will apply **vsInfo** tag to known locations (if the **locations** property is not specified, then the tag is applied to **virtualServers**, **pools** etc.)
+2. Next BIG-IP Telemetry Streaming will apply tags to known locations (if the **locations** property is not specified, then the tag is applied to **virtualServers**, **pools** etc.)
 3. Finally BIG-IP Telemetry Streaming keeps all **virtualServers** data with properties defined in **locations** only.
  
 As result of execution output will look like:
@@ -69,13 +65,10 @@ As result of execution output will look like:
 
     {
         "virtualServers": {
-            "/Common/app.app/virtualServer": {
-                "vsInfo": {
-                    "app": "app.app"
-                },
+            "/Common/app.app/virtualServer": 
                 "name": "/Common/app.app/virtualServer",
-                "bits.in": "100"
-            }
+                "clientside.bitsIn": "100",
+                "serviceApp": "app.app"
         }
     }
  
@@ -95,9 +88,7 @@ Another example:
             },
             {
                 "setTag": {
-                    "vsInfo": {
-                        "app": "`A`"
-                    }
+                    "serviceApp": "`A`"
                 }
             },
             {
@@ -105,9 +96,8 @@ Another example:
                 "locations": {
                     "virtualServers": {
                         ".*": {
-                            "vsInfo": true,
                             "name": true,
-                            "bits.in": true
+                            "clientside.bitsIn": true
                         }
                     }
                 }
@@ -149,9 +139,7 @@ Example 1:
             },
             {
                 "setTag": {
-                    "vsInfo": {
-                        "app": "`A`"
-                    }
+                    "serviceApp": "`A`"
                 }
             },
             {
@@ -159,9 +147,8 @@ Example 1:
                 "locations": {
                     "virtualServers": {
                         ".*": {
-                            "vsInfo": true,
                             "name": true,
-                            "bits.in": true
+                            "clientside.bitsIn": true
                         }
                     }
                 }
@@ -187,9 +174,7 @@ Example 2:
             },
             {
                 "setTag": {
-                    "vsInfo": {
-                        "app": "`A`"
-                    }
+                    "serviceApp": "`A`"
                 },
                 "ifAllMatch": {
                     "pools": {
@@ -204,9 +189,8 @@ Example 2:
                 "locations": {
                     "virtualServers": {
                         ".*": {
-                            "vsInfo": true,
                             "name": true,
-                            "bits.in": true
+                            "clientside.bitsIn": true
                         }
                     }
                 }
@@ -308,7 +292,7 @@ The following is a snippet that includes this tagging action.
                     "prop2": "tag1prop2"
                 },
                 "tag2": "Another tag"
-                },
+            },
             "ifAllMatch": {
                 "virtualServers": {
                     ".*": {
@@ -541,8 +525,8 @@ The following is an example of Telemetry output without using includeData:
         },
         "virtualServers": {
             "virtual1": {
-                "bits.in": "100",
-                "bits.out": "200"
+                "clientside.bitsIn": "100",
+                "clientside.bitsOut": "200"
             }
         }
     }
@@ -558,7 +542,7 @@ This is an example of an includeData Action definition:
         "locations": {
             "virtualServers": {
                 ".*": {
-                    "bits.in": true
+                    "clientside.bitsIn": true
                 }
             }
         }
@@ -573,7 +557,7 @@ And this is an example of the output from the Action definition.
     {
         "virtualServers": {
             "virtual1": {
-                "bits.in": "100"
+                "clientside.bitsIn": "100"
             }
         }
     }
@@ -743,8 +727,8 @@ The following is an example of Telemetry output without using excludeData:
         },
         "virtualServers": {
             "virtual1": {
-                "bits.in": "100",
-                "bits.out": "200"
+                "clientside.bitsIn": "100",
+                "clientside.bitsOut": "200"
             }
         }
     }
@@ -760,7 +744,7 @@ This is an example of an excludeData Action definition:
         "locations": {
             "virtualServers": {
                 ".*": {
-                    "bits.in": true
+                    "clientside.bitsIn": true
                 }
             }
         }
@@ -781,7 +765,7 @@ And this is an example of the output from the Action definition.
         },
         "virtualServers": {
             "virtual1": {
-                "bits.out": "200"
+                "clientside.bitsOut": "200"
             }
         }
     }

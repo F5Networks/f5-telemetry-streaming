@@ -30,16 +30,19 @@ moduleCache.remember();
 
 describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
     const basicSchemaTestsValidator = (decl) => shared.validateMinimal(decl);
+    let coreStub;
 
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        common.stubCoreModules();
+    beforeEach(async () => {
+        coreStub = common.stubCoreModules();
+        await coreStub.startServices();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+        await coreStub.destroyServices();
         sinon.restore();
     });
 
@@ -55,7 +58,9 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
             topic: 'topic',
             authenticationProtocol: 'None',
             protocol: 'binaryTcpTls',
-            port: 9092
+            port: 9092,
+            format: 'default',
+            partitionerType: 'default'
         }
     ));
 
@@ -64,19 +69,23 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
             type: 'Kafka',
             host: 'host',
             topic: 'topic',
-            port: 80,
+            port: 9094,
             protocol: 'binaryTcp',
             authenticationProtocol: 'SASL-PLAIN',
             username: 'username',
             passphrase: {
                 cipherText: 'cipherText'
-            }
+            },
+            format: 'default',
+            partitionerType: 'keyed',
+            partitionKey: 'thePartition',
+            customOpts: [{ name: 'requestTimeout', value: 1999 }]
         },
         {
             type: 'Kafka',
             host: 'host',
             topic: 'topic',
-            port: 80,
+            port: 9094,
             protocol: 'binaryTcp',
             authenticationProtocol: 'SASL-PLAIN',
             username: 'username',
@@ -84,7 +93,11 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
                 class: 'Secret',
                 protected: 'SecureVault',
                 cipherText: '$M$cipherText'
-            }
+            },
+            format: 'default',
+            partitionerType: 'keyed',
+            partitionKey: 'thePartition',
+            customOpts: [{ name: 'requestTimeout', value: 1999 }]
         }
     ));
 
@@ -117,14 +130,16 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
                 class: 'Secret',
                 protected: 'SecureVault',
                 cipherText: '$M$clientCertificate'
-            }
+            },
+            format: 'default',
+            partitionerType: 'default'
         }
     ));
 
     it('should pass full declaration with TLS client auth', () => shared.validateFull(
         {
             type: 'Kafka',
-            host: 'host',
+            host: ['host.first', 'host.second'],
             topic: 'topic',
             protocol: 'binaryTcpTls',
             port: 90,
@@ -137,11 +152,15 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
             },
             rootCertificate: {
                 cipherText: 'rootCertificate'
-            }
+            },
+            format: 'split',
+            partitionerType: 'keyed',
+            partitionKey: 'partitionId',
+            customOpts: [{ name: 'requestTimeout', value: 3999 }]
         },
         {
             type: 'Kafka',
-            host: 'host',
+            host: ['host.first', 'host.second'],
             topic: 'topic',
             authenticationProtocol: 'TLS',
             protocol: 'binaryTcpTls',
@@ -160,7 +179,11 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
                 class: 'Secret',
                 protected: 'SecureVault',
                 cipherText: '$M$rootCertificate'
-            }
+            },
+            format: 'split',
+            partitionerType: 'keyed',
+            partitionKey: 'partitionId',
+            customOpts: [{ name: 'requestTimeout', value: 3999 }]
         }
     ));
 
@@ -203,7 +226,7 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
             basicSchemaTestsValidator,
             {
                 type: 'Kafka',
-                host: 'host',
+                host: ['first.host', 'second.host'],
                 topic: 'topic',
                 authenticationProtocol: 'SASL-PLAIN',
                 username: 'username'
@@ -231,5 +254,74 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
             'privateKey',
             { requiredTests: true }
         );
+    });
+
+    describe('multiple hosts with non-default options', () => {
+        schemaValidationUtil.generateSchemaBasicTests(
+            basicSchemaTestsValidator,
+            {
+                type: 'Kafka',
+                host: ['first.host', 'second.host'],
+                topic: 'topic',
+                authenticationProtocol: 'SASL-PLAIN',
+                username: 'username',
+                passphrase: {
+                    cipherText: 'cipherText'
+                },
+                format: 'split',
+                partitionerType: 'random',
+                customOpts: [{ name: 'maxAsyncRequests', value: 14 }]
+            },
+            [
+                { property: 'host', requiredTests: true, arrayLengthTests: true },
+                { property: 'customOpts', optionalPropTests: true },
+                {
+                    property: 'format',
+                    defaultValueTests: 'default',
+                    enumTests: { allowed: ['default', 'split'], notAllowed: ['anything-goes'] }
+                },
+                {
+                    property: 'partitionerType',
+                    defaultValueTests: 'default',
+                    enumTests: { allowed: ['default', 'random', 'cyclic'], notAllowed: ['customThatMustBeDefined'] }
+                }
+            ]
+        );
+    });
+
+    describe('partitionerType == keyed', () => {
+        schemaValidationUtil.generateSchemaBasicTests(
+            basicSchemaTestsValidator,
+            {
+                type: 'Kafka',
+                host: ['first.host'],
+                topic: 'topic-on-keyed-partitions',
+                authenticationProtocol: 'SASL-PLAIN',
+                username: 'username',
+                passphrase: {
+                    cipherText: 'cipherText'
+                },
+                format: 'split',
+                partitionerType: 'keyed',
+                partitionKey: 'partition-id'
+            },
+            'partitionKey',
+            { requiredTests: true, stringLengthTests: true }
+        );
+    });
+
+    describe('partitionerType != keyed', () => {
+        const nonKeyedTypes = ['default', 'random', 'cyclic'];
+        nonKeyedTypes.forEach((type) => {
+            it(`should not allow partitionKey if partitionerType == ${type}`, () => assert.isRejected(shared.validateFull(
+                {
+                    type: 'Kafka',
+                    host: 'host',
+                    topic: 'topic',
+                    partitionerType: type,
+                    partitionKey: 'myKey'
+                }
+            ), /should NOT be valid/));
+        });
     });
 });

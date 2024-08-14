@@ -17,7 +17,6 @@
 'use strict';
 
 const Ajv = require('ajv');
-const fs = require('fs');
 const constants = require('./constants');
 const util = require('./utils/misc');
 const deviceUtil = require('./utils/device');
@@ -375,15 +374,14 @@ function hostConnectivityCheck(schemaCtx, dataCtx) {
  * @returns {Function} that returns {Promise} resolved once path is valid
  */
 function fsPathExistsCheck(schemaCtx, dataCtx) {
-    return () => new Promise((resolve, reject) => {
-        fs.access(dataCtx.data, (fs.constants || fs).R_OK, (err) => {
-            if (err) {
-                reject(new Error(`Unable to access path "${dataCtx.data}": ${err}`));
-            } else {
-                resolve(true);
-            }
-        });
-    });
+    return async () => {
+        try {
+            await util.fs.access(dataCtx.data, util.fs.constants.R_OK);
+        } catch (error) {
+            throw new Error(`Unable to access path "${dataCtx.data}": ${error}`);
+        }
+        return true;
+    };
 }
 
 /**
@@ -441,21 +439,6 @@ function declarationClassCheck(schemaCtx, dataCtx) {
 }
 
 /**
- * Checks the current node version and compares it to the field value
- *
- * @throws {Error} when reference is invalid
- * @returns {Boolean} true if reference is valid
- */
-function nodeSupportVersionCheck(schemaObj) {
-    const requestedNodeVersion = schemaObj.schema;
-    const currentNodeVersion = util.getRuntimeInfo().nodeVersion;
-    if (util.compareVersionStrings(currentNodeVersion, '<', requestedNodeVersion)) {
-        throw new Error(`requested node version: ${requestedNodeVersion} , current node version: ${currentNodeVersion}`);
-    }
-    return true;
-}
-
-/**
  * Expand JSON pointer
  *
  * @param {SchemaCtx} schemaCtx - schema context
@@ -486,6 +469,28 @@ function f5expandCheck(schemaCtx, dataCtx) {
         throw new Error(`Unable to expand JSON-pointer '${dataCtx.data}': ${err}`);
     }
     return true;
+}
+
+/**
+ * Check that the value does not exceed runtime.maxHeapSize or DEFAULT_HEAP_SIZE
+ *
+ * @param {SchemaCtx} schemaCtx - schema context
+ * @param {DataCtx} dataCtx - data context
+ *
+ * @returns {Function} that returns {Promise} resolved if value is <= configured heapSize
+ */
+function heapSizeLimitCheck(schemaCtx, dataCtx) {
+    return () => {
+        const controls = dataCtx.rootData[dataCtx.dataPath.split('/')[1]];
+        const heapSizeVal = (controls.runtime
+            && controls.runtime.maxHeapSize)
+            || constants.APP_THRESHOLDS.MEMORY.DEFAULT_HEAP_SIZE;
+
+        if (dataCtx.data > heapSizeVal) {
+            throw new Error(`Value should not be greater than V8's heap size: ${heapSizeVal} MB.`);
+        }
+        return true;
+    };
 }
 /**
  * Validators block end
@@ -601,40 +606,10 @@ function createValidationFunction(keyword, func) {
 
 module.exports = {
     asyncOrder: [
-        ['hostConnectivityCheck', 'pathExists'],
+        ['heapSizeLimitCheck', 'hostConnectivityCheck', 'pathExists'],
         ['f5secret']
     ],
     keywords: {
-        f5secret: {
-            type: 'object',
-            errors: true,
-            modifying: true,
-            metaSchema: {
-                type: 'boolean'
-            },
-            validate: createValidationFunction('f5secret', f5secretCheck)
-        },
-        hostConnectivityCheck: {
-            type: 'string',
-            errors: true,
-            modifying: false,
-            metaSchema: {
-                type: 'boolean'
-            },
-            validate: createValidationFunction('hostConnectivityCheck', hostConnectivityCheck)
-        },
-        timeWindowMinSize: {
-            type: 'object',
-            errors: true,
-            modifying: false,
-            metaSchema: {
-                type: 'integer',
-                minimum: 1,
-                maximum: 1439,
-                description: 'Time window size in minutes. From 1m to 23h 59m.'
-            },
-            validate: createValidationFunction('timeWindowMinSize', timeWindowSizeCheck)
-        },
         declarationClass: {
             type: 'string',
             errors: true,
@@ -669,6 +644,42 @@ module.exports = {
             },
             validate: createValidationFunction('declarationClassProp', declarationClassPropCheck)
         },
+        f5expand: {
+            type: 'string',
+            errors: true,
+            modifying: true,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('f5expand', f5expandCheck)
+        },
+        f5secret: {
+            type: 'object',
+            errors: true,
+            modifying: true,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('f5secret', f5secretCheck)
+        },
+        heapSizeLimitCheck: {
+            type: 'integer',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('heapSizeLimitCheck', heapSizeLimitCheck)
+        },
+        hostConnectivityCheck: {
+            type: 'string',
+            errors: true,
+            modifying: false,
+            metaSchema: {
+                type: 'boolean'
+            },
+            validate: createValidationFunction('hostConnectivityCheck', hostConnectivityCheck)
+        },
         pathExists: {
             type: 'string',
             errors: true,
@@ -679,24 +690,17 @@ module.exports = {
             },
             validate: createValidationFunction('pathExists', fsPathExistsCheck)
         },
-        f5expand: {
-            type: 'string',
-            errors: true,
-            modifying: true,
-            metaSchema: {
-                type: 'boolean'
-            },
-            validate: createValidationFunction('f5expand', f5expandCheck)
-        },
-        nodeSupportVersion: {
+        timeWindowMinSize: {
             type: 'object',
             errors: true,
             modifying: false,
             metaSchema: {
-                type: 'string',
-                description: 'The lowest node version supported'
+                type: 'integer',
+                minimum: 1,
+                maximum: 1439,
+                description: 'Time window size in minutes. From 1m to 23h 59m.'
             },
-            validate: createValidationFunction('nodeSupportVersion', nodeSupportVersionCheck)
+            validate: createValidationFunction('timeWindowMinSize', timeWindowSizeCheck)
         }
     }
 };

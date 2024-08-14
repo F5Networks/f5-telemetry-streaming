@@ -26,6 +26,7 @@ const util = require('./utils/misc');
 
 const actionsSchema = require('../schema/latest/actions_schema.json');
 const baseSchema = require('../schema/latest/base_schema.json');
+const commonSchema = require('../schema/latest/common_schema.json');
 const consumerSchema = require('../schema/latest/consumer_schema.json');
 const controlsSchema = require('../schema/latest/controls_schema.json');
 const endpointsSchema = require('../schema/latest/endpoints_schema.json');
@@ -75,6 +76,7 @@ module.exports = {
         const schemas = {
             actions: actionsSchema,
             base: baseSchema,
+            common: commonSchema,
             consumer: consumerSchema,
             pullConsumer: pullConsumerSchema,
             controls: controlsSchema,
@@ -146,31 +148,33 @@ module.exports = {
             return Promise.resolve(data);
         }
 
-        const deferred = context.deferred;
-        const processDeferred = (idx) => {
-            if (idx >= customKeywords.asyncOrder.length) {
-                return Promise.resolve();
-            }
-            const promises = [];
-            const keywords = customKeywords.asyncOrder[idx];
-            keywords.forEach((keyword) => {
-                if (deferred[keyword]) {
-                    deferred[keyword].forEach((deferredFn) => {
-                        promises.push(deferredFn());
-                    });
-                }
-            });
-            return promiseUtil.allSettled(promises)
+        // group all callbacks according to async validation order/priority
+        const deferred = customKeywords.asyncOrder
+            .map((group) => {
+                const v = group.reduce((acc, key) => {
+                    acc.push(...(context.deferred[key] || []));
+                    return acc;
+                }, []);
+                return v;
+            })
+            .filter((group) => group.length);
+
+        // keep groups ordering
+        return promiseUtil.loopForEach(
+            deferred,
+            // run at callbacks from a particular group at the same time
+            (group) => promiseUtil.allSettled(
+                group.map((fn) => Promise.resolve().then(fn))
+            )
                 .then((results) => {
                     const innerErrors = results.filter((r) => typeof r.reason !== 'undefined');
                     if (innerErrors.length) {
-                        return Promise.reject(new Error(util.stringify(processErrors(innerErrors))));
+                        return Promise.reject(new Error(util.stringify(innerErrors)));
                     }
-                    return processDeferred(idx + 1);
-                });
-        };
-        return processDeferred(0)
-            .then(() => Promise.resolve(data));
+                    return Promise.resolve();
+                })
+        )
+            .then(() => data);
     }
 };
 

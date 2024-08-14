@@ -28,21 +28,29 @@ const assert = require('../shared/assert');
 const sourceCode = require('../shared/sourceCode');
 const stubs = require('../shared/stubs');
 
-const configWorker = sourceCode('src/lib/config');
 const dataPublisher = sourceCode('src/lib/eventListener/dataPublisher');
 
 moduleCache.remember();
 
 describe('Data Publisher', () => {
+    let configWorker;
+    let coreStub;
+
     before(() => {
         moduleCache.restore();
     });
 
-    beforeEach(() => {
-        stubs.default.coreStub();
+    beforeEach(async () => {
+        coreStub = stubs.default.coreStub();
+        configWorker = coreStub.configWorker.configWorker;
+
+        await coreStub.startServices();
     });
 
-    afterEach(() => sinon.restore());
+    afterEach(async () => {
+        await coreStub.destroyServices();
+        sinon.restore();
+    });
 
     describe('.sendDataToListener', () => {
         let netConnectionPort;
