@@ -117,16 +117,6 @@ function reduceConditionals(statObj) {
  */
 function buildMap() {
     const outData = {};
-    // at first let's add folders
-    Object.keys(stats).forEach((statKey) => {
-        const statObj = stats[statKey];
-        if (statObj.structure && statObj.structure.folder) {
-            outData[statKey] = {
-                folder: true,
-                stats: {}
-            };
-        }
-    });
     // time to add other stats
     Object.keys(stats).forEach((statName) => {
         const reducedStatObj = reduceConditionals(deepClone(stats[statName]));
@@ -152,6 +142,12 @@ function buildMap() {
             }
         }
         if (reducedStatObj.structure && reducedStatObj.structure.parentKey) {
+            if (typeof outData[reducedStatObj.structure.parentKey] === 'undefined') {
+                outData[reducedStatObj.structure.parentKey] = {
+                    folder: true,
+                    stats: {}
+                };
+            }
             outData[reducedStatObj.structure.parentKey].stats[statName] = outValue;
         } else {
             outData[statName] = outValue;

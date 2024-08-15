@@ -8,7 +8,7 @@ For more information on editing JSON with Visual Studio Code, see |json|.
 
 
 How to validate a declaration
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Use the following procedure to validate a declaration.
 
 1.  Download and install |vsc|.

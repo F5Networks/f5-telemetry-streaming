@@ -63,7 +63,7 @@ The debug value will log debug messages, debug errors as well as everything abov
 
 
 verbose
-````
+```````
 The verbose value will log everything.
 
 .. code-block:: bash

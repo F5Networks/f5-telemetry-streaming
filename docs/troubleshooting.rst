@@ -52,6 +52,7 @@ The following is an example declaration containing a Controls class that sets th
         }
     }
 
+|
 
 Tracing
 -------
@@ -98,6 +99,31 @@ The following is an example that enables tracing on the Telemetry_System and Tel
         }
     }
 
+|
+
+.. _http-agent-options:
+
+HTTP Agent Options
+------------------
+While BIG-IP Telemetry Streaming is processing data, you can configure it to use customized configuration for HTTP transport.
+Node.js values may differ based on version used. Refer to node.js documentation for more information.
+
+.. code-block:: json
+
+    {
+        "class": "Telemetry",
+        "My_System_With_Custom_HTTP": {
+            "class": "Telemetry_System",
+            "systemPoller": {
+                "httpAgentOpts": [
+                    { "name": "keepAlive", "value": true },
+                    { "name": "keepAliveMsecs", "value": 600000 },
+                    { "name": "maxFreeSockets", "value": 5 },
+                    { "name": "maxSockets", "value": 5 }
+                ]
+            }
+        }
+    }
 
 |
 

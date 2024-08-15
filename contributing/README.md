@@ -125,7 +125,7 @@ What happens in the system internals between request and response?
 - Request is validated using JSON schema and AJV, config event fires
     - ref: [config.js](../src/lib/config.js)
 - System poller, event listener, etc. configures system resources
-    - ref: [systemPoller.js](../src/lib/systemPoller), [eventListener](../src/lib/eventListener/), etc.
+    - ref: [systemPoller](../src/lib/systemPoller), [eventListener](../src/lib/eventListener/), etc.
 - Client response sent with validated config
     - ref: [declareHandler](../src/lib/restAPI/handlers/declare.js)
     ```javascript
@@ -162,7 +162,7 @@ All core modules are included inside `../src/lib/`
     - Purpose: Handle configuration actions... such as validation, persistent storage, etc.
 - [systemPoller](../src/lib/systemPoller/)
     - Purpose: Handles CRUD-like actions for any system pollers required based on client configuration
-    - Related: See [iHealthPoller.js](../src/lib/ihealth/)
+    - Related: See [iHealthPoller](../src/lib/ihealth/)
 - [eventListener](../src/lib/eventListener/)
     - Purpose: Handles CRUD-like actions for any event listeners required based on client configuration.
 - [consumers](../src/lib/consumers/)

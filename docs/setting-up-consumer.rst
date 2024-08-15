@@ -54,10 +54,14 @@ The following items have been added to the Splunk consumer since it was introduc
       * - Version
         - Property
         - Description
-  
+
       * - 1.19
         - **compressionType**
         - Sets the type of compression.  Be sure to see :ref:`Memory usage spikes<splunkmem>` in the Troubleshooting section for information on the **compressionType** property. When set to **none**, this property stops BIG-IP TS from compressing data before sending it to Splunk, which can help reduce memory usage.
+  
+      * - 1.36
+        - **customOpts**
+        - Customization options.  Be sure to see :ref:`http-agent-options` in the Troubleshooting section for information on the **customOpts** property.
 
 
 **IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 

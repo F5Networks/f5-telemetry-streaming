@@ -22,11 +22,11 @@ There is no plan to deprecate this product.
         - Date
 
       * - 1.36.0
-        - Updated the documentation for Telemetry Streaming v1.36.0. This release contains the following changes: |br| * Drop support for BIG-IP 13.1 to 15.0.x
-        - 06-10-24
+        - Updated the documentation for Telemetry Streaming v1.36.0. This release contains the following changes: |br| * Drop support for BIG-IP 13.1 to 15.0.x |br| * New configuration options for Kafka consumer, support multi-host, data formatting |br| * iHealth Poller updated to follow new API authentication schema |br| * New configuration options for Telemetry System class |br| * New configuration options for Splunk consumer |br| * New **runtime.httpTimeout** option to configure timeout for incoming HTTP requests |br| |br| Changed: |br| * Event Listener performance bugfixes |br| |br| Issues Resolved: |br| * **memoryMonitor.provisionedMemory** should allow to provision up to **runtime.maxHeapSize** value
+        - 08-14-24
 
       * - 1.35.0
-        - Updated the documentation for Telemetry Streaming v1.35.0. This release contains the following changes: |br| * Added "memoryMonitor" (see :ref:`Memory Mamangement<memorymanagement>`). |br| |br| Changed: * Event Listener performance improvements
+        - Updated the documentation for Telemetry Streaming v1.35.0. This release contains the following changes: |br| * Added "memoryMonitor" (see :ref:`Memory Mamangement<memorymanagement>`). |br| |br| Changed: |br| * Event Listener performance improvements
         - 02-23-24
 
       * - 1.34.0

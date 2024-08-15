@@ -21,4 +21,4 @@ test/artifacts/
 **/.DS_Store
 # generated schema & docs
 dist/ts.schema.json
-docs/schema-reference.rst
+# docs/schema-reference.rst

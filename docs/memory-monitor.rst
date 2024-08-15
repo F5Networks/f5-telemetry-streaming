@@ -108,7 +108,7 @@ specified then **controls/memoryThresholdPercent** ignored despite the value.
         }
     }
 
-**Memory Monitor** will be configured with **memoryThresholdPercent** set to **90**%.
+**Memory Monitor** will be configured with **memoryThresholdPercent** set to **90** %.
 
 
 Using the "memoryMonitor" property of Controls class
