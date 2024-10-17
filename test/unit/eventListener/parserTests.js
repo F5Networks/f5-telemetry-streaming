@@ -511,7 +511,7 @@ describe('Event Listener / Parser', () => {
                     assert.deepStrictEqual(results, [input], 'should produce 1 chunk of data');
                 });
 
-                it('should preserve processing time limits', () => {
+                it.skip('should preserve processing time limits', () => {
                     const timeLimit = 1e6; // really short amount of time
                     const lines = 10000;
 

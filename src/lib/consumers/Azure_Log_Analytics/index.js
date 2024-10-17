@@ -28,7 +28,7 @@ const EVENT_TYPES = require('../../constants').EVENT_TYPES;
 module.exports = function (context) {
     const fullURI = azureUtil.getApiUrl(context, 'opinsights');
     const workspaceId = context.config.workspaceId;
-    const format = context.config.format;
+    const isPropertyBased = (context.config.format || '').startsWith('propertyBased');
     const sharedKey = context.config.passphrase;
     const logType = context.config.logType || 'F5Telemetry';
 
@@ -38,6 +38,14 @@ module.exports = function (context) {
         const copyData = JSON.parse(JSON.stringify(context.event.data));
         context.event.data = {};
         context.event.data[context.event.type] = copyData;
+    } else if (isPropertyBased
+            && context.config.format.endsWith('V2')
+            && context.event.data.system && context.event.data.system.asmAttackSignatures
+    ) {
+        // move 'asmAttackSignatures' to the top level to allow `azureUtil.isConfigItems`
+        // to detect it and `azureUtil.transformConfigItems` to transform it
+        context.event.data.asmAttackSignatures = context.event.data.system.asmAttackSignatures;
+        delete context.event.data.system.asmAttackSignatures;
     }
 
     return Promise.resolve()
@@ -70,7 +78,7 @@ module.exports = function (context) {
                     data = { value: data }; // make data an object
                 }
 
-                if ((format === 'propertyBased')
+                if (isPropertyBased
                         && azureUtil.isConfigItems(data, type, poolMemberMapping.isPoolMembersType(type))) {
                     data = azureUtil.transformConfigItems(data);
                     // If it is a pool, transfer its pool members to the pool members table of the corresponding type.

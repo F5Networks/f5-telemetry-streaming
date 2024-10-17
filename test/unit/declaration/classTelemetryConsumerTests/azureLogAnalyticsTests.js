@@ -124,7 +124,7 @@ describe('Declarations -> Telemetry_Consumer -> Azure_Log_Analytics', () => {
                 property: 'format',
                 ignoreOther: true,
                 enumTests: {
-                    allowed: ['default', 'propertyBased'],
+                    allowed: ['default', 'propertyBased', 'propertyBasedV2'],
                     notAllowed: ['format']
                 }
             }

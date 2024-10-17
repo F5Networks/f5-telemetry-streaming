@@ -1,6 +1,6 @@
 {
     "name": "f5-telemetry",
-    "version": "1.36.0-1",
+    "version": "1.37.0-1",
     "author": "F5, Inc.",
     "license": "Apache-2.0",
     "repository": {

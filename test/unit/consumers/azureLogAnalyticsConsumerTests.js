@@ -209,6 +209,19 @@ describe('Azure_Log_Analytics', () => {
                     azureLogData.propertyBasedSystemData[0].expectedData));
         });
 
+        it('should process systemInfo data with propertyBasedV2 setting', () => {
+            const pbConfig = testUtil.deepCopy(propertyBasedConsumerConfig);
+            pbConfig.format = 'propertyBasedV2';
+
+            const context = testUtil.buildConsumerContext({
+                eventType: 'systemInfo',
+                config: pbConfig
+            });
+            return azureAnalyticsIndex(context)
+                .then(() => assert.sameDeepMembers(getAllOpsInsightsReqs(),
+                    azureLogData.propertyBasedV2SystemData[0].expectedData));
+        });
+
         it('should process event data', () => {
             const context = testUtil.buildConsumerContext({
                 eventType: 'AVR',

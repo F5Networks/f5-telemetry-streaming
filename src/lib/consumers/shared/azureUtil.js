@@ -373,7 +373,7 @@ function isConfigItems(data, type, isPoolMembersType) {
     }
 
     // is it of type sslCerts or keys are of format of format /.../...
-    if (type === 'sslCerts' || Object.keys(data).every((key) => /\/[^/]*\/.*/.test(key))) {
+    if (type === 'sslCerts' || type === 'asmAttackSignatures' || Object.keys(data).every((key) => /\/[^/]*\/.*/.test(key))) {
         // check that the key is the same as property 'name'
         return Object.keys(data)
             .every((key) => typeof data[key] === 'object' && key === data[key].name);

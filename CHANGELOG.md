@@ -7,6 +7,13 @@ Changes to this project are documented in this file. More detail and links can b
 ### Changed
 ### Removed
 
+## 1.37.0
+### Added
+- MBIPMP-41258: Update Azure Log Analytics with new `propertyBasedV2` format that converts `system.asmAttackSignatures` into an array
+### Fixed
+### Changed
+### Removed
+
 ## 1.36.0
 **Important**: Starting from BIG-IP Telemetry Streaming version 1.36.0, BIG-IP Telemetry Streaming no longer supports BIG-IP 13.1 to 15.0.x. However, if you are still using the BIG-IP 13.1 to 15.0.x versions, you can use BIG-IP Telemetry Streaming 1.35.0 or earlier.
 ### Added

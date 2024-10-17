@@ -167,6 +167,11 @@ The following items have been added to the Azure Log Analytics consumer since it
         - **region**
         - The **region** property for Azure Log Analytics and Application Insights was added in part to support the Azure Government regions. |br| - This optional property is used to determine cloud type (public/commercial, govcloud) so that the correct API URLs can be used (example values: westeurope, japanwest, centralus, usgovvirginia, and so on). |br| - If you do not provide a region, BIG-IP Telemetry Streaming attempts to look it up from the instance metadata. |br| - If it is unable to extract metadata, BIG-IP TS defaults to public/commercial |br| - Check the |azregion| for product/region compatibility for Azure Government. |br| - See the Azure documentation for a valid list of regions (resource location), and :ref:`Region list<azreg>` for example values from the Azure CLI.
 
+      * - 1.37
+        - **format**
+        - **propertyBasedV2** - provides the same output as **propertyBased** with an addition of **system.asmAttackSignatures** moved to its own category **asmAttackSignatures**
+
+
 
 
 To see more information about sending data to Log Analytics, see |HTTP Data Collector API|.
@@ -451,6 +456,28 @@ Required Information:
  - Username: The username to use for authentication process.
  - Password: The password to use for authentication process.
 
+Optional parameters:
+
+.. NOTE:: Available on F5 BIG-IP Telemetry Streaming 1.36.0 and later
+
+- Format: Toggles formatting of data. Options: ``default`` and ``split`` - splits system information into multiple smaller messages.
+- Partitioner Type: Allows the message to be sent using a chosen partitioning strategy. Options:
+    - **default** - uses the default or partition at index 0
+    - **random** - pick from available partitions randomly
+    - **cyclic** - will cycle through the available partitions
+    - **keyed** - use a specific partition with key, a value for ``partitionKey`` must be provided.
+- Partition Key: Key used to lookup a partition. Required when *Partitioner Type* is ``keyed``. Must not be specified if using other partitioner types.
+- CustomOpts: Custom settings to pass to Kafka client. These are a subset of what the https://github.com/SOHU-Co/kafka-node supports. See the example declaration for how to use those options. Options:
+    - **connectRetryOptions.retries** - the maximum amount of times to retry the operation
+    - **connectRetryOptions.factor** - the exponential factor to use
+    - **connectRetryOptions.minTimeout** - the number of milliseconds before starting the first retry
+    - **connectRetryOptions.maxTimeout** - the maximum number of milliseconds between two retries
+    - **connectRetryOptions.randomize** - randomizes the timeouts by multiplying with a **connectRetryOptions.factor**
+    - **connectTimeout** - how much time in milliseconds it takes to wait for a successful connection before moving to the next host
+    - **idleConnection** - allows the broker to disconnect an idle connection from a client. The value is elapsed time in milliseconds without any data written to the TCP socket
+    - **maxAsyncRequests** - maximum async operations at a time toward the Kafka cluster
+    - **requestTimeout** - how much time in milliseconds for a Kafka request to timeout
+
 .. NOTE:: To see more information about installing Kafka, see |Installing Kafka|.
 
 Additions to the Kafka consumer
@@ -468,7 +495,7 @@ The following items have been added to the Kafka consumer since it was introduce
   
       * - 1.17
         - **privateKey**
-        - This and the following properties provide the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures BIG-IP Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication.  You can find more information on Kafka's client authentication on the Confluent pages: https://docs.confluent.io/5.5.0/kafka/authentication_ssl.html. |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
+        - This and the following properties provide the ability to add TLS client authentication to the Kafka consumer using the **TLS** authentication protocol.  This protocol configures BIG-IP Telemetry Streaming to provide the required private key and certificate(s) when the Kafka broker is configured to use SSL/TLS Client authentication.  You can find more information on Kafka's client authentication on the Confluent pages:  https://docs.confluent.io/platform/current/kafka/authentication_ssl.html |br| |br| **privateKey** is the Private Key for the SSL certificate. Must be formatted as a 1-line string, with literal new line characters. 
 
       * - 
         - **clientCertificate**
@@ -478,16 +505,31 @@ The following items have been added to the Kafka consumer since it was introduce
         - **rootCertificate**
         - The Certificate Authority root certificate, used to validate the client certificate. Certificate verification can be disabled by setting allowSelfSignedCert=true. Must be formatted as a 1-line string, with literal new line characters.
 
+      * - 1.36
+        - **customOpts**
+        - Various options to configure Kafka client.
+
+      * - 
+        - **format**
+        - Toggles formatting of data.
+
+      * - 
+        - **partitionerType**
+        - Allows the message to be sent using a chosen partitioning strategy.
+
+      * - 
+        - **partitionKey**
+        - Key used to lookup a partition.
 
 
-**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail. On previous versions, remove the highlighted line(s), and the comma from the previous line. 
+
+**IMPORTANT**: The following declaration includes the additional properties shown in the table. If you attempt to use this declaration on a previous version, it will fail.
 
 Example Declaration:
 
 .. literalinclude:: ../examples/declarations/consumers/Kafka/kafka.json
     :language: json
     :linenos:
-    :emphasize-lines: 24-41
 
 |
 

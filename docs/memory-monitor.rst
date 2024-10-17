@@ -234,6 +234,8 @@ The "runtime" property of Controls class is where you define your runtime config
 
 .. IMPORTANT:: **RUNTIME CONFIGURATION OPTIONS SHOULD BE USED ONLY WHEN YOU ARE OBSERVING/EXPERIENCING MEMORY USAGE ISSUES**
 
+.. IMPORTANT:: **F5 BIG-IP Telemetry Streaming not meant to be used on F5 BIG-IP with FIPS option enabled. F5 BIG-IP Telemetry Streaming may change scripts on the host system that lead to System Integrity check to fail**
+
 .. list-table::
       :widths: 25 25 200
       :header-rows: 1

@@ -565,6 +565,30 @@ For more information see:
 
 - `Bug ID 1602033 <https://cdn.f5.com/product/bugtracker/ID1602033.html>`_
 
+|
+
+.. _bigipplatformsupport:
+
+Why does not F5 BIG-IP Telemetry Streaming work on platforms with F5OS?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+F5 BIG-IP Telemetry Streaming has never been validated on F5 VELOS platform so F5 BIG-IP Telemetry Streaming is not supported on F5 VELOS.
+
+Some testing are done on new BIG-IP version but platform validation has not been done on new hardware like F5 VELOS and F5 rSeries.
+
+F5 BIG-IP Telemetry Streaming is in maintenance mode, focusing on the next generation of Telemetry innovations. We will continue to update BIG-IP TS with critical security updates.
+
+
+|
+
+.. _telemetrystreamingnofips:
+
+Why the FIPS self-check to fail once F5 BIG-IP Telemetry Streaming installed or modified runtime options?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+F5 BIG-IP Telemetry Streaming not meant to be used on F5 BIG-IP with FIPS option enabled. F5 BIG-IP Telemetry Streaming may change scripts on the host system that lead to
+System Integrity check to fail.
+
 
 .. |br| raw:: html
 
