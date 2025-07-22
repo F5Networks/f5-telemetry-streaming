@@ -163,7 +163,8 @@ function test() {
          *
          * @returns {Promise<Array<Object>>} resolved with parsed logs
          */
-        function getContainerLogs(filter) {
+        async function getContainerLogs(filter) {
+            await new Promise((resolve) => { setTimeout(resolve, 10000); });
             return cs.docker.containerLogs(DOCKER_CONTAINERS.FluentD.name)
                 .then((data) => {
                     cs.logger.info('Fluentd docker logs:', data);

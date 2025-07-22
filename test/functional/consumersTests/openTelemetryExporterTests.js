@@ -278,6 +278,32 @@ function test() {
                 ));
             });
 
+            describe('System Log data', () => {
+                harness.bigip.forEach((bigip) => it(
+                    `should check BIGIP log data for uncaught exceptions - ${bigip.name}`,
+                    function () {
+                        if (!isValidDut(bigip)) {
+                            return this.skip();
+                        }
+                        return bigip.ssh.default.exec('cat /var/log/restnoded/restnoded.log', (err, streamData) => {
+                            if (err) {
+                                bigip.logger.error('Error reading var log', err);
+                                return promiseUtils.sleepAndReject(30000, err);
+                            }
+                            return streamData.toString();
+                        })
+                            .then((streamData) => {
+                                const stringData = streamData.toString();
+                                if (stringData.includes('error: uncaughtException')) {
+                                    assert.notOk(stringData.includes('error: uncaughtException'), 'should not have uncaughtException log entries');
+                                } else {
+                                    assert.isOk(!stringData.includes('error: uncaughtException'), 'should have no uncaughtException log entries');
+                                }
+                            });
+                    }
+                ));
+            });
+
             if (!last) {
                 describe('Stop TS sending data to Open Telemetry Collector', () => {
                     let consumerDeclaration;

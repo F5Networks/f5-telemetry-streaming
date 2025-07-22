@@ -52,7 +52,7 @@ const DOCKER_CONTAINERS = {
             SPLUNK_START_ARGS: '--accept-license',
             SPLUNK_PASSWORD
         },
-        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}splunk/splunk:latest`,
+        image: 'splunk/splunk:latest',
         name: 'ts_splunk_consumer',
         publish: {
             [SPLUNK_HEC_PORT]: SPLUNK_HEC_PORT,

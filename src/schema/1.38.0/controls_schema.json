@@ -1,0 +1,174 @@
+{
+    "$id": "controls_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Controls schema",
+    "description": "",
+    "type": "object",
+    "allOf": [
+        {
+            "if": { "properties": { "class": { "const": "Controls" } } },
+            "then": {
+                "required": [
+                    "class"
+                ],
+                "properties": {
+                    "class": {
+                        "title": "Class",
+                        "description": "Telemetry Streaming Controls class",
+                        "type": "string",
+                        "enum": [ "Controls" ]
+                    },
+                    "logLevel": {
+                        "title": "Logging Level",
+                        "description": "",
+                        "type": "string",
+                        "default": "info",
+                        "enum": [ 
+                            "verbose",
+                            "debug",
+                            "info",
+                            "error"
+                        ] 
+                    },
+                    "debug": {
+                        "title": "Enable debug mode",
+                        "description": "",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "memoryThresholdPercent": {
+                        "title": "Memory Usage Threshold (Percentage of Available Process Memory)",
+                        "description": "Once memory usage reaches this value, processing may temporarily cease until levels return below threshold. Defaults to 90%",
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100,
+                        "default": 90
+                    },
+                    "listenerMode": {
+                        "title": "Event Listener events parsing mode",
+                        "description": "Event Listener events parsing mode. \"buffer\" is more performant but under the high memory usage events may result in OOM. \"string\" is less performant but more chance to have lower RSS",
+                        "type": "string",
+                        "enum": [
+                            "buffer",
+                            "string"
+                        ]
+                    },
+                    "listenerStrategy": {
+                        "title": "Event Listener events buffering strategy due high memory usage events",
+                        "description": "Event Listener events buffering strategy. \"drop\" drops all new chunks of data, but keeps pending data to process - less memory usage but loosing data. \"ring\" keeps buffering data by overriding peding data - higher memory usage but less chance to get data lost.",
+                        "type": "string",
+                        "enum": [
+                            "drop",
+                            "ring"
+                        ]
+                    },
+                    "memoryMonitor": {
+                        "title": "Memory Monitor configuration options",
+                        "description": "Memory Monitor configuration options allow configuring thresholds for various parameters to help Telemetry Streaming avoid extreme conditions like Out-Of-Memory.",
+                        "type": "object",
+                        "properties": {
+                            "interval": {
+                                "title": "",
+                                "description": "",
+                                "enum": [
+                                    "default",
+                                    "aggressive"
+                                ],
+                                "default": "default"
+                            },
+                            "logFrequency": {
+                                "title": "Logging Frequency (in sec.)",
+                                "description": "Number of seconds to use to log information about memory usage. Defaults to 10 sec.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "default": 10
+                            },
+                            "logLevel": {
+                                "title": "Logging Level",
+                                "description": "Logging Level to use to log information about memory usage. Defaults to \"debug\"",
+                                "default": "debug",
+                                "allOf": [
+                                    { "$ref": "#/allOf/0/then/properties/logLevel" }
+                                ]
+                            },
+                            "memoryThresholdPercent": {
+                                "title": "Memory Usage Threshold (Percentage of Available Process Memory)",
+                                "description": "Once memory usage reaches this value, processing may temporarily cease until levels return below threshold * \"thresholdReleasePercent\". Defaults to 90%. NOTE: the property is the same as the one from parent object but it take precedens over the parent's one if specified.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 100
+                            },
+                            "osFreeMemory": {
+                                "title": "OS Free memory (in MB)",
+                                "description": "Amount of OS Free memory (in MB) below that processing may temporarily ceasae until levels return above theshold. Defaults to 30 MB.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "default": 30
+                            },
+                            "provisionedMemory": {
+                                "title": "Provisioned Memory for Application (in MB.)",
+                                "description": "Amount of Memory in MB. that application should not exceed. Once limit exceed, processing may temporarily cease until levels return below threshold. Defaults to the 'runtime.maxHeapSize' value. Maximum should not exceed 'runtime.maxHeapSize'.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "heapSizeLimitCheck": true
+                            },
+                            "thresholdReleasePercent": {
+                                "title": "Memory Usage Threshold Release (Percentage of Available Threshold Memory)",
+                                "description": "Once memory usage reaches value described in \"memoryThresholdPercent\", processing may temporarily cease until levels return below threshold * \"thresholdReleasePercent\". Defaults to 90%.",
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 100,
+                                "default": 90
+                            }
+                        },
+                        "additionalProperties": false,
+                        "anyOf": [
+                            { "required": ["interval"] },
+                            { "required": ["logFrequency"] },
+                            { "required": ["logLevel"] },
+                            { "required": ["memoryThresholdPercent"] },
+                            { "required": ["osFreeMemory"] },
+                            { "required": ["provisionedMemory"] },
+                            { "required": ["thresholdReleasePercent"] }
+                        ]
+                    },
+                    "runtime": {
+                        "title": "Runtime Configuration Options. EXPERIMENTAL!",
+                        "description": "Runtime Configuration Options (V8). Allows to tune the V8 configuration. EXPERIMENTAL!",
+                        "type": "object",
+                        "properties": {
+                            "enableGC": {
+                                "title": "Enables the V8 garbage collector. EXPERIMENTAL!",
+                                "description": "Grants Telemetry Streaming access to the V8 garbage collector, which helps Telemetry Streaming cleanup memory when usage exceeds thresholds. EXPERIMENTAL!",
+                                "type": "boolean",
+                                "default": false
+                            },
+                            "maxHeapSize": {
+                                "title": "Increases the V8 maximum heap size. EXPERIMENTAL!",
+                                "description": "Increases V8 maximum heap size to enable more memory usage and prevent Heap-Out-Of-Memory error. EXPERIMENTAL!",
+                                "type": "number",
+                                "minimum": 1400,
+                                "default": 1400
+                            },
+                            "httpTimeout": {
+                                "title": "Increases the timeout value in seconds for incoming REST API HTTP requests. EXPERIMENTAL!",
+                                "description": "Increases the timeout value in seconds for incoming REST API HTTP requests that allows Telemetry Streaming to avoid TimeoutException error for long lasting operations. Defaults to 60 seconds. EXPERIMENTAL!",
+                                "type": "number",
+                                "default": 60,
+                                "minimum": 60,
+                                "maximum": 600
+                            }
+                        },
+                        "additionalProperties": false,
+                        "anyOf": [
+                            { "required": ["enableGC"] },
+                            { "required": ["maxHeapSize"] }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "else": {}
+        }
+    ]
+}

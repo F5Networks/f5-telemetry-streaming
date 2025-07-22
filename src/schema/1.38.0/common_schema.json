@@ -1,0 +1,92 @@
+{
+    "$id": "common_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Telemetry Streaming Common Objects Schema",
+    "description": "",
+    "type": "object",
+    "definitions": {
+        "additionalOptions": {
+            "$comment": "Additional custom options (e.g. feature flags for testing)",
+            "title": "Additional custom options (Target Object/Class Dependent)",
+            "description": "Additional custom options for use by target class. Refer to corresponding class schema for acceptable keys and values.",
+            "type": "array",
+            "items": {
+                "properties": {
+                    "name": {
+                        "description": "Name of the option",
+                        "type": "string",
+                        "f5expand": true,
+                        "minLength": 1
+                    },
+                    "value": {
+                        "description": "Value of the option",
+                        "minLength": 1,
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "f5expand": true
+                                    },
+                                    {
+                                        "$ref": "base_schema.json#/definitions/stringOrSecret"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "minItems": 1
+        },
+        "httpAgentOptions": {
+            "title": "Http Agent Options",
+            "description": "Set of additional options to customize http agent.",
+            "type": "array",
+            "items": {
+                "properties": {
+                    "name": {
+                        "enum": [
+                            "keepAlive",
+                            "keepAliveMsecs",
+                            "maxSockets",
+                            "maxFreeSockets"
+                        ]
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "name": { "const": "keepAlive" } } },
+                        "then": { "properties": { "value": { "type": "boolean" } } }
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "keepAliveMsecs" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } }
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "maxFreeSockets" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } }
+                    },
+                    {
+                        "if": { "properties": { "name": { "const": "maxSockets" } } },
+                        "then": { "properties": { "value": { "type": "integer", "minimum": 0 } } }
+                    }
+                ]
+            },
+            "minItems": 1
+        }
+    }
+}

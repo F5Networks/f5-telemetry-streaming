@@ -69,6 +69,7 @@
     * 1.35.0 - 18.4 MB
     * 1.36.0 - 20.6 MB (NOTE: inclusion of new version of Kafka library)
     * 1.37.0 - 20.6 MB
+    * 1.38.0 - 20.4 MB
   * Install build to BIG-IP, navigate to folder `/var/config/rest/iapps/f5-telemetry/` and check following:
     * Run `du -sh` and check that folder's size (shouldn't be much greater than previous versions):
       * 1.4.0 - 65 MB
@@ -104,6 +105,7 @@
       * 1.35.0 - 164 MB
       * 1.36.0 - 154 MB
       * 1.37.0 - 154 MB
+      * 1.38.0 - 160 MB
     * Check `node_modules` folder - if you see `eslint`, `mocha` or something else from [package.json](package.json) `devDependencies` section - something wrong with build process. Probably some `npm` flags are work as not expected and it MUST BE FIXED before publishing.
 * Ensure that all tests (unit tests and functional tests passed)
 * Optional: Ensure that your local tags match remote. If not, remove all and re-fetch:

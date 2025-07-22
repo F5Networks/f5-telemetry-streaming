@@ -81,7 +81,7 @@ const DOCKER_CONTAINERS = {
             KAFKA_CFG_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT_HOST',
             KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
         },
-        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/kafka:latest`,
+        image: `${constants.ARTIFACTORY_DOCKER_HUB_PREFIX}bitnami/kafka:3.3`,
         name: 'kafka-server',
         publish: {
             [KAFKA_PORT]: KAFKA_PORT

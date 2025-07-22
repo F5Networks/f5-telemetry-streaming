@@ -183,6 +183,30 @@ lint:
         - *install_unittest_packages_cmd
         - npm run lint
 
+secret_detection:
+  stage: atg-shared-checks
+  variables:
+    CI_DEFAULT_BRANCH: "${CI_COMMIT_BRANCH}"
+    GL_SECRET_DETECTION_CONFIG_SOURCE: "/gitleaks.toml"
+    GL_SECRET_DETECTION_CONFIG_TARGET: "gl-gitleaks.toml"
+    GL_SECRET_DETECTION_REPORT: "gl-secret-detection-report.json"
+    SECRET_DETECTION_HISTORIC_SCAN: "false"
+    SECRET_DETECTION_EXCLUDED_PATHS: ""
+  allow_failure: false
+  before_script:
+    - apk add jq
+    - cp ${GL_SECRET_DETECTION_CONFIG_SOURCE} ${GL_SECRET_DETECTION_CONFIG_TARGET}
+  script:
+    - /analyzer run
+    - if [[ $(cat ${GL_SECRET_DETECTION_REPORT} | jq '.vulnerabilities | length > 0') == "true" ]]; then exit 1; fi
+  artifacts:
+    paths:
+      - ${GL_SECRET_DETECTION_CONFIG_TARGET}
+      - ${GL_SECRET_DETECTION_REPORT}
+    reports:
+      secret_detection: ${GL_SECRET_DETECTION_REPORT}
+    when: always
+
 # BIG-IP 14.1+
 test_node8:
     extends:

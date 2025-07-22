@@ -108,7 +108,7 @@ How does the project handle a typical `POST` request?
             "trace": false,
             "format": "default"
         },
-        "schemaVersion": "1.37.0"
+        "schemaVersion": "1.38.0"
     }
 }
 ```

@@ -7,6 +7,14 @@ Changes to this project are documented in this file. More detail and links can b
 ### Changed
 ### Removed
 
+## 1.38.0
+### Added
+### Fixed
+- BIPNXTENG-10740: Resolver error when using GRPC/OpenTelemetry_Exporter
+- BIPNXTENG-11350: Restnoded restarts when using GRPC/OpenTelemetry_Exporter
+### Changed
+### Removed
+
 ## 1.37.0
 ### Added
 - MBIPMP-41258: Update Azure Log Analytics with new `propertyBasedV2` format that converts `system.asmAttackSignatures` into an array

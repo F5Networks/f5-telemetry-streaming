@@ -134,7 +134,7 @@ describe('iHealth / API / IHealth', () => {
                         passphrase: 'test_passphrase_1'
                     }
                 },
-                expectedProxy: 'https://test_user_1:test_passphrase_1@proxyhost:5555'
+                expectedProxy: 'https://test_user_1:test_passphrase_1@proxyhost:5555' // #gitleaks:allow
             }
         ];
 

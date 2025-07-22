@@ -14,8 +14,8 @@ request:
     instance:
     - harness:
         _copy: request/hypervisor
-      name: ubuntu
-      image: Ubuntu18.04LTS-pristine
+      name: ubuntu2404
+      image: Ubuntu2404LTS-pristine
       flavor: m1.large
     - harness:
         _copy: request/hypervisor
