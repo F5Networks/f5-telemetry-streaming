@@ -13,6 +13,7 @@
  *
  * @typedef {import('../utils/config').ConsumerComponent} ConsumerComponent
  * @typedef {import('../dataPipeline').DataEventCtxV2} DataCtx
+ * @typedef {import('../logger').Logger} Logger
  */
 
 const NotImplementedError = require('../errors').NotImplementedError;

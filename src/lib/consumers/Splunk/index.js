@@ -40,7 +40,7 @@ const DATA_FORMATS = {
 };
 
 /**
- * @module consumers/default
+ * @module consumers/Splunk
  *
  * @typedef {import('../api').ConsumerCallback} ConsumerCallback
  * @typedef {import('../api').ConsumerConfig} ConsumerConfig

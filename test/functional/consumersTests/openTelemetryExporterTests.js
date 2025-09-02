@@ -39,7 +39,7 @@ const assert = chai.assert;
 const MODULE_REQUIREMENTS = { DOCKER: true };
 
 const OTEL_EXPORTERS = [
-    // 'grpc', // disable - HTTP2 + grpc is broken on node 8.11.1 again
+    'grpc',
     'json',
     'protobuf'
 ];

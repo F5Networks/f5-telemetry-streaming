@@ -186,6 +186,41 @@ const _module = module.exports = {
     deepCopy,
 
     /**
+     * Generates a Data Context
+     *
+     * @param {Object} [options]                     - options to pass to context builder
+     * @param {String} [options.type]           - which event type to return
+     *
+     * @returns {Object} Returns object representing Data Context
+     */
+    buildDataEventContext(options) {
+        let data;
+        const opts = options || {};
+
+        switch (opts.type) {
+        case 'systemInfo':
+            data = this.deepCopy(systemPollerData);
+            break;
+        case 'AVR':
+            data = this.deepCopy(avrData);
+            break;
+        case 'LTM':
+            data = this.deepCopy(ltmData);
+            break;
+        case 'raw':
+            data = '<raw_event_data>';
+            break;
+        default:
+            throw new Error(`Unknown event type "${opts.type}" requested`);
+        }
+
+        return {
+            data,
+            type: opts.type || ''
+        };
+    },
+
+    /**
      * Generates a consumer config
      *
      * @param {Object} [options]                     - options to pass to context builder

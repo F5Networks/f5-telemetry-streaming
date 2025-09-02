@@ -81,7 +81,7 @@ describe('Teem Reporter / Teem Reporter Service', () => {
 
     it('should send TEEM report for minimal declaration', () => processDeclaration({
         class: 'Telemetry',
-        schemaVersion: '1.37.1'
+        schemaVersion: '1.39.0'
     })
         .then(() => {
             assert.lengthOf(teemRecords, 1);
@@ -111,7 +111,7 @@ describe('Teem Reporter / Teem Reporter Service', () => {
 
     it('should send multiple TEEM reports', () => processDeclaration({
         class: 'Telemetry',
-        schemaVersion: '1.37.1'
+        schemaVersion: '1.39.0'
     })
         .then(() => {
             assert.lengthOf(teemRecords, 1);
@@ -140,7 +140,7 @@ describe('Teem Reporter / Teem Reporter Service', () => {
 
             return processDeclaration({
                 class: 'Telemetry',
-                schemaVersion: '1.37.1',
+                schemaVersion: '1.39.0',
                 listener: {
                     class: 'Telemetry_Listener'
                 }
@@ -299,7 +299,7 @@ describe('Teem Reporter / Teem Reporter Service', () => {
         teemReportStub.throws(new Error('expected error'));
         return processDeclaration({
             class: 'Telemetry',
-            schemaVersion: '1.37.1'
+            schemaVersion: '1.39.0'
         })
             .then(() => {
                 assert.lengthOf(teemRecords, 0);

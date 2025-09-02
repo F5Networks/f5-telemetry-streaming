@@ -16,6 +16,7 @@ fi
 npx ${nycStart} mocha --opts ./test/unit/.mocha.opts ./test/unit/*.js
 
 for dir in $(ls -d ./test/unit/*/); do
+    echo "Running tests in ${dir}"
     npx ${nycCont} mocha --recursive --opts ./test/unit/.mocha.opts "${dir}"
 done
 

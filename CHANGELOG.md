@@ -7,6 +7,15 @@ Changes to this project are documented in this file. More detail and links can b
 ### Changed
 ### Removed
 
+## 1.39.0
+### Added
+### Fixed
+- Update grpc-gs to 1.9.15 to fix restnoded restarts when using GRPC/OpenTelemetry_Exporter
+- BIPNXTENG-12028: Kafka Consumer should not ignore updated certificates
+### Changed
+- Updated npm packages (@grpc/grpc-js from 1.8.18 to 1.9.15, @grpc/proto-loader from 0.7.8 to 0.8.0, @opentelemetry/sdk-metrics from 1.15.0 to 1.30.1)
+### Removed
+
 ## 1.38.0
 ### Added
 ### Fixed

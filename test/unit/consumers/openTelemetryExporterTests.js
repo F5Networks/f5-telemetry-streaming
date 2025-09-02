@@ -37,7 +37,7 @@ const IS_8_13_PLUS = util.compareVersionStrings(process.version.substring(1), '>
 
 const OTLP_PROTOS_PATH = path.resolve('./node_modules/@opentelemetry/opentelemetry-proto');
 const METRICS_SERVICE_PROTO_PATH = path.join(OTLP_PROTOS_PATH, 'opentelemetry/proto/collector/metrics/v1/metrics_service.proto');
-const OTLP_PROTO_GEN_PATH = path.resolve('./node_modules/@opentelemetry/otlp-grpc-exporter-base/build/src/generated/root.js');
+const OTLP_PROTO_GEN_PATH = path.resolve('./node_modules/@opentelemetry/exporter-metrics-otlp-grpc/node_modules/@opentelemetry/otlp-grpc-exporter-base/build/src/generated/root.js');
 
 let grpc;
 let openTelemetryExporter;
@@ -57,7 +57,7 @@ if (IS_8_11_1_PLUS) {
 
 moduleCache.remember();
 
-(IS_8_11_1_PLUS ? describe.skip : describe.skip)('OpenTelemetry_Exporter', () => {
+(IS_8_11_1_PLUS ? describe : describe.skip)('OpenTelemetry_Exporter', () => {
     if (!IS_8_11_1_PLUS) {
         return;
     }
