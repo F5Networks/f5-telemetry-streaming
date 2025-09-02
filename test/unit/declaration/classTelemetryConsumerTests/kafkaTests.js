@@ -256,6 +256,27 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
         );
     });
 
+    describe('protocol values', () => {
+        schemaValidationUtil.generateSchemaBasicTests(
+            basicSchemaTestsValidator,
+            {
+                type: 'Kafka',
+                host: 'first.host',
+                topic: 'topic'
+            },
+            [
+                {
+                    property: 'protocol',
+                    defaultValueTests: 'binaryTcpTls',
+                    enumTests: {
+                        allowed: ['binaryTcpTls', 'binaryTcp'],
+                        notAllowed: ['http', 'https', 'tcp', 'udp']
+                    }
+                }
+            ]
+        );
+    });
+
     describe('multiple hosts with non-default options', () => {
         schemaValidationUtil.generateSchemaBasicTests(
             basicSchemaTestsValidator,
@@ -270,11 +291,12 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
                 },
                 format: 'split',
                 partitionerType: 'random',
-                customOpts: [{ name: 'maxAsyncRequests', value: 14 }]
+                customOpts: [
+                    { name: 'connectTimeout', value: 10000 }
+                ]
             },
             [
                 { property: 'host', requiredTests: true, arrayLengthTests: true },
-                { property: 'customOpts', optionalPropTests: true },
                 {
                     property: 'format',
                     defaultValueTests: 'default',
@@ -284,6 +306,120 @@ describe('Declarations -> Telemetry_Consumer -> Kafka', () => {
                     property: 'partitionerType',
                     defaultValueTests: 'default',
                     enumTests: { allowed: ['default', 'random', 'cyclic'], notAllowed: ['customThatMustBeDefined'] }
+                },
+                { property: 'customOpts', optionalPropTests: true }
+            ]
+        );
+    });
+
+    describe('Kafka Client default options', () => {
+        schemaValidationUtil.generateSchemaBasicTests(
+            basicSchemaTestsValidator,
+            {
+                type: 'Kafka',
+                host: 'first.host',
+                topic: 'topic',
+                customOpts: [
+                    { name: 'connectRetryOptions.factor', value: 3000 },
+                    { name: 'connectRetryOptions.maxTimeout', value: 1000 },
+                    { name: 'connectRetryOptions.minTimeout', value: 5 },
+                    { name: 'connectRetryOptions.randomize', value: true },
+                    { name: 'connectRetryOptions.retries', value: 30000 },
+                    { name: 'connectTimeout', value: 10000 },
+                    { name: 'idleConnection', value: 10000 },
+                    { name: 'maxAsyncRequests', value: 14 },
+                    { name: 'requestTimeout', value: 30000 }
+                ]
+            },
+            [
+                {
+                    property: 'customOpts',
+                    ignoreOther: true,
+                    arrayLengthTests: {
+                        minItems: 1
+                    }
+                },
+                {
+                    property: 'customOpts.0.name',
+                    ignoreOther: true,
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.0.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.1.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.2.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.3.value',
+                    ignoreOther: true,
+                    booleanTests: true
+                },
+                {
+                    property: 'customOpts.4.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.5.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.6.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
+                },
+                {
+                    property: 'customOpts.7.value',
+                    ignoreOther: true,
+                    numberRangeTests: {
+                        minimum: 0
+                    },
+                    valueTests: {
+                        invalid: 'invalid'
+                    }
                 }
             ]
         );

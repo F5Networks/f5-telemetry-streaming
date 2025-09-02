@@ -230,6 +230,16 @@ module.exports = {
                     })
                 }
             },
+            kafka: {
+                minimal: {
+                    decrypted: declarationComponentGenerator({
+                        class: 'Telemetry_Consumer',
+                        type: 'Kafka',
+                        host: '192.168.100.1',
+                        topic: 'topic'
+                    })
+                }
+            },
             splunk: {
                 minimal: {
                     decrypted: declarationComponentGenerator({

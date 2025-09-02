@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 F5, Inc.
+ * Copyright 2025 F5, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,44 +22,163 @@
 // Zookeeper has been deprecated as of Kafka 3.5 and will be removed in 4.0
 
 const kafka = require('kafka-node');
-const constants = require('../../constants');
+
+const API = require('../api');
+const deepFreeze = require('../../utils/misc').deepFreeze;
+const DEFAULT_HOSTNAME = require('../../constants').DEFAULT_HOSTNAME;
+const EVT_SYSTEM_POLLER = require('../../constants').EVENT_TYPES.SYSTEM_POLLER;
 
 const PARTITIONER_TYPES = ['default', 'random', 'cyclic', 'keyed'];
+
 /**
- * AUTOTOOL-491 workaround to resolve following situation:
- * - connection to broker was removed from pool already - assertion failed
- * - another connection was registered with the same key (addr:port) - assertion failed
+ * @module consumers/Kafka
  *
+ * @typedef {import('../api').ConsumerCallback} ConsumerCallback
+ * @typedef {import('../api').ConsumerConfig} ConsumerConfig
+ * @typedef {import('../api').ConsumerInterface} ConsumerInterface
+ * @typedef {import('../api').ConsumerModuleInterface} ConsumerModuleInterface
+ * @typedef {import('../../dataPipeline').DataEventCtxV2} DataCtx
+ * @typedef {import('../../logger').Logger} Logger
  */
-if (typeof kafka.KafkaClient.prototype.deleteDisconnected !== 'undefined') {
-    const originalMethod = kafka.KafkaClient.prototype.deleteDisconnected;
-    kafka.KafkaClient.prototype.deleteDisconnected = function () {
-        try {
-            originalMethod.apply(this, arguments);
-        } catch (err) {
-            this.emit('f5error', err);
+
+/**
+ * Telemetry Streaming Kafka Push Consumer
+ *
+ * @implements {ConsumerInterface}
+ */
+class KafkaConsumer extends API.Consumer {
+    /** @inheritdoc */
+    get allowsPull() {
+        return false;
+    }
+
+    /** @inheritdoc */
+    get allowsPush() {
+        return true;
+    }
+
+    /** @inheritdoc */
+    onData(dataCtx) {
+        this._sendData(dataCtx);
+    }
+
+    /** @inheritdoc */
+    async onLoad(config) {
+        await super.onLoad(config);
+
+        // template for payload to use later
+        const payloadBase = {
+            topic: this.originConfig.topic,
+            messages: [null]
+        };
+
+        const isKeyed = this.originConfig.partitionerType === 'keyed';
+        if (isKeyed) {
+            payloadBase.key = this.originConfig.partitionKey;
         }
-    };
+
+        Object.defineProperties(this, {
+            connectionOptions: {
+                value: deepFreeze(buildKafkaClientOptions.call(this))
+            },
+            createMessage: {
+                value: isKeyed
+                    ? (data) => new kafka.KeyedMessage(this.originConfig.partitionKey, data)
+                    : (data) => data
+            },
+            partitionerType: {
+                value: PARTITIONER_TYPES.indexOf(this.originConfig.partitionerType)
+            },
+            payloadBase: {
+                get() { return Object.assign({}, payloadBase); }
+            },
+            realSendKafkaCb: {
+                value: realSendKafkaCb.bind(this.logger)
+            },
+            useDefaultFormat: {
+                value: this.originConfig.format === 'default'
+            }
+        });
+
+        this._producer = null;
+        this._promise = Promise.resolve();
+
+        connect.call(this);
+    }
+
+    /** @inheritdoc */
+    async onUnload() {
+        await super.onUnload();
+        destroy.call(this);
+    }
 }
 
 /**
- * Construct Kafka client options from Consumer config
+ * Telemetry Streaming Kafka Consumer Module
  *
- * @param {String} kafkaHost    Connection string to Kafka host(s)
- * @param {Object} config       Consumer configuration object
- *
- * @returns {Object} Kafka Client options object
+ * @implements {ConsumerModuleInterface}
  */
-function buildKafkaClientOptions(kafkaHost, config) {
-    // adding sslOptions to client options at all is the signal to invoke TLS
+class KafkaConsumerModule extends API.ConsumerModule {
+    /** @inheritdoc */
+    async createConsumer() {
+        return new KafkaConsumer();
+    }
+
+    /** @inheritdoc */
+    async onLoad(config) {
+        await super.onLoad(config);
+
+        /**
+         * AUTOTOOL-491 workaround to resolve following situation:
+         * - connection to broker was removed from pool already - assertion failed
+         * - another connection was registered with the same key (addr:port) - assertion failed
+         */
+        if (typeof kafka.KafkaClient.prototype.deleteDisconnected === 'function'
+            && kafka.KafkaClient.prototype.deleteDisconnected.patched !== true
+        ) {
+            this.logger.debug('Patching Kafka library.');
+            const originalMethod = kafka.KafkaClient.prototype.deleteDisconnected;
+            kafka.KafkaClient.prototype.deleteDisconnected = function () {
+                try {
+                    originalMethod.apply(this, arguments);
+                } catch (err) {
+                    this.emit('f5error', err);
+                }
+            };
+
+            kafka.KafkaClient.prototype.deleteDisconnected.patched = true;
+        }
+    }
+}
+
+/**
+ * Build Kafka client options based on the module configuration.
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @returns {object} Kafka client options
+ */
+function buildKafkaClientOptions() {
+    // TODO: do we want to allow customers to specify `clientId`?
+    const config = this.originConfig;
+    let kafkaHost = '';
     let tlsOptions = null;
+    let saslOptions = null;
+
+    if (typeof config.host === 'string') {
+        kafkaHost = `${config.host}:${config.port}`;
+    } else {
+        kafkaHost = config.host
+            .map((item) => `${item}:${config.port}`)
+            .join(',');
+    }
+
     if (config.protocol === 'binaryTcpTls') {
         tlsOptions = {
             rejectUnauthorized: !config.allowSelfSignedCert
         };
     }
-
-    let saslOptions = null;
     if (config.authenticationProtocol === 'SASL-PLAIN') {
         saslOptions = {
             mechanism: 'plain',
@@ -88,28 +207,19 @@ function buildKafkaClientOptions(kafkaHost, config) {
         requestTimeout: 5 * 1000, // shorten timeout
         sslOptions: tlsOptions,
         sasl: saslOptions,
-        connectRetryOptions: defaulRetryOpts
+        connectRetryOptions: defaulRetryOpts,
+        autoConnect: true
     };
 
     // allow additional opts or overrides to pass to client lib so we don't have to expose all via schema
     if (config.customOpts && config.customOpts.length) {
-        let allowedKeys = [
-            'connectTimeout',
-            'requestTimeout',
-            'idleConnection',
-            'maxAsyncRequests'
-        ];
-
-        allowedKeys = allowedKeys.concat(Object.keys(defaulRetryOpts).map((k) => `connectRetryOptions.${k}`));
-
+        // keys were validated by the schema already
         config.customOpts.forEach((opt) => {
-            if (allowedKeys.indexOf(opt.name) > -1) {
-                if (opt.name.startsWith('connectRetryOptions')) {
-                    const prop = opt.name.substring(opt.name.indexOf('.') + 1);
-                    clientOpts.connectRetryOptions[prop] = opt.value;
-                } else {
-                    clientOpts[opt.name] = opt.value;
-                }
+            if (opt.name.startsWith('connectRetryOptions')) {
+                const prop = opt.name.substring(opt.name.indexOf('.') + 1);
+                clientOpts.connectRetryOptions[prop] = opt.value;
+            } else {
+                clientOpts[opt.name] = opt.value;
             }
         });
     }
@@ -117,37 +227,171 @@ function buildKafkaClientOptions(kafkaHost, config) {
 }
 
 /**
- * Generate string containing kafka host(s) to connect to
+ * Connect to the Kafka broker.
  *
- * @param {Object} config   Consumer config
+ * @private
+ * @this KafkaConsumer
  *
- * @returns {String}        Host(s) to pass to KafkaClient in format ${host}:${port}
- *                          Comma is used as delimiter for multiple hosts
+ * @returns {void} once connection routine scheduled
  */
-function buildKafkaHostString(config) {
-    if (typeof config.host === 'string') {
-        return `${config.host}:${config.port || 9092}`;
-    }
+function connect() {
+    let producer = null;
+    disableDataTransfer.call(this);
 
-    let hostStr = '';
-    config.host.forEach((item, idx) => {
-        const delimiter = idx === 0 ? '' : ',';
-        hostStr += `${delimiter}${item}:${config.port || 9092}`;
+    this._promise = this._promise.then(() => new Promise((resolve, reject) => {
+        if (this._destroy) {
+            this.logger.debug('Kafka client is being destroyed, skipping connect.');
+            resolve();
+            return;
+        }
+
+        const client = new kafka.KafkaClient(Object.assign({}, this.connectionOptions));
+        client.on('f5error', (err) => {
+            this.logger.exception('KafkaClient unexpected error:', err);
+        });
+
+        this._producer = new kafka.Producer(
+            client,
+            { partitionerType: this.partitionerType }
+        );
+
+        producer = this._producer;
+        producer.on('ready', () => {
+            if (resolve === null) {
+                this.logger.verbose('Previously used KafkaClient successfully connected - ignoring.');
+            } else {
+                this.logger.verbose(`KafkaClient successfully connected to ${this.connectionOptions.kafkaHost}.`);
+                resolve();
+                resolve = null;
+                reject = null;
+                enableDataTransfer.call(this);
+            }
+        });
+
+        producer.on('error', (error) => {
+            // no need to explicitly disable data transfer here
+            // - it is not enabled yet if reject !== null
+            // - connect() will take care of it in the next call (same event loop cycle)
+            // - destroy() took care of it already
+
+            resolve = null;
+
+            if (this._producer !== producer) {
+                this.logger.exception('KafkaClient error (previously used instance of Producer):', error);
+                // destroying/reconnecting already, ignoring error
+                return;
+            }
+
+            // set to null to ignore consecutive errors
+            this._producer = null;
+
+            if (reject !== null) {
+                // not connected yet, rejecting
+                reject(error);
+                return;
+            }
+
+            // at that point the promise was fullfilled already, connection was
+            // established successfully. The only way to deal with the error
+            // is to log it and reconnect.
+
+            if (!this._destroy) {
+                this.logger.exception('KafkaClient error:', error);
+                this.logger.verbose('Reconnecting...');
+                connect.call(this);
+            }
+
+            safeClose(producer);
+        });
+    }))
+        .catch((error) => {
+            // no need to explicitly disable data transfer here
+            // - connect() will take care of it in the next call (same event loop cycle)
+            // - destroy() took care of it already
+
+            this.logger.exception('KafkaClient error:', error);
+
+            safeClose(producer);
+            this._producer = null;
+
+            if (!this._destroy) {
+                this.logger.verbose('Reconnecting...');
+                connect.call(this);
+            }
+        });
+}
+
+/**
+ * Destroy the Kafka client connection.
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @returns {void} once closing routine scheduled
+ */
+function destroy() {
+    // define read-only/final property to avoid overrides
+    Object.defineProperty(this, '_destroy', { value: true });
+    disableDataTransfer.call(this);
+
+    this._promise = this._promise.then(() => {
+        if (this._producer) {
+            this.logger.debug('Closing Kafka producer...');
+
+            safeClose.call(this, this._producer, () => {
+                this.logger.debug('Kafka producer closed.');
+            });
+            this._producer = null;
+        }
     });
+}
 
-    return hostStr;
+/**
+ * Disables data transfer
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @returns {void} once disabled
+ */
+function disableDataTransfer() {
+    this._sendData = dummySend;
+}
+
+/**
+ * Stub function in case when transport is not ready
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @returns {void} once dummy discarded
+ */
+function dummySend() {
+    // do nothing with data
+    this.logger.verbose('Not ready to send data...');
+    // TODO: cache data to send it later (if instance not disabled)
+    // - e.g. disconnected
+    // - not connected yet
+    // should be optional and configurable by the user
+}
+
+/**
+ * Enables data transfer
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @returns {void} once enabled
+ */
+function enableDataTransfer() {
+    this._sendData = realSend;
 }
 
 /**
  * Parses the event data to send to Kafka broker
  * Option to split up sytem poller data into multiple messages to decrease individual message size
  *
- * @param {Object} context  Consumer context containing config and data
- *
- * @returns {Array<string>|Array<kafka.KeyedMessage>} List of strings containing data to send.
- *                          If using keyed partition, a KeyedMessage is created.
- *                          If 'split' format is specified, the messages are formatted like below:
- *  Sample data input:
+ * Sample data input:
  *        {
  *          system: { hostname: 'somehost', version: '15.1.0', tmmTraffic: { 'clientSideTraffic.bitsIn' : 100 } },
  *          virtualServers: {
@@ -161,7 +405,7 @@ function buildKafkaHostString(config) {
  *               }
  *           }
  *        }
- *  Expected output:
+ * Expected output:
  *      [
  *        '{ "system": {"hostname":"somehost","version":"15.1.0","tmmTraffic":{"clientSideTraffic.bitsIn":100}}}',
  *        '{ "system": {"hostname":"somehost"},
@@ -170,143 +414,110 @@ function buildKafkaHostString(config) {
  *        '{ "system": {"hostname":"somehost"},
  *           "virtualServers": {"virtual2":{"serverside.bitsIn": 222,enabledState: 'enabled'}}
  *         }'
- *      ]
- */
-function buildMessages(context) {
-    const data = context.event.data;
-    const eventType = context.event.type;
-    const partitionKey = context.config.partitionKey;
-    const isKeyed = context.config.partitionerType === 'keyed' && partitionKey;
-
-    // for RAW_EVENTS / pre-formatted
-    if (typeof data === 'string') {
-        const message = isKeyed ? new kafka.KeyedMessage(partitionKey, data) : data;
-        return [message];
-    }
-
-    if (context.config.format === 'default' || eventType !== constants.EVENT_TYPES.SYSTEM_POLLER) {
-        const message = JSON.stringify(data);
-        return isKeyed ? [new kafka.KeyedMessage(partitionKey, message)] : [message];
-    }
-
-    // Additional processing for System Poller Info
-    // Split other properties into separate messages
-    const hostname = data.system.hostname || constants.DEFAULT_HOSTNAME;
-    context.logger.verbose(`Building messages for ${hostname} using "split" format.`);
-    const messageList = [];
-
-    Object.keys(data).forEach((key) => {
-        if (key === 'system') {
-            messageList.push(JSON.stringify({ system: data.system }));
-        } else {
-            const nonSystemProp = data[key];
-            Object.keys(nonSystemProp).forEach((propKey) => {
-                const message = {
-                    system: { hostname },
-                    [key]: {}
-                };
-                message[key][propKey] = nonSystemProp[propKey];
-                messageList.push(JSON.stringify(message));
-            });
-        }
-    });
-
-    if (context.config.partitionKey) {
-        return messageList.map((msg) => new kafka.KeyedMessage(context.config.partitionKey, msg));
-    }
-    return messageList;
-}
-
-/**
- * Caching class for Kafka connections
  *
- * @property {Object} connectionCache   Object containing cached Kafka connections
+ * @private
+ * @this KafkaConsumer
+ *
+ * @param {DataCtx} dataCtx
+ *
+ * @returns {void} once data scheduled to be sent
  */
-class ConnectionCache {
-    constructor() {
-        this.connectionCache = {};
-    }
+function realSend(dataCtx) {
+    const payload = this.payloadBase;
+    const data = dataCtx.data;
 
-    /**
-     * Creates and returns an object containing a Kafka Client and Producer.
-     * If a cached connection exists, the cached connection is returned.
-     *
-     * @param {Object} context   Consumer context
-     *
-     * @returns {Object}    Object containing the Kafka Client and Producer
-     */
-    makeConnection(context) {
-        const config = context.config;
-        const kafkaHost = buildKafkaHostString(config);
-
-        const cacheEntry = this.connectionCache[kafkaHost];
-        if (typeof cacheEntry !== 'undefined') {
-            return Promise.resolve(cacheEntry);
+    if (typeof data === 'string') {
+        // // for RAW_EVENTS / pre-formatted
+        payload.messages = [this.createMessage(data)];
+    } else if (this.useDefaultFormat || dataCtx.type !== EVT_SYSTEM_POLLER) {
+        payload.messages = [this.createMessage(JSON.stringify(data))];
+    } else {
+        let hostname = DEFAULT_HOSTNAME;
+        if (data.system && typeof data.system === 'object') {
+            if (data.system.hostname) {
+                hostname = data.system.hostname;
+            } else {
+                data.system.hostname = DEFAULT_HOSTNAME;
+            }
         }
 
-        this.connectionCache[kafkaHost] = new Promise((resolve, reject) => {
-            const clientOptions = buildKafkaClientOptions(kafkaHost, config);
-            const client = new kafka.KafkaClient(clientOptions);
-            client.on('f5error', (err) => {
-                context.logger.exception('Unexpected error in KafkaClient', err);
-            });
+        const messageList = [];
 
-            const producer = new kafka.Producer(
-                client,
-                { partitionerType: PARTITIONER_TYPES.indexOf(context.config.partitionerType) }
-            );
-            producer.on('ready', () => {
-                context.logger.verbose(`KafkaClient successfully connected to ${kafkaHost}.`);
-                const connection = {
-                    client,
-                    producer
-                };
-                this.connectionCache[kafkaHost] = connection;
-                resolve(connection);
-            });
+        // Additional processing for System Poller Info
+        // Split other properties into separate messages
 
-            producer.on('error', (error) => {
-                this.connectionCache[kafkaHost] = undefined;
-                reject(error);
-            });
+        Object.entries(data).forEach(([key, value]) => {
+            if (key === 'system') {
+                // TODO: should we inject hostname if missing?
+                messageList.push(this.createMessage(JSON.stringify({ system: value })));
+            } else {
+                Object.entries(value).forEach(([propKey, propValue]) => {
+                    const message = {
+                        system: { hostname },
+                        [key]: {
+                            [propKey]: propValue
+                        }
+                    };
+                    messageList.push(this.createMessage(JSON.stringify(message)));
+                });
+            }
         });
 
-        return Promise.resolve(this.connectionCache[kafkaHost]);
+        payload.messages = messageList;
+    }
+
+    this.writeTraceData(payload);
+    this._producer.send([payload], this.realSendKafkaCb);
+}
+
+/**
+ * Callback for Kafka send operation
+ *
+ * @private
+ * @this {Logger}
+ *
+ * @param {Object} error - error on attempt to send data
+ *
+ * @returns {void}
+ */
+function realSendKafkaCb(error) {
+    if (error) {
+        this.error(`error: ${error.message ? error.message : error}`);
+    } else {
+        this.verbose('success');
     }
 }
 
-const connectionCache = new ConnectionCache();
+/**
+ * Safely closes Kafka Producer
+ *
+ * @private
+ * @this KafkaConsumer
+ *
+ * @param {kafka.Producer} producer
+ * @param {function} [callback]
+ *
+ * @returns {void} once closed
+ */
+function safeClose(producer, callback) {
+    try {
+        producer.close(callback);
+    } catch (_) {
+        // suppress errors, not interested in the producer any more
+    }
+}
 
 /**
- * See {@link ../README.md#context} for documentation
+ * Load Telemetry Streaming Kafka Consumer module
+ *
+ * Note: called once only if not in memory yet
+ *
+ * @param {API.ModuleConfig} moduleConfig - module's config
+ *
+ * @return {API.ConsumerModuleInterface} module instance
  */
-module.exports = function (context) {
-    return Promise.resolve()
-        .then(() => connectionCache.makeConnection(context))
-        .then((connection) => {
-            const payload = {
-                topic: context.config.topic,
-                messages: buildMessages(context)
-            };
-
-            // only pass key if exists, will only exist if schema validated that partitionerType = keyed
-            if (context.config.partitionKey) {
-                payload.key = context.config.partitionKey;
-            }
-
-            if (context.tracer) {
-                context.tracer.write(payload);
-            }
-
-            connection.producer.send([payload], (error) => {
-                if (error) {
-                    context.logger.error(`error: ${error.message ? error.message : error}`);
-                } else {
-                    context.logger.verbose('success');
-                }
-            });
-        })
-        .catch((error) => {
-            context.logger.error(`error: ${error.message ? error.message : error}`);
-        });
+module.exports = {
+    async load() {
+        return new KafkaConsumerModule();
+    }
 };

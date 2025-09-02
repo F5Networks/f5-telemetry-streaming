@@ -217,7 +217,7 @@ test_node8:
 
 # packages audit
 npm_audit:
-    image: ${ARTIFACTORY_DOCKER_HUB}/node:16
+    image: ${ARTIFACTORY_DOCKER_HUB}/node:22
     extends:
         - .test_job_definition
     allow_failure: true

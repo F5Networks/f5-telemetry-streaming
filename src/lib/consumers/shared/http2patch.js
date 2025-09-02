@@ -45,6 +45,11 @@ function patchHttp2Lib() {
     let Http2StreamStateSymbol;
 
     /**
+     * Symbol to access 'handle' property of Htt2Stream
+     */
+    let Http2StreamHandleSymbol;
+
+    /**
      * Fetch hidden classes from 'http2' lib
      *
      * @returns {Object} with hidden classes
@@ -105,6 +110,39 @@ function patchHttp2Lib() {
             }
         }
         return stream[Http2StreamStateSymbol];
+    }
+
+    /**
+     * Get Htt2Stream private handle
+     *
+     * @returns {object} Htt2Stream private handle
+     */
+    function getPrivateHandleForHttp2Stream(stream) {
+        if (!Http2StreamHandleSymbol) {
+            if (!Object.getOwnPropertySymbols(stream).some((symb) => {
+                const prop = stream[symb];
+                if (typeof prop === 'object' && prop && typeof prop.ontrailers === 'function'
+                    && typeof prop.onstreamclose === 'function'
+                    && typeof prop.onread === 'function'
+                ) {
+                    Http2StreamHandleSymbol = symb;
+                    return true;
+                }
+                return false;
+            })) {
+                logger.warning('Unable to find "handle" symbol for http2stream');
+            }
+        }
+        return stream[Http2StreamHandleSymbol];
+    }
+
+    function streamOnResume(listener) {
+        if (getPrivateHandleForHttp2Stream(this)) {
+            listener.call(this);
+        } else {
+            logger.verbose('Http2Stream is not resumed - destroyed already!');
+            this.close();
+        }
     }
 
     if (!http2[kPatched]) {
@@ -264,6 +302,27 @@ function patchHttp2Lib() {
             streamLogger.warning('"closed" getter - exist!');
             streamLogger.warning('"close" method - exist!');
         }
+
+        streamLogger.warning('Patching "resume" handler');
+
+        /**
+         * Patch 'resume' handle to avoid restnoded to core due uncaguht exception.
+         *
+         * Problem: stream was closed/destoryed already and for some reason Client
+         * decides to resumse it. 'handle' property of Http2Stream is already
+         * null/undefined at this moment and grpc throws exception trying to
+         * call method of undefined.
+         *
+         * Solution: wrap original 'resume' listener to check if 'handle' is still
+         * present. If not - skip calling original listener.
+         */
+        const originOnFn = classes.Http2Stream.on;
+        classes.Http2Stream.on = function (event, listener) {
+            if (event === 'resume') {
+                listener = streamOnResume.bind(this, listener);
+            }
+            return originOnFn.call(this, event, listener);
+        };
 
         http2[kPatched] = true;
     }

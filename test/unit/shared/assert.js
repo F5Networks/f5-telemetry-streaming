@@ -99,6 +99,8 @@ const additional = {
      * @param {string} [message] - message to show on fail
      */
     includeMatch(haystack, needle, message) {
+        assert.isDefined(haystack, 'haystack should be defined');
+
         const checkFn = needle instanceof RegExp
             ? ((elem) => needle.test(elem))
             : ((elem) => elem.indexOf(needle) !== -1);
@@ -114,10 +116,12 @@ const additional = {
      * Asserts that haystack does not include needle
      *
      * @param {Array|string} haystack - haystack
-     * @param {RegExp} needle - needle to search for in haystack
+     * @param {RegExp|string} needle - needle to search for in haystack
      * @param {string} [message] - message to show on fail
      */
     notIncludeMatch(haystack, needle, message) {
+        assert.isDefined(haystack, 'haystack should be defined');
+
         const checkFn = needle instanceof RegExp
             ? ((elem) => needle.test(elem))
             : ((elem) => elem.indexOf(needle) !== -1);

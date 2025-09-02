@@ -27,14 +27,31 @@ const assert = require('./assert');
 const assignDefaults = require('./util').assignDefaults;
 const BigIpRestApiMock = require('./bigipAPIMock');
 const deepCopy = require('./util').deepCopy;
+const dummies = require('./dummies');
 const tsLogsForwarder = require('../../winstonLogger').tsLogger;
 const sourceCode = require('./sourceCode');
+const waitTill = require('./util').waitTill;
 
 /**
  * @typedef {import("./bigipAPIMock").MockNockStubBase} MockNockStubBase
  */
 
 let SINON_FAKE_CLOCK = null;
+
+const DEFAULT_STUB_SRC_MAP = Object.freeze({
+    appEvents: 'src/lib/appEvents',
+    configWorker: 'src/lib/config',
+    deviceUtil: 'src/lib/utils/device',
+    logger: 'src/lib/logger',
+    resourceMonitorUtils: 'src/lib/resourceMonitor/utils',
+    storage: 'src/lib/storage',
+    tracer: 'src/lib/utils/tracer',
+    utilMisc: 'src/lib/utils/misc'
+});
+
+const CONSUMERS_STUB_SRC_MAP = Object.freeze(Object.assign({
+    consumers: 'src/lib/consumers'
+}, DEFAULT_STUB_SRC_MAP));
 
 /**
  * Add 'restore' function for stub
@@ -50,6 +67,43 @@ function addStubRestore(stub, restoreFn) {
             originRestore.call(stub);
         }
     };
+}
+
+/**
+ * Load source code
+ *
+ * @param {{string: boolean}} modules - modules to load
+ * @param {{string: string}} srcMap - source code map
+ *
+ * @returns {{string: module}} - loaded modules
+ */
+function loadModules(modules, srcMap) {
+    const keys = Object.keys(modules);
+    let loaded = Object.assign({}, srcMap);
+
+    if (keys.length > 0) {
+        loaded = {};
+        if (keys.every((k) => modules[k] === false)) {
+            Object.keys(srcMap)
+                .forEach((k) => {
+                    modules[k] = modules[k] !== false;
+                });
+        }
+
+        Object.entries(modules)
+            .forEach(([key, value]) => {
+                if (value === true && typeof srcMap[key] !== 'undefined') {
+                    loaded[key] = srcMap[key];
+                }
+            });
+    }
+
+    Object.entries(loaded)
+        .forEach(([name, path]) => {
+            loaded[name] = sourceCode(path);
+        });
+
+    return loaded;
 }
 
 // reference to module.exports
@@ -190,9 +244,13 @@ const _module = module.exports = {
      * Stub core modules
      *
      * @param {object} coreModules - core modules to stub
-     * @param {ConfigWorker} [coreModules.configWorker] - config worker
+     * @param {module} [coreModules.appEvents] - App events
+     * @param {module} [coreModules.configWorker] - Config worker
+     * @param {module} [coreModules.consumers] - Consumers
      * @param {module} [coreModules.deviceUtil] - Device Utils module
      * @param {module} [coreModules.logger] - Logger module
+     * @param {module} [coreModules.resourceMonitorUtils] - Resource Monitor Utils module
+     * @param {module} [coreModules.storage] - Storage module
      * @param {module} [coreModules.tracer] - Tracer module
      * @param {module} [coreModules.utilMisc] - Utils (misc.) module
      * @param {object} [options] - options, see each stub for additional info
@@ -239,6 +297,9 @@ const _module = module.exports = {
                 ctx
             );
         }
+        if (coreModules.consumers) {
+            ctx.consumers = _module.consumersService(coreModules.consumers, options.consumers, ctx);
+        }
 
         ctx.destroyServices = async () => {
             if (ctx.storage && ctx.storage.service.isRunning()) {
@@ -246,6 +307,9 @@ const _module = module.exports = {
                     await ctx.configWorker.configWorker.cleanup();
                 }
                 await ctx.storage.service.destroy();
+            }
+            if (ctx.consumers && ctx.consumers.service.isRunning()) {
+                await ctx.consumers.service.destroy();
             }
             // time to remove all listeners
             if (ctx.appEvents) {
@@ -260,6 +324,9 @@ const _module = module.exports = {
                     await ctx.configWorker.configWorker.load();
                 }
             }
+            if (ctx.consumers) {
+                await ctx.consumers.service.restart();
+            }
         };
         ctx.startServices = async () => {
             // start first, dependency for configWorker
@@ -269,10 +336,16 @@ const _module = module.exports = {
                     await ctx.configWorker.configWorker.cleanup();
                 }
             }
+            if (ctx.consumers) {
+                await ctx.consumers.service.start();
+            }
         };
         ctx.stopServices = async () => {
             if (ctx.storage && ctx.storage.service.isRunning()) {
                 await ctx.storage.service.stop();
+            }
+            if (ctx.consumers) {
+                await ctx.consumers.service.stop();
             }
         };
         return ctx;
@@ -303,6 +376,34 @@ const _module = module.exports = {
         }
 
         ctx.configWorker = configWorker;
+        return ctx;
+    },
+
+    /**
+     * Stub for Consumers Service
+     *
+     * @param {module} conumsers - Consumers module
+     * @param {object} options
+     * @param {CoreStubCtx} coreCtx
+     *
+     * @returns {ConsumersServiceStubCtx} stub context
+     */
+    consumersService(ConsumersService, options, coreCtx) {
+        const ctx = {
+            consumers: [],
+            consumersStats: {},
+            service: new ConsumersService()
+        };
+        ctx.service.initialize(coreCtx.appEvents.appEvents);
+
+        coreCtx.appEvents.appEvents.on('consumers.change', (getConsumers) => {
+            ctx.consumers = getConsumers();
+            ctx.consumers.sort((a, b) => a.id.toLowerCase().localeCompare(b.id.toLowerCase()));
+        });
+        coreCtx.appEvents.appEvents.on('consumers.config.done', (stats) => {
+            ctx.consumersStats = stats;
+        });
+
         return ctx;
     },
 
@@ -402,7 +503,48 @@ const _module = module.exports = {
                 all: []
             },
             logLevelHistory: [],
-            setLogLevel: sinon.stub(logger, 'setLogLevel')
+            setLogLevel: sinon.stub(logger, 'setLogLevel'),
+
+            /**
+             * Ensure message logged
+             *
+             * NOTE: if only one argument passed then it will be treated as needle
+             * and level will be set to 'all'
+             *
+             * @param {string} level
+             * @param {RegEx | string} needle
+             *
+             * @returns {Promise} resolved once message found
+             */
+            shouldIncludeMessage(level, needle) {
+                if (arguments.length < 2) {
+                    needle = level;
+                    level = 'all';
+                }
+                return waitTill(() => {
+                    assert.includeMatch(ctx.messages[level], needle);
+                    return true;
+                }, true);
+            },
+
+            /**
+             * Ensure message not logged
+             *
+             * NOTE: if only one argument passed then it will be treated as needle
+             * and level will be set to 'all'
+             *
+             * @param {string} level
+             * @param {RegEx | string} needle
+             *
+             * @returns {void} once done
+             */
+            shouldNotIncludeMessage(level, needle) {
+                if (arguments.length < 2) {
+                    needle = level;
+                    level = 'all';
+                }
+                assert.notIncludeMatch(ctx.messages[level], needle);
+            }
         };
         const levels = [
             ['verbose', 'finest'],
@@ -441,6 +583,7 @@ const _module = module.exports = {
                 ctx.messages[pair[0]] = [];
             });
         };
+
         return ctx;
     },
 
@@ -737,45 +880,64 @@ _module.default = {
     /**
      * Load default modules for 'core' stub
      *
-     * @param {Object.<string, boolean>} [modules] - modules to load
+     * @param {{string: boolean}} [modules] - modules to load
      * @param {object} [options] - options for stubs
      *
      * @returns {CoreStubCtx}
      */
     coreStub(modules, options) {
-        modules = Object.assign({}, modules);
-        const srcMap = {
-            appEvents: 'src/lib/appEvents',
-            configWorker: 'src/lib/config',
-            deviceUtil: 'src/lib/utils/device',
-            logger: 'src/lib/logger',
-            resourceMonitorUtils: 'src/lib/resourceMonitor/utils',
-            storage: 'src/lib/storage',
-            tracer: 'src/lib/utils/tracer',
-            utilMisc: 'src/lib/utils/misc'
-        };
-        const keys = Object.keys(modules);
-        let toLoad = srcMap;
+        return _module.coreStub(
+            loadModules(Object.assign({}, modules), DEFAULT_STUB_SRC_MAP),
+            options
+        );
+    }
+};
 
-        if (keys.length > 0) {
-            toLoad = {};
-            if (keys.every((k) => modules[k] === false)) {
-                Object.keys(srcMap)
-                    .forEach((k) => {
-                        modules[k] = modules[k] !== false;
-                    });
-            }
-            toLoad = {};
-            Object.keys(modules).forEach((key) => {
-                if (modules[key] === true && typeof srcMap[key] !== 'undefined') {
-                    toLoad[key] = srcMap[key];
-                }
-            });
+/**
+ * Consumers stubs - namespace for stubs to test consumers
+ */
+_module.consumers = {
+    /**
+     * Load default modules for 'consumers' stub
+     *
+     * @param {{string: boolean}} [modules] - modules to load
+     * @param {object} [options] - options for stubs
+     *
+     * @returns {ConsumersStubCtx}
+     */
+    coreStub(modules, options) {
+        modules = Object.assign({}, modules);
+        if (typeof modules.resourceMonitorUtils === 'undefined') {
+            modules.resourceMonitorUtils = false;
         }
-        Object.keys(toLoad).forEach((key) => {
-            toLoad[key] = sourceCode(toLoad[key]);
-        });
-        return _module.coreStub(toLoad, options);
+        const stubs = _module.coreStub(
+            loadModules(modules, CONSUMERS_STUB_SRC_MAP),
+            options
+        );
+        stubs.processDeclaration = function processDeclaration(declaration, namespace) {
+            let fn;
+
+            if (typeof declaration.class === 'undefined') {
+                declaration = namespace
+                    ? dummies.declaration.namespace.decrypted(declaration)
+                    : dummies.declaration.base.decrypted(declaration);
+            }
+
+            if (declaration.class === 'Telemetry_Namespace') {
+                fn = () => this.configWorker.configWorker.processNamespaceDeclaration(declaration, namespace);
+            } else if (declaration.class === 'Telemetry') {
+                fn = () => this.configWorker.configWorker.processDeclaration(declaration);
+            } else {
+                throw new Error(`Unknown declaration class: ${declaration.class}`);
+            }
+
+            return Promise.all([
+                this.appEvents.appEvents.waitFor('consumers.config.done'),
+                fn()
+            ]);
+        };
+
+        return stubs;
     }
 };
 
@@ -800,8 +962,19 @@ _module.default = {
  * @property {sinon.spy} validationSucceedSpy - spy for 'validationSucceed' event
  */
 /**
+ * @typedef {object} ConsumersServiceStubCtx
+ * @property {object[]} consumers - list of loaded consumers
+ * @property {object} consumersStats - stats received from the service
+ * @property {ConsumersService} service - Consumers Service instance
+ */
+/**
+ * @typedef {CoreStubCtx} ConsumersStubCtx
+ * @property {function} processDeclaration - process declaration
+ */
+/**
  * @typedef {object} CoreStubCtx
  * @property {ConfigWorkerStubCtx} configWorker - config worker stub
+ * @property {ConsumersServiceStubCtx} consumers - consumers stub
  * @property {function} destroyServices - destroy services
  * @property {DeviceUtilStubCtx} deviceUtil - Device Util stub
  * @property {BigIpRestApiMock} localhostBigIp - BigIpRestApiMock instance for localhost
@@ -836,7 +1009,9 @@ _module.default = {
  * @property {object} proxy_debug - sinon stub for Logger.logger.debug
  * @property {object} proxy_info - sinon stub for Logger.logger.info
  * @property {object} proxy_warning - sinon stub for Logger.logger.warning
- * @property {object} proxy_erro - sinon stub for Logger.logger.error
+ * @property {object} proxy_error - sinon stub for Logger.logger.error
+ * @property {function} shouldInclude - ensure that message logged
+ * @property {function} shouldNotInclude - ensure that message not logged
  */
 /**
  * @typedef {object} ResourceMonitorUtilsStubCtx
