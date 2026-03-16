@@ -425,7 +425,7 @@ Example Declaration:
 
 .. literalinclude:: ../examples/declarations/consumers/AWS_S3/aws_s3.json
     :language: json
-    :emphasize-lines: 12
+    :emphasize-lines: 13
 
 |
 
