@@ -35,8 +35,9 @@ const DEFAULT_METRICS_TO_TAGS = ['name', 'port'];
 /**
  * Keys to do not treat as tags
  * - Capacity - usually is XX% (10%) (system.diskStorage)
+ * - telemetryEventCategory - internal TS pipeline field, not useful as a metric tag
  */
-const DEFAULT_TAGS_TO_IGNORE = ['Capacity'];
+const DEFAULT_TAGS_TO_IGNORE = ['Capacity', 'telemetryEventCategory'];
 
 /**
  * Keys to do not treat as tags and treat as metrics
@@ -88,11 +89,14 @@ module.exports = {
         // tags to ignore + should include tags that should be used as metrics
         const tagsToIgnore = (options.tagsToIgnore || DEFAULT_TAGS_TO_IGNORE).concat(tagsToMetrics);
 
-        (function inner(data, stack) {
+        (function inner(data, stack, inheritedTags) {
             /**
-             * NOTE: ALL callbacks should receive COPY of 'stack' to avoid any damage
+             * NOTE: ALL callbacks should receive COPY of 'stack' to avoid any damage.
+             * inheritedTags accumulates string tags from parent collection levels so that
+             * deeply nested metrics (e.g. iRule event stats) carry identifying context
+             * such as the iRule name, even though the instance key is excluded from the path.
              */
-            const tags = options.collectTags ? {} : undefined;
+            const tags = options.collectTags ? Object.assign({}, inheritedTags) : undefined;
 
             // disable/enable check for collection of objects
             let isCollectionOfObjects = !!options.excludeNameFromPath;
@@ -152,7 +156,7 @@ module.exports = {
                             stack.push(itemKey);
                         }
                         if (!options.maxDepth || options.maxDepth < stack.length) {
-                            inner(itemData, stack);
+                            inner(itemData, stack, tags);
                         }
                         if (!ignoreKeysInPath) {
                             stack.pop();
@@ -164,7 +168,7 @@ module.exports = {
                     options.onMetric(stack.concat(itemKey), itemData, tags);
                 }
             });
-        }(tsData, []));
+        }(tsData, [], {}));
     }
 };
 
