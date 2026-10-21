@@ -195,6 +195,43 @@ The following is an example of the Azure dashboard with BIG-IP Telemetry Streami
 
 | 
 
+.. _azure-monitor-logs-ingestion-ref:
+
+Microsoft Azure Monitor Logs Ingestion
+--------------------------------------
+|azure_img|
+
+Use this consumer with an Azure Monitor Data Collection Endpoint (DCE) and Data Collection Rule
+(DCR). Unlike the Azure Log Analytics consumer, this consumer uses Microsoft Entra application
+credentials and the Azure Monitor Logs Ingestion API instead of a workspace ID and shared key.
+
+Required information:
+ - Tenant ID: Microsoft Entra directory tenant ID.
+ - Client ID: Application (client) ID for an app registration with permission to send data to the DCR.
+ - Client Secret: Secret for the app registration.
+ - Data Collection Endpoint: The DCE logs ingestion endpoint.
+ - Data Collection Rule Immutable ID: The immutable ID shown on the DCR overview page.
+ - Stream Mappings: Maps each F5 Telemetry Streaming category to a stream declared by the DCR.
+
+The application must have the **Monitoring Metrics Publisher** role on the DCR. The request scope
+defaults to ``https://monitor.azure.com/.default`` and the Logs Ingestion API version defaults to
+``2023-01-01``. The consumer caches access tokens, refreshes once after an HTTP 401 response, and
+retries HTTP 429 and 5xx responses.
+
+System Poller data can contain many top-level categories. Only categories listed in
+``streamMappings`` are sent; unmapped categories are skipped. Event Listener categories such as
+``LTM``, ``ASM``, and ``AVR`` use their ``telemetryEventCategory`` value. Each configured DCR stream
+must accept the corresponding F5 payload schema.
+
+Example Declaration:
+
+.. literalinclude:: ../examples/declarations/consumers/Azure_Monitor_Logs_Ingestion/azure_monitor_logs_ingestion.json
+    :language: json
+
+For DCE, DCR, permissions, and request details, see the |Logs Ingestion API|.
+
+|
+
 .. _mi:
 
 Using Microsoft Managed Identities for Log Analytics
@@ -1289,6 +1326,10 @@ In the following table, we list the Azure Government regions.
 .. |HTTP Data Collector API| raw:: html
 
    <a href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/data-collector-api" target="_blank">HTTP Data Collector API documentation</a>
+
+.. |Logs Ingestion API| raw:: html
+
+   <a href="https://learn.microsoft.com/azure/azure-monitor/logs/logs-ingestion-api-overview" target="_blank">Azure Monitor Logs Ingestion API documentation</a>
 
 .. |azure_dashboard| raw:: html
 

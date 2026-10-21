@@ -240,6 +240,90 @@
             "minLength": 1,
             "f5expand": true
         },
+        "tenantId": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Microsoft Entra tenant ID",
+            "description": "Directory tenant ID used for OAuth client credentials authentication",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "clientId": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Microsoft Entra application client ID",
+            "description": "Application client ID used for OAuth client credentials authentication",
+            "type": "string",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "clientSecret": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Microsoft Entra application client secret",
+            "description": "Application secret used for OAuth client credentials authentication",
+            "allOf": [
+                {
+                    "$ref": "base_schema.json#/definitions/secret"
+                }
+            ]
+        },
+        "dataCollectionEndpoint": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Azure Monitor data collection endpoint",
+            "description": "Logs ingestion endpoint, for example https://example.ingest.monitor.azure.com",
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "dataCollectionRuleImmutableId": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Data collection rule immutable ID",
+            "description": "Immutable ID of the Azure Monitor data collection rule",
+            "type": "string",
+            "pattern": "^dcr-[A-Za-z0-9]+$",
+            "f5expand": true
+        },
+        "streamMappings": {
+            "$comment": "Required for Azure_Monitor_Logs_Ingestion",
+            "title": "Telemetry type to DCR stream mappings",
+            "description": "Maps F5 telemetry types such as LTM, system, ASM, and AVR to DCR stream names",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+                "type": "string",
+                "pattern": "^(Custom|Microsoft)-[A-Za-z0-9_-]+$",
+                "f5expand": true
+            }
+        },
+        "scope": {
+            "$comment": "Optional for Azure_Monitor_Logs_Ingestion",
+            "title": "Microsoft Entra OAuth scope",
+            "description": "OAuth scope used when acquiring an access token",
+            "type": "string",
+            "minLength": 1,
+            "default": "https://monitor.azure.com/.default",
+            "f5expand": true
+        },
+        "tokenEndpoint": {
+            "$comment": "Optional for Azure_Monitor_Logs_Ingestion",
+            "title": "Microsoft Entra token endpoint",
+            "description": "Overrides the tenant-specific Microsoft Entra OAuth token endpoint",
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://",
+            "minLength": 1,
+            "f5expand": true
+        },
+        "maxRetryAttempts": {
+            "$comment": "Optional for Azure_Monitor_Logs_Ingestion",
+            "title": "Maximum ingestion request attempts",
+            "description": "Maximum number of attempts for throttled and transient server failures",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 3
+        },
         "useManagedIdentity": {
             "$comment": "Required for certain consumers: Azure_Log_Analytics and Azure_Application_Insights",
             "title": "Use Managed Identity",
@@ -829,6 +913,7 @@
                             "AWS_CloudWatch",
                             "AWS_S3",
                             "Azure_Log_Analytics",
+                            "Azure_Monitor_Logs_Ingestion",
                             "Azure_Application_Insights",
                             "DataDog",
                             "default",
@@ -883,6 +968,15 @@
                             "passphrase": {},
                             "format": {},
                             "workspaceId": {},
+                            "tenantId": {},
+                            "clientId": {},
+                            "clientSecret": {},
+                            "dataCollectionEndpoint": {},
+                            "dataCollectionRuleImmutableId": {},
+                            "streamMappings": {},
+                            "scope": {},
+                            "tokenEndpoint": {},
+                            "maxRetryAttempts": {},
                             "useManagedIdentity": {},
                             "instrumentationKey": {},
                             "appInsightsResourceName": {},
@@ -1022,6 +1116,40 @@
                                         { "$ref": "#/definitions/customOpts" },
                                         { "$ref": "#/definitions/customHttpOpts" }
                                     ]
+                                }
+                            }
+                        },
+                        "else": {}
+                    },
+                    {
+                        "if": { "properties": { "type": { "const": "Azure_Monitor_Logs_Ingestion" } } },
+                        "then": {
+                            "required": [
+                                "tenantId",
+                                "clientId",
+                                "clientSecret",
+                                "dataCollectionEndpoint",
+                                "dataCollectionRuleImmutableId",
+                                "streamMappings"
+                            ],
+                            "properties": {
+                                "tenantId": { "$ref": "#/definitions/tenantId" },
+                                "clientId": { "$ref": "#/definitions/clientId" },
+                                "clientSecret": { "$ref": "#/definitions/clientSecret" },
+                                "dataCollectionEndpoint": { "$ref": "#/definitions/dataCollectionEndpoint" },
+                                "dataCollectionRuleImmutableId": { "$ref": "#/definitions/dataCollectionRuleImmutableId" },
+                                "streamMappings": { "$ref": "#/definitions/streamMappings" },
+                                "scope": { "$ref": "#/definitions/scope" },
+                                "tokenEndpoint": { "$ref": "#/definitions/tokenEndpoint" },
+                                "apiVersion": {
+                                    "$ref": "#/definitions/apiVersion",
+                                    "default": "2023-01-01"
+                                },
+                                "maxRetryAttempts": { "$ref": "#/definitions/maxRetryAttempts" },
+                                "format": {
+                                    "$ref": "#/definitions/format",
+                                    "enum": [ "default", "propertyBased", "propertyBasedV2" ],
+                                    "default": "default"
                                 }
                             }
                         },
