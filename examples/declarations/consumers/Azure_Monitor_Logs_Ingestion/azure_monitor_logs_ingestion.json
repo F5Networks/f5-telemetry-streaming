@@ -1,0 +1,21 @@
+{
+    "class": "Telemetry",
+    "My_Consumer": {
+        "class": "Telemetry_Consumer",
+        "type": "Azure_Monitor_Logs_Ingestion",
+        "tenantId": "00000000-0000-0000-0000-000000000000",
+        "clientId": "11111111-1111-1111-1111-111111111111",
+        "clientSecret": {
+            "cipherText": "client-secret"
+        },
+        "dataCollectionEndpoint": "https://example.ingest.monitor.azure.com",
+        "dataCollectionRuleImmutableId": "dcr-0123456789abcdef0123456789abcdef",
+        "streamMappings": {
+            "LTM": "Custom-F5Telemetry_LTM_CL",
+            "system": "Custom-F5Telemetry_system_CL",
+            "ASM": "Custom-F5Telemetry_ASM_CL",
+            "AVR": "Custom-F5Telemetry_AVR_CL"
+        },
+        "format": "propertyBasedV2"
+    }
+}
